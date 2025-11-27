@@ -1,0 +1,127 @@
+#############################
+# Visual Studio generated files
+#############################
+.vs/
+*.VC.db
+*.VC.opendb
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+#############################
+# Build results
+#############################
+[Bb]in/
+[Oo]bj/
+ipch/
+Debug/
+Release/
+x64/
+x86/
+ARM/
+ARM64/
+*.tlog
+*.lastbuildstate
+*.log
+*.cache
+*.ilk
+*.iobj
+*.ipdb
+*.pdb
+
+#############################
+# Intermediate / temp files
+#############################
+*.tmp
+*.bak
+*.old
+*.orig
+*.temp
+*.swp
+*.sln.tmp
+*.db
+*.mdf
+*.ldf
+
+#############################
+# Visual C++ specific
+#############################
+*.pch
+*.pdb
+*.obj
+*.idb
+*.dyalog
+*.res
+*.exp
+*.exe.embed.manifest
+*.manifest
+*.map
+*.rsp
+
+#############################
+# CMake / Ninja generated
+#############################
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+build/
+out/
+ninja.build
+*.ninja
+*.cmake
+
+#############################
+# Game engines (optional support)
+#############################
+
+# Cocos2d-x
+proj.win32/Debug.win32/
+proj.win32/Release.win32/
+proj.win32/.vs/
+
+# Unreal Engine
+DerivedDataCache/
+Intermediate/
+Saved/
+*.opensdf
+*.sdf
+
+# Unity
+Library/
+Temp/
+Obj/
+Logs/
+MemoryCaptures/
+UnityGenerated/
+
+#############################
+# Code editing tools
+#############################
+*.vscode/
+.vscode/
+*.idea/
+.idea/
+
+#############################
+# Package managers
+#############################
+node_modules/
+packages/
+
+#############################
+# Archives / Binary assets (optional)
+#############################
+*.zip
+*.7z
+*.rar
+*.tar
+*.gz
+
+#############################
+# OS-generated files
+#############################
+.DS_Store
+Thumbs.db
+desktop.ini
