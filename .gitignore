@@ -7,6 +7,7 @@ Thumbs.db
 .idea/
 *.sublime-workspace
 *.sublime-project
+Debug.win32/
 
 # =========================
 # Cocos2d-x 通用构建目录
@@ -25,7 +26,7 @@ out/
 # =========================
 # Visual Studio (Windows, proj.win32)
 # =========================
-proj.win32/Debug/
+proj.win32/Debug.win32/
 proj.win32/Release/
 proj.win32/*.sdf
 proj.win32/*.suo
