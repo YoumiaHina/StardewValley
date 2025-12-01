@@ -1,0 +1,100 @@
+# =========================
+# 通用系统文件 / IDE 设置
+# =========================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# =========================
+# Cocos2d-x 通用构建目录
+# =========================
+bin/
+build/
+gen/
+temp/
+obj/
+out/
+
+# 避免上传编译生成的日志和临时文件
+*.log
+*.tmp
+
+# =========================
+# Visual Studio (Windows, proj.win32)
+# =========================
+proj.win32/Debug/
+proj.win32/Release/
+proj.win32/*.sdf
+proj.win32/*.suo
+proj.win32/*.opensdf
+proj.win32/*.user
+proj.win32/*.ipch
+proj.win32/*.aps
+.vs/
+
+# =========================
+# Android (proj.android / proj.android-studio)
+# =========================
+# Android Studio 临时构建文件
+proj.android-studio/.gradle/
+proj.android-studio/build/
+proj.android-studio/*/build/
+proj.android-studio/local.properties
+proj.android-studio/*.iml
+proj.android-studio/.idea/
+
+# 旧版 Ant 构建 (proj.android) - 3.17 主要使用 AS，但保留以防万一
+proj.android/bin/
+proj.android/gen/
+proj.android/assets/
+proj.android/obj/
+proj.android/libs/
+proj.android/local.properties
+proj.android/ant.properties
+proj.android/build.xml
+proj.android/proguard-project.txt
+
+# =========================
+# Xcode (iOS/Mac, proj.ios_mac)
+# =========================
+proj.ios_mac/build/
+proj.ios_mac/*.mode1v3
+proj.ios_mac/*.mode2v3
+proj.ios_mac/*.perspectivev3
+proj.ios_mac/*.scc
+proj.ios_mac/xcuserdata/
+proj.ios_mac/*.xcworkspace/xcuserdata/
+
+# 注意：通常我们要保留 .xcodeproj 和 .xcworkspace
+# 但要忽略用户特定的状态文件
+*.xcuserstate
+
+# =========================
+# Linux (proj.linux)
+# =========================
+proj.linux/bin/
+proj.linux/obj/
+proj.linux/CMakeCache.txt
+proj.linux/CMakeFiles/
+proj.linux/Makefile
+proj.linux/cmake_install.cmake
+
+# =========================
+# Cocos 引擎内部产生的临时文件
+# =========================
+# 如果你的项目包含了完整 cocos2d 源码文件夹，
+# 下面这些是为了防止引擎内部编译产生的垃圾文件被上传
+cocos2d/cocos/2d/renderer/local_config.mk
+cocos2d/external/config.json
+*.pyc
+
+# 忽略预编译库的临时文件 (视情况而定)
+# *.a
+# *.lib
+# *.dll
+# *.so
+# 注意：Cocos 依赖的预编译第三方库通常在 external 文件夹里，
+# 那些通常是需要上传的，所以不要全局忽略 .a 或 .lib，除非你知道你在做什么。
