@@ -10,6 +10,8 @@
 #include "Game/Item.h"
 #include "Game/WorldState.h"
 #include "Scenes/RoomScene.h"
+#include <random>
+#include <ctime>
 
 USING_NS_CC;
 
@@ -33,9 +35,13 @@ bool GameScene::init() {
         this->addChild(label, 1);
     }
 
+    // World container: map + player + drops (HUD stays on scene root)
+    _worldNode = Node::create();
+    this->addChild(_worldNode, 0);
+
     // Map build
     _mapNode = Node::create();
-    this->addChild(_mapNode, 0);
+    _worldNode->addChild(_mapNode, 0);
     buildMap();
 
     // Simple placeholder player: a colored square
@@ -45,7 +51,7 @@ bool GameScene::init() {
     _player->drawSolidPoly(verts, 4, Color4F(0.2f, 0.7f, 0.9f, 1.0f));
     // place player at center tile
     _player->setPosition(tileToWorld(_cols/2, _rows/2));
-    this->addChild(_player, 2);
+    _worldNode->addChild(_player, 2);
 
     // Inventory & hotbar（共享全局背包）
     auto &ws = Game::globalState();
@@ -64,7 +70,7 @@ bool GameScene::init() {
     buildHUD();
 
     _dropsNode = Node::create();
-    this->addChild(_dropsNode, 1);
+    _worldNode->addChild(_dropsNode, 1);
     _dropsDraw = DrawNode::create();
     _dropsNode->addChild(_dropsDraw);
     refreshDropsVisuals();
@@ -100,8 +106,6 @@ bool GameScene::init() {
             case EventKeyboard::KeyCode::KEY_8:          if (_inventory) { _inventory->selectIndex(7); Game::globalState().selectedIndex = 7; refreshHotbarUI(); } break;
             case EventKeyboard::KeyCode::KEY_9:          if (_inventory) { _inventory->selectIndex(8); Game::globalState().selectedIndex = 8; refreshHotbarUI(); } break;
             case EventKeyboard::KeyCode::KEY_0:          if (_inventory) { _inventory->selectIndex(9); Game::globalState().selectedIndex = 9; refreshHotbarUI(); } break;
-            case EventKeyboard::KeyCode::KEY_Q:          if (_inventory) { _inventory->prev(); Game::globalState().selectedIndex = _inventory->selectedIndex(); refreshHotbarUI(); } break;
-            case EventKeyboard::KeyCode::KEY_E:          if (_inventory) { _inventory->next(); Game::globalState().selectedIndex = _inventory->selectedIndex(); refreshHotbarUI(); } break;
             case EventKeyboard::KeyCode::KEY_SPACE:
                 if (_nearFarmDoor) {
                     auto room = RoomScene::create();
@@ -153,13 +157,90 @@ bool GameScene::init() {
             case EventKeyboard::KeyCode::KEY_RIGHT_ARROW:_right = false; break;
             default: break;
         }
-        // 如果没有任何方向键被按住，立即重置加速状态
-        if (!(_up || _down || _left || _right)) {
-            _moveHeldDuration = 0.0f;
-            _isSprinting = false;
-        }
+    // 如果没有任何方向键被按住，立即重置加速状态
+    if (!(_up || _down || _left || _right)) {
+        _moveHeldDuration = 0.0f;
+        _isSprinting = false;
+    }
     };
     _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
+
+    // Mouse: scroll to change selection; click hotbar to select
+    auto mouse = EventListenerMouse::create();
+    mouse->onMouseScroll = [this](EventMouse* e){
+        if (!_inventory) return;
+        float dy = e->getScrollY();
+        // 方向调整：滚轮上滚（dy>0）选择下一个；下滚（dy<0）选择上一个
+        if (dy > 0) {
+            _inventory->next();
+        } else if (dy < 0) {
+            _inventory->prev();
+        } else {
+            return;
+        }
+        Game::globalState().selectedIndex = _inventory->selectedIndex();
+        refreshHotbarUI();
+    };
+    auto handleClick = [this](EventMouse* e){
+        if (!_inventory || !_hotbarNode) return;
+        if (e->getMouseButton() != EventMouse::MouseButton::BUTTON_LEFT) return;
+        auto p = e->getLocation();
+        auto local = _hotbarNode->convertToNodeSpace(p);
+        int slots = static_cast<int>(_inventory->size());
+        if (slots <= 0) return;
+        float slotW = 80.0f;
+        float slotH = 32.0f;
+        float padding = 6.0f;
+        float hitMarginY = 8.0f; // 与背景绘制一致，扩大纵向点击范围
+        float totalWidth = slots * slotW + (slots - 1) * padding;
+        // within vertical bounds?
+        if (local.y < -(slotH/2 + hitMarginY) || local.y > (slotH/2 + hitMarginY)) return;
+        // find index by iterating
+        for (int i = 0; i < slots; ++i) {
+            float cx = -totalWidth/2 + i * (slotW + padding) + slotW/2;
+            float minx = cx - slotW/2;
+            float maxx = cx + slotW/2;
+            if (local.x >= minx && local.x <= maxx) {
+                _inventory->selectIndex(i);
+                Game::globalState().selectedIndex = i;
+                refreshHotbarUI();
+                break;
+            }
+        }
+    };
+    mouse->onMouseDown = handleClick;
+    mouse->onMouseUp   = handleClick;
+    _eventDispatcher->addEventListenerWithSceneGraphPriority(mouse, this);
+
+    // 兼容触摸输入：部分平台将鼠标视为触摸事件
+    auto touch = EventListenerTouchOneByOne::create();
+    touch->setSwallowTouches(false);
+    touch->onTouchBegan = [this](Touch* t, Event*){
+        if (!_inventory || !_hotbarNode) return false;
+        auto p = t->getLocation();
+        auto local = _hotbarNode->convertToNodeSpace(p);
+        int slots = static_cast<int>(_inventory->size());
+        if (slots <= 0) return false;
+        float slotW = 80.0f;
+        float slotH = 32.0f;
+        float padding = 6.0f;
+        float hitMarginY = 8.0f;
+        float totalWidth = slots * slotW + (slots - 1) * padding;
+        if (local.y < -(slotH/2 + hitMarginY) || local.y > (slotH/2 + hitMarginY)) return false;
+        for (int i = 0; i < slots; ++i) {
+            float cx = -totalWidth/2 + i * (slotW + padding) + slotW/2;
+            float minx = cx - slotW/2;
+            float maxx = cx + slotW/2;
+            if (local.x >= minx && local.x <= maxx) {
+                _inventory->selectIndex(i);
+                Game::globalState().selectedIndex = i;
+                refreshHotbarUI();
+                return true;
+            }
+        }
+        return false;
+    };
+    _eventDispatcher->addEventListenerWithSceneGraphPriority(touch, this);
 
     this->scheduleUpdate();
 
@@ -209,6 +290,33 @@ void GameScene::update(float dt) {
         updateCursor();
         collectDropsNearPlayer();
         checkFarmDoorRegion();
+        // 即使未移动也执行相机边缘跟随
+        auto visibleSizeNZ = Director::getInstance()->getVisibleSize();
+        auto originNZ = Director::getInstance()->getVisibleOrigin();
+        if (_worldNode && _player) {
+            Vec2 screenPos = _worldNode->convertToWorldSpace(_player->getPosition());
+            float marginX = visibleSizeNZ.width * 0.25f;
+            float marginY = visibleSizeNZ.height * 0.25f;
+            float left = originNZ.x + marginX;
+            float right = originNZ.x + visibleSizeNZ.width - marginX;
+            float bottom = originNZ.y + marginY;
+            float top = originNZ.y + visibleSizeNZ.height - marginY;
+            Vec2 cam = _worldNode->getPosition();
+            if (screenPos.x < left)   cam.x += left - screenPos.x;
+            if (screenPos.x > right)  cam.x += right - screenPos.x;
+            if (screenPos.y < bottom) cam.y += bottom - screenPos.y;
+            if (screenPos.y > top)    cam.y += top - screenPos.y;
+            // Clamp camera to map bounds
+            float mapW = _cols * GameConfig::TILE_SIZE;
+            float mapH = _rows * GameConfig::TILE_SIZE;
+            float minX = (originNZ.x + visibleSizeNZ.width) - (_mapOrigin.x + mapW);
+            float maxX = originNZ.x - _mapOrigin.x;
+            float minY = (originNZ.y + visibleSizeNZ.height) - (_mapOrigin.y + mapH);
+            float maxY = originNZ.y - _mapOrigin.y;
+            cam.x = std::max(minX, std::min(maxX, cam.x));
+            cam.y = std::max(minY, std::min(maxY, cam.y));
+            _worldNode->setPosition(cam);
+        }
         return;
     }
 
@@ -233,6 +341,34 @@ void GameScene::update(float dt) {
     updateCursor();
     collectDropsNearPlayer();
     checkFarmDoorRegion();
+
+    // 相机边缘自动跟随（把世界容器平移），保持玩家在安全区内
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    auto origin = Director::getInstance()->getVisibleOrigin();
+    if (_worldNode) {
+        Vec2 screenPos = _worldNode->convertToWorldSpace(_player->getPosition());
+        float marginX = visibleSize.width * 0.25f;
+        float marginY = visibleSize.height * 0.25f;
+        float left = origin.x + marginX;
+        float right = origin.x + visibleSize.width - marginX;
+        float bottom = origin.y + marginY;
+        float top = origin.y + visibleSize.height - marginY;
+        Vec2 cam = _worldNode->getPosition();
+        if (screenPos.x < left)   cam.x += left - screenPos.x;
+        if (screenPos.x > right)  cam.x += right - screenPos.x;
+        if (screenPos.y < bottom) cam.y += bottom - screenPos.y;
+        if (screenPos.y > top)    cam.y += top - screenPos.y;
+        // Clamp camera to map bounds
+        float mapW = _cols * GameConfig::TILE_SIZE;
+        float mapH = _rows * GameConfig::TILE_SIZE;
+        float minX = (origin.x + visibleSize.width) - (_mapOrigin.x + mapW);
+        float maxX = origin.x - _mapOrigin.x;
+        float minY = (origin.y + visibleSize.height) - (_mapOrigin.y + mapH);
+        float maxY = origin.y - _mapOrigin.y;
+        cam.x = std::max(minX, std::min(maxX, cam.x));
+        cam.y = std::max(minY, std::min(maxY, cam.y));
+        _worldNode->setPosition(cam);
+    }
 }
 
 void GameScene::buildMap() {
@@ -247,16 +383,24 @@ void GameScene::buildMap() {
     auto &ws = Game::globalState();
     if (ws.farmTiles.empty()) {
         _tiles.assign(_cols * _rows, Game::TileType::Soil);
-        // 首次放置演示用岩石与树
+        // 扩图后随机生成更多树与石头，中心出生区留空
         int cx = _cols / 2;
         int cy = _rows / 2;
-        auto place = [this](int c, int r, Game::TileType t){ if (inBounds(c,r)) setTile(c,r,t); };
-        place(cx-5, cy-2, Game::TileType::Rock);
-        place(cx-4, cy,   Game::TileType::Rock);
-        place(cx-6, cy+2, Game::TileType::Rock);
-        place(cx+4, cy-1, Game::TileType::Tree);
-        place(cx+5, cy+1, Game::TileType::Tree);
-        place(cx+6, cy,   Game::TileType::Tree);
+        auto safe = [cx, cy](int c, int r){ return std::abs(c - cx) <= 4 && std::abs(r - cy) <= 4; };
+        std::mt19937 rng(static_cast<unsigned>(std::time(nullptr)));
+        std::uniform_int_distribution<int> distC(0, _cols - 1);
+        std::uniform_int_distribution<int> distR(0, _rows - 1);
+        auto placeIfSoil = [this, &safe](int c, int r, Game::TileType t){ if (inBounds(c,r) && !safe(c,r) && getTile(c,r) == Game::TileType::Soil) setTile(c,r,t); };
+        int rocks = (_cols * _rows) / 18; // 密度适中
+        int trees = (_cols * _rows) / 14; // 略多一些树
+        for (int i = 0; i < rocks; ++i) {
+            int c = distC(rng); int r = distR(rng);
+            placeIfSoil(c, r, Game::TileType::Rock);
+        }
+        for (int i = 0; i < trees; ++i) {
+            int c = distC(rng); int r = distR(rng);
+            placeIfSoil(c, r, Game::TileType::Tree);
+        }
         ws.farmTiles = _tiles;
     } else {
         _tiles = ws.farmTiles;
@@ -618,7 +762,9 @@ void GameScene::checkFarmDoorRegion() {
         _doorPrompt->setVisible(_nearFarmDoor);
         if (_nearFarmDoor) {
             _doorPrompt->setString("Press Space to Enter House");
-            _doorPrompt->setPosition(p + Vec2(0, 26));
+            // 转到世界坐标显示提示（HUD 在场景根）
+            Vec2 worldP = _worldNode ? _worldNode->convertToWorldSpace(p) : p;
+            _doorPrompt->setPosition(worldP + Vec2(0, 26));
         }
     }
 }

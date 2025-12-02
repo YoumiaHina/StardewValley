@@ -115,8 +115,6 @@ bool RoomScene::init() {
             case EventKeyboard::KeyCode::KEY_8:          if (_inventory) { _inventory->selectIndex(7); Game::globalState().selectedIndex = 7; refreshHotbarUI(); } break;
             case EventKeyboard::KeyCode::KEY_9:          if (_inventory) { _inventory->selectIndex(8); Game::globalState().selectedIndex = 8; refreshHotbarUI(); } break;
             case EventKeyboard::KeyCode::KEY_0:          if (_inventory) { _inventory->selectIndex(9); Game::globalState().selectedIndex = 9; refreshHotbarUI(); } break;
-            case EventKeyboard::KeyCode::KEY_Q:          if (_inventory) { _inventory->prev(); Game::globalState().selectedIndex = _inventory->selectedIndex(); refreshHotbarUI(); } break;
-            case EventKeyboard::KeyCode::KEY_E:          if (_inventory) { _inventory->next(); Game::globalState().selectedIndex = _inventory->selectedIndex(); refreshHotbarUI(); } break;
             case EventKeyboard::KeyCode::KEY_SPACE:
                 if (_nearDoor && !_transitioning) {
                     _transitioning = true;
@@ -201,6 +199,81 @@ bool RoomScene::init() {
         }
     };
     _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
+
+    // 鼠标：滚轮切换，点击热键栏选择
+    auto mouse = EventListenerMouse::create();
+    mouse->onMouseScroll = [this](EventMouse* e){
+        if (!_inventory) return;
+        float dy = e->getScrollY();
+        // 方向调整：滚轮上滚（dy>0）选择下一个；下滚（dy<0）选择上一个
+        if (dy > 0) {
+            _inventory->next();
+        } else if (dy < 0) {
+            _inventory->prev();
+        } else {
+            return;
+        }
+        Game::globalState().selectedIndex = _inventory->selectedIndex();
+        refreshHotbarUI();
+    };
+    auto handleClick = [this](EventMouse* e){
+        if (!_inventory || !_hotbarNode) return;
+        if (e->getMouseButton() != EventMouse::MouseButton::BUTTON_LEFT) return;
+        auto p = e->getLocation();
+        auto local = _hotbarNode->convertToNodeSpace(p);
+        int slots = static_cast<int>(_inventory->size());
+        if (slots <= 0) return;
+        float slotW = 80.0f;
+        float slotH = 32.0f;
+        float padding = 6.0f;
+        float hitMarginY = 8.0f; // 与背景绘制一致，扩大纵向点击范围
+        float totalWidth = slots * slotW + (slots - 1) * padding;
+        if (local.y < -(slotH/2 + hitMarginY) || local.y > (slotH/2 + hitMarginY)) return;
+        for (int i = 0; i < slots; ++i) {
+            float cx = -totalWidth/2 + i * (slotW + padding) + slotW/2;
+            float minx = cx - slotW/2;
+            float maxx = cx + slotW/2;
+            if (local.x >= minx && local.x <= maxx) {
+                _inventory->selectIndex(i);
+                Game::globalState().selectedIndex = i;
+                refreshHotbarUI();
+                break;
+            }
+        }
+    };
+    mouse->onMouseDown = handleClick;
+    mouse->onMouseUp   = handleClick;
+    _eventDispatcher->addEventListenerWithSceneGraphPriority(mouse, this);
+
+    // 兼容触摸输入：部分平台只派发触摸事件
+    auto touch = EventListenerTouchOneByOne::create();
+    touch->setSwallowTouches(false);
+    touch->onTouchBegan = [this](Touch* t, Event*){
+        if (!_inventory || !_hotbarNode) return false;
+        auto p = t->getLocation();
+        auto local = _hotbarNode->convertToNodeSpace(p);
+        int slots = static_cast<int>(_inventory->size());
+        if (slots <= 0) return false;
+        float slotW = 80.0f;
+        float slotH = 32.0f;
+        float padding = 6.0f;
+        float hitMarginY = 8.0f;
+        float totalWidth = slots * slotW + (slots - 1) * padding;
+        if (local.y < -(slotH/2 + hitMarginY) || local.y > (slotH/2 + hitMarginY)) return false;
+        for (int i = 0; i < slots; ++i) {
+            float cx = -totalWidth/2 + i * (slotW + padding) + slotW/2;
+            float minx = cx - slotW/2;
+            float maxx = cx + slotW/2;
+            if (local.x >= minx && local.x <= maxx) {
+                _inventory->selectIndex(i);
+                Game::globalState().selectedIndex = i;
+                refreshHotbarUI();
+                return true;
+            }
+        }
+        return false;
+    };
+    _eventDispatcher->addEventListenerWithSceneGraphPriority(touch, this);
 
     this->scheduleUpdate();
     return true;

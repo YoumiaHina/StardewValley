@@ -17,9 +17,9 @@ namespace GameConfig {
     // 工具栏槽位数量（模仿星露谷初始背包，上排 12 格）
     static const int TOOLBAR_SLOTS = 12;
 
-    // 地图网格尺寸（按 480x320 与 16 像素格计算）
-    static const int MAP_COLS = 30; // 480 / 16
-    static const int MAP_ROWS = 20; // 320 / 16
+    // 地图网格尺寸：扩容，提供更大的农场可探索范围
+    static const int MAP_COLS = 120;
+    static const int MAP_ROWS = 80;
 
     // 掉落与拾取相关参数
     static const float DROP_DRAW_RADIUS = 8.0f;   // 掉落渲染圆点半径

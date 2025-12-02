@@ -25,6 +25,8 @@ public:
     void setSpawnAtFarmEntrance();
 
 private:
+    // 世界容器节点：承载地图、玩家、掉落物，便于相机平移
+    cocos2d::Node* _worldNode = nullptr;
     cocos2d::DrawNode* _player = nullptr;
     // hotbar/inventory UI（共享）
     std::shared_ptr<Game::Inventory> _inventory;
