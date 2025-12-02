@@ -66,6 +66,21 @@ int Inventory::addItems(ItemType type, int qty) {
     return qty;
 }
 
+bool Inventory::consumeSelectedItem(int qty) {
+    if (qty <= 0) return false;
+    if (_slots.empty()) return false;
+    auto &s = _slots[_selected];
+    if (s.kind != SlotKind::Item || s.itemQty <= 0) return false;
+    int consume = qty <= s.itemQty ? qty : s.itemQty;
+    s.itemQty -= consume;
+    if (s.itemQty <= 0) {
+        s.kind = SlotKind::Empty;
+        s.itemType = ItemType::Wood; // reset default
+        s.itemQty = 0;
+    }
+    return consume > 0;
+}
+
 void Inventory::selectIndex(int index) {
     if (_slots.empty()) { _selected = 0; return; }
     if (index < 0) index = 0;

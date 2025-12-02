@@ -42,6 +42,11 @@ inline cocos2d::Color4F itemColor(ItemType t) {
     }
 }
 
+// 是否可食用（占位规则：纤维可食用，用于演示）
+inline bool itemEdible(ItemType t) {
+    return t == ItemType::Fiber;
+}
+
 // 枚举哈希，便于 unordered_map
 struct ItemTypeHash {
     std::size_t operator()(ItemType t) const noexcept {

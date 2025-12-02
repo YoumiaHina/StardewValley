@@ -24,4 +24,18 @@ namespace GameConfig {
     // 掉落与拾取相关参数
     static const float DROP_DRAW_RADIUS = 8.0f;   // 掉落渲染圆点半径
     static const float DROP_PICK_RADIUS = 20.0f;  // 玩家拾取距离阈值
+
+    // 能量系统（基础与消耗/回复）
+    static const int ENERGY_MAX = 100;
+    static const int ENERGY_COST_AXE = 8;
+    static const int ENERGY_COST_PICKAXE = 8;
+    static const int ENERGY_COST_HOE = 4;
+    static const int ENERGY_COST_WATER = 2;
+    static const int ENERGY_RECOVER_FIBER = 15; // 纤维作为占位食物
+
+    // Time mapping
+    // Seconds per one in-game minute: 10s -> +10min implies 1s -> +1min
+    static const float REAL_SECONDS_PER_GAME_MINUTE = 1.0f;
+    // Kept for reference if hour-based mapping is needed elsewhere
+    static const float REAL_SECONDS_PER_GAME_HOUR = 60.0f;
 }

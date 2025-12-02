@@ -47,6 +47,8 @@ private:
     void buildHotbarUI();
     void refreshHotbarUI();
     void useSelectedTool();
+    void buildHUD();
+    void refreshHUD();
 
     // tile map
     int _cols = GameConfig::MAP_COLS;
@@ -62,6 +64,12 @@ private:
     std::vector<Game::Drop> _drops;
     cocos2d::Node* _dropsNode = nullptr;
     cocos2d::DrawNode* _dropsDraw = nullptr;
+
+    // HUD：时间与能量
+    cocos2d::Label* _hudTimeLabel = nullptr;
+    cocos2d::Node* _energyNode = nullptr;
+    cocos2d::DrawNode* _energyFill = nullptr;
+    cocos2d::Label* _energyLabel = nullptr;
 
     // 农场↔房间：门口区域与提示
     cocos2d::Rect _farmDoorRect;          // 农场房屋门口区域（靠近底部中间）

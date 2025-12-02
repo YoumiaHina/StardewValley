@@ -43,6 +43,10 @@ public:
     // add items into inventory, stacking first; returns remaining qty not fitted
     int addItems(ItemType type, int qty);
 
+    // 消耗当前选中槽位中的物品（当选中为物品槽）
+    // 返回是否成功消耗至少 1 个
+    bool consumeSelectedItem(int qty = 1);
+
     int selectedIndex() const { return _selected; }
     void selectIndex(int index);
     void next();

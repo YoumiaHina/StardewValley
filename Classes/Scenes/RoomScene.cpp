@@ -59,6 +59,9 @@ bool RoomScene::init() {
     if (_inventory) { _inventory->selectIndex(ws.selectedIndex); }
     buildHotbarUI();
 
+    // HUD: time and energy (English)
+    buildHUD();
+
     // 门口交互提示（初始隐藏）
     _doorPrompt = Label::createWithTTF("Press Space to Exit", "fonts/Marker Felt.ttf", 20);
     if (_doorPrompt) {
@@ -79,6 +82,14 @@ bool RoomScene::init() {
         _tableLabel->setColor(Color3B::WHITE);
         _tableLabel->setPosition(Vec2(_tableRect.getMidX(), _tableRect.getMaxY() + 18));
         this->addChild(_tableLabel, 2);
+    }
+
+    // 床交互提示（初始隐藏）
+    _bedPrompt = Label::createWithTTF("Press Space to Sleep", "fonts/Marker Felt.ttf", 20);
+    if (_bedPrompt) {
+        _bedPrompt->setColor(Color3B::YELLOW);
+        _bedPrompt->setVisible(false);
+        this->addChild(_bedPrompt, 3);
     }
 
     // 键盘输入（与 GameScene 保持一致）
@@ -114,6 +125,26 @@ bool RoomScene::init() {
                     farm->setSpawnAtFarmEntrance();
                     auto trans = TransitionFade::create(0.6f, farm);
                     Director::getInstance()->replaceScene(trans);
+                } else if (_nearBed) {
+                    // 睡觉：能量回满并进入下一天（每季30天，四季循环）
+                    auto &ws = Game::globalState();
+                    ws.energy = ws.maxEnergy;
+                    ws.dayOfSeason += 1;
+                    if (ws.dayOfSeason > 30) { ws.dayOfSeason = 1; ws.seasonIndex = (ws.seasonIndex + 1) % 4; }
+                    ws.timeHour = 6; // wake up at 06:00
+                    ws.timeMinute = 0;
+                    ws.timeAccum = 0.0f;
+                    refreshHUD();
+                    auto seasonName = [](int idx){
+                        switch (idx % 4) { case 0: return "Spring"; case 1: return "Summer"; case 2: return "Fall"; default: return "Winter"; }
+                    };
+                    auto pop = Label::createWithTTF(StringUtils::format("New Day: %s Day %d, %02d:%02d", seasonName(ws.seasonIndex), ws.dayOfSeason, ws.timeHour, ws.timeMinute), "fonts/Marker Felt.ttf", 20);
+                    pop->setColor(Color3B::WHITE);
+                    auto pos = _player ? _player->getPosition() : Vec2(0,0);
+                    pop->setPosition(pos + Vec2(0, 26));
+                    this->addChild(pop, 3);
+                    auto seq = Sequence::create(FadeOut::create(0.8f), RemoveSelf::create(), nullptr);
+                    pop->runAction(seq);
                 } else {
                     // 室内不支持使用工具，给予提示反馈
                     auto pop = Label::createWithTTF("No effect indoors", "fonts/Marker Felt.ttf", 20);
@@ -125,6 +156,30 @@ bool RoomScene::init() {
                     pop->runAction(seq);
                 }
                 break;
+            case EventKeyboard::KeyCode::KEY_F: {
+                // 吃东西：选中为可食用物品时，消耗并回复能量
+                if (_inventory && _inventory->selectedKind() == Game::SlotKind::Item) {
+                    const auto &slot = _inventory->selectedSlot();
+                    if (Game::itemEdible(slot.itemType)) {
+                        bool ok = _inventory->consumeSelectedItem(1);
+                        if (ok) {
+                            auto &ws2 = Game::globalState();
+                            int recover = GameConfig::ENERGY_RECOVER_FIBER;
+                            ws2.energy = std::min(ws2.maxEnergy, ws2.energy + recover);
+                            refreshHotbarUI();
+                            refreshHUD();
+                            auto pop = Label::createWithTTF(std::string("Ate ") + Game::itemName(slot.itemType) + StringUtils::format(" +%d Energy", recover), "fonts/Marker Felt.ttf", 20);
+                            pop->setColor(Color3B::YELLOW);
+                            auto pos = _player ? _player->getPosition() : Vec2(0,0);
+                            pop->setPosition(pos + Vec2(0, 26));
+                            this->addChild(pop, 3);
+                            auto seq = Sequence::create(FadeOut::create(0.6f), RemoveSelf::create(), nullptr);
+                            pop->runAction(seq);
+                        }
+                    }
+                }
+                break;
+            }
             default: break;
         }
     };
@@ -225,6 +280,26 @@ void RoomScene::buildRoom() {
 }
 
 void RoomScene::update(float dt) {
+    // time progression: 1 real second -> 1 game minute
+    auto &wsTime = Game::globalState();
+    bool timeChanged = false;
+    wsTime.timeAccum += dt;
+    while (wsTime.timeAccum >= GameConfig::REAL_SECONDS_PER_GAME_MINUTE) {
+        wsTime.timeAccum -= GameConfig::REAL_SECONDS_PER_GAME_MINUTE;
+        wsTime.timeMinute += 1;
+        if (wsTime.timeMinute >= 60) {
+            wsTime.timeMinute = 0;
+            wsTime.timeHour += 1;
+            if (wsTime.timeHour >= 24) {
+                wsTime.timeHour = 0;
+                wsTime.dayOfSeason += 1;
+                if (wsTime.dayOfSeason > 30) { wsTime.dayOfSeason = 1; wsTime.seasonIndex = (wsTime.seasonIndex + 1) % 4; }
+            }
+        }
+        timeChanged = true;
+    }
+    if (timeChanged) { refreshHUD(); }
+
     // 加速计时：按住任意方向键
     bool movementHeld = (_up || _down || _left || _right);
     if (movementHeld) {
@@ -243,6 +318,7 @@ void RoomScene::update(float dt) {
 
     if (dx == 0.0f && dy == 0.0f) {
         checkDoorRegion();
+        checkBedRegion();
         return;
     }
 
@@ -259,6 +335,7 @@ void RoomScene::update(float dt) {
     _player->setPosition(next);
 
     checkDoorRegion();
+    checkBedRegion();
 }
 
 void RoomScene::checkDoorRegion() {
@@ -281,6 +358,89 @@ void RoomScene::setSpawnInsideDoor() {
     Vec2 spawn(_doorRect.getMidX(), _doorRect.getMinY() + _doorRect.size.height + offsetY);
     _player->setPosition(spawn);
 }
+void RoomScene::buildHUD() {
+    auto &ws = Game::globalState();
+    if (ws.maxEnergy <= 0) ws.maxEnergy = GameConfig::ENERGY_MAX;
+    if (ws.energy < 0 || ws.energy > ws.maxEnergy) ws.energy = ws.maxEnergy;
+
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    auto origin = Director::getInstance()->getVisibleOrigin();
+
+    if (!_hudTimeLabel) {
+        _hudTimeLabel = Label::createWithTTF("", "fonts/Marker Felt.ttf", 18);
+        _hudTimeLabel->setColor(Color3B::WHITE);
+        _hudTimeLabel->setAnchorPoint(Vec2(1,1));
+        float pad = 10.0f;
+        _hudTimeLabel->setPosition(Vec2(origin.x + visibleSize.width - pad, origin.y + visibleSize.height - pad));
+        this->addChild(_hudTimeLabel, 3);
+    }
+
+    if (!_energyNode) {
+        _energyNode = Node::create();
+        float pad = 10.0f;
+        _energyNode->setPosition(Vec2(origin.x + visibleSize.width - pad, origin.y + pad));
+        this->addChild(_energyNode, 3);
+
+        float bw = 160.0f, bh = 18.0f;
+        auto bg = DrawNode::create();
+        Vec2 bl(-bw, 0), br(0, 0), tr(0, bh), tl(-bw, bh);
+        Vec2 rect[4] = { bl, br, tr, tl };
+        bg->drawSolidPoly(rect, 4, Color4F(0.f,0.f,0.f,0.35f));
+        bg->drawLine(bl, br, Color4F(1,1,1,0.5f));
+        bg->drawLine(br, tr, Color4F(1,1,1,0.5f));
+        bg->drawLine(tr, tl, Color4F(1,1,1,0.5f));
+        bg->drawLine(tl, bl, Color4F(1,1,1,0.5f));
+        _energyNode->addChild(bg);
+
+        _energyFill = DrawNode::create();
+        _energyNode->addChild(_energyFill);
+
+        _energyLabel = Label::createWithTTF("", "fonts/Marker Felt.ttf", 16);
+        _energyLabel->setAnchorPoint(Vec2(1,0.5f));
+        _energyLabel->setPosition(Vec2(-4.0f, bh * 0.5f));
+        _energyLabel->setColor(Color3B::WHITE);
+        _energyNode->addChild(_energyLabel);
+    }
+
+    refreshHUD();
+}
+
+void RoomScene::refreshHUD() {
+    auto &ws = Game::globalState();
+    auto seasonName = [](int idx){
+        switch (idx % 4) { case 0: return "Spring"; case 1: return "Summer"; case 2: return "Fall"; default: return "Winter"; }
+    };
+    if (_hudTimeLabel) {
+        _hudTimeLabel->setString(StringUtils::format("%s Day %d, %02d:%02d", seasonName(ws.seasonIndex), ws.dayOfSeason, ws.timeHour, ws.timeMinute));
+    }
+    if (_energyFill && _energyNode) {
+        _energyFill->clear();
+        float bw = 160.0f, bh = 18.0f;
+        float ratio = ws.maxEnergy > 0 ? (static_cast<float>(ws.energy) / static_cast<float>(ws.maxEnergy)) : 0.f;
+        ratio = std::max(0.f, std::min(1.f, ratio));
+        float fillW = bw * ratio;
+        Vec2 bl(-bw, 0), br(-bw + fillW, 0), tr(-bw + fillW, bh), tl(-bw, bh);
+        Vec2 rect[4] = { bl, br, tr, tl };
+        _energyFill->drawSolidPoly(rect, 4, Color4F(0.2f, 0.8f, 0.25f, 0.85f));
+    }
+    if (_energyLabel) {
+        _energyLabel->setString(StringUtils::format("Energy %d/%d", ws.energy, ws.maxEnergy));
+    }
+}
+
+void RoomScene::checkBedRegion() {
+    if (!_player) return;
+    Vec2 p = _player->getPosition();
+    _nearBed = _bedRect.containsPoint(p);
+    if (_bedPrompt) {
+        _bedPrompt->setVisible(_nearBed);
+        if (_nearBed) {
+            _bedPrompt->setString("Press Space to Sleep");
+            _bedPrompt->setPosition(p + Vec2(0, 26));
+        }
+    }
+}
+
 void RoomScene::buildHotbarUI() {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     auto origin = Director::getInstance()->getVisibleOrigin();

@@ -21,6 +21,9 @@ public:
     // 构建并刷新室内热键栏（物品栏）
     void buildHotbarUI();
     void refreshHotbarUI();
+    // HUD（时间与能量）
+    void buildHUD();
+    void refreshHUD();
 
 private:
     // 玩家与房间绘制
@@ -38,12 +41,20 @@ private:
     cocos2d::Rect _tableRect;
     cocos2d::Label* _bedLabel = nullptr;
     cocos2d::Label* _tableLabel = nullptr;
+    cocos2d::Label* _bedPrompt = nullptr;  // 靠近床的交互提示
+    bool _nearBed = false;
 
     // 物品栏（与 GameScene 共享同一实例）
     std::shared_ptr<Game::Inventory> _inventory;
     cocos2d::Node* _hotbarNode = nullptr;
     cocos2d::DrawNode* _hotbarHighlight = nullptr;
     std::vector<cocos2d::Label*> _hotbarLabels;
+
+    // HUD：时间与能量
+    cocos2d::Label* _hudTimeLabel = nullptr;
+    cocos2d::Node* _energyNode = nullptr;
+    cocos2d::DrawNode* _energyFill = nullptr;
+    cocos2d::Label* _energyLabel = nullptr;
 
     // 输入与移动参数（与 GameScene 保持一致体验）
     bool _up = false;
@@ -58,4 +69,5 @@ private:
 
     void buildRoom();
     void checkDoorRegion();
+    void checkBedRegion();
 };

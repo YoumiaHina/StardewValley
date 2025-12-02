@@ -60,6 +60,9 @@ bool GameScene::init() {
     if (_inventory) { _inventory->selectIndex(ws.selectedIndex); }
     buildHotbarUI();
 
+    // HUD：时间与能量
+    buildHUD();
+
     _dropsNode = Node::create();
     this->addChild(_dropsNode, 1);
     _dropsDraw = DrawNode::create();
@@ -110,6 +113,31 @@ bool GameScene::init() {
                     useSelectedTool();
                 }
                 break;
+            case EventKeyboard::KeyCode::KEY_F: {
+                // 吃东西：选中为可食用物品时，消耗并回复能量
+                if (_inventory && _inventory->selectedKind() == Game::SlotKind::Item) {
+                    const auto &slot = _inventory->selectedSlot();
+                    if (Game::itemEdible(slot.itemType)) {
+                        // 当前仅演示 Fiber 可食用
+                        bool ok = _inventory->consumeSelectedItem(1);
+                        if (ok) {
+                            auto &ws2 = Game::globalState();
+                            int recover = GameConfig::ENERGY_RECOVER_FIBER; // 简化映射
+                            ws2.energy = std::min(ws2.maxEnergy, ws2.energy + recover);
+                            refreshHotbarUI();
+                            refreshHUD();
+                            auto pop = Label::createWithTTF(std::string("Ate ") + Game::itemName(slot.itemType) + StringUtils::format(" +%d Energy", recover), "fonts/Marker Felt.ttf", 20);
+                            pop->setColor(Color3B::YELLOW);
+                            auto pos = _player ? _player->getPosition() : Vec2(0,0);
+                            pop->setPosition(pos + Vec2(0, 26));
+                            this->addChild(pop, 3);
+                            auto seq = Sequence::create(FadeOut::create(0.6f), RemoveSelf::create(), nullptr);
+                            pop->runAction(seq);
+                        }
+                    }
+                }
+                break;
+            }
             default: break;
         }
     };
@@ -139,6 +167,26 @@ bool GameScene::init() {
 }
 
 void GameScene::update(float dt) {
+    // time progression: 1 real second -> 1 game minute
+    auto &wsTime = Game::globalState();
+    bool timeChanged = false;
+    wsTime.timeAccum += dt;
+    while (wsTime.timeAccum >= GameConfig::REAL_SECONDS_PER_GAME_MINUTE) {
+        wsTime.timeAccum -= GameConfig::REAL_SECONDS_PER_GAME_MINUTE;
+        wsTime.timeMinute += 1;
+        if (wsTime.timeMinute >= 60) {
+            wsTime.timeMinute = 0;
+            wsTime.timeHour += 1;
+            if (wsTime.timeHour >= 24) {
+                wsTime.timeHour = 0;
+                wsTime.dayOfSeason += 1;
+                if (wsTime.dayOfSeason > 30) { wsTime.dayOfSeason = 1; wsTime.seasonIndex = (wsTime.seasonIndex + 1) % 4; }
+            }
+        }
+        timeChanged = true;
+    }
+    if (timeChanged) { refreshHUD(); }
+
     // sprint timing: holding ANY movement key (WASD/Arrows)
     bool movementHeld = (_up || _down || _left || _right);
     if (movementHeld) {
@@ -435,6 +483,29 @@ void GameScene::useSelectedTool() {
     const Game::Tool* tool = _inventory->selectedTool();
     if (!tool) return;
 
+    // 能量消耗：不同工具对应不同消耗
+    auto &ws = Game::globalState();
+    auto costFor = [](Game::ToolType t){
+        switch (t) {
+            case Game::ToolType::Axe:         return GameConfig::ENERGY_COST_AXE;
+            case Game::ToolType::Pickaxe:     return GameConfig::ENERGY_COST_PICKAXE;
+            case Game::ToolType::Hoe:         return GameConfig::ENERGY_COST_HOE;
+            case Game::ToolType::WateringCan: return GameConfig::ENERGY_COST_WATER;
+            default: return 0;
+        }
+    };
+    int need = costFor(tool->type);
+    if (ws.energy < need) {
+        auto warn = Label::createWithTTF("Not enough energy", "fonts/Marker Felt.ttf", 20);
+        warn->setColor(Color3B::RED);
+        auto pos = _player ? _player->getPosition() : Vec2(0,0);
+        warn->setPosition(pos + Vec2(0, 26));
+        this->addChild(warn, 3);
+        auto seqW = Sequence::create(FadeOut::create(0.6f), RemoveSelf::create(), nullptr);
+        warn->runAction(seqW);
+        return;
+    }
+
     std::string msg;
     auto tgt = targetTile();
     int tc = tgt.first, tr = tgt.second;
@@ -475,6 +546,10 @@ void GameScene::useSelectedTool() {
             break;
         default: msg = "Use"; break;
     }
+
+    // 扣除能量并刷新 HUD
+    ws.energy = std::max(0, ws.energy - need);
+    refreshHUD();
 
     refreshMapVisuals();
     refreshDropsVisuals();
@@ -553,4 +628,88 @@ void GameScene::setSpawnAtFarmEntrance() {
     float s = static_cast<float>(GameConfig::TILE_SIZE);
     Vec2 spawn(_farmDoorRect.getMidX(), _farmDoorRect.getMinY() + s);
     _player->setPosition(spawn);
+}
+
+// ---- HUD: 时间与能量条 ----
+void GameScene::buildHUD() {
+    auto &ws = Game::globalState();
+    // 初始化能量（若首次进入）
+    if (ws.maxEnergy <= 0) ws.maxEnergy = GameConfig::ENERGY_MAX;
+    if (ws.energy < 0 || ws.energy > ws.maxEnergy) ws.energy = ws.maxEnergy;
+
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    auto origin = Director::getInstance()->getVisibleOrigin();
+
+    // 时间标签（右上角）
+    if (!_hudTimeLabel) {
+        _hudTimeLabel = Label::createWithTTF("", "fonts/Marker Felt.ttf", 18);
+        _hudTimeLabel->setColor(Color3B::WHITE);
+        _hudTimeLabel->setAnchorPoint(Vec2(1,1));
+        float pad = 10.0f;
+        _hudTimeLabel->setPosition(Vec2(origin.x + visibleSize.width - pad, origin.y + visibleSize.height - pad));
+        this->addChild(_hudTimeLabel, 3);
+    }
+
+    // 能量条（右下角）
+    if (!_energyNode) {
+        _energyNode = Node::create();
+        float pad = 10.0f;
+        _energyNode->setPosition(Vec2(origin.x + visibleSize.width - pad, origin.y + pad));
+        this->addChild(_energyNode, 3);
+
+        // 背景与边框
+        float bw = 160.0f, bh = 18.0f;
+        auto bg = DrawNode::create();
+        Vec2 bl(-bw, 0), br(0, 0), tr(0, bh), tl(-bw, bh); // 右下为锚点
+        Vec2 rect[4] = { bl, br, tr, tl };
+        bg->drawSolidPoly(rect, 4, Color4F(0.f,0.f,0.f,0.35f));
+        bg->drawLine(bl, br, Color4F(1,1,1,0.5f));
+        bg->drawLine(br, tr, Color4F(1,1,1,0.5f));
+        bg->drawLine(tr, tl, Color4F(1,1,1,0.5f));
+        bg->drawLine(tl, bl, Color4F(1,1,1,0.5f));
+        _energyNode->addChild(bg);
+
+        _energyFill = DrawNode::create();
+        _energyNode->addChild(_energyFill);
+
+        _energyLabel = Label::createWithTTF("", "fonts/Marker Felt.ttf", 16);
+        _energyLabel->setAnchorPoint(Vec2(1,0.5f));
+        _energyLabel->setPosition(Vec2(-4.0f, bh * 0.5f));
+        _energyLabel->setColor(Color3B::WHITE);
+        _energyNode->addChild(_energyLabel);
+    }
+
+    refreshHUD();
+}
+
+void GameScene::refreshHUD() {
+    auto &ws = Game::globalState();
+    // 时间文本
+    auto seasonName = [](int idx){
+        switch (idx % 4) {
+            case 0: return "Spring";
+            case 1: return "Summer";
+            case 2: return "Fall";
+            default: return "Winter";
+        }
+    };
+    if (_hudTimeLabel) {
+        _hudTimeLabel->setString(StringUtils::format("%s Day %d, %02d:%02d", seasonName(ws.seasonIndex), ws.dayOfSeason, ws.timeHour, ws.timeMinute));
+    }
+
+    // 能量填充
+    if (_energyFill && _energyNode) {
+        _energyFill->clear();
+        float bw = 160.0f, bh = 18.0f;
+        float ratio = ws.maxEnergy > 0 ? (static_cast<float>(ws.energy) / static_cast<float>(ws.maxEnergy)) : 0.f;
+        ratio = std::max(0.f, std::min(1.f, ratio));
+        float fillW = bw * ratio;
+        Vec2 bl(-bw, 0), br(-bw + fillW, 0), tr(-bw + fillW, bh), tl(-bw, bh);
+        Vec2 rect[4] = { bl, br, tr, tl };
+        _energyFill->drawSolidPoly(rect, 4, Color4F(0.2f, 0.8f, 0.25f, 0.85f));
+    }
+
+    if (_energyLabel) {
+        _energyLabel->setString(StringUtils::format("Energy %d/%d", ws.energy, ws.maxEnergy));
+    }
 }
