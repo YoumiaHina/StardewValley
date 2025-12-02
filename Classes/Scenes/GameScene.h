@@ -13,6 +13,7 @@
 #include "Game/Tile.h"
 #include "Game/Drop.h"
 #include "Game/Chest.h"
+#include "Game/Crop.h"
 
 class GameScene : public cocos2d::Scene {
 public:
@@ -75,6 +76,10 @@ private:
     bool _nearChest = false;
     cocos2d::Label* _chestPrompt = nullptr;
 
+    std::vector<Game::Crop> _crops;
+    cocos2d::DrawNode* _cropsDraw = nullptr;
+
+
     // crafting UI
     cocos2d::Node* _craftNode = nullptr;
     cocos2d::Label* _craftLabel = nullptr;
@@ -131,6 +136,13 @@ private:
     void refreshChestsVisuals();
     void checkChestRegion();
     bool tileHasChest(int c, int r) const;
+
+    void refreshCropsVisuals();
+    int findCropIndex(int c, int r) const;
+    void plantCrop(Game::CropType type, int c, int r);
+    void advanceCropsDaily();
+    void harvestCropAt(int c, int r);
+
 
     // crafting helpers
     void buildCraftUI();

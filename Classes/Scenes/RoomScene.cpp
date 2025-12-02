@@ -9,6 +9,7 @@
 #include "Game/Item.h"
 #include "Game/GameConfig.h"
 #include "Game/WorldState.h"
+#include "Game/Cheat.h"
 // UI 控件（Button）
 #include "ui/CocosGUI.h"
 
@@ -244,20 +245,15 @@ bool RoomScene::init() {
                 break;
             }
             case EventKeyboard::KeyCode::KEY_Z: {
-                // 作弊：各类基础资源 +99
-                if (_inventory) {
-                    for (auto t : { Game::ItemType::Wood, Game::ItemType::Stone, Game::ItemType::Fiber, Game::ItemType::Chest }) {
-                        _inventory->addItems(t, 99);
-                    }
-                    refreshHotbarUI();
-                    auto pop = Label::createWithTTF("Cheat: +99 All", "fonts/Marker Felt.ttf", 20);
-                    pop->setColor(Color3B::YELLOW);
-                    auto pos = _player ? _player->getPosition() : Vec2(0,0);
-                    pop->setPosition(pos + Vec2(0, 26));
-                    this->addChild(pop, 3);
-                    auto seq = Sequence::create(FadeOut::create(0.6f), RemoveSelf::create(), nullptr);
-                    pop->runAction(seq);
-                }
+                Game::Cheat::grantBasic(_inventory);
+                refreshHotbarUI();
+                auto pop = Label::createWithTTF("Cheat: +99 All", "fonts/Marker Felt.ttf", 20);
+                pop->setColor(Color3B::YELLOW);
+                auto pos = _player ? _player->getPosition() : Vec2(0,0);
+                pop->setPosition(pos + Vec2(0, 26));
+                this->addChild(pop, 3);
+                auto seq = Sequence::create(FadeOut::create(0.6f), RemoveSelf::create(), nullptr);
+                pop->runAction(seq);
                 break;
             }
             case EventKeyboard::KeyCode::KEY_ESCAPE:

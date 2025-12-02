@@ -10,9 +10,12 @@
 #include "Game/Tile.h"
 #include "Game/Item.h"
 #include "Game/WorldState.h"
+#include "Game/Cheat.h"
+#include "Game/Crop.h"
 #include "Scenes/RoomScene.h"
 #include <random>
 #include <ctime>
+#include <algorithm>
 
 USING_NS_CC;
 
@@ -76,6 +79,11 @@ bool GameScene::init() {
     _dropsNode->addChild(_dropsDraw);
     refreshDropsVisuals();
 
+    _cropsDraw = DrawNode::create();
+    _worldNode->addChild(_cropsDraw, 1);
+    _crops = ws.farmCrops;
+    refreshCropsVisuals();
+
     // 门口交互提示（初始隐藏）
     _doorPrompt = Label::createWithTTF("Press Space to Enter House", "fonts/Marker Felt.ttf", 20);
     if (_doorPrompt) {
@@ -133,6 +141,28 @@ bool GameScene::init() {
                     Director::getInstance()->replaceScene(trans);
                 } else if (_inventory && _inventory->selectedKind() == Game::SlotKind::Item) {
                     const auto &slot = _inventory->selectedSlot();
+                    if (Game::isSeed(slot.itemType)) {
+                        auto tgt = targetTile();
+                        int tc = tgt.first, tr = tgt.second;
+                        if (inBounds(tc, tr) && !tileHasChest(tc, tr) && findCropIndex(tc, tr) < 0) {
+                            auto t = getTile(tc, tr);
+                            if (t == Game::TileType::Tilled || t == Game::TileType::Watered) {
+                                auto ct = Game::cropTypeFromSeed(slot.itemType);
+                                plantCrop(ct, tc, tr);
+                                bool ok = _inventory->consumeSelectedItem(1);
+                                if (ok) { refreshHotbarUI(); }
+                                auto pop = Label::createWithTTF("Planted", "fonts/Marker Felt.ttf", 20);
+                                pop->setColor(Color3B::YELLOW);
+                                auto pos = _worldNode->convertToWorldSpace(tileToWorld(tc, tr));
+                                pop->setPosition(pos + Vec2(0, 26));
+                                this->addChild(pop, 3);
+                                auto seq = Sequence::create(FadeOut::create(0.6f), RemoveSelf::create(), nullptr);
+                                pop->runAction(seq);
+                            }
+                        }
+                        break;
+                    }
+                    
                     // 放置箱子
                     if (slot.itemType == Game::ItemType::Chest) {
                         auto tgt = targetTile();
@@ -227,20 +257,15 @@ bool GameScene::init() {
                 }
                 break;
             case EventKeyboard::KeyCode::KEY_Z: {
-                // 作弊：各类基础资源 +99
-                if (_inventory) {
-                    for (auto t : { Game::ItemType::Wood, Game::ItemType::Stone, Game::ItemType::Fiber, Game::ItemType::Chest }) {
-                        _inventory->addItems(t, 99);
-                    }
-                    refreshHotbarUI();
-                    auto pop = Label::createWithTTF("Cheat: +99 All", "fonts/Marker Felt.ttf", 20);
-                    pop->setColor(Color3B::YELLOW);
-                    auto pos = _player ? _player->getPosition() : Vec2(0,0);
-                    pop->setPosition(pos + Vec2(0, 26));
-                    this->addChild(pop, 3);
-                    auto seq = Sequence::create(FadeOut::create(0.6f), RemoveSelf::create(), nullptr);
-                    pop->runAction(seq);
-                }
+                Game::Cheat::grantBasic(_inventory);
+                refreshHotbarUI();
+                auto pop = Label::createWithTTF("Cheat: +99 All", "fonts/Marker Felt.ttf", 20);
+                pop->setColor(Color3B::YELLOW);
+                auto pos = _player ? _player->getPosition() : Vec2(0,0);
+                pop->setPosition(pos + Vec2(0, 26));
+                this->addChild(pop, 3);
+                auto seq = Sequence::create(FadeOut::create(0.6f), RemoveSelf::create(), nullptr);
+                pop->runAction(seq);
                 break;
             }
             case EventKeyboard::KeyCode::KEY_ESCAPE:
@@ -496,6 +521,7 @@ void GameScene::update(float dt) {
     // time progression: 1 real second -> 1 game minute
     auto &wsTime = Game::globalState();
     bool timeChanged = false;
+    bool dayChanged = false;
     wsTime.timeAccum += dt;
     while (wsTime.timeAccum >= GameConfig::REAL_SECONDS_PER_GAME_MINUTE) {
         wsTime.timeAccum -= GameConfig::REAL_SECONDS_PER_GAME_MINUTE;
@@ -507,11 +533,13 @@ void GameScene::update(float dt) {
                 wsTime.timeHour = 0;
                 wsTime.dayOfSeason += 1;
                 if (wsTime.dayOfSeason > 30) { wsTime.dayOfSeason = 1; wsTime.seasonIndex = (wsTime.seasonIndex + 1) % 4; }
+                dayChanged = true;
             }
         }
         timeChanged = true;
     }
     if (timeChanged) { refreshHUD(); }
+    if (dayChanged) { advanceCropsDaily(); refreshMapVisuals(); refreshCropsVisuals(); }
 
     // sprint timing: holding ANY movement key (WASD/Arrows)
     bool movementHeld = (_up || _down || _left || _right);
@@ -906,13 +934,24 @@ void GameScene::useSelectedTool() {
 
     switch (tool->type) {
         case Game::ToolType::Hoe:
-            if (current == Game::TileType::Soil) { 
-                setTile(tc,tr, Game::TileType::Tilled); 
-                msg = "Till!"; 
-                // tilling土壤，掉落纤维
-                spawnDropAt(tc, tr, Game::ItemType::Fiber, 1);
+            {
+                int idx = findCropIndex(tc, tr);
+                if (idx >= 0) {
+                    auto &cp = _crops[idx];
+                    if (cp.stage >= cp.maxStage) {
+                        harvestCropAt(tc, tr);
+                        msg = "Harvest!";
+                    } else {
+                        msg = "Not ready";
+                    }
+                } else if (current == Game::TileType::Soil) {
+                    setTile(tc,tr, Game::TileType::Tilled);
+                    msg = "Till!";
+                    spawnDropAt(tc, tr, Game::ItemType::Fiber, 1);
+                } else {
+                    msg = "Nothing";
+                }
             }
-            else msg = "Nothing";
             break;
         case Game::ToolType::WateringCan:
             if (current == Game::TileType::Tilled) { setTile(tc,tr, Game::TileType::Watered); msg = "Water!"; }
@@ -1019,6 +1058,80 @@ void GameScene::collectDropsNearPlayer() {
         Game::globalState().farmDrops = _drops;
     }
 }
+
+void GameScene::refreshCropsVisuals() {
+    if (!_cropsDraw) return;
+    _cropsDraw->clear();
+    float s = static_cast<float>(GameConfig::TILE_SIZE);
+    for (const auto& cp : _crops) {
+        auto center = tileToWorld(cp.c, cp.r);
+        float radius = s * (0.15f + 0.08f * std::max(0, cp.stage));
+        cocos2d::Color4F col = cocos2d::Color4F(0.95f, 0.85f, 0.35f, 1.0f);
+        _cropsDraw->drawSolidCircle(center, radius, 0.0f, 12, col);
+        _cropsDraw->drawCircle(center, radius, 0.0f, 12, false, cocos2d::Color4F(0,0,0,0.35f));
+        if (cp.stage >= cp.maxStage) {
+            _cropsDraw->drawCircle(center, radius + 2.0f, 0.0f, 12, false, cocos2d::Color4F(1.f,0.9f,0.2f,0.8f));
+        }
+    }
+}
+
+int GameScene::findCropIndex(int c, int r) const {
+    for (int i = 0; i < static_cast<int>(_crops.size()); ++i) {
+        if (_crops[i].c == c && _crops[i].r == r) return i;
+    }
+    return -1;
+}
+
+void GameScene::plantCrop(Game::CropType type, int c, int r) {
+    Game::Crop cp;
+    cp.c = c;
+    cp.r = r;
+    cp.type = type;
+    cp.stage = 0;
+    cp.progress = 0;
+    cp.maxStage = Game::cropMaxStage(type);
+    _crops.push_back(cp);
+    Game::globalState().farmCrops = _crops;
+    refreshCropsVisuals();
+}
+
+void GameScene::advanceCropsDaily() {
+    for (auto &cp : _crops) {
+        auto t = getTile(cp.c, cp.r);
+        bool watered = (t == Game::TileType::Watered);
+        if (watered && cp.stage < cp.maxStage) {
+            cp.progress += 1;
+            auto days = Game::cropStageDays(cp.type);
+            int need = (cp.stage >= 0 && cp.stage < static_cast<int>(days.size())) ? days[cp.stage] : 1;
+            if (cp.progress >= need) {
+                cp.stage += 1;
+                cp.progress = 0;
+            }
+        }
+        if (t == Game::TileType::Watered) {
+            setTile(cp.c, cp.r, Game::TileType::Tilled);
+        }
+    }
+    Game::globalState().farmCrops = _crops;
+}
+
+void GameScene::harvestCropAt(int c, int r) {
+    int idx = findCropIndex(c, r);
+    if (idx < 0) return;
+    auto cp = _crops[idx];
+    if (cp.stage >= cp.maxStage) {
+        auto item = Game::produceItemFor(cp.type);
+        int rem = _inventory ? _inventory->addItems(item, 1) : 1;
+        if (rem > 0) {
+            spawnDropAt(c, r, item, 1);
+        }
+        _crops.erase(_crops.begin() + idx);
+        Game::globalState().farmCrops = _crops;
+        refreshCropsVisuals();
+    }
+}
+
+
 
 // 统一背包后，物品数量显示内嵌到热键栏文本中，已移除独立物品UI。
 
