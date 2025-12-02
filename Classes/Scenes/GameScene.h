@@ -12,6 +12,8 @@
 #include "Game/Tile.h"
 #include "Game/Drop.h"
 
+#include "Game/GameMap.h"
+
 class GameScene : public cocos2d::Scene {
 public:
     static cocos2d::Scene* createScene();
@@ -62,13 +64,7 @@ private:
     cocos2d::Vec2 _mapOrigin; // bottom-left of grid in world coords
     cocos2d::Vec2 _lastDir = cocos2d::Vec2(0, -1); // default facing down
 
-    cocos2d::TMXTiledMap* _tmx = nullptr;
-    cocos2d::TMXLayer* _layer1 = nullptr;
-    cocos2d::TMXLayer* _layer2 = nullptr;
-    cocos2d::TMXLayer* _layer3 = nullptr;
-    std::vector<cocos2d::Rect> _wallRects;
-    std::vector<std::vector<cocos2d::Vec2>> _wallPolygons;
-    cocos2d::DrawNode* _debugNode = nullptr;
+    Game::GameMap* _gameMap = nullptr;
     float _playerRadius = 12.0f;
 
     // drops & items
@@ -96,11 +92,6 @@ private:
     cocos2d::Vec2 tileToWorld(int c, int r) const; // center position
     void worldToTileIndex(const cocos2d::Vec2& p, int& c, int& r) const;
     std::pair<int,int> targetTile() const;
-
-    void loadTMX();
-    void setupLayerOrder();
-    void parseWalls();
-    bool collidesWithWalls(const cocos2d::Vec2& p, float radius) const;
 
     // drops helpers
     void refreshDropsVisuals();

@@ -45,6 +45,9 @@
     <ClCompile Include="main.cpp">
       <Filter>Win32</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\Game\GameMap.cpp">
+      <Filter>Classes\Game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Classes\AppDelegate.h">
@@ -88,6 +91,9 @@
     </ClInclude>
     <ClInclude Include="main.h">
       <Filter>Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\GameMap.h">
+      <Filter>Classes\Game</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

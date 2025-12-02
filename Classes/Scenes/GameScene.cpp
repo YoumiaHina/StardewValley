@@ -50,8 +50,8 @@ bool GameScene::init() {
     _player->drawSolidPoly(verts, 4, Color4F(0.2f, 0.7f, 0.9f, 1.0f));
     // place player at center tile
     _player->setPosition(tileToWorld(_cols/2, _rows/2));
-    if (_tmx) {
-        _tmx->addChild(_player, 20);
+    if (_gameMap && _gameMap->getTMX()) {
+        _gameMap->getTMX()->addChild(_player, 20);
     } else {
         _worldNode->addChild(_player, 2);
     }
@@ -73,8 +73,8 @@ bool GameScene::init() {
     buildHUD();
 
     _dropsNode = Node::create();
-    if (_tmx) {
-        _tmx->addChild(_dropsNode, 19);
+    if (_gameMap && _gameMap->getTMX()) {
+        _gameMap->getTMX()->addChild(_dropsNode, 19);
     } else {
         _worldNode->addChild(_dropsNode, 1);
     }
@@ -314,8 +314,8 @@ void GameScene::update(float dt) {
             if (screenPos.y < bottom) cam.y += bottom - screenPos.y;
             if (screenPos.y > top)    cam.y += top - screenPos.y;
             // Clamp camera to map bounds
-            float mapW = _tmx ? _tmx->getContentSize().width : (_cols * GameConfig::TILE_SIZE);
-            float mapH = _tmx ? _tmx->getContentSize().height : (_rows * GameConfig::TILE_SIZE);
+            float mapW = _gameMap ? _gameMap->getContentSize().width : (_cols * GameConfig::TILE_SIZE);
+            float mapH = _gameMap ? _gameMap->getContentSize().height : (_rows * GameConfig::TILE_SIZE);
             float minX = (originNZ.x + visibleSizeNZ.width) - (_mapOrigin.x + mapW);
             float maxX = originNZ.x - _mapOrigin.x;
             float minY = (originNZ.y + visibleSizeNZ.height) - (_mapOrigin.y + mapH);
@@ -334,20 +334,25 @@ void GameScene::update(float dt) {
     float speed = _isSprinting ? _sprintSpeed : _baseSpeed;
     cocos2d::Vec2 delta = dir * speed * dt;
     auto nextPos = _player->getPosition() + delta;
-    float mapW = _tmx ? _tmx->getContentSize().width : (_cols * GameConfig::TILE_SIZE);
-    float mapH = _tmx ? _tmx->getContentSize().height : (_rows * GameConfig::TILE_SIZE);
-    float minX = _tmx ? (GameConfig::TILE_SIZE * 0.5f) : (_mapOrigin.x + GameConfig::TILE_SIZE * 0.5f);
-    float minY = _tmx ? (GameConfig::TILE_SIZE * 0.5f) : (_mapOrigin.y + GameConfig::TILE_SIZE * 0.5f);
-    float maxX = _tmx ? (mapW - GameConfig::TILE_SIZE * 0.5f) : (_mapOrigin.x + mapW - GameConfig::TILE_SIZE * 0.5f);
-    float maxY = _tmx ? (mapH - GameConfig::TILE_SIZE * 0.5f) : (_mapOrigin.y + mapH - GameConfig::TILE_SIZE * 0.5f);
+    float mapW = _gameMap ? _gameMap->getContentSize().width : (_cols * GameConfig::TILE_SIZE);
+    float mapH = _gameMap ? _gameMap->getContentSize().height : (_rows * GameConfig::TILE_SIZE);
+    float minX = _gameMap ? (GameConfig::TILE_SIZE * 0.5f) : (_mapOrigin.x + GameConfig::TILE_SIZE * 0.5f);
+    float minY = _gameMap ? (GameConfig::TILE_SIZE * 0.5f) : (_mapOrigin.y + GameConfig::TILE_SIZE * 0.5f);
+    float maxX = _gameMap ? (mapW - GameConfig::TILE_SIZE * 0.5f) : (_mapOrigin.x + mapW - GameConfig::TILE_SIZE * 0.5f);
+    float maxY = _gameMap ? (mapH - GameConfig::TILE_SIZE * 0.5f) : (_mapOrigin.y + mapH - GameConfig::TILE_SIZE * 0.5f);
     nextPos.x = std::max(minX, std::min(maxX, nextPos.x));
     nextPos.y = std::max(minY, std::min(maxY, nextPos.y));
     cocos2d::Vec2 tryX(nextPos.x, _player->getPosition().y);
-    if (!collidesWithWalls(tryX, _playerRadius)) {
+    if (_gameMap && !_gameMap->collides(tryX, _playerRadius)) {
+        _player->setPositionX(tryX.x);
+    } else if (!_gameMap) {
         _player->setPositionX(tryX.x);
     }
+
     cocos2d::Vec2 tryY(_player->getPosition().x, nextPos.y);
-    if (!collidesWithWalls(tryY, _playerRadius)) {
+    if (_gameMap && !_gameMap->collides(tryY, _playerRadius)) {
+        _player->setPositionY(tryY.y);
+    } else if (!_gameMap) {
         _player->setPositionY(tryY.y);
     }
 
@@ -372,8 +377,8 @@ void GameScene::update(float dt) {
         if (screenPos.y < bottom) cam.y += bottom - screenPos.y;
         if (screenPos.y > top)    cam.y += top - screenPos.y;
         // Clamp camera to map bounds
-        float mapW = _tmx ? _tmx->getContentSize().width : (_cols * GameConfig::TILE_SIZE);
-        float mapH = _tmx ? _tmx->getContentSize().height : (_rows * GameConfig::TILE_SIZE);
+        float mapW = _gameMap ? _gameMap->getContentSize().width : (_cols * GameConfig::TILE_SIZE);
+        float mapH = _gameMap ? _gameMap->getContentSize().height : (_rows * GameConfig::TILE_SIZE);
         float minX = (origin.x + visibleSize.width) - (_mapOrigin.x + mapW);
         float maxX = origin.x - _mapOrigin.x;
         float minY = (origin.y + visibleSize.height) - (_mapOrigin.y + mapH);
@@ -387,22 +392,20 @@ void GameScene::update(float dt) {
 void GameScene::buildMap() {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     auto origin = Director::getInstance()->getVisibleOrigin();
-    loadTMX();
-    Size content = _tmx ? _tmx->getContentSize() : Size(_cols * GameConfig::TILE_SIZE, _rows * GameConfig::TILE_SIZE);
+    
+    _gameMap = Game::GameMap::create("Maps/spring_outdoors/spring_outdoors.tmx");
+    
+    Size content = _gameMap ? _gameMap->getContentSize() : Size(_cols * GameConfig::TILE_SIZE, _rows * GameConfig::TILE_SIZE);
     _mapOrigin = Vec2(origin.x + (visibleSize.width - content.width) * 0.5f,
                       origin.y + (visibleSize.height - content.height) * 0.5f);
-    if (_tmx) {
-        _tmx->setAnchorPoint(Vec2(0,0));
-        _tmx->setPosition(_mapOrigin);
-        _mapNode->addChild(_tmx, 0);
-        setupLayerOrder();
-        parseWalls();
-        _cols = static_cast<int>(_tmx->getMapSize().width);
-        _rows = static_cast<int>(_tmx->getMapSize().height);
+    if (_gameMap) {
+        _gameMap->setAnchorPoint(Vec2(0,0));
+        _gameMap->setPosition(_mapOrigin);
+        _mapNode->addChild(_gameMap, 0);
+        _cols = static_cast<int>(_gameMap->getMapSize().width);
+        _rows = static_cast<int>(_gameMap->getMapSize().height);
     }
 
-    
-    
     // 地图：从全局状态恢复或首次初始化
     auto &ws = Game::globalState();
     if (ws.farmTiles.empty()) {
@@ -434,8 +437,8 @@ void GameScene::buildMap() {
     _mapNode->addChild(_mapDraw, -1);
 
     _cursor = DrawNode::create();
-    if (_tmx) {
-        _tmx->addChild(_cursor, 21);
+    if (_gameMap && _gameMap->getTMX()) {
+        _gameMap->getTMX()->addChild(_cursor, 21);
     } else {
         _mapNode->addChild(_cursor, 1);
     }
@@ -534,22 +537,21 @@ void GameScene::setTile(int c, int r, Game::TileType t) {
 }
 
 cocos2d::Vec2 GameScene::tileToWorld(int c, int r) const {
-    float s = static_cast<float>(GameConfig::TILE_SIZE);
-    if (_tmx) {
-        return Vec2(c * s + s * 0.5f, r * s + s * 0.5f);
+    if (_gameMap) {
+        return _gameMap->tileToWorld(c, r);
     }
+    float s = static_cast<float>(GameConfig::TILE_SIZE);
     return _mapOrigin + Vec2(c * s + s * 0.5f, r * s + s * 0.5f);
 }
 
 void GameScene::worldToTileIndex(const cocos2d::Vec2& p, int& c, int& r) const {
-    float s = static_cast<float>(GameConfig::TILE_SIZE);
-    if (_tmx) {
-        c = static_cast<int>(p.x / s);
-        r = static_cast<int>(p.y / s);
-    } else {
-        c = static_cast<int>((p.x - _mapOrigin.x) / s);
-        r = static_cast<int>((p.y - _mapOrigin.y) / s);
+    if (_gameMap) {
+        _gameMap->worldToTileIndex(p, c, r);
+        return;
     }
+    float s = static_cast<float>(GameConfig::TILE_SIZE);
+    c = static_cast<int>((p.x - _mapOrigin.x) / s);
+    r = static_cast<int>((p.y - _mapOrigin.y) / s);
 }
 
 std::pair<int,int> GameScene::targetTile() const {
@@ -895,131 +897,4 @@ void GameScene::refreshHUD() {
         _energyLabel->setString(StringUtils::format("Energy %d/%d", ws.energy, ws.maxEnergy));
     }
 }
-void GameScene::loadTMX() {
-    _tmx = TMXTiledMap::create("Maps/spring_outdoors/spring_outdoors.tmx");
-}
 
-void GameScene::setupLayerOrder() {
-    if (!_tmx) return;
-    _layer1 = _tmx->getLayer("Background");
-    _layer2 = _tmx->getLayer("HouseBody");
-    _layer3 = _tmx->getLayer("HouseTop");
-    if (_layer1) _tmx->reorderChild(_layer1, 0);
-    if (_layer2) _tmx->reorderChild(_layer2, 10);
-    if (_layer3) _tmx->reorderChild(_layer3, 30);
-}
-
-void GameScene::parseWalls() {
-    _wallRects.clear();
-    _wallPolygons.clear();
-    if (!_tmx) return;
-    
-    // Debug node for walls
-    if (_debugNode) {
-        _debugNode->removeFromParent();
-        _debugNode = nullptr;
-    }
-    _debugNode = DrawNode::create();
-    _tmx->addChild(_debugNode, 999); // High Z to be visible
-
-    auto group = _tmx->getObjectGroup("Wall");
-    if (!group) return;
-    auto objects = group->getObjects();
-    
-    cocos2d::log("Parsing Wall Objects: Found %d objects", (int)objects.size());
-
-    for (auto &val : objects) {
-        auto dict = val.asValueMap();
-        float x = dict.at("x").asFloat();
-        float y = dict.at("y").asFloat(); // cocos2d-x parses this as Bottom-Left Y for Rects
-        
-        // Debug log
-        // cocos2d::log("Object: x=%.2f, y=%.2f", x, y);
-
-        if (dict.find("points") != dict.end() || dict.find("polyline") != dict.end() || dict.find("polygon") != dict.end()) {
-             // Polygon / Polyline
-             std::vector<Vec2> pts;
-             ValueVector arr;
-             if (dict.find("points") != dict.end()) arr = dict.at("points").asValueVector();
-             else if (dict.find("polygon") != dict.end()) arr = dict.at("polygon").asValueVector();
-             else if (dict.find("polyline") != dict.end()) arr = dict.at("polyline").asValueVector();
-
-             for (auto &pv : arr) {
-                 auto pmap = pv.asValueMap();
-                 float px = pmap.at("x").asFloat();
-                 float py = pmap.at("y").asFloat();
-                 // TMX polygon points are relative offsets.
-                 // TMX Y is down, Cocos Y is up. 
-                 // So +py in TMX means moving DOWN. In Cocos, that means SUBTRACTING from Y.
-                 float finalX = x + px;
-                 float finalY = y - py; 
-                 pts.emplace_back(finalX, finalY);
-             }
-             
-             if (!pts.empty()) {
-                 _wallPolygons.push_back(pts);
-                 // Draw debug poly (Red)
-                 _debugNode->drawPoly(pts.data(), (unsigned int)pts.size(), true, Color4F(1, 0, 0, 0.5f));
-                 _debugNode->drawSolidPoly(pts.data(), (unsigned int)pts.size(), Color4F(1, 0, 0, 0.2f));
-                 cocos2d::log("Added Polygon with %d points", (int)pts.size());
-             }
-        } else if (dict.find("width") != dict.end() && dict.find("height") != dict.end()) {
-            // Rectangle
-            float w = dict.at("width").asFloat();
-            float h = dict.at("height").asFloat();
-            // cocos2d-x TMX parser usually returns 'y' as the bottom-left corner of the rect
-            Rect r(x, y, w, h);
-            _wallRects.push_back(r);
-            
-            // Draw debug rect (Red)
-            _debugNode->drawRect(r.origin, r.origin + r.size, Color4F(1, 0, 0, 0.5f));
-            _debugNode->drawSolidRect(r.origin, r.origin + r.size, Color4F(1, 0, 0, 0.2f));
-            cocos2d::log("Added Rect: x=%.2f, y=%.2f, w=%.2f, h=%.2f", x, y, w, h);
-        }
-    }
-}
-
-bool GameScene::collidesWithWalls(const Vec2& p, float radius) const {
-    // Check Rects
-    for (const auto& r : _wallRects) {
-        float cx = std::max(r.getMinX(), std::min(p.x, r.getMaxX()));
-        float cy = std::max(r.getMinY(), std::min(p.y, r.getMaxY()));
-        float dx = p.x - cx;
-        float dy = p.y - cy;
-        if (dx*dx + dy*dy <= radius*radius) return true;
-    }
-    
-    // Check Polygons
-    for (const auto& poly : _wallPolygons) {
-        if (poly.size() < 3) continue;
-        
-        // 1. Check if point is inside polygon (Ray Casting Algorithm)
-        bool inside = false;
-        size_t j = poly.size() - 1;
-        for (size_t i = 0; i < poly.size(); i++) {
-            if ( ((poly[i].y > p.y) != (poly[j].y > p.y)) &&
-                 (p.x < (poly[j].x - poly[i].x) * (p.y - poly[i].y) / (poly[j].y - poly[i].y) + poly[i].x) ) {
-               inside = !inside;
-            }
-            j = i;
-        }
-        if (inside) return true;
-
-        // 2. Check distance to edges (Segment vs Circle)
-        j = poly.size() - 1;
-        float r2 = radius * radius;
-        for (size_t i = 0; i < poly.size(); i++) {
-            Vec2 p1 = poly[j];
-            Vec2 p2 = poly[i];
-            Vec2 d = p2 - p1;
-            if (d.lengthSquared() > 0) {
-                float t = (p - p1).dot(d) / d.lengthSquared();
-                t = std::max(0.0f, std::min(1.0f, t));
-                Vec2 closest = p1 + d * t;
-                if (p.distanceSquared(closest) <= r2) return true;
-            }
-            j = i;
-        }
-    }
-    return false;
-}
