@@ -13,4 +13,11 @@ namespace GameConfig {
 
     // 过渡时间
     static const float TRANSITION_FADE = 0.3f;
+
+    // 工具栏槽位数量
+    static const int TOOLBAR_SLOTS = 4;
+
+    // 地图网格尺寸（按 480x320 与 16 像素格计算）
+    static const int MAP_COLS = 30; // 480 / 16
+    static const int MAP_ROWS = 20; // 320 / 16
 }
