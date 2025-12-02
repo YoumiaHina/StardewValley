@@ -3,6 +3,7 @@
  */
 #include "Scenes/GameScene.h"
 #include "cocos2d.h"
+#include "ui/CocosGUI.h"
 #include "Game/Inventory.h"
 #include "Game/Tool.h"
 #include "Game/GameConfig.h"
@@ -83,6 +84,23 @@ bool GameScene::init() {
         this->addChild(_doorPrompt, 3);
     }
 
+    // Chest visuals & prompt
+    _chestDraw = DrawNode::create();
+    _worldNode->addChild(_chestDraw, 1);
+    _chests = ws.farmChests;
+    refreshChestsVisuals();
+    _chestPrompt = Label::createWithTTF("Press Space to Deposit", "fonts/Marker Felt.ttf", 20);
+    if (_chestPrompt) {
+        _chestPrompt->setColor(Color3B::YELLOW);
+        _chestPrompt->setVisible(false);
+        this->addChild(_chestPrompt, 3);
+    }
+
+    // Craft UI (E to open, Enter to craft)
+    buildCraftUI();
+    // Chest storage UI (C to open when near a chest)
+    buildChestUI();
+
     // Keyboard movement (placeholder)
     auto listener = EventListenerKeyboard::create();
     listener->onKeyPressed = [this](EventKeyboard::KeyCode code, Event*) {
@@ -113,9 +131,121 @@ bool GameScene::init() {
                     room->setSpawnInsideDoor();
                     auto trans = TransitionFade::create(0.6f, room);
                     Director::getInstance()->replaceScene(trans);
+                } else if (_inventory && _inventory->selectedKind() == Game::SlotKind::Item) {
+                    const auto &slot = _inventory->selectedSlot();
+                    // 放置箱子
+                    if (slot.itemType == Game::ItemType::Chest) {
+                        auto tgt = targetTile();
+                        int tc = tgt.first, tr = tgt.second;
+                        if (inBounds(tc, tr) && !tileHasChest(tc, tr)) {
+                            auto t = getTile(tc, tr);
+                            if (t != Game::TileType::Rock && t != Game::TileType::Tree) {
+                                Game::Chest chest{ tileToWorld(tc, tr), Game::Bag{} };
+                                _chests.push_back(chest);
+                                Game::globalState().farmChests = _chests;
+                                refreshChestsVisuals();
+                                // 消耗一个箱子
+                                _inventory->removeItems(Game::ItemType::Chest, 1);
+                                refreshHotbarUI();
+                                auto pop = Label::createWithTTF("Placed Chest", "fonts/Marker Felt.ttf", 20);
+                                pop->setColor(Color3B::YELLOW);
+                                auto pos = _worldNode->convertToWorldSpace(tileToWorld(tc, tr));
+                                pop->setPosition(pos + Vec2(0, 26));
+                                this->addChild(pop, 3);
+                                auto seq = Sequence::create(FadeOut::create(0.6f), RemoveSelf::create(), nullptr);
+                                pop->runAction(seq);
+                            }
+                        }
+                    } else {
+                        // 近箱子则将选中物品存入最近的箱子
+                        checkChestRegion();
+                        if (_nearChest && slot.itemQty > 0) {
+                            // 找最近的箱子
+                            Vec2 p = _player->getPosition();
+                            int idx = -1; float best = 1e9f;
+                            for (int i=0;i<(int)_chests.size();++i) {
+                                float d = p.distance(_chests[i].pos);
+                                if (d < best) { best = d; idx = i; }
+                            }
+                            if (idx >= 0) {
+                                // 将整堆放入箱子
+                                int qty = slot.itemQty;
+                                _chests[idx].bag.add(slot.itemType, qty);
+                                Game::globalState().farmChests = _chests;
+                                _inventory->consumeSelectedItem(qty);
+                                refreshHotbarUI();
+                                auto pos = _worldNode->convertToWorldSpace(_chests[idx].pos);
+                                auto pop = Label::createWithTTF("Stored Items", "fonts/Marker Felt.ttf", 20);
+                                pop->setColor(Color3B::YELLOW);
+                                pop->setPosition(pos + Vec2(0, 26));
+                                this->addChild(pop, 3);
+                                auto seq = Sequence::create(FadeOut::create(0.6f), RemoveSelf::create(), nullptr);
+                                pop->runAction(seq);
+                            }
+                        }
+                    }
                 } else {
                     useSelectedTool();
                 }
+                break;
+            case EventKeyboard::KeyCode::KEY_E:
+                if (_craftNode) {
+                    bool vis = _craftNode->isVisible();
+                    _craftNode->setVisible(!vis);
+                    refreshCraftUI();
+                }
+                break;
+            case EventKeyboard::KeyCode::KEY_C: {
+                // 切换打开/关闭最近箱子的存取面板
+                if (_chestPanel && _chestPanel->isVisible()) {
+                    _chestPanel->setVisible(false);
+                    break;
+                }
+                checkChestRegion();
+                if (_nearChest) {
+                    Vec2 p = _player->getPosition();
+                    int idx = -1; float best = 1e9f;
+                    for (int i=0;i<(int)_chests.size();++i) {
+                        float d = p.distance(_chests[i].pos);
+                        if (d < best) { best = d; idx = i; }
+                    }
+                    if (idx >= 0) { showChestPanel(idx); }
+                } else {
+                    auto pop = Label::createWithTTF("No chest nearby", "fonts/Marker Felt.ttf", 20);
+                    pop->setColor(Color3B::RED);
+                    auto pos = _worldNode ? _worldNode->convertToWorldSpace(_player->getPosition()) : _player->getPosition();
+                    pop->setPosition(pos + Vec2(0, 26));
+                    this->addChild(pop, 3);
+                    auto seq = Sequence::create(FadeOut::create(0.6f), RemoveSelf::create(), nullptr);
+                    pop->runAction(seq);
+                }
+                break;
+            }
+            case EventKeyboard::KeyCode::KEY_ENTER:
+                if (_craftNode && _craftNode->isVisible()) {
+                    craftChest();
+                }
+                break;
+            case EventKeyboard::KeyCode::KEY_Z: {
+                // 作弊：各类基础资源 +99
+                if (_inventory) {
+                    for (auto t : { Game::ItemType::Wood, Game::ItemType::Stone, Game::ItemType::Fiber, Game::ItemType::Chest }) {
+                        _inventory->addItems(t, 99);
+                    }
+                    refreshHotbarUI();
+                    auto pop = Label::createWithTTF("Cheat: +99 All", "fonts/Marker Felt.ttf", 20);
+                    pop->setColor(Color3B::YELLOW);
+                    auto pos = _player ? _player->getPosition() : Vec2(0,0);
+                    pop->setPosition(pos + Vec2(0, 26));
+                    this->addChild(pop, 3);
+                    auto seq = Sequence::create(FadeOut::create(0.6f), RemoveSelf::create(), nullptr);
+                    pop->runAction(seq);
+                }
+                break;
+            }
+            case EventKeyboard::KeyCode::KEY_ESCAPE:
+                if (_craftNode) _craftNode->setVisible(false);
+                if (_chestPanel) _chestPanel->setVisible(false);
                 break;
             case EventKeyboard::KeyCode::KEY_F: {
                 // 吃东西：选中为可食用物品时，消耗并回复能量
@@ -181,35 +311,150 @@ bool GameScene::init() {
         Game::globalState().selectedIndex = _inventory->selectedIndex();
         refreshHotbarUI();
     };
-    auto handleClick = [this](EventMouse* e){
-        if (!_inventory || !_hotbarNode) return;
+    mouse->onMouseDown = [this](EventMouse* e){
+        // 右键：靠近箱子时打开交互面板
+        if (e->getMouseButton() == EventMouse::MouseButton::BUTTON_RIGHT) {
+            checkChestRegion();
+            if (_nearChest) {
+                Vec2 p = _player ? _player->getPosition() : Vec2::ZERO;
+                int idx = -1; float best = 1e9f;
+                for (int i=0;i<(int)_chests.size();++i) {
+                    float d = p.distance(_chests[i].pos);
+                    if (d < best) { best = d; idx = i; }
+                }
+                if (idx >= 0) { showChestPanel(idx); }
+            } else {
+                auto pop = Label::createWithTTF("No chest nearby", "fonts/Marker Felt.ttf", 20);
+                pop->setColor(Color3B::RED);
+                auto pos = _worldNode ? _worldNode->convertToWorldSpace(_player ? _player->getPosition() : Vec2::ZERO) : ( _player ? _player->getPosition() : Vec2::ZERO );
+                pop->setPosition(pos + Vec2(0, 26));
+                this->addChild(pop, 3);
+                auto seq = Sequence::create(FadeOut::create(0.6f), RemoveSelf::create(), nullptr);
+                pop->runAction(seq);
+            }
+            return;
+        }
         if (e->getMouseButton() != EventMouse::MouseButton::BUTTON_LEFT) return;
         auto p = e->getLocation();
-        auto local = _hotbarNode->convertToNodeSpace(p);
-        int slots = static_cast<int>(_inventory->size());
-        if (slots <= 0) return;
-        float slotW = 80.0f;
-        float slotH = 32.0f;
-        float padding = 6.0f;
-        float hitMarginY = 8.0f; // 与背景绘制一致，扩大纵向点击范围
-        float totalWidth = slots * slotW + (slots - 1) * padding;
-        // within vertical bounds?
-        if (local.y < -(slotH/2 + hitMarginY) || local.y > (slotH/2 + hitMarginY)) return;
-        // find index by iterating
-        for (int i = 0; i < slots; ++i) {
-            float cx = -totalWidth/2 + i * (slotW + padding) + slotW/2;
-            float minx = cx - slotW/2;
-            float maxx = cx + slotW/2;
-            if (local.x >= minx && local.x <= maxx) {
-                _inventory->selectIndex(i);
-                Game::globalState().selectedIndex = i;
-                refreshHotbarUI();
-                break;
+        // 不再在面板外点击时关闭面板，以便拖拽操作
+
+        // 选择热键栏槽位，或开始从热键栏拖拽到箱子面板
+        if (_inventory && _hotbarNode) {
+            auto local = _hotbarNode->convertToNodeSpace(p);
+            int slots = static_cast<int>(_inventory->size());
+            if (slots > 0) {
+                float slotW = 80.0f, slotH = 32.0f, padding = 6.0f, hitMarginY = 8.0f;
+                float totalWidth = slots * slotW + (slots - 1) * padding;
+                if (!(local.y < -(slotH/2 + hitMarginY) || local.y > (slotH/2 + hitMarginY))) {
+                    for (int i = 0; i < slots; ++i) {
+                        float cx = -totalWidth/2 + i * (slotW + padding) + slotW/2;
+                        float minx = cx - slotW/2;
+                        float maxx = cx + slotW/2;
+                        if (local.x >= minx && local.x <= maxx) {
+                            _inventory->selectIndex(i);
+                            Game::globalState().selectedIndex = i;
+                            refreshHotbarUI();
+                            // 若箱子面板打开且该槽为物品，开始拖拽
+                            if (_chestPanel && _chestPanel->isVisible() && _inventory->isItem(i)) {
+                                auto st = _inventory->itemAt(i);
+                                _dragging = true;
+                                _dragSource = DragSource::Inventory;
+                                _dragSlotIndex = i;
+                                _dragType = st.type;
+                                _dragQty = st.quantity;
+                                if (!_dragGhost) {
+                                    _dragGhost = Label::createWithTTF("", "fonts/Marker Felt.ttf", 18);
+                                    this->addChild(_dragGhost, 5);
+                                }
+                                _dragGhost->setString(StringUtils::format("%s x%d", Game::itemName(st.type), st.quantity));
+                                _dragGhost->setColor(Color3B::YELLOW);
+                                _dragGhost->setPosition(p);
+                            }
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+
+        // 从箱子面板的行开始拖拽到热键栏（整堆），以行的实际 Y 值构造“整行”命中矩形
+        if (_chestPanel && _chestPanel->isVisible() && _activeChestIdx >= 0 && _activeChestIdx < (int)_chests.size()) {
+            auto &bag = _chests[_activeChestIdx].bag;
+            Vec2 listLocal = _chestListNode ? _chestListNode->convertToNodeSpace(p) : _chestPanel->convertToNodeSpace(p);
+            float xLeft = -_chestPanelW/2 + 10.0f;
+            float xRight = _chestPanelW/2 - 10.0f;
+            for (int idx = 0; idx < (int)_withdrawRows.size(); ++idx) {
+                const auto &row = _withdrawRows[idx];
+                if (!row.countLabel || !row.nameLabel) continue;
+                float y = row.nameLabel->getPositionY();
+                float rowH = std::max(row.nameLabel->getContentSize().height, row.countLabel->getContentSize().height) + 16.0f;
+                Rect rowRect(xLeft, y - rowH * 0.5f, xRight - xLeft, rowH);
+                if (rowRect.containsPoint(listLocal)) {
+                    auto type = row.type;
+                    int have = bag.count(type);
+                    if (have > 0) {
+                        _dragging = true;
+                        _dragSource = DragSource::Chest;
+                        _dragType = type;
+                        _dragQty = have;
+                        if (!_dragGhost) {
+                            _dragGhost = Label::createWithTTF("", "fonts/Marker Felt.ttf", 18);
+                            this->addChild(_dragGhost, 5);
+                        }
+                        _dragGhost->setString(StringUtils::format("%s x%d", Game::itemName(type), have));
+                        _dragGhost->setColor(Color3B::YELLOW);
+                        _dragGhost->setPosition(p);
+                    }
+                    return;
+                }
             }
         }
     };
-    mouse->onMouseDown = handleClick;
-    mouse->onMouseUp   = handleClick;
+    mouse->onMouseMove = [this](EventMouse* e){
+        if (_dragging && _dragGhost) {
+            _dragGhost->setPosition(e->getLocation());
+        }
+    };
+    mouse->onMouseUp = [this](EventMouse* e){
+        if (e->getMouseButton() != EventMouse::MouseButton::BUTTON_LEFT) return;
+        if (!_dragging) return;
+        auto p = e->getLocation();
+        if (_dragSource == DragSource::Inventory) {
+            // 拖到箱子面板进行存入（直接使用拖拽记录的类型与数量）
+            if (_chestPanel && _chestPanel->isVisible() && _activeChestIdx >= 0 && _activeChestIdx < (int)_chests.size()) {
+                auto chestLocal = _chestPanel->convertToNodeSpace(p);
+                bool inChest = (chestLocal.x >= -_chestPanelW/2 && chestLocal.x <= _chestPanelW/2 &&
+                                chestLocal.y >= -_chestPanelH/2 && chestLocal.y <= _chestPanelH/2);
+                if (inChest && _inventory) {
+                    _chests[_activeChestIdx].bag.add(_dragType, _dragQty);
+                    Game::globalState().farmChests = _chests;
+                    _inventory->selectIndex(_dragSlotIndex);
+                    _inventory->consumeSelectedItem(_dragQty);
+                    refreshChestUI();
+                    refreshHotbarUI();
+                }
+            }
+        } else if (_dragSource == DragSource::Chest) {
+            // 拖到热键栏进行取出
+            if (_hotbarNode && _inventory) {
+                auto hbLocal = _hotbarNode->convertToNodeSpace(p);
+                int slots = static_cast<int>(_inventory->size());
+                float slotW = 80.0f, slotH = 32.0f, padding = 6.0f, hitY = 8.0f;
+                float totalW = slots * slotW + (slots - 1) * padding;
+                bool inHotbar = !(hbLocal.y < -(slotH/2 + hitY) || hbLocal.y > (slotH/2 + hitY)) &&
+                                (hbLocal.x >= -totalW/2 - 10 && hbLocal.x <= totalW/2 + 10);
+                if (inHotbar) {
+                    attemptWithdraw(_dragType, _dragQty);
+                }
+            }
+        }
+        // 结束拖拽
+        _dragging = false;
+        _dragSource = DragSource::None;
+        _dragSlotIndex = -1;
+        _dragQty = 0;
+        if (_dragGhost) { _dragGhost->removeFromParent(); _dragGhost = nullptr; }
+    };
     _eventDispatcher->addEventListenerWithSceneGraphPriority(mouse, this);
 
     // 兼容触摸输入：部分平台将鼠标视为触摸事件
@@ -341,6 +586,7 @@ void GameScene::update(float dt) {
     updateCursor();
     collectDropsNearPlayer();
     checkFarmDoorRegion();
+    checkChestRegion();
 
     // 相机边缘自动跟随（把世界容器平移），保持玩家在安全区内
     auto visibleSize = Director::getInstance()->getVisibleSize();
@@ -417,6 +663,8 @@ void GameScene::buildMap() {
 
     // 掉落：从全局状态恢复
     _drops = ws.farmDrops;
+    // 箱子：从全局状态恢复
+    _chests = ws.farmChests;
 
     // 定义农场房屋门口区域（靠近底部中间）
     float s = static_cast<float>(GameConfig::TILE_SIZE);
@@ -718,6 +966,26 @@ void GameScene::refreshDropsVisuals() {
     }
 }
 
+// 箱子绘制：用方块表示
+void GameScene::refreshChestsVisuals() {
+    if (!_chestDraw) return;
+    _chestDraw->clear();
+    float s = static_cast<float>(GameConfig::TILE_SIZE);
+    for (const auto& ch : _chests) {
+        Vec2 center = ch.pos;
+        Vec2 a(center.x - s*0.45f, center.y - s*0.45f);
+        Vec2 b(center.x + s*0.45f, center.y - s*0.45f);
+        Vec2 c(center.x + s*0.45f, center.y + s*0.45f);
+        Vec2 d(center.x - s*0.45f, center.y + s*0.45f);
+        Vec2 rect[4] = { a,b,c,d };
+        _chestDraw->drawSolidPoly(rect, 4, Color4F(0.85f,0.65f,0.20f,1.0f));
+        _chestDraw->drawLine(a,b, Color4F(0,0,0,0.35f));
+        _chestDraw->drawLine(b,c, Color4F(0,0,0,0.35f));
+        _chestDraw->drawLine(c,d, Color4F(0,0,0,0.35f));
+        _chestDraw->drawLine(d,a, Color4F(0,0,0,0.35f));
+    }
+}
+
 void GameScene::spawnDropAt(int c, int r, Game::ItemType type, int qty) {
     if (!inBounds(c,r) || qty <= 0) return;
     Game::Drop d{ type, tileToWorld(c,r), qty };
@@ -765,6 +1033,25 @@ void GameScene::checkFarmDoorRegion() {
             // 转到世界坐标显示提示（HUD 在场景根）
             Vec2 worldP = _worldNode ? _worldNode->convertToWorldSpace(p) : p;
             _doorPrompt->setPosition(worldP + Vec2(0, 26));
+        }
+    }
+}
+
+void GameScene::checkChestRegion() {
+    if (!_player) return;
+    Vec2 p = _player->getPosition();
+    float maxDist = GameConfig::TILE_SIZE * 0.8f;
+    bool isNear = false;
+    for (const auto& ch : _chests) {
+        if (p.distance(ch.pos) <= maxDist) { isNear = true; break; }
+    }
+    _nearChest = isNear;
+    if (_chestPrompt) {
+        _chestPrompt->setVisible(_nearChest);
+        if (_nearChest) {
+            Vec2 worldP = _worldNode ? _worldNode->convertToWorldSpace(p) : p;
+            _chestPrompt->setPosition(worldP + Vec2(0, 26));
+            _chestPrompt->setString("Right-click to Open / Space to Deposit");
         }
     }
 }
@@ -858,4 +1145,217 @@ void GameScene::refreshHUD() {
     if (_energyLabel) {
         _energyLabel->setString(StringUtils::format("Energy %d/%d", ws.energy, ws.maxEnergy));
     }
+}
+
+bool GameScene::tileHasChest(int c, int r) const {
+    Vec2 center = tileToWorld(c, r);
+    float eps = GameConfig::TILE_SIZE * 0.2f;
+    for (const auto& ch : _chests) {
+        if (center.distance(ch.pos) <= eps) return true;
+    }
+    return false;
+}
+
+void GameScene::buildCraftUI() {
+    if (_craftNode) return;
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    auto origin = Director::getInstance()->getVisibleOrigin();
+    _craftNode = Node::create();
+    _craftNode->setPosition(Vec2(origin.x + visibleSize.width/2, origin.y + visibleSize.height/2));
+    this->addChild(_craftNode, 3);
+    _craftNode->setVisible(false);
+    auto bg = DrawNode::create();
+    float w = 260.f, h = 180.f;
+    Vec2 v[4] = { Vec2(-w/2,-h/2), Vec2(w/2,-h/2), Vec2(w/2,h/2), Vec2(-w/2,h/2) };
+    bg->drawSolidPoly(v, 4, Color4F(0.f,0.f,0.f,0.55f));
+    _craftNode->addChild(bg);
+    _craftLabel = Label::createWithTTF("Crafting", "fonts/Marker Felt.ttf", 20);
+    _craftLabel->setPosition(Vec2(0, h/2 - 28));
+    _craftNode->addChild(_craftLabel);
+
+    // 初始化配方：Chest = 40 Wood（可扩展）
+    _recipes.clear();
+    _recipes.push_back({ Game::ItemType::Chest, Game::ItemType::Wood, 40 });
+
+    // 显示第一条配方信息
+    auto info = Label::createWithTTF("Chest requires 40 Wood", "fonts/Marker Felt.ttf", 18);
+    info->setPosition(Vec2(0, 12));
+    _craftNode->addChild(info);
+
+    // 点击按钮进行合成
+    _craftButton = ui::Button::create("CloseNormal.png", "CloseSelected.png");
+    _craftButton->setTitleText("Craft Chest");
+    _craftButton->setTitleFontSize(20);
+    _craftButton->setScale9Enabled(true);
+    _craftButton->setContentSize(Size(160, 40));
+    _craftButton->setPosition(Vec2(0, -40));
+    _craftButton->addClickEventListener([this](Ref*){
+        craftChest();
+    });
+    _craftNode->addChild(_craftButton);
+}
+
+void GameScene::refreshCraftUI() {
+    if (!_craftNode || !_inventory) return;
+    int wood = _inventory->countItems(Game::ItemType::Wood);
+    if (_craftButton) {
+        bool enable = wood >= 40;
+        _craftButton->setEnabled(enable);
+        _craftButton->setBright(enable);
+    }
+}
+
+void GameScene::craftChest() {
+    if (!_inventory) return;
+    int wood = _inventory->countItems(Game::ItemType::Wood);
+    if (wood < 40) {
+        auto warn = Label::createWithTTF("Need 40 Wood", "fonts/Marker Felt.ttf", 20);
+        warn->setColor(Color3B::RED);
+        auto pos = _worldNode ? _worldNode->convertToWorldSpace(_player->getPosition()) : _player->getPosition();
+        warn->setPosition(pos + Vec2(0, 26));
+        this->addChild(warn, 3);
+        auto seqW = Sequence::create(FadeOut::create(0.6f), RemoveSelf::create(), nullptr);
+        warn->runAction(seqW);
+        return;
+    }
+    bool ok = _inventory->removeItems(Game::ItemType::Wood, 40);
+    if (ok) {
+        int rem = _inventory->addItems(Game::ItemType::Chest, 1);
+        if (rem > 0) {
+            // 背包满无法放入
+            auto warn = Label::createWithTTF("Inventory Full", "fonts/Marker Felt.ttf", 20);
+            warn->setColor(Color3B::RED);
+            auto pos = _worldNode ? _worldNode->convertToWorldSpace(_player->getPosition()) : _player->getPosition();
+            warn->setPosition(pos + Vec2(0, 26));
+            this->addChild(warn, 3);
+            auto seqW = Sequence::create(FadeOut::create(0.6f), RemoveSelf::create(), nullptr);
+            warn->runAction(seqW);
+        } else {
+            refreshHotbarUI();
+            refreshCraftUI();
+            auto pop = Label::createWithTTF("Crafted Chest", "fonts/Marker Felt.ttf", 20);
+            pop->setColor(Color3B::YELLOW);
+            auto pos = _worldNode ? _worldNode->convertToWorldSpace(_player->getPosition()) : _player->getPosition();
+            pop->setPosition(pos + Vec2(0, 26));
+            this->addChild(pop, 3);
+            auto seq = Sequence::create(FadeOut::create(0.6f), RemoveSelf::create(), nullptr);
+            pop->runAction(seq);
+        }
+    }
+}
+
+// ---- Chest storage UI ----
+void GameScene::buildChestUI() {
+    if (_chestPanel) return;
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    auto origin = Director::getInstance()->getVisibleOrigin();
+    _chestPanel = Node::create();
+    _chestPanel->setPosition(Vec2(origin.x + visibleSize.width/2, origin.y + visibleSize.height/2));
+    this->addChild(_chestPanel, 3);
+    _chestPanel->setVisible(false);
+
+    // 背景
+    auto bg = DrawNode::create();
+    float w = 360.f, h = 240.f;
+    Vec2 v[4] = { Vec2(-w/2,-h/2), Vec2(w/2,-h/2), Vec2(w/2,h/2), Vec2(-w/2,h/2) };
+    bg->drawSolidPoly(v, 4, Color4F(0.f,0.f,0.f,0.55f));
+    _chestPanel->addChild(bg);
+    _chestPanelW = w; _chestPanelH = h;
+
+    auto title = Label::createWithTTF("Chest Storage", "fonts/Marker Felt.ttf", 20);
+    title->setPosition(Vec2(0, h/2 - 26));
+    _chestPanel->addChild(title);
+
+    // 关闭按钮
+    auto closeBtn = ui::Button::create("CloseNormal.png", "CloseSelected.png");
+    closeBtn->setTitleText("X");
+    closeBtn->setTitleFontSize(18);
+    closeBtn->setScale9Enabled(true);
+    closeBtn->setContentSize(Size(36, 36));
+    closeBtn->setPosition(Vec2(w/2 - 20, h/2 - 20));
+    closeBtn->addClickEventListener([this](Ref*){
+        if (_chestPanel) _chestPanel->setVisible(false);
+    });
+    _chestPanel->addChild(closeBtn);
+    // 行容器：用于动态生成/清空条目
+    _chestListNode = Node::create();
+    _chestPanel->addChild(_chestListNode);
+}
+
+void GameScene::refreshChestUI() {
+    if (!_chestPanel || _activeChestIdx < 0 || _activeChestIdx >= (int)_chests.size()) return;
+    auto &bag = _chests[_activeChestIdx].bag;
+    if (_chestListNode) _chestListNode->removeAllChildren();
+    _withdrawRows.clear();
+    const float startY = _chestRowStartY;
+    const float gapY = _chestRowGapY;
+    int i = 0;
+    for (const auto &entry : bag.all()) {
+        auto t = entry.first; int have = entry.second;
+        if (have <= 0) continue;
+        float y = startY - i * gapY;
+        auto nameLabel = Label::createWithTTF(Game::itemName(t), "fonts/Marker Felt.ttf", 18);
+        nameLabel->setPosition(Vec2(-140, y));
+        if (_chestListNode) _chestListNode->addChild(nameLabel);
+        auto countLabel = Label::createWithTTF(StringUtils::format("x%d", have), "fonts/Marker Felt.ttf", 18);
+        countLabel->setPosition(Vec2(-60, y));
+        if (_chestListNode) _chestListNode->addChild(countLabel);
+        WithdrawRow row; row.type = t; row.nameLabel = nameLabel; row.countLabel = countLabel; row.planLabel = nullptr; row.minusBtn = nullptr; row.plusBtn = nullptr; row.takeBtn = nullptr; row.planQty = 0;
+        _withdrawRows.push_back(row);
+        ++i;
+    }
+}
+
+void GameScene::showChestPanel(int idx) {
+    _activeChestIdx = idx;
+    if (_chestPanel) {
+        _chestPanel->setVisible(true);
+        refreshChestUI();
+    }
+}
+
+void GameScene::attemptWithdraw(Game::ItemType type, int qty) {
+    if (_activeChestIdx < 0 || _activeChestIdx >= (int)_chests.size()) return;
+    if (qty <= 0) return;
+    auto &bag = _chests[_activeChestIdx].bag;
+    int have = bag.count(type);
+    int take = std::min(have, qty);
+    if (take <= 0) {
+        auto warn = Label::createWithTTF("Empty", "fonts/Marker Felt.ttf", 20);
+        warn->setColor(Color3B::RED);
+        auto pos = _worldNode ? _worldNode->convertToWorldSpace(_chests[_activeChestIdx].pos) : _chests[_activeChestIdx].pos;
+        warn->setPosition(pos + Vec2(0, 26));
+        this->addChild(warn, 3);
+        auto seq = Sequence::create(FadeOut::create(0.6f), RemoveSelf::create(), nullptr);
+        warn->runAction(seq);
+        return;
+    }
+
+    bag.remove(type, take);
+    int rem = _inventory ? _inventory->addItems(type, take) : take;
+    int put = take - rem;
+    if (rem > 0) {
+        // 背包装不下的部分退回箱子
+        bag.add(type, rem);
+        auto warn = Label::createWithTTF(StringUtils::format("Inventory full, took %d", put), "fonts/Marker Felt.ttf", 20);
+        warn->setColor(Color3B::RED);
+        auto pos = _worldNode ? _worldNode->convertToWorldSpace(_chests[_activeChestIdx].pos) : _chests[_activeChestIdx].pos;
+        warn->setPosition(pos + Vec2(0, 26));
+        this->addChild(warn, 3);
+        auto seq = Sequence::create(FadeOut::create(0.6f), RemoveSelf::create(), nullptr);
+        warn->runAction(seq);
+    } else {
+        auto pop = Label::createWithTTF(StringUtils::format("Took %d", put), "fonts/Marker Felt.ttf", 20);
+        pop->setColor(Color3B::YELLOW);
+        auto pos = _worldNode ? _worldNode->convertToWorldSpace(_chests[_activeChestIdx].pos) : _chests[_activeChestIdx].pos;
+        pop->setPosition(pos + Vec2(0, 26));
+        this->addChild(pop, 3);
+        auto seq = Sequence::create(FadeOut::create(0.6f), RemoveSelf::create(), nullptr);
+        pop->runAction(seq);
+    }
+
+    // 同步全局与 UI
+    Game::globalState().farmChests = _chests;
+    refreshChestUI();
+    refreshHotbarUI();
 }

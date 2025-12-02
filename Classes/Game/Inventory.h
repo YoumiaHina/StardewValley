@@ -42,6 +42,10 @@ public:
     bool isEmpty(std::size_t index) const;
     // add items into inventory, stacking first; returns remaining qty not fitted
     int addItems(ItemType type, int qty);
+    // count items of given type across all slots
+    int countItems(ItemType type) const;
+    // remove items of given type across slots; returns success if fully removed qty
+    bool removeItems(ItemType type, int qty);
 
     // 消耗当前选中槽位中的物品（当选中为物品槽）
     // 返回是否成功消耗至少 1 个

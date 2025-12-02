@@ -9,6 +9,7 @@ enum class ItemType {
     Wood = 0,
     Stone = 1,
     Fiber = 2,
+    Chest = 3, // 可放置的储物箱
 };
 
 // 英文名称（内部使用）
@@ -17,6 +18,7 @@ inline const char* itemName(ItemType t) {
         case ItemType::Wood:  return "Wood";
         case ItemType::Stone: return "Stone";
         case ItemType::Fiber: return "Fiber";
+        case ItemType::Chest: return "Chest";
         default: return "Unknown";
     }
 }
@@ -27,6 +29,7 @@ inline const char* itemNameZH(ItemType t) {
         case ItemType::Wood:  return "木材";
         case ItemType::Stone: return "石头";
         case ItemType::Fiber: return "纤维";
+        case ItemType::Chest: return "箱子";
         default: return "未知";
     }
 }
@@ -38,6 +41,7 @@ inline cocos2d::Color4F itemColor(ItemType t) {
         case ItemType::Wood:  return Color4F(0.55f, 0.40f, 0.25f, 1.0f);
         case ItemType::Stone: return Color4F(0.65f, 0.65f, 0.68f, 1.0f);
         case ItemType::Fiber: return Color4F(0.25f, 0.75f, 0.35f, 1.0f);
+        case ItemType::Chest: return Color4F(0.85f, 0.65f, 0.20f, 1.0f);
         default: return Color4F(1,1,1,1);
     }
 }

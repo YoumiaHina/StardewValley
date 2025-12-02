@@ -8,6 +8,7 @@
 #include "Game/Inventory.h"
 #include "Game/Tile.h"
 #include "Game/Drop.h"
+#include "Game/Chest.h"
 #include "Game/GameConfig.h"
 
 namespace Game {
@@ -21,6 +22,12 @@ struct WorldState {
 
     // 农场掉落（未拾取的物品）
     std::vector<Drop> farmDrops;
+
+    // 农场箱子（已放置的储物箱）
+    std::vector<Chest> farmChests;
+
+    // 室内箱子（房屋内放置的储物箱）
+    std::vector<Chest> houseChests;
 
     // 热键选中槽位索引
     int selectedIndex = 0;

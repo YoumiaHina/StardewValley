@@ -6,11 +6,13 @@
 #include "cocos2d.h"
 #include <memory>
 #include <vector>
+#include "ui/CocosGUI.h"
 #include "Game/Inventory.h"
 #include "Game/Tool.h"
 #include "Game/GameConfig.h"
 #include "Game/Tile.h"
 #include "Game/Drop.h"
+#include "Game/Chest.h"
 
 class GameScene : public cocos2d::Scene {
 public:
@@ -67,6 +69,35 @@ private:
     cocos2d::Node* _dropsNode = nullptr;
     cocos2d::DrawNode* _dropsDraw = nullptr;
 
+    // chests: placed storage
+    std::vector<Game::Chest> _chests;
+    cocos2d::DrawNode* _chestDraw = nullptr;
+    bool _nearChest = false;
+    cocos2d::Label* _chestPrompt = nullptr;
+
+    // crafting UI
+    cocos2d::Node* _craftNode = nullptr;
+    cocos2d::Label* _craftLabel = nullptr;
+    cocos2d::ui::Button* _craftButton = nullptr;
+    struct CraftRecipe { Game::ItemType result; Game::ItemType costType; int costQty; };
+    std::vector<CraftRecipe> _recipes;
+
+    // chest storage UI
+    cocos2d::Node* _chestPanel = nullptr;
+    cocos2d::Node* _chestListNode = nullptr;
+    int _activeChestIdx = -1;
+    struct WithdrawRow {
+        Game::ItemType type;
+        cocos2d::Label* nameLabel = nullptr;
+        cocos2d::Label* countLabel = nullptr;
+        cocos2d::Label* planLabel = nullptr;
+        cocos2d::ui::Button* minusBtn = nullptr;
+        cocos2d::ui::Button* plusBtn = nullptr;
+        cocos2d::ui::Button* takeBtn = nullptr;
+        int planQty = 0;
+    };
+    std::vector<WithdrawRow> _withdrawRows;
+
     // HUD：时间与能量
     cocos2d::Label* _hudTimeLabel = nullptr;
     cocos2d::Node* _energyNode = nullptr;
@@ -95,4 +126,33 @@ private:
 
     // 农场门口检测与切换（内部使用）
     void checkFarmDoorRegion();
+
+    // chests helpers
+    void refreshChestsVisuals();
+    void checkChestRegion();
+    bool tileHasChest(int c, int r) const;
+
+    // crafting helpers
+    void buildCraftUI();
+    void refreshCraftUI();
+    void craftChest();
+
+    // chest UI helpers
+    void buildChestUI();
+    void refreshChestUI();
+    void showChestPanel(int idx);
+    void attemptWithdraw(Game::ItemType type, int qty);
+
+    // chest panel geometry and drag & drop
+    float _chestPanelW = 360.f;
+    float _chestPanelH = 240.f;
+    float _chestRowStartY = 60.f;
+    float _chestRowGapY = 60.f;
+    enum class DragSource { None, Inventory, Chest };
+    DragSource _dragSource = DragSource::None;
+    bool _dragging = false;
+    int _dragSlotIndex = -1;
+    Game::ItemType _dragType;
+    int _dragQty = 0;
+    cocos2d::Label* _dragGhost = nullptr;
 };
