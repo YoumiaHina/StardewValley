@@ -19,6 +19,28 @@ bool MainMenuScene::init() {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     auto origin = Director::getInstance()->getVisibleOrigin();
 
+    // Background image (placed at Resources/res/start_bg.png)
+    // Scales to cover the entire screen while preserving aspect ratio.
+    auto bg = Sprite::create("res/start_bg.png");
+    if (bg) {
+        bg->setAnchorPoint(Vec2(0.5f, 0.5f));
+        bg->setPosition(Vec2(origin.x + visibleSize.width / 2,
+                              origin.y + visibleSize.height / 2));
+        const auto imgSize = bg->getContentSize();
+        const float scaleX = visibleSize.width  / imgSize.width;
+        const float scaleY = visibleSize.height / imgSize.height;
+        bg->setScale(std::max(scaleX, scaleY)); // cover whole screen
+        this->addChild(bg, 0);
+    } else {
+        // Fallback solid background if image is missing
+        auto solid = LayerColor::create(Color4B(26, 39, 63, 255));
+        this->addChild(solid, 0);
+    }
+
+    // Soft shade to improve text readability on bright images
+    auto shade = LayerColor::create(Color4B(0, 0, 0, 60));
+    this->addChild(shade, 0);
+
     // Title
     auto title = Label::createWithTTF("Stardew Valley", "fonts/Marker Felt.ttf", 40);
     if (title) {
