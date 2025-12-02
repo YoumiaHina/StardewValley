@@ -7,6 +7,9 @@
 #include <memory>
 #include <vector>
 #include "Game/Inventory.h"
+#include "Game/Chest.h"
+// 需要使用 UI Button
+#include "ui/CocosGUI.h"
 
 class RoomScene : public cocos2d::Scene {
 public:
@@ -56,6 +59,12 @@ private:
     cocos2d::DrawNode* _energyFill = nullptr;
     cocos2d::Label* _energyLabel = nullptr;
 
+    // 室内箱子：数据与绘制
+    std::vector<Game::Chest> _houseChests;
+    cocos2d::DrawNode* _chestDraw = nullptr;
+    cocos2d::Label* _chestPrompt = nullptr;
+    bool _nearChest = false;
+
     // 输入与移动参数（与 GameScene 保持一致体验）
     bool _up = false;
     bool _down = false;
@@ -70,4 +79,39 @@ private:
     void buildRoom();
     void checkDoorRegion();
     void checkBedRegion();
+    void refreshChestsVisuals();
+    void checkChestRegion();
+
+    // 室内箱子面板与交互
+    void buildChestUI();
+    void refreshChestUI();
+    void showChestPanel(int idx);
+    void attemptWithdraw(Game::ItemType type, int qty);
+
+    // 面板数据与拖拽状态
+    cocos2d::Node* _chestPanel = nullptr;
+    cocos2d::Node* _chestListNode = nullptr;
+    int _activeChestIdx = -1;
+    struct WithdrawRow {
+        Game::ItemType type;
+        cocos2d::Label* nameLabel = nullptr;
+        cocos2d::Label* countLabel = nullptr;
+        cocos2d::Label* planLabel = nullptr;
+        cocos2d::ui::Button* minusBtn = nullptr;
+        cocos2d::ui::Button* plusBtn = nullptr;
+        cocos2d::ui::Button* takeBtn = nullptr;
+        int planQty = 0;
+    };
+    std::vector<WithdrawRow> _withdrawRows;
+    float _chestPanelW = 360.f;
+    float _chestPanelH = 240.f;
+    float _chestRowStartY = 60.f;
+    float _chestRowGapY = 60.f;
+    enum class DragSource { None, Inventory, Chest };
+    DragSource _dragSource = DragSource::None;
+    bool _dragging = false;
+    int _dragSlotIndex = -1;
+    Game::ItemType _dragType;
+    int _dragQty = 0;
+    cocos2d::Label* _dragGhost = nullptr;
 };

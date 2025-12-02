@@ -66,6 +66,38 @@ int Inventory::addItems(ItemType type, int qty) {
     return qty;
 }
 
+int Inventory::countItems(ItemType type) const {
+    int total = 0;
+    for (auto const& s : _slots) {
+        if (s.kind == SlotKind::Item && s.itemType == type) {
+            total += s.itemQty;
+        }
+    }
+    return total;
+}
+
+bool Inventory::removeItems(ItemType type, int qty) {
+    if (qty <= 0) return true;
+    // First pass: compute availability
+    int have = countItems(type);
+    if (have < qty) return false;
+    // Second pass: consume from stacks front to back
+    for (auto &s : _slots) {
+        if (qty <= 0) break;
+        if (s.kind == SlotKind::Item && s.itemType == type && s.itemQty > 0) {
+            int take = (s.itemQty >= qty) ? qty : s.itemQty;
+            s.itemQty -= take;
+            qty -= take;
+            if (s.itemQty <= 0) {
+                s.kind = SlotKind::Empty;
+                s.itemType = ItemType::Wood;
+                s.itemQty = 0;
+            }
+        }
+    }
+    return qty <= 0;
+}
+
 bool Inventory::consumeSelectedItem(int qty) {
     if (qty <= 0) return false;
     if (_slots.empty()) return false;
