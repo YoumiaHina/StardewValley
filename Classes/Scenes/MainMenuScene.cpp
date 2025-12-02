@@ -2,7 +2,7 @@
  * MainMenuScene: Minimal main menu with Start/Quit.
  */
 #include "Scenes/MainMenuScene.h"
-#include "Scenes/GameScene.h"
+#include "Scenes/RoomScene.h"
 #include "cocos2d.h"
 
 USING_NS_CC;
@@ -44,8 +44,8 @@ bool MainMenuScene::init() {
 }
 
 void MainMenuScene::onStart(Ref* /*sender*/) {
-    auto game = GameScene::createScene();
-    auto trans = TransitionFade::create(0.3f, game);
+    auto room = RoomScene::createScene();
+    auto trans = TransitionFade::create(0.3f, room);
     Director::getInstance()->replaceScene(trans);
 }
 

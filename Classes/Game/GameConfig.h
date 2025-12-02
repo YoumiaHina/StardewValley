@@ -14,10 +14,14 @@ namespace GameConfig {
     // 过渡时间
     static const float TRANSITION_FADE = 0.3f;
 
-    // 工具栏槽位数量
-    static const int TOOLBAR_SLOTS = 4;
+    // 工具栏槽位数量（模仿星露谷初始背包，上排 12 格）
+    static const int TOOLBAR_SLOTS = 12;
 
     // 地图网格尺寸（按 480x320 与 16 像素格计算）
     static const int MAP_COLS = 30; // 480 / 16
     static const int MAP_ROWS = 20; // 320 / 16
+
+    // 掉落与拾取相关参数
+    static const float DROP_DRAW_RADIUS = 8.0f;   // 掉落渲染圆点半径
+    static const float DROP_PICK_RADIUS = 20.0f;  // 玩家拾取距离阈值
 }
