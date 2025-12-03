@@ -105,6 +105,10 @@ void PlayerAppearance::updateAnimation(float dt) {
             _animFrame = (_animFrame + 1) % 4; // 4 frames: Stand, R, Stand, L usually
             updateSprites();
         }
+    } else if (_animFrame != 0) {
+        // Ensure we reset if we stopped but update loop didn't catch it
+        _animFrame = 0;
+        updateSprites();
     }
 }
 
@@ -140,8 +144,40 @@ void PlayerAppearance::updateSprites() {
     // Bobbing: Shift down on step frames (1 and 2)
     float bobY = (animCol == 1 || animCol == 2) ? -1.0f : 0.0f;
 
-    cocos2d::Rect bodyRect = getBodyRect(_currentDir, _animFrame);
+    // Flip sprites if facing left (Direction::LEFT is 3)
+    // BUT: Texture for LEFT (row 3) exists for Body, Pants, Arms.
+    // Shirt: Has LEFT block.
+    // Hair: Uses SIDE block (shared for Right/Left).
+    // So:
+    // Body, Pants, Arms: Use Row 3. No flip needed usually if texture is correct.
+    // Shirt: Use Block 2 (Left). No flip needed.
+    // Hair: Uses Block 1 (Side). Needs flip if Left.
+    
+    bool flipHair = (_currentDir == Direction::LEFT);
+    
+    // User Requirement: "When moving left, reverse the action of moving right".
+    // This implies the current LEFT animation might be wrong or the user wants to reuse RIGHT sprites flipped.
+    // SV standard: Row 3 IS Left. 
+    // If user says "Left action has problem, use Right reversed":
+    // We should map LEFT direction to RIGHT row/block, and set setFlippedX(true).
+    
+    bool useRightForLeft = (_currentDir == Direction::LEFT);
+    Direction effectiveDir = _currentDir;
+    if (useRightForLeft) {
+        effectiveDir = Direction::RIGHT;
+    }
+
+    // Re-calculate rows based on effectiveDir
+    switch (effectiveDir) {
+        case Direction::DOWN: dirRow = 0; break;
+        case Direction::RIGHT: dirRow = 1; break;
+        case Direction::UP: dirRow = 2; break;
+        case Direction::LEFT: dirRow = 3; break; // Should not happen if useRightForLeft is true
+    }
+
+    cocos2d::Rect bodyRect = getBodyRect(effectiveDir, _animFrame);
     _bodySprite->setTextureRect(bodyRect);
+    _bodySprite->setFlippedX(useRightForLeft);
     
     // Arm (Cols 7-12 -> Indices 6-11)
     // armCol = animCol + 6
@@ -151,38 +187,38 @@ void PlayerAppearance::updateSprites() {
     float armX = armCol * w;
     float armY = dirRow * h;
     _armSprite->setTextureRect(cocos2d::Rect(armX, armY, w, h));
+    _armSprite->setFlippedX(useRightForLeft);
     
     // Pants
-    cocos2d::Rect pantsRect = getPantsRect(_pantsIndex, _currentDir, _animFrame);
+    cocos2d::Rect pantsRect = getPantsRect(_pantsIndex, effectiveDir, _animFrame);
     _pantsSprite->setTextureRect(pantsRect);
+    _pantsSprite->setFlippedX(useRightForLeft);
     
     // Shirt
-    // 8x32 chunks. 8x8 sub-blocks.
-    cocos2d::Rect shirtRect = getShirtRect(_shirtIndex, _currentDir, _animFrame);
+    // Shirt has specific Left block (Index 2).
+    // If we use Right (Index 1) flipped, it might look better if original Left was bad.
+    // User said: "When moving left, just reverse right action".
+    // So we use Shirt's RIGHT block and flip it.
+    cocos2d::Rect shirtRect = getShirtRect(_shirtIndex, effectiveDir, _animFrame);
     _shirtSprite->setTextureRect(shirtRect);
+    _shirtSprite->setFlippedX(useRightForLeft);
     
     // Hair
-    cocos2d::Rect hairRect = getHairRect(_hairIndex, _currentDir, _animFrame);
+    // Hair uses Side block (Index 1) for both Right and Left.
+    // So we just need to flip it if Left.
+    // getHairRect handles index mapping, but we need to ensure we ask for RIGHT (Side) if we are Left.
+    cocos2d::Rect hairRect = getHairRect(_hairIndex, effectiveDir, _animFrame);
     _hairSprite->setTextureRect(hairRect);
+    _hairSprite->setFlippedX(useRightForLeft);
     
     // Apply Bobbing to attachments
-    // Body and Pants are usually synced in texture (if Pants matches Body layout).
-    // Arms match Body layout so they might have bobbing drawn in? 
-    // If Arms are drawn relative to body in the sheet, they should stay at (0,0).
-    // But Shirt and Hair are separate attachments.
-    
     _shirtSprite->setPosition(0, -3 + bobY);
     _hairSprite->setPosition(0, -1 + bobY);
     
     // Arms: In farmer_base, arms are aligned with body. 
-    // If we draw body at (0,0), we draw arms at (0,0).
-    // The texture itself should contain the vertical shift if it matches the body.
-    // So we probably do NOT move arms via setPosition, as they are part of the base rig animation.
     _armSprite->setPosition(0, 0); 
     
-    // Pants: If pants use the same layout as body, they should also have the drop drawn in.
-    // If not, we move them.
-    // Assuming pants texture is just overlay, likely has same animation.
+    // Pants
     _pantsSprite->setPosition(0, 0);
 }
 

@@ -682,12 +682,31 @@ void GameScene::update(float dt) {
         float scale = _worldNode->getScale();
         float mapW = _gameMap ? _gameMap->getContentSize().width : (_cols * GameConfig::TILE_SIZE);
         float mapH = _gameMap ? _gameMap->getContentSize().height : (_rows * GameConfig::TILE_SIZE);
+        
         float minX = (origin.x + visibleSize.width) - (_mapOrigin.x + mapW) * scale;
         float maxX = origin.x - _mapOrigin.x * scale;
         float minY = (origin.y + visibleSize.height) - (_mapOrigin.y + mapH) * scale;
         float maxY = origin.y - _mapOrigin.y * scale;
-        cam.x = std::max(minX, std::min(maxX, cam.x));
-        cam.y = std::max(minY, std::min(maxY, cam.y));
+        
+        // If map fits in screen, center it
+        if (mapW * scale <= visibleSize.width) {
+            float centerX = origin.x + visibleSize.width * 0.5f;
+            float worldCenterX = _mapOrigin.x + mapW * 0.5f;
+            cam.x = centerX - worldCenterX * scale + (_worldNode->getPositionX() - cam.x); // Wait, cam is position of WorldNode.
+            // Target cam x:
+            // We want (MapCenter * scale + cam.x) = ScreenCenter
+            // cam.x = ScreenCenter - MapCenter * scale
+            cam.x = (origin.x + visibleSize.width * 0.5f) - (_mapOrigin.x + mapW * 0.5f) * scale;
+        } else {
+            cam.x = std::max(minX, std::min(maxX, cam.x));
+        }
+
+        if (mapH * scale <= visibleSize.height) {
+             cam.y = (origin.y + visibleSize.height * 0.5f) - (_mapOrigin.y + mapH * 0.5f) * scale;
+        } else {
+            cam.y = std::max(minY, std::min(maxY, cam.y));
+        }
+        
         _worldNode->setPosition(cam);
     }
 }
