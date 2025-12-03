@@ -53,6 +53,24 @@ list(APPEND GAME_SOURCE
      Classes/Scenes/SplashScene.cpp
      Classes/Scenes/MainMenuScene.cpp
      Classes/Scenes/GameScene.cpp
+     Classes/Scenes/RoomScene.cpp
+     Classes/Controllers/IMapController.h
+     Classes/Controllers/PlayerController.cpp
+     Classes/Controllers/PlayerController.h
+     Classes/Controllers/FarmMapController.cpp
+     Classes/Controllers/FarmMapController.h
+     Classes/Controllers/RoomMapController.cpp
+     Classes/Controllers/RoomMapController.h
+     Classes/Controllers/UIController.cpp
+     Classes/Controllers/UIController.h
+     Classes/Controllers/ToolSystem.cpp
+     Classes/Controllers/ToolSystem.h
+     Classes/Controllers/GameStateController.cpp
+     Classes/Controllers/GameStateController.h
+     Classes/Controllers/FarmInteractor.cpp
+     Classes/Controllers/FarmInteractor.h
+     Classes/Controllers/RoomInteractor.cpp
+     Classes/Controllers/RoomInteractor.h
      )
 list(APPEND GAME_HEADER
      Classes/AppDelegate.h
@@ -60,6 +78,7 @@ list(APPEND GAME_HEADER
      Classes/Scenes/SplashScene.h
      Classes/Scenes/MainMenuScene.h
      Classes/Scenes/GameScene.h
+     Classes/Scenes/RoomScene.h
      Classes/Game/GameConfig.h
      )
 

@@ -1,0 +1,352 @@
+#include "Controllers/UIController.h"
+#include "cocos2d.h"
+#include "ui/CocosGUI.h"
+#include "Game/GameConfig.h"
+#include "Game/WorldState.h"
+
+using namespace cocos2d;
+
+namespace Controllers {
+
+void UIController::buildHUD() {
+    auto &ws = Game::globalState();
+    if (ws.maxEnergy <= 0) ws.maxEnergy = GameConfig::ENERGY_MAX;
+    if (ws.energy < 0 || ws.energy > ws.maxEnergy) ws.energy = ws.maxEnergy;
+
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    auto origin = Director::getInstance()->getVisibleOrigin();
+
+    if (!_hudTimeLabel) {
+        _hudTimeLabel = Label::createWithTTF("", "fonts/Marker Felt.ttf", 18);
+        _hudTimeLabel->setColor(Color3B::WHITE);
+        _hudTimeLabel->setAnchorPoint(Vec2(1,1));
+        float pad = 10.0f;
+        _hudTimeLabel->setPosition(Vec2(origin.x + visibleSize.width - pad, origin.y + visibleSize.height - pad));
+        if (_scene) _scene->addChild(_hudTimeLabel, 3);
+    }
+
+    if (!_energyNode) {
+        _energyNode = Node::create();
+        float pad = 10.0f;
+        _energyNode->setPosition(Vec2(origin.x + visibleSize.width - pad, origin.y + pad));
+        if (_scene) _scene->addChild(_energyNode, 3);
+
+        float bw = 160.0f, bh = 18.0f;
+        auto bg = DrawNode::create();
+        Vec2 bl(-bw, 0), br(0, 0), tr(0, bh), tl(-bw, bh);
+        Vec2 rect[4] = { bl, br, tr, tl };
+        bg->drawSolidPoly(rect, 4, Color4F(0.f,0.f,0.f,0.35f));
+        bg->drawLine(bl, br, Color4F(1,1,1,0.5f));
+        bg->drawLine(br, tr, Color4F(1,1,1,0.5f));
+        bg->drawLine(tr, tl, Color4F(1,1,1,0.5f));
+        bg->drawLine(tl, bl, Color4F(1,1,1,0.5f));
+        _energyNode->addChild(bg);
+
+        _energyFill = DrawNode::create();
+        _energyNode->addChild(_energyFill);
+
+        _energyLabel = Label::createWithTTF("", "fonts/Marker Felt.ttf", 16);
+        _energyLabel->setAnchorPoint(Vec2(1,0.5f));
+        _energyLabel->setPosition(Vec2(-4.0f, bh * 0.5f));
+        _energyLabel->setColor(Color3B::WHITE);
+        _energyNode->addChild(_energyLabel);
+    }
+
+    refreshHUD();
+}
+
+void UIController::refreshHUD() {
+    auto &ws = Game::globalState();
+    auto seasonName = [](int idx){
+        switch (idx % 4) { case 0: return "Spring"; case 1: return "Summer"; case 2: return "Fall"; default: return "Winter"; }
+    };
+    if (_hudTimeLabel) {
+        _hudTimeLabel->setString(StringUtils::format("%s Day %d, %02d:%02d", seasonName(ws.seasonIndex), ws.dayOfSeason, ws.timeHour, ws.timeMinute));
+    }
+    if (_energyFill && _energyNode) {
+        _energyFill->clear();
+        float bw = 160.0f, bh = 18.0f;
+        float ratio = ws.maxEnergy > 0 ? (static_cast<float>(ws.energy) / static_cast<float>(ws.maxEnergy)) : 0.f;
+        ratio = std::max(0.f, std::min(1.f, ratio));
+        float fillW = bw * ratio;
+        Vec2 bl(-bw, 0), br(-bw + fillW, 0), tr(-bw + fillW, bh), tl(-bw, bh);
+        Vec2 rect[4] = { bl, br, tr, tl };
+        _energyFill->drawSolidPoly(rect, 4, Color4F(0.2f, 0.8f, 0.25f, 0.85f));
+    }
+    if (_energyLabel) {
+        _energyLabel->setString(StringUtils::format("Energy %d/%d", ws.energy, ws.maxEnergy));
+    }
+}
+
+void UIController::buildHotbar() {
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    auto origin = Director::getInstance()->getVisibleOrigin();
+    _hotbarNode = Node::create();
+    _hotbarNode->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + 28));
+    if (_scene) _scene->addChild(_hotbarNode, 2);
+
+    int slots = static_cast<int>(_inventory ? _inventory->size() : 0);
+    float slotW = 80.0f, slotH = 32.0f, padding = 6.0f;
+    float totalWidth = slots * slotW + (slots - 1) * padding;
+    auto bg = DrawNode::create();
+    Vec2 bgVerts[4] = { Vec2(-totalWidth/2 - 10, -slotH/2 - 8),
+                        Vec2( totalWidth/2 + 10, -slotH/2 - 8),
+                        Vec2( totalWidth/2 + 10,  slotH/2 + 8),
+                        Vec2(-totalWidth/2 - 10,  slotH/2 + 8) };
+    bg->drawSolidPoly(bgVerts, 4, Color4F(0.f, 0.f, 0.f, 0.35f));
+    _hotbarNode->addChild(bg);
+
+    _hotbarLabels.clear();
+    for (int i = 0; i < slots; ++i) {
+        float x = -totalWidth/2 + i * (slotW + padding) + slotW/2;
+        auto rect = DrawNode::create();
+        Vec2 r[4] = { Vec2(x - slotW/2, -slotH/2), Vec2(x + slotW/2, -slotH/2), Vec2(x + slotW/2,  slotH/2), Vec2(x - slotW/2,  slotH/2) };
+        rect->drawSolidPoly(r, 4, Color4F(0.15f, 0.15f, 0.15f, 0.6f));
+        _hotbarNode->addChild(rect);
+        std::string text = "-";
+        if (_inventory) {
+            if (auto t = _inventory->toolAt(i)) {
+                text = t->name;
+            } else if (_inventory->isItem(i)) {
+                auto st = _inventory->itemAt(i);
+                text = StringUtils::format("%s x%d", Game::itemName(st.type), st.quantity);
+            }
+        }
+        auto label = Label::createWithTTF(text, "fonts/Marker Felt.ttf", 18);
+        label->setPosition(Vec2(x, 0));
+        _hotbarNode->addChild(label);
+        _hotbarLabels.push_back(label);
+    }
+
+    _hotbarHighlight = DrawNode::create();
+    _hotbarNode->addChild(_hotbarHighlight);
+    refreshHotbar();
+}
+
+void UIController::refreshHotbar() {
+    if (!_hotbarNode || !_hotbarHighlight || !_inventory) return;
+    int slots = static_cast<int>(_inventory->size());
+    if (slots <= 0) return;
+    float slotW = 80.0f, slotH = 32.0f, padding = 6.0f;
+    float totalWidth = slots * slotW + (slots - 1) * padding;
+    int sel = _inventory->selectedIndex();
+    float x = -totalWidth/2 + sel * (slotW + padding) + slotW/2;
+    _hotbarHighlight->clear();
+    Vec2 a(x - slotW/2, -slotH/2), b(x + slotW/2, -slotH/2), c(x + slotW/2,  slotH/2), d(x - slotW/2,  slotH/2);
+    _hotbarHighlight->drawLine(a, b, Color4F(1.f, 0.9f, 0.2f, 1.f));
+    _hotbarHighlight->drawLine(b, c, Color4F(1.f, 0.9f, 0.2f, 1.f));
+    _hotbarHighlight->drawLine(c, d, Color4F(1.f, 0.9f, 0.2f, 1.f));
+    _hotbarHighlight->drawLine(d, a, Color4F(1.f, 0.9f, 0.2f, 1.f));
+    for (int i = 0; i < slots && i < static_cast<int>(_hotbarLabels.size()); ++i) {
+        std::string text = "-";
+        if (auto t = _inventory->toolAt(i)) {
+            text = t->name;
+        } else if (_inventory->isItem(i)) {
+            auto st = _inventory->itemAt(i);
+            text = StringUtils::format("%s x%d", Game::itemName(st.type), st.quantity);
+        }
+        _hotbarLabels[i]->setString(text);
+    }
+}
+
+void UIController::selectHotbarIndex(int idx) {
+    if (_inventory) {
+        _inventory->selectIndex(idx);
+        Game::globalState().selectedIndex = idx;
+        refreshHotbar();
+    }
+}
+
+bool UIController::handleHotbarMouseDown(EventMouse* e) {
+    if (!_hotbarNode || !_inventory) return false;
+    if (e->getMouseButton() != EventMouse::MouseButton::BUTTON_LEFT) return false;
+    auto p = e->getLocation();
+    auto local = _hotbarNode->convertToNodeSpace(p);
+    int slots = static_cast<int>(_inventory->size());
+    if (slots <= 0) return false;
+    float slotW = 80.0f, slotH = 32.0f, padding = 6.0f, hitMarginY = 8.0f;
+    float totalWidth = slots * slotW + (slots - 1) * padding;
+    if (local.y < -(slotH/2 + hitMarginY) || local.y > (slotH/2 + hitMarginY)) return false;
+    for (int i = 0; i < slots; ++i) {
+        float cx = -totalWidth/2 + i * (slotW + padding) + slotW/2;
+        float minx = cx - slotW/2;
+        float maxx = cx + slotW/2;
+        if (local.x >= minx && local.x <= maxx) {
+            selectHotbarIndex(i);
+            return true;
+        }
+    }
+    return false;
+}
+
+bool UIController::handleHotbarAtPoint(const Vec2& screenPoint) {
+    if (!_hotbarNode || !_inventory) return false;
+    auto local = _hotbarNode->convertToNodeSpace(screenPoint);
+    int slots = static_cast<int>(_inventory->size());
+    if (slots <= 0) return false;
+    float slotW = 80.0f, slotH = 32.0f, padding = 6.0f, hitMarginY = 8.0f;
+    float totalWidth = slots * slotW + (slots - 1) * padding;
+    if (local.y < -(slotH/2 + hitMarginY) || local.y > (slotH/2 + hitMarginY)) return false;
+    for (int i = 0; i < slots; ++i) {
+        float cx = -totalWidth/2 + i * (slotW + padding) + slotW/2;
+        float minx = cx - slotW/2;
+        float maxx = cx + slotW/2;
+        if (local.x >= minx && local.x <= maxx) {
+            selectHotbarIndex(i);
+            return true;
+        }
+    }
+    return false;
+}
+
+bool UIController::handleChestRightClick(EventMouse* e, const std::vector<Game::Chest>& chests) {
+    if (e->getMouseButton() != EventMouse::MouseButton::BUTTON_RIGHT) return false;
+    if (chests.empty()) return false;
+    // 打开最近箱子的面板（若靠近）
+    // 场景应预先根据地图检测靠近箱子；这里简化直接打开最近者
+    // 查找最近的箱子
+    Vec2 p = e->getLocation();
+    int idx = -1; float best = 1e9f;
+    for (int i=0;i<(int)chests.size();++i) {
+        float d = p.distance(chests[i].pos);
+        if (d < best) { best = d; idx = i; }
+    }
+    if (idx >= 0) {
+        buildChestPanel();
+        refreshChestPanel(chests[idx]);
+        toggleChestPanel(true);
+        return true;
+    }
+    return false;
+}
+
+void UIController::showDoorPrompt(bool visible, const Vec2& worldPos, const std::string& text) {
+    if (!_doorPrompt) {
+        _doorPrompt = Label::createWithTTF(text, "fonts/Marker Felt.ttf", 20);
+        _doorPrompt->setColor(Color3B::YELLOW);
+        if (_scene) _scene->addChild(_doorPrompt, 3);
+    }
+    _doorPrompt->setString(text);
+    _doorPrompt->setVisible(visible);
+    if (visible) {
+        Vec2 pos = worldPos; if (_worldNode) pos = _worldNode->convertToWorldSpace(worldPos);
+        _doorPrompt->setPosition(pos + Vec2(0, 26));
+    }
+}
+
+void UIController::showChestPrompt(bool visible, const Vec2& worldPos, const std::string& text) {
+    if (!_chestPrompt) {
+        _chestPrompt = Label::createWithTTF(text, "fonts/Marker Felt.ttf", 20);
+        _chestPrompt->setColor(Color3B::YELLOW);
+        if (_scene) _scene->addChild(_chestPrompt, 3);
+    }
+    _chestPrompt->setString(text);
+    _chestPrompt->setVisible(visible);
+    if (visible) {
+        Vec2 pos = worldPos; if (_worldNode) pos = _worldNode->convertToWorldSpace(worldPos);
+        _chestPrompt->setPosition(pos + Vec2(0, 26));
+    }
+}
+
+void UIController::popTextAt(const Vec2& worldPos, const std::string& text, const Color3B& color) {
+    auto label = Label::createWithTTF(text, "fonts/Marker Felt.ttf", 20);
+    label->setColor(color);
+    Vec2 pos = worldPos; if (_worldNode) pos = _worldNode->convertToWorldSpace(worldPos);
+    label->setPosition(pos + Vec2(0, 26));
+    if (_scene) _scene->addChild(label, 3);
+    auto seq = Sequence::create(FadeOut::create(0.6f), RemoveSelf::create(), nullptr);
+    label->runAction(seq);
+}
+
+void UIController::buildChestPanel() {
+    if (_chestPanel) return;
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    auto origin = Director::getInstance()->getVisibleOrigin();
+    _chestPanel = Node::create();
+    _chestPanel->setPosition(Vec2(origin.x + visibleSize.width/2, origin.y + visibleSize.height/2));
+    if (_scene) _scene->addChild(_chestPanel, 3);
+    _chestPanel->setVisible(false);
+
+    auto bg = DrawNode::create();
+    float w = 360.f, h = 240.f;
+    Vec2 v[4] = { Vec2(-w/2,-h/2), Vec2(w/2,-h/2), Vec2(w/2,h/2), Vec2(-w/2,h/2) };
+    bg->drawSolidPoly(v, 4, Color4F(0.f,0.f,0.f,0.55f));
+    _chestPanel->addChild(bg);
+
+    auto title = Label::createWithTTF("Chest Storage", "fonts/Marker Felt.ttf", 20);
+    title->setPosition(Vec2(0, h/2 - 26));
+    _chestPanel->addChild(title);
+
+    auto closeBtn = ui::Button::create("CloseNormal.png", "CloseSelected.png");
+    closeBtn->setTitleText("X");
+    closeBtn->setTitleFontSize(18);
+    closeBtn->setScale9Enabled(true);
+    closeBtn->setContentSize(Size(36, 36));
+    closeBtn->setPosition(Vec2(w/2 - 20, h/2 - 20));
+    closeBtn->addClickEventListener([this](Ref*){ toggleChestPanel(false); });
+    _chestPanel->addChild(closeBtn);
+
+    _chestListNode = Node::create();
+    _chestPanel->addChild(_chestListNode);
+}
+
+void UIController::refreshChestPanel(const Game::Chest& chest) {
+    if (!_chestPanel || !_chestListNode) return;
+    _chestListNode->removeAllChildren();
+    float startY = 60.f, gapY = 60.f;
+    int i = 0;
+    for (const auto &entry : chest.bag.all()) {
+        auto t = entry.first; int have = entry.second; if (have <= 0) continue;
+        float y = startY - i * gapY;
+        auto nameLabel = Label::createWithTTF(Game::itemName(t), "fonts/Marker Felt.ttf", 18);
+        nameLabel->setPosition(Vec2(-140, y));
+        _chestListNode->addChild(nameLabel);
+        auto countLabel = Label::createWithTTF(StringUtils::format("x%d", have), "fonts/Marker Felt.ttf", 18);
+        countLabel->setPosition(Vec2(-60, y));
+        _chestListNode->addChild(countLabel);
+        ++i;
+    }
+}
+
+void UIController::toggleChestPanel(bool visible) {
+    if (_chestPanel) _chestPanel->setVisible(visible);
+}
+
+void UIController::buildCraftPanel() {
+    if (_craftNode) return;
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    auto origin = Director::getInstance()->getVisibleOrigin();
+    _craftNode = Node::create();
+    _craftNode->setPosition(Vec2(origin.x + visibleSize.width/2, origin.y + visibleSize.height/2));
+    if (_scene) _scene->addChild(_craftNode, 3);
+    _craftNode->setVisible(false);
+    auto bg = DrawNode::create();
+    float w = 260.f, h = 180.f;
+    Vec2 v[4] = { Vec2(-w/2,-h/2), Vec2(w/2,-h/2), Vec2(w/2,h/2), Vec2(-w/2,h/2) };
+    bg->drawSolidPoly(v, 4, Color4F(0.f,0.f,0.f,0.55f));
+    _craftNode->addChild(bg);
+    auto info = Label::createWithTTF("Chest requires 40 Wood", "fonts/Marker Felt.ttf", 18);
+    info->setPosition(Vec2(0, 12));
+    _craftNode->addChild(info);
+    _craftButton = ui::Button::create("CloseNormal.png", "CloseSelected.png");
+    _craftButton->setTitleText("Craft Chest");
+    _craftButton->setTitleFontSize(20);
+    _craftButton->setScale9Enabled(true);
+    _craftButton->setContentSize(Size(160, 40));
+    _craftButton->setPosition(Vec2(0, -40));
+    _craftNode->addChild(_craftButton);
+}
+
+void UIController::refreshCraftPanel(int woodCount) {
+    if (_craftButton) {
+        bool enable = woodCount >= 40;
+        _craftButton->setEnabled(enable);
+        _craftButton->setBright(enable);
+    }
+}
+
+void UIController::toggleCraftPanel(bool visible) {
+    if (_craftNode) _craftNode->setVisible(visible);
+}
+
+} // namespace Controllers

@@ -1,28 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{A7B6051E-6D3E-4E1C-A69E-5CE2A8D49651}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{5B6373A6-9D52-4B4B-8C62-927B21F21D34}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{E3C7C0C9-4B15-4E5C-8F55-BA0C6C4E9AC8}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
     <Filter Include="Classes">
-      <UniqueIdentifier>{4D3B16E1-8B8D-48C9-9F1E-5F4B4C2D7A11}</UniqueIdentifier>
+      <UniqueIdentifier>{3C8B3C18-1E9E-4D74-8EB8-76D6E6D2E4B7}</UniqueIdentifier>
     </Filter>
     <Filter Include="Classes\Scenes">
-      <UniqueIdentifier>{A1E2B3C4-D5E6-47F8-9123-4567890ABCDF}</UniqueIdentifier>
+      <UniqueIdentifier>{6C7E12C4-5F2E-4E2E-9B1B-9D2C77EAA4B9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Classes\Controllers">
+      <UniqueIdentifier>{4E0B1D2F-7A6A-4B1E-8F9B-1B8E83C5AF42}</UniqueIdentifier>
     </Filter>
     <Filter Include="Classes\Game">
-      <UniqueIdentifier>{E2F1C0B9-8A7D-46C5-9E2D-1F2E3D4C5B6A}</UniqueIdentifier>
+      <UniqueIdentifier>{B2D8E2E1-3A23-4F47-8E39-1E7B91B2C83F}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Win32">
-      <UniqueIdentifier>{1C2D3E4F-5061-4272-8394-95A6B7C8D9E0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Resources">
-      <UniqueIdentifier>{ABCDEF12-3456-4789-ABCD-EF1234567890}</UniqueIdentifier>
+    <Filter Include="proj.win32">
+      <UniqueIdentifier>{9D3B8242-29C4-4F3C-9B0E-9A7E2E8B3F56}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
+
   <ItemGroup>
+    <!-- Source Files -->
     <ClCompile Include="..\Classes\AppDelegate.cpp">
       <Filter>Classes</Filter>
     </ClCompile>
     <ClCompile Include="..\Classes\HelloWorldScene.cpp">
       <Filter>Classes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Scenes\CustomizationScene.cpp">
+      <Filter>Classes\Scenes</Filter>
     </ClCompile>
     <ClCompile Include="..\Classes\Scenes\SplashScene.cpp">
       <Filter>Classes\Scenes</Filter>
@@ -36,32 +53,62 @@
     <ClCompile Include="..\Classes\Scenes\RoomScene.cpp">
       <Filter>Classes\Scenes</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\Game\Inventory.cpp">
+    <ClCompile Include="..\Classes\Game\PlayerAppearance.cpp">
+      <Filter>Classes\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\GameMap.cpp">
       <Filter>Classes\Game</Filter>
     </ClCompile>
     <ClCompile Include="..\Classes\Game\WorldState.cpp">
       <Filter>Classes\Game</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\Game\Inventory.cpp">
+      <Filter>Classes\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\Bag.cpp">
+      <Filter>Classes\Game</Filter>
+    </ClCompile>
+    <!-- Controllers -->
+    <ClCompile Include="..\Classes\Controllers\PlayerController.cpp">
+      <Filter>Classes\Controllers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\FarmMapController.cpp">
+      <Filter>Classes\Controllers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\RoomMapController.cpp">
+      <Filter>Classes\Controllers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\UIController.cpp">
+      <Filter>Classes\Controllers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\ToolSystem.cpp">
+      <Filter>Classes\Controllers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\GameStateController.cpp">
+      <Filter>Classes\Controllers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\FarmInteractor.cpp">
+      <Filter>Classes\Controllers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\RoomInteractor.cpp">
+      <Filter>Classes\Controllers</Filter>
+    </ClCompile>
+    <!-- Win32 entry -->
     <ClCompile Include="main.cpp">
-      <Filter>Win32</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Classes\Game\GameMap.cpp">
-      <Filter>Classes\Game</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Classes\Game\Bag.cpp" />
-    <ClCompile Include="..\Classes\Scenes\CustomizationScene.cpp">
-      <Filter>Classes\Scenes</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Classes\Game\PlayerAppearance.cpp">
-      <Filter>Classes\Game</Filter>
+      <Filter>proj.win32</Filter>
     </ClCompile>
   </ItemGroup>
+
   <ItemGroup>
+    <!-- Header Files -->
     <ClInclude Include="..\Classes\AppDelegate.h">
       <Filter>Classes</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\HelloWorldScene.h">
       <Filter>Classes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Scenes\CustomizationScene.h">
+      <Filter>Classes\Scenes</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\Scenes\SplashScene.h">
       <Filter>Classes\Scenes</Filter>
@@ -74,6 +121,24 @@
     </ClInclude>
     <ClInclude Include="..\Classes\Scenes\RoomScene.h">
       <Filter>Classes\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\Bag.h">
+      <Filter>Classes\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\PlayerAppearance.h">
+      <Filter>Classes\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\Cheat.h">
+      <Filter>Classes\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\Chest.h">
+      <Filter>Classes\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\Crop.h">
+      <Filter>Classes\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\GameMap.h">
+      <Filter>Classes\Game</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\Game\GameConfig.h">
       <Filter>Classes\Game</Filter>
@@ -96,34 +161,43 @@
     <ClInclude Include="..\Classes\Game\Drop.h">
       <Filter>Classes\Game</Filter>
     </ClInclude>
+    <!-- Controllers headers -->
+    <ClInclude Include="..\Classes\Controllers\IMapController.h">
+      <Filter>Classes\Controllers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\PlayerController.h">
+      <Filter>Classes\Controllers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\FarmMapController.h">
+      <Filter>Classes\Controllers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\RoomMapController.h">
+      <Filter>Classes\Controllers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\UIController.h">
+      <Filter>Classes\Controllers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\ToolSystem.h">
+      <Filter>Classes\Controllers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\GameStateController.h">
+      <Filter>Classes\Controllers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\FarmInteractor.h">
+      <Filter>Classes\Controllers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\RoomInteractor.h">
+      <Filter>Classes\Controllers</Filter>
+    </ClInclude>
+    <!-- Win32 header -->
     <ClInclude Include="main.h">
-      <Filter>Win32</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Classes\Game\GameMap.h">
-      <Filter>Classes\Game</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Classes\Game\Bag.h">
-      <Filter>Classes\Game</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Classes\Game\Cheat.h">
-      <Filter>Classes\Game</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Classes\Game\Chest.h">
-      <Filter>Classes\Game</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Classes\Game\Crop.h">
-      <Filter>Classes\Game</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Classes\Scenes\CustomizationScene.h">
-      <Filter>Classes\Scenes</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Classes\Game\PlayerAppearance.h">
-      <Filter>Classes\Game</Filter>
+      <Filter>proj.win32</Filter>
     </ClInclude>
   </ItemGroup>
+
   <ItemGroup>
     <ResourceCompile Include="game.rc">
-      <Filter>Resources</Filter>
+      <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>
 </Project>
