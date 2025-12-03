@@ -86,24 +86,16 @@ void PlayerController::update(float dt) {
     if (_worldNode) {
         auto visibleSize = Director::getInstance()->getVisibleSize();
         auto origin = Director::getInstance()->getVisibleOrigin();
-        Vec2 screenPos = _worldNode->convertToWorldSpace(_player->getPosition());
-        float marginX = visibleSize.width * 0.25f;
-        float marginY = visibleSize.height * 0.25f;
-        float left = origin.x + marginX;
-        float right = origin.x + visibleSize.width - marginX;
-        float bottom = origin.y + marginY;
-        float top = origin.y + visibleSize.height - marginY;
-        Vec2 cam = _worldNode->getPosition();
-        if (screenPos.x < left)   cam.x += left - screenPos.x;
-        if (screenPos.x > right)  cam.x += right - screenPos.x;
-        if (screenPos.y < bottom) cam.y += bottom - screenPos.y;
-        if (screenPos.y > top)    cam.y += top - screenPos.y;
 
         float scale = _worldNode->getScale();
+        auto org = _map->getOrigin();
+        auto playerPos = _player->getPosition();
+        Vec2 screenCenter(origin.x + visibleSize.width * 0.5f, origin.y + visibleSize.height * 0.5f);
+        Vec2 cam = screenCenter - (org + playerPos) * scale;
+
         cocos2d::Size mapSize = _map->getContentSize();
         float mapW = mapSize.width;
         float mapH = mapSize.height;
-        auto org = _map->getOrigin();
 
         float minX = (origin.x + visibleSize.width) - (org.x + mapW) * scale;
         float maxX = origin.x - org.x * scale;
@@ -115,6 +107,7 @@ void PlayerController::update(float dt) {
         } else {
             cam.x = std::max(minX, std::min(maxX, cam.x));
         }
+
         if (mapH * scale <= visibleSize.height) {
             cam.y = (origin.y + visibleSize.height * 0.5f) - (org.y + mapH * 0.5f) * scale;
         } else {
