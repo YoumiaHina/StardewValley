@@ -41,20 +41,34 @@ bool GameScene::init() {
 
     // World container: map + player + drops (HUD stays on scene root)
     _worldNode = Node::create();
+    _worldNode->setScale(2.0f); // Zoom in
     this->addChild(_worldNode, 0);
 
     _mapNode = Node::create();
     _worldNode->addChild(_mapNode, 0);
     buildMap();
 
-    // Simple placeholder player: a colored square
-    _player = DrawNode::create();
-    const float size = 16.f;
-    Vec2 verts[4] = { Vec2(-size, -size), Vec2(size, -size), Vec2(size, size), Vec2(-size, size) };
-    _player->drawSolidPoly(verts, 4, Color4F(0.2f, 0.7f, 0.9f, 1.0f));
+    // Character Node
+    _player = Game::PlayerAppearance::create();
+    
+    // Load customized settings
+    auto def = UserDefault::getInstance();
+    int shirt = def->getIntegerForKey("player_shirt", 0);
+    int pants = def->getIntegerForKey("player_pants", 0);
+    int hair = def->getIntegerForKey("player_hair", 0);
+    int r = def->getIntegerForKey("player_hair_r", 255);
+    int g = def->getIntegerForKey("player_hair_g", 255);
+    int b = def->getIntegerForKey("player_hair_b", 255);
+    
+    _player->setShirtStyle(shirt);
+    _player->setPantsStyle(pants);
+    _player->setHairStyle(hair);
+    _player->setHairColor(Color3B(r, g, b));
+    
     // place player at center tile
     _player->setPosition(tileToWorld(_cols/2, _rows/2));
     if (_gameMap && _gameMap->getTMX()) {
+        // Ensure z-order is correct (player at 20, between HouseBody 10 and HouseTop 30)
         _gameMap->getTMX()->addChild(_player, 20);
     } else {
         _worldNode->addChild(_player, 2);
@@ -587,12 +601,13 @@ void GameScene::update(float dt) {
             if (screenPos.y < bottom) cam.y += bottom - screenPos.y;
             if (screenPos.y > top)    cam.y += top - screenPos.y;
             // Clamp camera to map bounds
+            float scale = _worldNode->getScale();
             float mapW = _gameMap ? _gameMap->getContentSize().width : (_cols * GameConfig::TILE_SIZE);
             float mapH = _gameMap ? _gameMap->getContentSize().height : (_rows * GameConfig::TILE_SIZE);
-            float minX = (originNZ.x + visibleSizeNZ.width) - (_mapOrigin.x + mapW);
-            float maxX = originNZ.x - _mapOrigin.x;
-            float minY = (originNZ.y + visibleSizeNZ.height) - (_mapOrigin.y + mapH);
-            float maxY = originNZ.y - _mapOrigin.y;
+            float minX = (originNZ.x + visibleSizeNZ.width) - (_mapOrigin.x + mapW) * scale;
+            float maxX = originNZ.x - _mapOrigin.x * scale;
+            float minY = (originNZ.y + visibleSizeNZ.height) - (_mapOrigin.y + mapH) * scale;
+            float maxY = originNZ.y - _mapOrigin.y * scale;
             cam.x = std::max(minX, std::min(maxX, cam.x));
             cam.y = std::max(minY, std::min(maxY, cam.y));
             _worldNode->setPosition(cam);
@@ -603,6 +618,19 @@ void GameScene::update(float dt) {
     cocos2d::Vec2 dir(dx, dy);
     dir.normalize(); // keep consistent speed when moving diagonally
     _lastDir = dir; // track facing
+    
+    // Update Character Node
+    bool isMoving = (dx != 0 || dy != 0);
+    _player->setMoving(isMoving);
+    
+    if (isMoving) {
+        if (std::abs(dx) > std::abs(dy)) {
+            _player->setDirection(dx > 0 ? Game::PlayerAppearance::Direction::RIGHT : Game::PlayerAppearance::Direction::LEFT);
+        } else {
+            _player->setDirection(dy > 0 ? Game::PlayerAppearance::Direction::UP : Game::PlayerAppearance::Direction::DOWN);
+        }
+    }
+    _player->updateAnimation(dt);
 
     float speed = _isSprinting ? _sprintSpeed : _baseSpeed;
     cocos2d::Vec2 delta = dir * speed * dt;
@@ -651,12 +679,13 @@ void GameScene::update(float dt) {
         if (screenPos.y < bottom) cam.y += bottom - screenPos.y;
         if (screenPos.y > top)    cam.y += top - screenPos.y;
         // Clamp camera to map bounds
+        float scale = _worldNode->getScale();
         float mapW = _gameMap ? _gameMap->getContentSize().width : (_cols * GameConfig::TILE_SIZE);
         float mapH = _gameMap ? _gameMap->getContentSize().height : (_rows * GameConfig::TILE_SIZE);
-        float minX = (origin.x + visibleSize.width) - (_mapOrigin.x + mapW);
-        float maxX = origin.x - _mapOrigin.x;
-        float minY = (origin.y + visibleSize.height) - (_mapOrigin.y + mapH);
-        float maxY = origin.y - _mapOrigin.y;
+        float minX = (origin.x + visibleSize.width) - (_mapOrigin.x + mapW) * scale;
+        float maxX = origin.x - _mapOrigin.x * scale;
+        float minY = (origin.y + visibleSize.height) - (_mapOrigin.y + mapH) * scale;
+        float maxY = origin.y - _mapOrigin.y * scale;
         cam.x = std::max(minX, std::min(maxX, cam.x));
         cam.y = std::max(minY, std::min(maxY, cam.y));
         _worldNode->setPosition(cam);

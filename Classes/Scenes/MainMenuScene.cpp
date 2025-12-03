@@ -3,6 +3,7 @@
  */
 #include "Scenes/MainMenuScene.h"
 #include "Scenes/RoomScene.h"
+#include "Scenes/CustomizationScene.h"
 #include "cocos2d.h"
 
 USING_NS_CC;
@@ -66,8 +67,8 @@ bool MainMenuScene::init() {
 }
 
 void MainMenuScene::onStart(Ref* /*sender*/) {
-    auto room = RoomScene::createScene();
-    auto trans = TransitionFade::create(0.3f, room);
+    auto nextScene = CustomizationScene::createScene();
+    auto trans = TransitionFade::create(0.5f, nextScene);
     Director::getInstance()->replaceScene(trans);
 }
 

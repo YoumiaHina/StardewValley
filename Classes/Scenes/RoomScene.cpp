@@ -36,18 +36,34 @@ bool RoomScene::init() {
     }
 
     // 房间绘制节点
+    _worldNode = Node::create();
+    _worldNode->setScale(2.0f);
+    this->addChild(_worldNode, 0);
+
     _roomDraw = DrawNode::create();
-    this->addChild(_roomDraw, 0);
+    _worldNode->addChild(_roomDraw, 0);
     buildRoom();
 
-    // 玩家（与 GameScene 一致的占位图形：方块）
-    _player = DrawNode::create();
-    const float size = 16.f;
-    Vec2 verts[4] = { Vec2(-size, -size), Vec2(size, -size), Vec2(size, size), Vec2(-size, size) };
-    _player->drawSolidPoly(verts, 4, Color4F(0.2f, 0.7f, 0.9f, 1.0f));
+    // Character Node
+    _player = Game::PlayerAppearance::create();
+    
+    // Load customized settings
+    auto def = UserDefault::getInstance();
+    int shirt = def->getIntegerForKey("player_shirt", 0);
+    int pants = def->getIntegerForKey("player_pants", 0);
+    int hair = def->getIntegerForKey("player_hair", 0);
+    int r = def->getIntegerForKey("player_hair_r", 255);
+    int g = def->getIntegerForKey("player_hair_g", 255);
+    int b = def->getIntegerForKey("player_hair_b", 255);
+    
+    _player->setShirtStyle(shirt);
+    _player->setPantsStyle(pants);
+    _player->setHairStyle(hair);
+    _player->setHairColor(Color3B(r, g, b));
+
     // 初始位置：房间中上部
     _player->setPosition(Vec2(_roomRect.getMidX(), _roomRect.getMidY() + 80));
-    this->addChild(_player, 2);
+    _worldNode->addChild(_player, 2);
 
     // 物品栏与热键栏（共享全局背包）
     auto &ws = Game::globalState();
@@ -79,12 +95,12 @@ bool RoomScene::init() {
     if (_bedLabel) {
         _bedLabel->setColor(Color3B::WHITE);
         _bedLabel->setPosition(Vec2(_bedRect.getMidX(), _bedRect.getMaxY() + 18));
-        this->addChild(_bedLabel, 2);
+        _worldNode->addChild(_bedLabel, 2);
     }
     if (_tableLabel) {
         _tableLabel->setColor(Color3B::WHITE);
         _tableLabel->setPosition(Vec2(_tableRect.getMidX(), _tableRect.getMaxY() + 18));
-        this->addChild(_tableLabel, 2);
+        _worldNode->addChild(_tableLabel, 2);
     }
 
     // 床交互提示（初始隐藏）
@@ -97,7 +113,7 @@ bool RoomScene::init() {
 
     // 室内箱子绘制与提示
     _chestDraw = DrawNode::create();
-    this->addChild(_chestDraw, 1);
+    _worldNode->addChild(_chestDraw, 1);
     _houseChests = ws.houseChests;
     refreshChestsVisuals();
     _chestPrompt = Label::createWithTTF("Press Space to Deposit", "fonts/Marker Felt.ttf", 20);
@@ -157,6 +173,7 @@ bool RoomScene::init() {
                     auto pop = Label::createWithTTF(StringUtils::format("New Day: %s Day %d, %02d:%02d", seasonName(ws.seasonIndex), ws.dayOfSeason, ws.timeHour, ws.timeMinute), "fonts/Marker Felt.ttf", 20);
                     pop->setColor(Color3B::WHITE);
                     auto pos = _player ? _player->getPosition() : Vec2(0,0);
+                    if (_worldNode) pos = _worldNode->convertToWorldSpace(pos);
                     pop->setPosition(pos + Vec2(0, 26));
                     this->addChild(pop, 3);
                     auto seq = Sequence::create(FadeOut::create(0.8f), RemoveSelf::create(), nullptr);
@@ -177,7 +194,8 @@ bool RoomScene::init() {
                             refreshHotbarUI();
                             auto pop2 = Label::createWithTTF("Placed Chest", "fonts/Marker Felt.ttf", 20);
                             pop2->setColor(Color3B::YELLOW);
-                            pop2->setPosition(p + Vec2(0, 26));
+                            Vec2 wp = p; if (_worldNode) wp = _worldNode->convertToWorldSpace(p);
+                            pop2->setPosition(wp + Vec2(0, 26));
                             this->addChild(pop2, 3);
                             auto seq2 = Sequence::create(FadeOut::create(0.8f), RemoveSelf::create(), nullptr);
                             pop2->runAction(seq2);
@@ -200,7 +218,8 @@ bool RoomScene::init() {
                                 refreshHotbarUI();
                                 auto pop3 = Label::createWithTTF("Stored Items", "fonts/Marker Felt.ttf", 20);
                                 pop3->setColor(Color3B::YELLOW);
-                                pop3->setPosition(p + Vec2(0, 26));
+                                Vec2 wp = p; if (_worldNode) wp = _worldNode->convertToWorldSpace(p);
+                                pop3->setPosition(wp + Vec2(0, 26));
                                 this->addChild(pop3, 3);
                                 auto seq3 = Sequence::create(FadeOut::create(0.6f), RemoveSelf::create(), nullptr);
                                 pop3->runAction(seq3);
@@ -212,6 +231,7 @@ bool RoomScene::init() {
                     auto pop = Label::createWithTTF("No effect indoors", "fonts/Marker Felt.ttf", 20);
                     pop->setColor(Color3B::YELLOW);
                     auto pos = _player ? _player->getPosition() : Vec2(0,0);
+                    if (_worldNode) pos = _worldNode->convertToWorldSpace(pos);
                     pop->setPosition(pos + Vec2(0, 26));
                     this->addChild(pop, 3);
                     auto seq = Sequence::create(FadeOut::create(0.6f), RemoveSelf::create(), nullptr);
@@ -237,6 +257,7 @@ bool RoomScene::init() {
                     auto pop = Label::createWithTTF("No chest nearby", "fonts/Marker Felt.ttf", 20);
                     pop->setColor(Color3B::RED);
                     auto pos = _player ? _player->getPosition() : Vec2(0,0);
+                    if (_worldNode) pos = _worldNode->convertToWorldSpace(pos);
                     pop->setPosition(pos + Vec2(0, 26));
                     this->addChild(pop, 3);
                     auto seq = Sequence::create(FadeOut::create(0.6f), RemoveSelf::create(), nullptr);
@@ -250,6 +271,7 @@ bool RoomScene::init() {
                 auto pop = Label::createWithTTF("Cheat: +99 All", "fonts/Marker Felt.ttf", 20);
                 pop->setColor(Color3B::YELLOW);
                 auto pos = _player ? _player->getPosition() : Vec2(0,0);
+                if (_worldNode) pos = _worldNode->convertToWorldSpace(pos);
                 pop->setPosition(pos + Vec2(0, 26));
                 this->addChild(pop, 3);
                 auto seq = Sequence::create(FadeOut::create(0.6f), RemoveSelf::create(), nullptr);
@@ -274,6 +296,7 @@ bool RoomScene::init() {
                             auto pop = Label::createWithTTF(std::string("Ate ") + Game::itemName(slot.itemType) + StringUtils::format(" +%d Energy", recover), "fonts/Marker Felt.ttf", 20);
                             pop->setColor(Color3B::YELLOW);
                             auto pos = _player ? _player->getPosition() : Vec2(0,0);
+                            if (_worldNode) pos = _worldNode->convertToWorldSpace(pos);
                             pop->setPosition(pos + Vec2(0, 26));
                             this->addChild(pop, 3);
                             auto seq = Sequence::create(FadeOut::create(0.6f), RemoveSelf::create(), nullptr);
@@ -503,15 +526,10 @@ void RoomScene::buildRoom() {
     if (!_roomDraw) return;
     _roomDraw->clear();
 
-    auto visibleSize = Director::getInstance()->getVisibleSize();
-    auto origin = Director::getInstance()->getVisibleOrigin();
-
-    // 房间大小：屏幕中间，略小于屏幕
-    float roomW = std::min(visibleSize.width * 0.70f, 900.0f);
-    float roomH = std::min(visibleSize.height * 0.70f, 520.0f);
-    float rx = origin.x + (visibleSize.width - roomW) * 0.5f;
-    float ry = origin.y + (visibleSize.height - roomH) * 0.5f;
-    _roomRect = Rect(rx, ry, roomW, roomH);
+    // Fixed room size in local coordinates
+    float roomW = 600.0f;
+    float roomH = 400.0f;
+    _roomRect = Rect(0, 0, roomW, roomH);
 
     // 门口区域：房间下边中间的一段缺口
     float doorW = 100.0f;
@@ -618,6 +636,19 @@ void RoomScene::update(float dt) {
 
     Vec2 dir(dx, dy);
     dir.normalize();
+    // Update Character Node Animation
+    bool isMoving = (_up || _down || _left || _right);
+    _player->setMoving(isMoving);
+    
+    if (isMoving) {
+        if (std::abs(dx) > std::abs(dy)) {
+            _player->setDirection(dx > 0 ? Game::PlayerAppearance::Direction::RIGHT : Game::PlayerAppearance::Direction::LEFT);
+        } else {
+            _player->setDirection(dy > 0 ? Game::PlayerAppearance::Direction::UP : Game::PlayerAppearance::Direction::DOWN);
+        }
+    }
+    _player->updateAnimation(dt);
+
     float speed = _isSprinting ? _sprintSpeed : _baseSpeed;
     Vec2 delta = dir * speed * dt;
     Vec2 next = _player->getPosition() + delta;
@@ -631,6 +662,40 @@ void RoomScene::update(float dt) {
     checkDoorRegion();
     checkBedRegion();
     checkChestRegion();
+    
+    // Camera Follow
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    auto origin = Director::getInstance()->getVisibleOrigin();
+    if (_worldNode && _player) {
+        float scale = _worldNode->getScale();
+        
+        // Target: Center player on screen
+        Vec2 targetCam = Vec2(origin.x + visibleSize.width * 0.5f, origin.y + visibleSize.height * 0.5f)
+                         - _player->getPosition() * scale;
+                         
+        float roomW = _roomRect.size.width * scale;
+        float roomH = _roomRect.size.height * scale;
+        
+        // Horizontal Clamp/Center
+        if (roomW <= visibleSize.width) {
+             targetCam.x = origin.x + (visibleSize.width - roomW) * 0.5f;
+        } else {
+            float minX = (origin.x + visibleSize.width) - roomW;
+            float maxX = origin.x;
+            targetCam.x = std::max(minX, std::min(maxX, targetCam.x));
+        }
+        
+        // Vertical Clamp/Center
+        if (roomH <= visibleSize.height) {
+             targetCam.y = origin.y + (visibleSize.height - roomH) * 0.5f;
+        } else {
+            float minY = (origin.y + visibleSize.height) - roomH;
+            float maxY = origin.y;
+            targetCam.y = std::max(minY, std::min(maxY, targetCam.y));
+        }
+        
+        _worldNode->setPosition(targetCam);
+    }
 }
 
 void RoomScene::checkDoorRegion() {
@@ -639,9 +704,10 @@ void RoomScene::checkDoorRegion() {
     _nearDoor = _doorRect.containsPoint(p);
     if (_doorPrompt) {
         _doorPrompt->setVisible(_nearDoor);
-        if (_nearDoor) {
+        if (_nearDoor && _worldNode) {
             _doorPrompt->setString("Press Space to Exit");
-            _doorPrompt->setPosition(p + Vec2(0, 26));
+            Vec2 worldPos = _worldNode->convertToWorldSpace(p);
+            _doorPrompt->setPosition(worldPos + Vec2(0, 26));
         }
     }
 }
@@ -729,9 +795,10 @@ void RoomScene::checkBedRegion() {
     _nearBed = _bedRect.containsPoint(p);
     if (_bedPrompt) {
         _bedPrompt->setVisible(_nearBed);
-        if (_nearBed) {
+        if (_nearBed && _worldNode) {
             _bedPrompt->setString("Press Space to Sleep");
-            _bedPrompt->setPosition(p + Vec2(0, 26));
+            Vec2 worldPos = _worldNode->convertToWorldSpace(p);
+            _bedPrompt->setPosition(worldPos + Vec2(0, 26));
         }
     }
 }
@@ -855,9 +922,10 @@ void RoomScene::checkChestRegion() {
     _nearChest = isNear;
     if (_chestPrompt) {
         _chestPrompt->setVisible(_nearChest);
-        if (_nearChest) {
+        if (_nearChest && _worldNode) {
             _chestPrompt->setString("Right-click to Open / Space to Deposit");
-            _chestPrompt->setPosition(p + Vec2(0, 26));
+            Vec2 worldPos = _worldNode->convertToWorldSpace(p);
+            _chestPrompt->setPosition(worldPos + Vec2(0, 26));
         }
     }
 }
@@ -941,6 +1009,7 @@ void RoomScene::attemptWithdraw(Game::ItemType type, int qty) {
         auto warn = Label::createWithTTF("Empty", "fonts/Marker Felt.ttf", 20);
         warn->setColor(Color3B::RED);
         Vec2 pos = _houseChests[_activeChestIdx].pos;
+        if (_worldNode) pos = _worldNode->convertToWorldSpace(pos);
         warn->setPosition(pos + Vec2(0, 26));
         this->addChild(warn, 3);
         auto seq = Sequence::create(FadeOut::create(0.6f), RemoveSelf::create(), nullptr);
@@ -952,6 +1021,7 @@ void RoomScene::attemptWithdraw(Game::ItemType type, int qty) {
     int rem = _inventory ? _inventory->addItems(type, take) : take;
     int put = take - rem;
     Vec2 chestPos = _houseChests[_activeChestIdx].pos;
+    if (_worldNode) chestPos = _worldNode->convertToWorldSpace(chestPos);
     if (rem > 0) {
         // 背包装不下的部分退回箱子
         bag.add(type, rem);

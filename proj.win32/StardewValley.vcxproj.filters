@@ -48,6 +48,13 @@
     <ClCompile Include="..\Classes\Game\GameMap.cpp">
       <Filter>Classes\Game</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\Game\Bag.cpp" />
+    <ClCompile Include="..\Classes\Scenes\CustomizationScene.cpp">
+      <Filter>Classes\Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\PlayerAppearance.cpp">
+      <Filter>Classes\Game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Classes\AppDelegate.h">
@@ -93,6 +100,24 @@
       <Filter>Win32</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\Game\GameMap.h">
+      <Filter>Classes\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\Bag.h">
+      <Filter>Classes\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\Cheat.h">
+      <Filter>Classes\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\Chest.h">
+      <Filter>Classes\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\Crop.h">
+      <Filter>Classes\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Scenes\CustomizationScene.h">
+      <Filter>Classes\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\PlayerAppearance.h">
       <Filter>Classes\Game</Filter>
     </ClInclude>
   </ItemGroup>

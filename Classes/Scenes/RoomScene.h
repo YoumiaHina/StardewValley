@@ -11,6 +11,8 @@
 // 需要使用 UI Button
 #include "ui/CocosGUI.h"
 
+#include "Game/PlayerAppearance.h"
+
 class RoomScene : public cocos2d::Scene {
 public:
     static cocos2d::Scene* createScene();
@@ -30,7 +32,8 @@ public:
 
 private:
     // 玩家与房间绘制
-    cocos2d::DrawNode* _player = nullptr;
+    cocos2d::Node* _worldNode = nullptr; // Scale container
+    Game::PlayerAppearance* _player = nullptr;
     cocos2d::DrawNode* _roomDraw = nullptr;
 
     // 房间与门区域
