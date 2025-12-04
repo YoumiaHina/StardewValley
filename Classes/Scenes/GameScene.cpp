@@ -9,6 +9,7 @@
 #include "Game/GameConfig.h"
 #include "Game/Tool.h"
 #include "Scenes/RoomScene.h"
+#include "Scenes/AbyssMineScene.h"
 #include "Game/Cheat.h"
 #include "Controllers/PlayerController.h"
 #include "Controllers/FarmMapController.h"
@@ -58,3 +59,11 @@ void GameScene::onSpacePressed() {
 }
 
 const char* GameScene::doorPromptText() const { return "Press Space to Enter House"; }
+
+void GameScene::onKeyPressedHook(EventKeyboard::KeyCode code) {
+    if (code == EventKeyboard::KeyCode::KEY_K) {
+        auto abyss = AbyssMineScene::create();
+        auto trans = TransitionFade::create(0.6f, abyss);
+        Director::getInstance()->replaceScene(trans);
+    }
+}

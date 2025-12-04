@@ -22,6 +22,8 @@
 #include "Controllers/PlayerController.h"
 #include "Controllers/GameStateController.h"
 #include "Controllers/ToolSystem.h"
+#include <functional>
+#include <vector>
 
 class SceneBase : public cocos2d::Scene {
 public:
@@ -53,7 +55,20 @@ protected:
     Controllers::GameStateController* _stateController = nullptr;
     Controllers::ToolSystem* _toolSystem = nullptr; // 可选
 
+protected:
+    // 允许子类注册额外的更新回调（用于 Monster/Mining/Combat 等控制器调度）。
+    void addUpdateCallback(const std::function<void(float)>& cb);
+    // 子类可覆盖的键盘钩子（默认空），用于处理自定义按键（如快速进矿洞 K）。
+    virtual void onKeyPressedHook(cocos2d::EventKeyboard::KeyCode) {}
+
 private:
     // 事件转发
     void registerCommonInputHandlers(bool enableToolOnSpace, bool enableToolOnLeftClick, bool buildCraftPanel);
+
+protected:
+    // 子类可覆盖的事件挂钩（默认空），用于转发到自定义控制器
+    virtual void onMouseDown(cocos2d::EventMouse* e) {}
+
+private:
+    std::vector<std::function<void(float)>> _extraUpdates;
 };

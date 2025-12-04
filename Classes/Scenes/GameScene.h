@@ -38,4 +38,7 @@ private:
     void positionPlayerInitial() override;
     void onSpacePressed() override;
     const char* doorPromptText() const override;
+
+protected:
+    void onKeyPressedHook(cocos2d::EventKeyboard::KeyCode code) override;
 };

@@ -72,6 +72,13 @@ list(APPEND GAME_SOURCE
      Classes/Controllers/FarmInteractor.h
      Classes/Controllers/RoomInteractor.cpp
      Classes/Controllers/RoomInteractor.h
+     Classes/Scenes/AbyssMineScene.cpp
+     Classes/Controllers/AbyssMapController.cpp
+     Classes/Controllers/AbyssMonsterController.cpp
+     Classes/Controllers/AbyssMiningController.cpp
+     Classes/Controllers/AbyssCombatController.cpp
+     Classes/Controllers/AbyssInteractor.cpp
+     Classes/Controllers/AbyssElevatorController.cpp
      )
 list(APPEND GAME_HEADER
      Classes/AppDelegate.h
@@ -81,6 +88,13 @@ list(APPEND GAME_HEADER
      Classes/Scenes/GameScene.h
      Classes/Scenes/SceneBase.h
      Classes/Scenes/RoomScene.h
+     Classes/Scenes/AbyssMineScene.h
+     Classes/Controllers/AbyssMapController.h
+     Classes/Controllers/AbyssMonsterController.h
+     Classes/Controllers/AbyssMiningController.h
+     Classes/Controllers/AbyssCombatController.h
+     Classes/Controllers/AbyssInteractor.h
+     Classes/Controllers/AbyssElevatorController.h
      Classes/Game/GameConfig.h
      )
 

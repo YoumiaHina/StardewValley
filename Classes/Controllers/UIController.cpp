@@ -76,6 +76,53 @@ void UIController::refreshHUD() {
     if (_energyLabel) {
         _energyLabel->setString(StringUtils::format("Energy %d/%d", ws.energy, ws.maxEnergy));
     }
+    // HP HUD（矿洞专属）
+    if (_hpFill && _hpNode) {
+        _hpFill->clear();
+        float bw = 160.0f, bh = 18.0f;
+        float ratio = ws.maxHp > 0 ? (static_cast<float>(ws.hp) / static_cast<float>(ws.maxHp)) : 0.f;
+        ratio = std::max(0.f, std::min(1.f, ratio));
+        float fillW = bw * ratio;
+        Vec2 bl(-bw, 0), br(-bw + fillW, 0), tr(-bw + fillW, bh), tl(-bw, bh);
+        Vec2 rect[4] = { bl, br, tr, tl };
+        _hpFill->drawSolidPoly(rect, 4, Color4F(0.9f, 0.15f, 0.15f, 0.95f));
+    }
+    if (_hpLabel) {
+        _hpLabel->setString(StringUtils::format("HP %d/%d", ws.hp, ws.maxHp));
+    }
+}
+
+void UIController::buildHPBarAboveEnergy() {
+    // 仅当能量条已建立时创建 HP 条，并将其放置在能量条正上方
+    if (!_energyNode || _hpNode) return;
+    _hpNode = Node::create();
+    // 根据能量条的世界位置放置到其正上方
+    Vec2 energyWorld = _energyNode->getPosition();
+    float offsetY = 24.0f; // 与能量条间距
+    _hpNode->setPosition(Vec2(energyWorld.x, energyWorld.y + offsetY));
+    if (_scene) _scene->addChild(_hpNode, 3);
+
+    float bw = 160.0f, bh = 18.0f;
+    auto bg = DrawNode::create();
+    Vec2 bl(-bw, 0), br(0, 0), tr(0, bh), tl(-bw, bh);
+    Vec2 rect[4] = { bl, br, tr, tl };
+    bg->drawSolidPoly(rect, 4, Color4F(0.f,0.f,0.f,0.35f));
+    bg->drawLine(bl, br, Color4F(1,1,1,0.5f));
+    bg->drawLine(br, tr, Color4F(1,1,1,0.5f));
+    bg->drawLine(tr, tl, Color4F(1,1,1,0.5f));
+    bg->drawLine(tl, bl, Color4F(1,1,1,0.5f));
+    _hpNode->addChild(bg);
+
+    _hpFill = DrawNode::create();
+    _hpNode->addChild(_hpFill);
+
+    _hpLabel = Label::createWithTTF("", "fonts/Marker Felt.ttf", 16);
+    _hpLabel->setAnchorPoint(Vec2(1,0.5f));
+    _hpLabel->setPosition(Vec2(-4.0f, bh * 0.5f));
+    _hpLabel->setColor(Color3B::RED);
+    _hpNode->addChild(_hpLabel);
+
+    refreshHUD();
 }
 
 void UIController::buildHotbar() {

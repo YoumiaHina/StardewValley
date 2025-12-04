@@ -53,6 +53,27 @@
     <ClCompile Include="..\Classes\Scenes\SceneBase.cpp">
       <Filter>Classes\Scenes</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\Scenes\AbyssMineScene.cpp">
+      <Filter>Classes\Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\AbyssMapController.cpp">
+      <Filter>Classes\Controllers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\AbyssMonsterController.cpp">
+      <Filter>Classes\Controllers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\AbyssMiningController.cpp">
+      <Filter>Classes\Controllers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\AbyssCombatController.cpp">
+      <Filter>Classes\Controllers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\AbyssInteractor.cpp">
+      <Filter>Classes\Controllers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\AbyssElevatorController.cpp">
+      <Filter>Classes\Controllers</Filter>
+    </ClCompile>
     <ClCompile Include="..\Classes\Scenes\RoomScene.cpp">
       <Filter>Classes\Scenes</Filter>
     </ClCompile>
@@ -124,6 +145,27 @@
     </ClInclude>
     <ClInclude Include="..\Classes\Scenes\SceneBase.h">
       <Filter>Classes\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Scenes\AbyssMineScene.h">
+      <Filter>Classes\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\AbyssMapController.h">
+      <Filter>Classes\Controllers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\AbyssMonsterController.h">
+      <Filter>Classes\Controllers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\AbyssMiningController.h">
+      <Filter>Classes\Controllers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\AbyssCombatController.h">
+      <Filter>Classes\Controllers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\AbyssInteractor.h">
+      <Filter>Classes\Controllers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\AbyssElevatorController.h">
+      <Filter>Classes\Controllers</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\Scenes\RoomScene.h">
       <Filter>Classes\Scenes</Filter>

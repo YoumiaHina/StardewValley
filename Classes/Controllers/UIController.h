@@ -31,6 +31,8 @@ public:
     bool handleChestRightClick(cocos2d::EventMouse* e, const std::vector<Game::Chest>& chests);
     bool handleHotbarAtPoint(const cocos2d::Vec2& screenPoint);
     void handleHotbarScroll(float dy);
+    // 矿洞专属：在能量条正上方绘制血条（红色）。
+    void buildHPBarAboveEnergy();
 
     // 提示显示/隐藏（传入世界坐标）
     void showDoorPrompt(bool visible, const cocos2d::Vec2& worldPos, const std::string& text);
@@ -59,6 +61,10 @@ private:
     cocos2d::Node* _energyNode = nullptr;
     cocos2d::DrawNode* _energyFill = nullptr;
     cocos2d::Label* _energyLabel = nullptr;
+    // HP HUD（矿洞专属）
+    cocos2d::Node* _hpNode = nullptr;
+    cocos2d::DrawNode* _hpFill = nullptr;
+    cocos2d::Label* _hpLabel = nullptr;
 
     // Hotbar
     cocos2d::Node* _hotbarNode = nullptr;

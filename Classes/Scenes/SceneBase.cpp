@@ -94,6 +94,8 @@ void SceneBase::registerCommonInputHandlers(bool enableToolOnSpace, bool enableT
             } break;
             default: break;
         }
+        // 子类扩展键盘处理（如快速进入矿洞 K 键）
+        onKeyPressedHook(code);
     };
     kb->onKeyReleased = [this](EventKeyboard::KeyCode code, Event*) {
         _playerController->onKeyReleased(code);
@@ -111,6 +113,8 @@ void SceneBase::registerCommonInputHandlers(bool enableToolOnSpace, bool enableT
         if (e->getMouseButton() == EventMouse::MouseButton::BUTTON_RIGHT) {
             _uiController->handleChestRightClick(e, _mapController->chests());
         }
+        // 允许子类进一步处理（例如战斗攻击）
+        onMouseDown(e);
     };
     mouse->onMouseScroll = [this](EventMouse* e){
         _uiController->handleHotbarScroll(e->getScrollY());
@@ -128,6 +132,7 @@ void SceneBase::registerCommonInputHandlers(bool enableToolOnSpace, bool enableT
 void SceneBase::update(float dt) {
     _stateController->update(dt);
     _playerController->update(dt);
+    for (auto& cb : _extraUpdates) { cb(dt); }
     if (_player && _uiController && _mapController) {
         Vec2 p = _player->getPosition();
         bool nearDoor = _mapController->isNearDoor(p);
@@ -135,4 +140,8 @@ void SceneBase::update(float dt) {
         _uiController->showDoorPrompt(nearDoor, p, doorPromptText());
         _uiController->showChestPrompt(nearChest, p, "Right-click to Open / Space to Deposit");
     }
+}
+
+void SceneBase::addUpdateCallback(const std::function<void(float)>& cb) {
+    _extraUpdates.push_back(cb);
 }

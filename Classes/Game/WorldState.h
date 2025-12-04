@@ -47,6 +47,10 @@ struct WorldState {
     // 能量系统
     int energy = GameConfig::ENERGY_MAX;
     int maxEnergy = GameConfig::ENERGY_MAX;
+
+    // 生命值系统（矿洞 HUD 专属显示）
+    int hp = 100;
+    int maxHp = 100;
 };
 
 // 获取全局状态（惰性初始化由调用方保证）
