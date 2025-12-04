@@ -19,7 +19,8 @@ FarmInteractor::SpaceAction FarmInteractor::onSpacePressed() {
         const auto &slot = _inventory->selectedSlot();
         // 播种
         if (Game::isSeed(slot.itemType)) {
-            auto tgt = _map->targetTile(p, Vec2(0,-1));
+            auto lastDir = _getLastDir ? _getLastDir() : Vec2(0,-1);
+            auto tgt = _map->targetTile(p, lastDir);
             int tc = tgt.first, tr = tgt.second;
             if (_map->inBounds(tc, tr) && !_map->isNearChest(_map->tileToWorld(tc,tr)) && _map->findCropIndex(tc, tr) < 0) {
                 auto t = _map->getTile(tc, tr);
@@ -35,7 +36,8 @@ FarmInteractor::SpaceAction FarmInteractor::onSpacePressed() {
         }
         // 放置箱子
         if (slot.itemType == Game::ItemType::Chest) {
-            auto tgt = _map->targetTile(p, Vec2(0,-1));
+            auto lastDir = _getLastDir ? _getLastDir() : Vec2(0,-1);
+            auto tgt = _map->targetTile(p, lastDir);
             int tc = tgt.first, tr = tgt.second;
             if (_map->inBounds(tc, tr)) {
                 auto t = _map->getTile(tc, tr);

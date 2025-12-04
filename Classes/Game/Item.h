@@ -12,6 +12,10 @@ enum class ItemType {
     Chest = 3,
     Parsnip = 4,
     ParsnipSeed = 5,
+    Blueberry = 6,
+    BlueberrySeed = 7,
+    Eggplant = 8,
+    EggplantSeed = 9,
 };
 
 // 英文名称（内部使用）
@@ -23,6 +27,10 @@ inline const char* itemName(ItemType t) {
         case ItemType::Chest: return "Chest";
         case ItemType::Parsnip: return "Parsnip";
         case ItemType::ParsnipSeed: return "Parsnip Seed";
+        case ItemType::Blueberry: return "Blueberry";
+        case ItemType::BlueberrySeed: return "Blueberry Seed";
+        case ItemType::Eggplant: return "Eggplant";
+        case ItemType::EggplantSeed: return "Eggplant Seed";
         default: return "Unknown";
     }
 }
@@ -36,6 +44,10 @@ inline const char* itemNameZH(ItemType t) {
         case ItemType::Chest: return "箱子";
         case ItemType::Parsnip: return "防风草";
         case ItemType::ParsnipSeed: return "防风草种子";
+        case ItemType::Blueberry: return "蓝莓";
+        case ItemType::BlueberrySeed: return "蓝莓种子";
+        case ItemType::Eggplant: return "茄子";
+        case ItemType::EggplantSeed: return "茄子种子";
         default: return "未知";
     }
 }
@@ -50,13 +62,37 @@ inline cocos2d::Color4F itemColor(ItemType t) {
         case ItemType::Chest: return Color4F(0.85f, 0.65f, 0.20f, 1.0f);
         case ItemType::Parsnip: return Color4F(0.95f, 0.85f, 0.35f, 1.0f);
         case ItemType::ParsnipSeed: return Color4F(0.90f, 0.75f, 0.25f, 1.0f);
+        case ItemType::Blueberry: return Color4F(0.35f, 0.45f, 0.95f, 1.0f);
+        case ItemType::BlueberrySeed: return Color4F(0.35f, 0.45f, 0.95f, 0.8f);
+        case ItemType::Eggplant: return Color4F(0.55f, 0.30f, 0.85f, 1.0f);
+        case ItemType::EggplantSeed: return Color4F(0.55f, 0.30f, 0.85f, 0.8f);
         default: return Color4F(1,1,1,1);
     }
 }
 
 // 是否可食用（占位规则：纤维可食用，用于演示）
 inline bool itemEdible(ItemType t) {
-    return t == ItemType::Fiber;
+    return t == ItemType::Fiber || t == ItemType::Parsnip || t == ItemType::Blueberry || t == ItemType::Eggplant;
+}
+
+inline int itemEnergyRestore(ItemType t) {
+    switch (t) {
+        case ItemType::Fiber: return 5;
+        case ItemType::Parsnip: return 20;
+        case ItemType::Blueberry: return 12;
+        case ItemType::Eggplant: return 18;
+        default: return 0;
+    }
+}
+
+inline int itemHpRestore(ItemType t) {
+    switch (t) {
+        case ItemType::Fiber: return 0;
+        case ItemType::Parsnip: return 0;
+        case ItemType::Blueberry: return 2;
+        case ItemType::Eggplant: return 4;
+        default: return 0;
+    }
 }
 
 // 枚举哈希，便于 unordered_map

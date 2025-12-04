@@ -59,7 +59,9 @@ bool SceneBase::initBase(float worldScale, bool buildCraftPanel, bool enableTool
     // 可选工具系统
     if (enableToolOnSpace || enableToolOnLeftClick) {
         _toolSystem = new Controllers::ToolSystem(_inventory, _mapController,
-            [this]() -> Vec2 { return _player ? _player->getPosition() : Vec2(); }, _uiController);
+            [this]() -> Vec2 { return _player ? _player->getPosition() : Vec2(); },
+            [this]() -> Vec2 { return _playerController ? _playerController->lastDir() : Vec2(0,-1); },
+            _uiController);
     }
 
     // 事件监听
@@ -87,6 +89,39 @@ void SceneBase::registerCommonInputHandlers(bool enableToolOnSpace, bool enableT
             case EventKeyboard::KeyCode::KEY_Z: {
                 Game::Cheat::grantBasic(_inventory);
                 _uiController->refreshHotbar();
+            } break;
+            case EventKeyboard::KeyCode::KEY_X: {
+                // 仅让当前目标格子的作物提升一个阶段
+                int tc = 0, tr = 0;
+                if (_player && _mapController) {
+                    Vec2 playerPos = _player->getPosition();
+                    Vec2 dir = _playerController ? _playerController->lastDir() : Vec2(0,-1);
+                    auto tgt = _mapController->targetTile(playerPos, dir);
+                    tc = tgt.first; tr = tgt.second;
+                    _mapController->advanceCropOnceAt(tc, tr);
+                }
+                if (_uiController && _player) {
+                    _mapController->refreshCropsVisuals();
+                    _uiController->popTextAt(_player->getPosition(), "Grow +1", Color3B::YELLOW);
+                }
+            } break;
+            case EventKeyboard::KeyCode::KEY_F: {
+                auto &ws = Game::globalState();
+                if (_inventory && _inventory->selectedKind() == Game::SlotKind::Item) {
+                    auto slot = _inventory->selectedSlot();
+                    if (slot.itemQty > 0 && Game::itemEdible(slot.itemType)) {
+                        bool ok = _inventory->consumeSelectedItem(1);
+                        if (ok) {
+                            int e = ws.energy + Game::itemEnergyRestore(slot.itemType);
+                            int h = ws.hp + Game::itemHpRestore(slot.itemType);
+                            ws.energy = std::min(ws.maxEnergy, e);
+                            ws.hp = std::min(ws.maxHp, h);
+                            _uiController->refreshHotbar();
+                            _uiController->refreshHUD();
+                            if (_player) _uiController->popTextAt(_player->getPosition(), "Ate", Color3B::GREEN);
+                        }
+                    }
+                }
             } break;
             case EventKeyboard::KeyCode::KEY_SPACE: {
                 if (enableToolOnSpace && _toolSystem) { _toolSystem->useSelectedTool(); }

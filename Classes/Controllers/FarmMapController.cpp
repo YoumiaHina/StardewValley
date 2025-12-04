@@ -3,8 +3,10 @@
 #include <random>
 #include <ctime>
 #include <algorithm>
+#include <unordered_set>
 #include "Game/GameConfig.h"
 #include "Game/WorldState.h"
+#include "Game/CropSprites.h"
 
 using namespace cocos2d;
 
@@ -73,6 +75,12 @@ void FarmMapController::init() {
     _worldNode->addChild(_chestDraw, 1);
     _cropsDraw = DrawNode::create();
     _worldNode->addChild(_cropsDraw, 1);
+    _cropsRoot = Node::create();
+    if (_gameMap && _gameMap->getTMX()) {
+        _gameMap->getTMX()->addChild(_cropsRoot, 22);
+    } else {
+        _worldNode->addChild(_cropsRoot, 18);
+    }
 
     refreshMapVisuals();
     refreshDropsVisuals();
@@ -233,17 +241,59 @@ void FarmMapController::refreshMapVisuals() {
 }
 
 void FarmMapController::refreshCropsVisuals() {
-    if (!_cropsDraw) return;
-    _cropsDraw->clear();
+    if (!_cropsRoot) return;
     float s = tileSize();
+    std::unordered_set<long long> alive;
     for (const auto& cp : _crops) {
+        long long key = (static_cast<long long>(cp.r) << 32) | static_cast<unsigned long long>(cp.c);
+        alive.insert(key);
+        auto itB = _cropSprites.find(key);
+        cocos2d::Sprite* sprB = nullptr;
+        if (itB == _cropSprites.end()) {
+            sprB = cocos2d::Sprite::create("crops.png");
+            sprB->setAnchorPoint(cocos2d::Vec2(0.5f, 0.0f));
+            _cropsRoot->addChild(sprB, 0);
+            _cropSprites[key] = sprB;
+        } else {
+            sprB = itB->second;
+        }
+        auto itT = _cropSpritesTop.find(key);
+        cocos2d::Sprite* sprT = nullptr;
+        if (itT == _cropSpritesTop.end()) {
+            sprT = cocos2d::Sprite::create("crops.png");
+            sprT->setAnchorPoint(cocos2d::Vec2(0.5f, 0.0f));
+            _cropsRoot->addChild(sprT, 1);
+            _cropSpritesTop[key] = sprT;
+        } else {
+            sprT = itT->second;
+        }
+        float texH = sprB->getTexture() ? sprB->getTexture()->getContentSize().height : 0.0f;
+        cocos2d::Rect rectB = Game::cropRectBottomHalf(cp.type, cp.stage, texH);
+        cocos2d::Rect rectT = Game::cropRectTopHalf(cp.type, cp.stage, texH);
+        sprB->setTextureRect(rectB);
+        sprT->setTextureRect(rectT);
         auto center = tileToWorld(cp.c, cp.r);
-        float radius = s * (0.15f + 0.08f * std::max(0, cp.stage));
-        Color4F col(0.95f, 0.85f, 0.35f, 1.0f);
-        _cropsDraw->drawSolidCircle(center, radius, 0.0f, 12, col);
-        _cropsDraw->drawCircle(center, radius, 0.0f, 12, false, Color4F(0,0,0,0.35f));
-        if (cp.stage >= cp.maxStage) {
-            _cropsDraw->drawCircle(center, radius + 2.0f, 0.0f, 12, false, Color4F(1.f,0.9f,0.2f,0.8f));
+        sprB->setPosition(cocos2d::Vec2(center.x, center.y - s * 0.5f));
+        sprT->setPosition(cocos2d::Vec2(center.x, center.y - s * 0.5f + 16.0f));
+        sprB->setVisible(true);
+        sprT->setVisible(true);
+    }
+    std::vector<long long> toRemove;
+    for (auto& kv : _cropSprites) {
+        if (alive.find(kv.first) == alive.end()) {
+            toRemove.push_back(kv.first);
+        }
+    }
+    for (auto k : toRemove) {
+        if (_cropSprites.count(k)) {
+            auto spr = _cropSprites[k];
+            if (spr) spr->removeFromParent();
+            _cropSprites.erase(k);
+        }
+        if (_cropSpritesTop.count(k)) {
+            auto spr2 = _cropSpritesTop[k];
+            if (spr2) spr2->removeFromParent();
+            _cropSpritesTop.erase(k);
         }
     }
 }
@@ -301,6 +351,27 @@ void FarmMapController::harvestCropAt(int c, int r) {
         auto item = Game::produceItemFor(cp.type);
         // 背包逻辑由上层处理，这里仅移除作物并刷新可视
         _crops.erase(_crops.begin() + idx);
+        Game::globalState().farmCrops = _crops;
+        refreshCropsVisuals();
+    }
+}
+
+void FarmMapController::instantMatureAllCrops() {
+    for (auto &cp : _crops) {
+        cp.stage = cp.maxStage;
+        cp.progress = 0;
+    }
+    Game::globalState().farmCrops = _crops;
+    refreshCropsVisuals();
+}
+
+void FarmMapController::advanceCropOnceAt(int c, int r) {
+    int idx = findCropIndex(c, r);
+    if (idx < 0) return;
+    auto &cp = _crops[idx];
+    if (cp.stage < cp.maxStage) {
+        cp.stage += 1;
+        cp.progress = 0;
         Game::globalState().farmCrops = _crops;
         refreshCropsVisuals();
     }

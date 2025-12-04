@@ -20,8 +20,9 @@ public:
     FarmInteractor(std::shared_ptr<Game::Inventory> inventory,
                    IMapController* map,
                    UIController* ui,
-                   std::function<cocos2d::Vec2()> getPlayerPos)
-    : _inventory(std::move(inventory)), _map(map), _ui(ui), _getPlayerPos(std::move(getPlayerPos)) {}
+                   std::function<cocos2d::Vec2()> getPlayerPos,
+                   std::function<cocos2d::Vec2()> getLastDir)
+    : _inventory(std::move(inventory)), _map(map), _ui(ui), _getPlayerPos(std::move(getPlayerPos)), _getLastDir(std::move(getLastDir)) {}
 
     SpaceAction onSpacePressed();
 
@@ -30,6 +31,7 @@ private:
     IMapController* _map = nullptr;
     UIController* _ui = nullptr;
     std::function<cocos2d::Vec2()> _getPlayerPos;
+    std::function<cocos2d::Vec2()> _getLastDir;
 };
 
 } // namespace Controllers

@@ -52,6 +52,8 @@ public:
     virtual void plantCrop(int cropType /*Game::CropType*/, int c, int r) {}
     virtual void advanceCropsDaily() {}
     virtual void harvestCropAt(int c, int r) {}
+    virtual void instantMatureAllCrops() {}
+    virtual void advanceCropOnceAt(int c, int r) {}
 
     // Chest 容器访问（Farm/Room 实现）
     virtual const std::vector<Game::Chest>& chests() const = 0;

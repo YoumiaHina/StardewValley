@@ -33,7 +33,7 @@ std::string ToolSystem::useSelectedTool() {
     int tc = 0, tr = 0;
     if (_getPlayerPos) {
         auto playerPos = _getPlayerPos();
-        auto lastDir = Vec2(0,-1); // 由 PlayerController 更新光标；这里仅取目标格
+        auto lastDir = _getLastDir ? _getLastDir() : Vec2(0,-1);
         auto tgt = _map->targetTile(playerPos, lastDir);
         tc = tgt.first; tr = tgt.second;
     }
