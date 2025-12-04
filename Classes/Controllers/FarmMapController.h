@@ -62,6 +62,7 @@ public:
 
     Game::GameMap* tmx() const { return _gameMap; }
     cocos2d::Node* worldNode() const { return _worldNode; }
+    void addActorToMap(cocos2d::Node* node, int zOrder) override;
 
 private:
     cocos2d::Node* _worldNode = nullptr;

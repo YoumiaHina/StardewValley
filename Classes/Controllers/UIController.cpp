@@ -199,6 +199,19 @@ bool UIController::handleHotbarAtPoint(const Vec2& screenPoint) {
     return false;
 }
 
+void UIController::handleHotbarScroll(float dy) {
+    if (!_inventory) return;
+    if (dy > 0) {
+        _inventory->next();
+    } else if (dy < 0) {
+        _inventory->prev();
+    } else {
+        return;
+    }
+    Game::globalState().selectedIndex = _inventory->selectedIndex();
+    refreshHotbar();
+}
+
 bool UIController::handleChestRightClick(EventMouse* e, const std::vector<Game::Chest>& chests) {
     if (e->getMouseButton() != EventMouse::MouseButton::BUTTON_RIGHT) return false;
     if (chests.empty()) return false;

@@ -83,4 +83,10 @@ bool RoomMapController::isNearChest(const Vec2& playerWorldPos) const {
     return false;
 }
 
+void RoomMapController::addActorToMap(cocos2d::Node* node, int zOrder) {
+    if (_worldNode) {
+        _worldNode->addChild(node, zOrder);
+    }
+}
+
 } // namespace Controllers

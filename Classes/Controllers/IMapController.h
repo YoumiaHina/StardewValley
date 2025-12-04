@@ -56,6 +56,9 @@ public:
     // Chest 容器访问（Farm/Room 实现）
     virtual const std::vector<Game::Chest>& chests() const = 0;
     virtual std::vector<Game::Chest>& chests() = 0;
+
+    // 将角色/演员节点添加到地图正确的父节点与层级（Farm 使用 TMX，Room 使用 world）。
+    virtual void addActorToMap(cocos2d::Node* node, int zOrder) = 0;
 };
 
 } // namespace Controllers

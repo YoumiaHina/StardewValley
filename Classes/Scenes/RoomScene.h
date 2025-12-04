@@ -15,26 +15,24 @@
 #include "Controllers/UIController.h"
 #include "Controllers/GameStateController.h"
 #include "Controllers/RoomInteractor.h"
+#include "Scenes/SceneBase.h"
 
-class RoomScene : public cocos2d::Scene {
+class RoomScene : public SceneBase {
 public:
     static cocos2d::Scene* createScene();
     virtual bool init() override;
 
     CREATE_FUNC(RoomScene);
-
-    void update(float dt) override;
     // 设置在门内侧的出生点（从农场返回时）
     void setSpawnInsideDoor();
 
 private:
-    cocos2d::Node* _worldNode = nullptr;
-    Game::PlayerAppearance* _player = nullptr;
-    std::shared_ptr<Game::Inventory> _inventory;
-
-    Controllers::PlayerController* _playerController = nullptr;
-    Controllers::RoomMapController* _mapController = nullptr;
-    Controllers::UIController* _uiController = nullptr;
-    Controllers::GameStateController* _stateController = nullptr;
+    Controllers::RoomMapController* _roomMap = nullptr;
     Controllers::RoomInteractor* _interactor = nullptr;
+
+    // SceneBase overrides
+    Controllers::IMapController* createMapController(cocos2d::Node* worldNode) override;
+    void positionPlayerInitial() override;
+    void onSpacePressed() override;
+    const char* doorPromptText() const override;
 };

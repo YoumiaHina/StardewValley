@@ -30,6 +30,7 @@ public:
     bool handleHotbarMouseDown(cocos2d::EventMouse* e);
     bool handleChestRightClick(cocos2d::EventMouse* e, const std::vector<Game::Chest>& chests);
     bool handleHotbarAtPoint(const cocos2d::Vec2& screenPoint);
+    void handleHotbarScroll(float dy);
 
     // 提示显示/隐藏（传入世界坐标）
     void showDoorPrompt(bool visible, const cocos2d::Vec2& worldPos, const std::string& text);

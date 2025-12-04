@@ -161,6 +161,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClCompile Include="..\Classes\Scenes\MainMenuScene.cpp" />
     <ClCompile Include="..\Classes\Scenes\GameScene.cpp" />
     <ClCompile Include="..\Classes\Scenes\RoomScene.cpp" />
+    <ClCompile Include="..\Classes\Scenes\SceneBase.cpp" />
     <ClCompile Include="..\Classes\Game\WorldState.cpp" />
     <ClCompile Include="..\Classes\Game\Inventory.cpp" />
     <ClCompile Include="..\Classes\Game\Bag.cpp" />
@@ -188,6 +189,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClInclude Include="..\Classes\Scenes\MainMenuScene.h" />
     <ClInclude Include="..\Classes\Scenes\GameScene.h" />
     <ClInclude Include="..\Classes\Scenes\RoomScene.h" />
+    <ClInclude Include="..\Classes\Scenes\SceneBase.h" />
     <ClInclude Include="..\Classes\Game\GameConfig.h" />
     <ClInclude Include="..\Classes\Game\WorldState.h" />
     <ClInclude Include="..\Classes\Game\Inventory.h" />

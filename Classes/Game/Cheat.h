@@ -9,7 +9,7 @@ namespace Game {
 struct Cheat {
     static void grantBasic(const std::shared_ptr<Inventory>& inv) {
         if (!inv) return;
-        for (auto t : { ItemType::Wood, ItemType::Stone, ItemType::Fiber, ItemType::Chest, ItemType::ParsnipSeed }) {
+        for (auto t : { ItemType::Wood, ItemType::Stone, ItemType::Fiber, ItemType::Chest, ItemType::Parsnip, ItemType::ParsnipSeed }) {
             inv->addItems(t, 99);
         }
     }

@@ -50,6 +50,9 @@
     <ClCompile Include="..\Classes\Scenes\GameScene.cpp">
       <Filter>Classes\Scenes</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\Scenes\SceneBase.cpp">
+      <Filter>Classes\Scenes</Filter>
+    </ClCompile>
     <ClCompile Include="..\Classes\Scenes\RoomScene.cpp">
       <Filter>Classes\Scenes</Filter>
     </ClCompile>
@@ -117,6 +120,9 @@
       <Filter>Classes\Scenes</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\Scenes\GameScene.h">
+      <Filter>Classes\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Scenes\SceneBase.h">
       <Filter>Classes\Scenes</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\Scenes\RoomScene.h">

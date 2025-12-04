@@ -306,4 +306,12 @@ void FarmMapController::harvestCropAt(int c, int r) {
     }
 }
 
+void FarmMapController::addActorToMap(cocos2d::Node* node, int zOrder) {
+    if (_gameMap && _gameMap->getTMX()) {
+        _gameMap->getTMX()->addChild(node, zOrder);
+    } else if (_worldNode) {
+        _worldNode->addChild(node, zOrder);
+    }
+}
+
 } // namespace Controllers

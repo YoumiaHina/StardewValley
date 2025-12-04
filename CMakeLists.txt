@@ -53,6 +53,7 @@ list(APPEND GAME_SOURCE
      Classes/Scenes/SplashScene.cpp
      Classes/Scenes/MainMenuScene.cpp
      Classes/Scenes/GameScene.cpp
+     Classes/Scenes/SceneBase.cpp
      Classes/Scenes/RoomScene.cpp
      Classes/Controllers/IMapController.h
      Classes/Controllers/PlayerController.cpp
@@ -78,6 +79,7 @@ list(APPEND GAME_HEADER
      Classes/Scenes/SplashScene.h
      Classes/Scenes/MainMenuScene.h
      Classes/Scenes/GameScene.h
+     Classes/Scenes/SceneBase.h
      Classes/Scenes/RoomScene.h
      Classes/Game/GameConfig.h
      )

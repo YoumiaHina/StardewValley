@@ -37,6 +37,7 @@ public:
     const cocos2d::Rect& bedRect()  const { return _bedRect; }
     const std::vector<Game::Chest>& chests() const { return _chests; }
     std::vector<Game::Chest>& chests() { return _chests; }
+    void addActorToMap(cocos2d::Node* node, int zOrder) override;
 
 private:
     cocos2d::Node* _worldNode = nullptr;

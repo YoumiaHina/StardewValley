@@ -17,29 +17,25 @@
 #include "Controllers/UIController.h"
 #include "Controllers/GameStateController.h"
 #include "Controllers/FarmInteractor.h"
+#include "Scenes/SceneBase.h"
 
-class GameScene : public cocos2d::Scene {
+class GameScene : public SceneBase {
 public:
     static cocos2d::Scene* createScene();
     virtual bool init() override;
 
     CREATE_FUNC(GameScene);
-
-    void update(float dt) override;
+    
     // 供其他场景调用：将玩家出生在农场门外侧
     void setSpawnAtFarmEntrance();
 
 private:
-    // 世界容器与核心对象
-    cocos2d::Node* _worldNode = nullptr;
-    Game::PlayerAppearance* _player = nullptr;
-    std::shared_ptr<Game::Inventory> _inventory;
-
-    // 控制器与系统
-    Controllers::PlayerController* _playerController = nullptr;
-    Controllers::FarmMapController* _mapController = nullptr;
-    Controllers::UIController* _uiController = nullptr;
-    Controllers::ToolSystem* _toolSystem = nullptr;
-    Controllers::GameStateController* _stateController = nullptr;
+    Controllers::FarmMapController* _farmMap = nullptr;
     Controllers::FarmInteractor* _interactor = nullptr;
+
+    // SceneBase overrides
+    Controllers::IMapController* createMapController(cocos2d::Node* worldNode) override;
+    void positionPlayerInitial() override;
+    void onSpacePressed() override;
+    const char* doorPromptText() const override;
 };
