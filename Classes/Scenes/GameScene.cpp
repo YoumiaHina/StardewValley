@@ -10,6 +10,7 @@
 #include "Game/Tool.h"
 #include "Scenes/RoomScene.h"
 #include "Scenes/AbyssMineScene.h"
+#include "Managers/AudioManager.h"
 #include "Game/Cheat.h"
 #include "Controllers/PlayerController.h"
 #include "Controllers/FarmMapController.h"
@@ -24,6 +25,7 @@ Scene* GameScene::createScene() { return GameScene::create(); }
 
 bool GameScene::init() {
     if (!initBase(/*worldScale*/3.0f, /*buildCraftPanel*/true, /*enableToolOnSpace*/true, /*enableToolOnLeftClick*/true)) return false;
+    Managers::AudioManager::getInstance().playBackgroundFor(Managers::SceneZone::Farm);
     _interactor = new Controllers::FarmInteractor(_inventory, _mapController, _uiController,
         [this]() -> Vec2 { return _player ? _player->getPosition() : Vec2(); },
         [this]() -> Vec2 { return _playerController ? _playerController->lastDir() : Vec2(0,-1); });
