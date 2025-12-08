@@ -91,6 +91,14 @@ private:
     cocos2d::Node* _cropsRoot = nullptr;
     std::unordered_map<long long, cocos2d::Sprite*> _cropSprites;
     std::unordered_map<long long, cocos2d::Sprite*> _cropSpritesTop;
+
+    // Tilled tile overlay sprites
+    cocos2d::Node* _tileRoot = nullptr;
+    std::unordered_map<long long, cocos2d::Sprite*> _tileSprites;
+
+    // Lake overlay sprites
+    cocos2d::Node* _lakeRoot = nullptr;
+    std::unordered_map<long long, cocos2d::Sprite*> _lakeSprites;
 };
 
 } // namespace Controllers

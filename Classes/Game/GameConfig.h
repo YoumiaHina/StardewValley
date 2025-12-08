@@ -38,4 +38,19 @@ namespace GameConfig {
     static const float REAL_SECONDS_PER_GAME_MINUTE = 1.0f;
     // Kept for reference if hour-based mapping is needed elsewhere
     static const float REAL_SECONDS_PER_GAME_HOUR = 60.0f;
+
+    // Tileset 配置（spring_outdoors）
+    static const int SPRING_OUTDOORS_COLUMNS = 25; // tileset 列数（tsx 定义为 25）
+
+    // 农场耕地材质（按 1-based 行列指定）
+    static const int FARM_TILLED_TILE_ROW = 57; // 第 57 排
+    static const int FARM_TILLED_TILE_COL = 23; // 第 23 列
+
+    // 农场浇水后耕地材质（按 1-based 行列指定）
+    static const int FARM_WATERED_TILE_ROW = 58; // 第 58 排
+    static const int FARM_WATERED_TILE_COL = 13; // 第 13 列
+
+    // 湖泊材质（按 1-based 行列指定）
+    static const int FARM_LAKE_TILE_ROW = 66; // 第 66 排
+    static const int FARM_LAKE_TILE_COL = 10; // 第 10 列
 }

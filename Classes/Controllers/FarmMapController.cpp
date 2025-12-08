@@ -82,6 +82,63 @@ void FarmMapController::init() {
         _worldNode->addChild(_cropsRoot, 18);
     }
 
+    // Tile overlay root for textured tilled soil
+    _tileRoot = Node::create();
+    if (_gameMap && _gameMap->getTMX()) {
+        _gameMap->getTMX()->addChild(_tileRoot, 18);
+    } else {
+        _worldNode->addChild(_tileRoot, 0);
+    }
+
+    // Lake overlay: generate a natural elliptical patch with configured tile
+    _lakeRoot = Node::create();
+    if (_gameMap && _gameMap->getTMX()) {
+        _gameMap->getTMX()->addChild(_lakeRoot, 17);
+    } else {
+        _worldNode->addChild(_lakeRoot, 0);
+    }
+    {
+        // Choose a location and shape for the lake
+        int cx = std::max(8, _cols / 4);
+        int cy = std::max(8, _rows / 3);
+        int a = 8; // horizontal radius (tiles)
+        int b = 6; // vertical radius (tiles)
+        for (int r = std::max(0, cy - b - 1); r <= std::min(_rows - 1, cy + b + 1); ++r) {
+            for (int c = std::max(0, cx - a - 1); c <= std::min(_cols - 1, cx + a + 1); ++c) {
+                float dx = static_cast<float>(c - cx);
+                float dy = static_cast<float>(r - cy);
+                float v = (dx*dx) / (static_cast<float>(a*a)) + (dy*dy) / (static_cast<float>(b*b));
+                if (v <= 1.0f) {
+                    // Ensure no rocks/trees remain inside the lake
+                    if (inBounds(c,r)) {
+                        if (getTile(c,r) == Game::TileType::Rock || getTile(c,r) == Game::TileType::Tree) {
+                            setTile(c,r, Game::TileType::Soil);
+                        }
+                    }
+                    long long key = (static_cast<long long>(r) << 32) | static_cast<unsigned long long>(c);
+                    cocos2d::Sprite* spr = cocos2d::Sprite::create("Maps/spring_outdoors/spring_outdoors.png");
+                    spr->setAnchorPoint(cocos2d::Vec2(0.5f, 0.5f));
+                    // Compute texture rect for lake tile
+                    int tw = 16, th = 16;
+                    int columns = GameConfig::SPRING_OUTDOORS_COLUMNS;
+                    int row1 = GameConfig::FARM_LAKE_TILE_ROW;
+                    int col1 = GameConfig::FARM_LAKE_TILE_COL;
+                    int tileId = (row1 - 1) * columns + (col1 - 1);
+                    int col = tileId % columns;
+                    int row = tileId / columns;
+                    float texH = spr->getTexture() ? spr->getTexture()->getContentSize().height : 0.0f;
+                    float x = static_cast<float>(col * tw);
+                    float y = texH - static_cast<float>((row + 1) * th);
+                    spr->setTextureRect(cocos2d::Rect(x, y, static_cast<float>(tw), static_cast<float>(th)));
+                    auto pos = tileToWorld(c, r);
+                    spr->setPosition(pos);
+                    _lakeRoot->addChild(spr, 0);
+                    _lakeSprites[key] = spr;
+                }
+            }
+        }
+    }
+
     refreshMapVisuals();
     refreshDropsVisuals();
     refreshCropsVisuals();
@@ -190,6 +247,8 @@ Game::TileType FarmMapController::getTile(int c, int r) const {
 void FarmMapController::setTile(int c, int r, Game::TileType t) {
     _tiles[r * _cols + c] = t;
     Game::globalState().farmTiles = _tiles;
+    // Immediately refresh visuals to reflect tile changes
+    refreshMapVisuals();
 }
 
 Vec2 FarmMapController::tileToWorld(int c, int r) const {
@@ -209,6 +268,8 @@ void FarmMapController::refreshMapVisuals() {
     if (!_mapDraw) return;
     _mapDraw->clear();
     float s = tileSize();
+    // Track which overlay sprites are alive
+    std::unordered_set<long long> alive;
     for (int r = 0; r < _rows; ++r) {
         for (int c = 0; c < _cols; ++c) {
             auto center = tileToWorld(c, r);
@@ -225,17 +286,70 @@ void FarmMapController::refreshMapVisuals() {
                 case Game::TileType::Tree:   base = Color4F(0.55f, 0.40f, 0.25f, 1.0f); break;
             }
             Vec2 rect[4] = { a, b, c2, d };
-            _mapDraw->drawSolidPoly(rect, 4, base);
+            // Skip base fill for tilled to allow textured overlay to show clearly
+            if (getTile(c, r) != Game::TileType::Tilled) {
+                _mapDraw->drawSolidPoly(rect, 4, base);
+            }
             _mapDraw->drawLine(a,b, Color4F(0,0,0,0.25f));
             _mapDraw->drawLine(b,c2,Color4F(0,0,0,0.25f));
             _mapDraw->drawLine(c2,d, Color4F(0,0,0,0.25f));
             _mapDraw->drawLine(d,a, Color4F(0,0,0,0.25f));
             switch (getTile(c, r)) {
-                case Game::TileType::Watered: _mapDraw->drawSolidPoly(rect, 4, Color4F(0.2f, 0.4f, 0.9f, 0.22f)); break;
+                // 去掉浇水提示的蓝色覆盖层
                 case Game::TileType::Rock:    _mapDraw->drawSolidCircle(center, s*0.35f, 0.0f, 12, Color4F(0.6f,0.6f,0.6f,1.0f)); break;
                 case Game::TileType::Tree:    _mapDraw->drawSolidCircle(center, s*0.45f, 0.0f, 12, Color4F(0.2f,0.75f,0.25f,1.0f)); break;
                 default: break;
             }
+
+            // Tilled soil textured overlay using spring_outdoors tileset (configurable row/col)
+            if (getTile(c, r) == Game::TileType::Tilled || getTile(c, r) == Game::TileType::Watered) {
+                long long key = (static_cast<long long>(r) << 32) | static_cast<unsigned long long>(c);
+                alive.insert(key);
+                cocos2d::Sprite* spr = nullptr;
+                auto it = _tileSprites.find(key);
+                if (it == _tileSprites.end()) {
+                    spr = cocos2d::Sprite::create("Maps/spring_outdoors/spring_outdoors.png");
+                    spr->setAnchorPoint(cocos2d::Vec2(0.5f, 0.5f));
+                    _tileRoot->addChild(spr, 0);
+                    _tileSprites[key] = spr;
+                } else {
+                    spr = it->second;
+                }
+                // Compute texture rect from config row/col (1-based)
+                int tw = 16, th = 16;
+                int columns = GameConfig::SPRING_OUTDOORS_COLUMNS;
+                int row1 = (getTile(c, r) == Game::TileType::Watered)
+                    ? GameConfig::FARM_WATERED_TILE_ROW
+                    : GameConfig::FARM_TILLED_TILE_ROW;
+                int col1 = (getTile(c, r) == Game::TileType::Watered)
+                    ? GameConfig::FARM_WATERED_TILE_COL
+                    : GameConfig::FARM_TILLED_TILE_COL;
+                int tileId = (row1 - 1) * columns + (col1 - 1);
+                int col = tileId % columns;
+                int row = tileId / columns;
+                float texH = spr->getTexture() ? spr->getTexture()->getContentSize().height : 0.0f;
+                float x = static_cast<float>(col * tw);
+                float y = texH - static_cast<float>((row + 1) * th);
+                spr->setTextureRect(cocos2d::Rect(x, y, static_cast<float>(tw), static_cast<float>(th)));
+                auto pos = tileToWorld(c, r);
+                spr->setPosition(pos);
+                spr->setVisible(true);
+            }
+        }
+    }
+
+    // Remove any overlay sprites that are no longer needed
+    std::vector<long long> toRemove;
+    for (auto &kv : _tileSprites) {
+        if (alive.find(kv.first) == alive.end()) {
+            toRemove.push_back(kv.first);
+        }
+    }
+    for (auto k : toRemove) {
+        if (_tileSprites.count(k)) {
+            auto spr = _tileSprites[k];
+            if (spr) spr->removeFromParent();
+            _tileSprites.erase(k);
         }
     }
 }
@@ -250,7 +364,7 @@ void FarmMapController::refreshCropsVisuals() {
         auto itB = _cropSprites.find(key);
         cocos2d::Sprite* sprB = nullptr;
         if (itB == _cropSprites.end()) {
-            sprB = cocos2d::Sprite::create("crops.png");
+            sprB = cocos2d::Sprite::create("crops/crops.png");
             sprB->setAnchorPoint(cocos2d::Vec2(0.5f, 0.0f));
             _cropsRoot->addChild(sprB, 0);
             _cropSprites[key] = sprB;
@@ -260,7 +374,7 @@ void FarmMapController::refreshCropsVisuals() {
         auto itT = _cropSpritesTop.find(key);
         cocos2d::Sprite* sprT = nullptr;
         if (itT == _cropSpritesTop.end()) {
-            sprT = cocos2d::Sprite::create("crops.png");
+            sprT = cocos2d::Sprite::create("crops/crops.png");
             sprT->setAnchorPoint(cocos2d::Vec2(0.5f, 0.0f));
             _cropsRoot->addChild(sprT, 1);
             _cropSpritesTop[key] = sprT;

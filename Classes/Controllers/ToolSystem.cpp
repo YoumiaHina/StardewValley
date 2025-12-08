@@ -49,7 +49,6 @@ std::string ToolSystem::useSelectedTool() {
             } else if (current == Game::TileType::Soil) {
                 _map->setTile(tc,tr, Game::TileType::Tilled);
                 msg = "Till!";
-                _map->spawnDropAt(tc, tr, static_cast<int>(Game::ItemType::Fiber), 1);
             } else {
                 msg = "Nothing";
             }
