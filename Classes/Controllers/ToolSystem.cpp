@@ -53,10 +53,36 @@ std::string ToolSystem::useSelectedTool() {
                 msg = "Nothing";
             }
         } break;
-        case Game::ToolType::WateringCan:
-            if (current == Game::TileType::Tilled) { _map->setTile(tc,tr, Game::TileType::Watered); msg = "Water!"; }
-            else msg = "Nothing";
-            break;
+        case Game::ToolType::WateringCan: {
+            // 优先：在湖边并且水量未满时，直接补水
+            bool nearLake = false;
+            if (_getPlayerPos) {
+                float s = _map->tileSize();
+                float radius = s * GameConfig::LAKE_REFILL_RADIUS_TILES;
+                nearLake = _map->isNearLake(_getPlayerPos(), radius);
+            }
+            if (nearLake && ws.water < ws.maxWater) {
+                ws.water = ws.maxWater;
+                msg = std::string("Refill! (") + std::to_string(ws.water) + "/" + std::to_string(ws.maxWater) + ")";
+                // 补水不消耗能量
+                need = 0;
+                break;
+            }
+
+            // 正常浇水：需要有水且目标为 Tilled
+            if (current == Game::TileType::Tilled) {
+                if (ws.water <= 0) {
+                    msg = nearLake ? "Refill first" : "No water";
+                } else {
+                    _map->setTile(tc,tr, Game::TileType::Watered);
+                    ws.water = std::max(0, ws.water - GameConfig::WATERING_CAN_CONSUME);
+                    msg = std::string("Water! (") + std::to_string(ws.water) + "/" + std::to_string(ws.maxWater) + ")";
+                }
+            } else {
+                // 非耕地，若在湖边则提示可补水，否则无事发生
+                msg = nearLake ? "Hold to Refill" : "Nothing";
+            }
+        } break;
         case Game::ToolType::Pickaxe:
             if (current == Game::TileType::Rock) { _map->setTile(tc,tr, Game::TileType::Soil); msg = "Mine!"; _map->spawnDropAt(tc, tr, static_cast<int>(Game::ItemType::Stone), 1); }
             else msg = "Nothing";
@@ -71,6 +97,7 @@ std::string ToolSystem::useSelectedTool() {
     ws.energy = std::max(0, ws.energy - need);
     if (_ui && _getPlayerPos) {
         _ui->refreshHUD();
+        _ui->refreshHotbar(); // 更新水壶水量蓝条
         _map->refreshMapVisuals();
         _map->refreshDropsVisuals();
         _ui->popTextAt(_getPlayerPos(), msg, Color3B::YELLOW);

@@ -48,6 +48,10 @@ struct WorldState {
     int energy = GameConfig::ENERGY_MAX;
     int maxEnergy = GameConfig::ENERGY_MAX;
 
+    // 水壶水量系统
+    int water = GameConfig::WATERING_CAN_MAX;
+    int maxWater = GameConfig::WATERING_CAN_MAX;
+
     // 生命值系统（矿洞 HUD 专属显示）
     int hp = 100;
     int maxHp = 100;

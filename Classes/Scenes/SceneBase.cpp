@@ -49,6 +49,10 @@ bool SceneBase::initBase(float worldScale, bool buildCraftPanel, bool enableTool
     _uiController = new Controllers::UIController(this, _worldNode, _inventory);
     _uiController->buildHUD();
     _uiController->buildHotbar();
+    // 在水壶上方构建水量蓝条
+    _uiController->buildWaterBarAboveCan();
+    // 初次刷新蓝条以显示当前水量
+    _uiController->refreshWaterBar();
     _uiController->buildChestPanel();
     if (buildCraftPanel) _uiController->buildCraftPanel();
 

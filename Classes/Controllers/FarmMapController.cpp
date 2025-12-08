@@ -93,7 +93,8 @@ void FarmMapController::init() {
     // Lake overlay: generate a natural elliptical patch with configured tile
     _lakeRoot = Node::create();
     if (_gameMap && _gameMap->getTMX()) {
-        _gameMap->getTMX()->addChild(_lakeRoot, 17);
+        // 提高层级，确保湖面贴图在基础地表层之上
+        _gameMap->getTMX()->addChild(_lakeRoot, 20);
     } else {
         _worldNode->addChild(_lakeRoot, 0);
     }
@@ -169,19 +170,26 @@ Vec2 FarmMapController::clampPosition(const Vec2& current, const Vec2& next, flo
     candidate.x = std::max(minX, std::min(maxX, candidate.x));
     candidate.y = std::max(minY, std::min(maxY, candidate.y));
 
+    auto lakeBlocked = [&](const Vec2& p){
+        int cc=0, rr=0; worldToTileIndex(p, cc, rr);
+        if (!inBounds(cc, rr)) return false;
+        long long k = (static_cast<long long>(rr) << 32) | static_cast<unsigned long long>(cc);
+        return _lakeSprites.find(k) != _lakeSprites.end();
+    };
+
     Vec2 tryX(candidate.x, current.y);
     if (_gameMap) {
-        if (!_gameMap->collides(tryX, radius)) {
-            // ok
-        } else {
+        bool baseBlockedX = _gameMap->collides(tryX, radius);
+        bool lakeX = lakeBlocked(tryX) || lakeBlocked(tryX + Vec2(radius,0)) || lakeBlocked(tryX + Vec2(-radius,0));
+        if (baseBlockedX || lakeX) {
             tryX.x = current.x;
         }
     }
     Vec2 tryY(current.x, candidate.y);
     if (_gameMap) {
-        if (!_gameMap->collides(tryY, radius)) {
-            // ok
-        } else {
+        bool baseBlockedY = _gameMap->collides(tryY, radius);
+        bool lakeY = lakeBlocked(tryY) || lakeBlocked(tryY + Vec2(0,radius)) || lakeBlocked(tryY + Vec2(0,-radius));
+        if (baseBlockedY || lakeY) {
             tryY.y = current.y;
         }
     }
@@ -189,7 +197,24 @@ Vec2 FarmMapController::clampPosition(const Vec2& current, const Vec2& next, flo
 }
 
 bool FarmMapController::collides(const Vec2& pos, float radius) const {
-    return _gameMap ? _gameMap->collides(pos, radius) : false;
+    bool blocked = _gameMap ? _gameMap->collides(pos, radius) : false;
+    if (blocked) return true;
+    // 追加：湖面不可行走（根据半径采样多点格子判定）
+    auto isLakeAt = [&](const Vec2& p){
+        int cc = 0, rr = 0; worldToTileIndex(p, cc, rr);
+        if (!inBounds(cc, rr)) return false;
+        long long k = (static_cast<long long>(rr) << 32) | static_cast<unsigned long long>(cc);
+        return _lakeSprites.find(k) != _lakeSprites.end();
+    };
+    // 采样中心与四个方向（半径）
+    if (isLakeAt(pos)) return true;
+    Vec2 offsets[4] = {
+        Vec2(radius, 0), Vec2(-radius, 0), Vec2(0, radius), Vec2(0, -radius)
+    };
+    for (auto& d : offsets) {
+        if (isLakeAt(pos + d)) return true;
+    }
+    return false;
 }
 
 bool FarmMapController::isNearDoor(const Vec2& playerWorldPos) const {
@@ -219,6 +244,24 @@ std::pair<int,int> FarmMapController::targetTile(const Vec2& playerPos, const Ve
     if (tc < 0) tc = 0; if (tc >= _cols) tc = _cols-1;
     if (tr < 0) tr = 0; if (tr >= _rows) tr = _rows-1;
     return {tc, tr};
+}
+
+bool FarmMapController::isNearLake(const Vec2& playerWorldPos, float radius) const {
+    if (_lakeSprites.empty()) return false;
+    float s = tileSize();
+    float half = s * 0.5f;
+    for (const auto& kv : _lakeSprites) {
+        long long key = kv.first;
+        int r = static_cast<int>(key >> 32);
+        int c = static_cast<int>(key & 0xffffffff);
+        auto center = tileToWorld(c, r);
+        // 与湖面格子的矩形边界的最近距离（distance to AABB）
+        float dx = std::max(std::abs(playerWorldPos.x - center.x) - half, 0.0f);
+        float dy = std::max(std::abs(playerWorldPos.y - center.y) - half, 0.0f);
+        float distEdge = std::sqrt(dx*dx + dy*dy);
+        if (distEdge <= radius) return true;
+    }
+    return false;
 }
 
 void FarmMapController::updateCursor(const Vec2& playerPos, const Vec2& lastDir) {

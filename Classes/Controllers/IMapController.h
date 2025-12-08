@@ -43,6 +43,9 @@ public:
     virtual cocos2d::Vec2 tileToWorld(int c, int r) const { return cocos2d::Vec2(); }
     virtual void worldToTileIndex(const cocos2d::Vec2& p, int& c, int& r) const { c = 0; r = 0; }
 
+    // Farm 专用：湖边判定（默认不支持）
+    virtual bool isNearLake(const cocos2d::Vec2& playerWorldPos, float radius) const { return false; }
+
     // Farm 专用：农作物/掉落
     virtual void refreshMapVisuals() {}
     virtual void refreshCropsVisuals() {}

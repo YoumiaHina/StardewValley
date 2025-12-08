@@ -201,6 +201,8 @@ void UIController::selectHotbarIndex(int idx) {
         _inventory->selectIndex(idx);
         Game::globalState().selectedIndex = idx;
         refreshHotbar();
+        // 同步刷新水壶蓝条
+        refreshWaterBar();
     }
 }
 
@@ -257,6 +259,8 @@ void UIController::handleHotbarScroll(float dy) {
     }
     Game::globalState().selectedIndex = _inventory->selectedIndex();
     refreshHotbar();
+    // 同步刷新水壶蓝条
+    refreshWaterBar();
 }
 
 bool UIController::handleChestRightClick(EventMouse* e, const std::vector<Game::Chest>& chests) {
@@ -410,3 +414,58 @@ void UIController::toggleCraftPanel(bool visible) {
 }
 
 } // namespace Controllers
+
+// --- Water bar (blue) above watering can slot ---
+namespace Controllers {
+void UIController::buildWaterBarAboveCan() {
+    if (_waterBarNode) return;
+    if (!_hotbarNode) return;
+    _waterBarNode = Node::create();
+    _hotbarNode->addChild(_waterBarNode, 3);
+
+    _waterBarBg = DrawNode::create();
+    _waterBarFill = DrawNode::create();
+    _waterBarNode->addChild(_waterBarBg);
+    _waterBarNode->addChild(_waterBarFill);
+
+    float bw = 80.0f, bh = 8.0f;
+    Vec2 bl(-bw/2, 0), br(bw/2, 0), tr(bw/2, bh), tl(-bw/2, bh);
+    Vec2 rect[4] = { bl, br, tr, tl };
+    _waterBarBg->drawSolidPoly(rect, 4, Color4F(0.f,0.f,0.f,0.35f));
+    _waterBarBg->drawLine(bl, br, Color4F(1,1,1,0.4f));
+    _waterBarBg->drawLine(br, tr, Color4F(1,1,1,0.4f));
+    _waterBarBg->drawLine(tr, tl, Color4F(1,1,1,0.4f));
+    _waterBarBg->drawLine(tl, bl, Color4F(1,1,1,0.4f));
+    _waterBarNode->setVisible(false);
+}
+
+void UIController::refreshWaterBar() {
+    if (!_hotbarNode || !_inventory || !_waterBarNode || !_waterBarFill) return;
+    int slots = static_cast<int>(_inventory->size());
+    if (slots <= 0) { _waterBarNode->setVisible(false); return; }
+    int canIdx = -1;
+    for (int i = 0; i < slots; ++i) {
+        if (auto t = _inventory->toolAt(i)) {
+            if (t->type == Game::ToolType::WateringCan) { canIdx = i; break; }
+        }
+    }
+    if (canIdx < 0) { _waterBarNode->setVisible(false); return; }
+
+    float slotW = 80.0f, slotH = 32.0f, padding = 6.0f;
+    float totalWidth = slots * slotW + (slots - 1) * padding;
+    float cx = -totalWidth/2 + canIdx * (slotW + padding) + slotW/2;
+    float y = slotH/2 + 10.0f;
+    _waterBarNode->setPosition(Vec2(cx, y));
+    _waterBarNode->setVisible(true);
+
+    auto &ws = Game::globalState();
+    float bw = 80.0f, bh = 8.0f;
+    _waterBarFill->clear();
+    float ratio = ws.maxWater > 0 ? (static_cast<float>(ws.water) / static_cast<float>(ws.maxWater)) : 0.f;
+    ratio = std::max(0.f, std::min(1.f, ratio));
+    float fillW = bw * ratio;
+    Vec2 bl(-bw/2, 0), br(-bw/2 + fillW, 0), tr(-bw/2 + fillW, bh), tl(-bw/2, bh);
+    Vec2 fillRect[4] = { bl, br, tr, tl };
+    _waterBarFill->drawSolidPoly(fillRect, 4, Color4F(0.2f, 0.5f, 1.0f, 0.85f));
+}
+}

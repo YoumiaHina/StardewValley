@@ -53,4 +53,9 @@ namespace GameConfig {
     // 湖泊材质（按 1-based 行列指定）
     static const int FARM_LAKE_TILE_ROW = 66; // 第 66 排
     static const int FARM_LAKE_TILE_COL = 10; // 第 10 列
+
+    // 水壶机制
+    static const int WATERING_CAN_MAX = 40;          // 水壶最大水量（格数/次）
+    static const int WATERING_CAN_CONSUME = 1;       // 每次浇水消耗的水量
+    static const float LAKE_REFILL_RADIUS_TILES = 1.5f; // 到湖边补水的判定半径（单位：格）
 }

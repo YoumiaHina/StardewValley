@@ -99,6 +99,10 @@ private:
     // Lake overlay sprites
     cocos2d::Node* _lakeRoot = nullptr;
     std::unordered_map<long long, cocos2d::Sprite*> _lakeSprites;
+
+    // 接口扩展：湖边判定
+public:
+    bool isNearLake(const cocos2d::Vec2& playerWorldPos, float radius) const override;
 };
 
 } // namespace Controllers

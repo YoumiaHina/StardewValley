@@ -26,6 +26,10 @@ public:
     void refreshHotbar();
     void selectHotbarIndex(int idx);
 
+    // 水壶水量蓝条：显示在热键栏的水壶上方
+    void buildWaterBarAboveCan();
+    void refreshWaterBar();
+
     // 事件转发：处理热键栏点击选择与右键打开箱子面板
     bool handleHotbarMouseDown(cocos2d::EventMouse* e);
     bool handleChestRightClick(cocos2d::EventMouse* e, const std::vector<Game::Chest>& chests);
@@ -70,6 +74,11 @@ private:
     cocos2d::Node* _hotbarNode = nullptr;
     cocos2d::DrawNode* _hotbarHighlight = nullptr;
     std::vector<cocos2d::Label*> _hotbarLabels;
+
+    // Water bar (above watering can slot)
+    cocos2d::Node* _waterBarNode = nullptr;
+    cocos2d::DrawNode* _waterBarBg = nullptr;
+    cocos2d::DrawNode* _waterBarFill = nullptr;
 
     // Prompts
     cocos2d::Label* _doorPrompt = nullptr;
