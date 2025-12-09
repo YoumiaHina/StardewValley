@@ -15,8 +15,8 @@
 
 namespace Controllers {
 
-class ToolSystem {
-public:
+    class ToolSystem {
+    public:
     ToolSystem(std::shared_ptr<Game::Inventory> inventory,
                IMapController* map,
                CropSystem* crop,
@@ -26,15 +26,18 @@ public:
     : _inventory(std::move(inventory)), _map(map), _crop(crop), _getPlayerPos(std::move(getPlayerPos)), _getLastDir(std::move(getLastDir)), _ui(ui) {}
 
     // 使用当前选中工具；返回提示消息。
-    std::string useSelectedTool();
+        std::string useSelectedTool();
+
+        void setFishingStarter(std::function<void(const cocos2d::Vec2&)> cb) { _onStartFishing = std::move(cb); }
 
 private:
-    std::shared_ptr<Game::Inventory> _inventory;
-    IMapController* _map = nullptr;
-    CropSystem* _crop = nullptr;
-    std::function<cocos2d::Vec2()> _getPlayerPos; // 提示定位回调
-    std::function<cocos2d::Vec2()> _getLastDir;   // 面向方向回调
-    UIController* _ui = nullptr;
-};
+        std::shared_ptr<Game::Inventory> _inventory;
+        IMapController* _map = nullptr;
+        CropSystem* _crop = nullptr;
+        std::function<cocos2d::Vec2()> _getPlayerPos; // 提示定位回调
+        std::function<cocos2d::Vec2()> _getLastDir;   // 面向方向回调
+        UIController* _ui = nullptr;
+        std::function<void(const cocos2d::Vec2&)> _onStartFishing;
+    };
 
 } // namespace Controllers

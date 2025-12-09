@@ -41,6 +41,7 @@ bool SceneBase::initBase(float worldScale, bool buildCraftPanel, bool enableTool
         ws.inventory->setTool(1, Game::makeTool(Game::ToolType::Hoe));
         ws.inventory->setTool(2, Game::makeTool(Game::ToolType::Pickaxe));
         ws.inventory->setTool(3, Game::makeTool(Game::ToolType::WateringCan));
+        ws.inventory->setTool(4, Game::makeTool(Game::ToolType::FishingRod));
     }
     _inventory = ws.inventory;
     if (_inventory) _inventory->selectIndex(ws.selectedIndex);
@@ -209,6 +210,9 @@ void SceneBase::update(float dt) {
         bool nearChest = _mapController->isNearChest(p);
         _uiController->showDoorPrompt(nearDoor, p, doorPromptText());
         _uiController->showChestPrompt(nearChest, p, "Right-click to Open / Space to Deposit");
+        bool nearLake = _mapController->isNearLake(p, _mapController->tileSize() * (GameConfig::LAKE_REFILL_RADIUS_TILES + 0.5f));
+        bool rodSelected = (_inventory && _inventory->selectedTool() && _inventory->selectedTool()->type == Game::ToolType::FishingRod);
+        _uiController->showFishPrompt(nearLake && rodSelected, p, "Space/Left-click to Fish");
     }
 }
 

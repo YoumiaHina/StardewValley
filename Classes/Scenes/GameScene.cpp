@@ -11,6 +11,7 @@
 #include "Scenes/RoomScene.h"
 #include "Scenes/AbyssMineScene.h"
 #include "Managers/AudioManager.h"
+#include "Controllers/FishingController.h"
 #include "Game/Cheat.h"
 #include "Controllers/PlayerController.h"
 #include "Controllers/FarmMapController.h"
@@ -29,6 +30,11 @@ bool GameScene::init() {
     _interactor = new Controllers::FarmInteractor(_inventory, _mapController, _uiController, _cropSystem,
         [this]() -> Vec2 { return _player ? _player->getPosition() : Vec2(); },
         [this]() -> Vec2 { return _playerController ? _playerController->lastDir() : Vec2(0,-1); });
+    _fishing = new Controllers::FishingController(_mapController, _inventory, _uiController, this, _worldNode);
+    addUpdateCallback([this](float dt){ if (_fishing) _fishing->update(dt); });
+    if (_toolSystem) {
+        _toolSystem->setFishingStarter([this](const Vec2& pos){ if (_fishing) _fishing->startAt(pos); });
+    }
     return true;
 }
 
@@ -68,5 +74,9 @@ void GameScene::onKeyPressedHook(EventKeyboard::KeyCode code) {
         auto abyss = AbyssMineScene::create();
         auto trans = TransitionFade::create(0.6f, abyss);
         Director::getInstance()->replaceScene(trans);
+    } else if (code == EventKeyboard::KeyCode::KEY_J) {
+        if (_player && _fishing) {
+            _fishing->startAnywhere(_player->getPosition());
+        }
     }
 }

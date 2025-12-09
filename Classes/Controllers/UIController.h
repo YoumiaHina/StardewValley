@@ -41,6 +41,7 @@ public:
     // 提示显示/隐藏（传入世界坐标）
     void showDoorPrompt(bool visible, const cocos2d::Vec2& worldPos, const std::string& text);
     void showChestPrompt(bool visible, const cocos2d::Vec2& worldPos, const std::string& text);
+    void showFishPrompt(bool visible, const cocos2d::Vec2& worldPos, const std::string& text);
 
     // 弹出短文本
     void popTextAt(const cocos2d::Vec2& worldPos, const std::string& text, const cocos2d::Color3B& color);
@@ -74,6 +75,7 @@ private:
     cocos2d::Node* _hotbarNode = nullptr;
     cocos2d::DrawNode* _hotbarHighlight = nullptr;
     std::vector<cocos2d::Label*> _hotbarLabels;
+    std::vector<cocos2d::Sprite*> _hotbarIcons;
 
     // Water bar (above watering can slot)
     cocos2d::Node* _waterBarNode = nullptr;
@@ -83,6 +85,7 @@ private:
     // Prompts
     cocos2d::Label* _doorPrompt = nullptr;
     cocos2d::Label* _chestPrompt = nullptr;
+    cocos2d::Label* _fishPrompt = nullptr;
 
     // Chest Panel
     cocos2d::Node* _chestPanel = nullptr;

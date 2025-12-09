@@ -144,12 +144,18 @@ void UIController::buildHotbar() {
     _hotbarNode->addChild(bg);
 
     _hotbarLabels.clear();
+    _hotbarIcons.clear();
     for (int i = 0; i < slots; ++i) {
         float x = -totalWidth/2 + i * (slotW + padding) + slotW/2;
         auto rect = DrawNode::create();
         Vec2 r[4] = { Vec2(x - slotW/2, -slotH/2), Vec2(x + slotW/2, -slotH/2), Vec2(x + slotW/2,  slotH/2), Vec2(x - slotW/2,  slotH/2) };
         rect->drawSolidPoly(r, 4, Color4F(0.15f, 0.15f, 0.15f, 0.6f));
         _hotbarNode->addChild(rect);
+        auto icon = Sprite::create();
+        icon->setPosition(Vec2(x, 0));
+        icon->setVisible(false);
+        _hotbarNode->addChild(icon, 1);
+        _hotbarIcons.push_back(icon);
         std::string text = "-";
         if (_inventory) {
             if (auto t = _inventory->toolAt(i)) {
@@ -193,6 +199,31 @@ void UIController::refreshHotbar() {
             text = StringUtils::format("%s x%d", Game::itemName(st.type), st.quantity);
         }
         _hotbarLabels[i]->setString(text);
+        if (i < static_cast<int>(_hotbarIcons.size())) {
+            auto icon = _hotbarIcons[i];
+            if (_inventory->isItem(i)) {
+                auto st = _inventory->itemAt(i);
+                if (st.type == Game::ItemType::Fish && st.quantity > 0) {
+                    auto tex = Director::getInstance()->getTextureCache()->addImage("fish/3120.png");
+                    if (tex) {
+                        icon->setTexture(tex);
+                        float h = tex->getContentSize().height;
+                        float targetH = slotH * 0.8f;
+                        float scale = (h > 0) ? (targetH / h) : 1.0f;
+                        icon->setScale(scale);
+                        float x = -totalWidth/2 + i * (slotW + padding) + slotW/2;
+                        icon->setPosition(Vec2(x, 0));
+                        icon->setVisible(true);
+                    } else {
+                        icon->setVisible(false);
+                    }
+                } else {
+                    icon->setVisible(false);
+                }
+            } else {
+                icon->setVisible(false);
+            }
+        }
     }
 }
 
@@ -309,6 +340,20 @@ void UIController::showChestPrompt(bool visible, const Vec2& worldPos, const std
     if (visible) {
         Vec2 pos = worldPos; if (_worldNode) pos = _worldNode->convertToWorldSpace(worldPos);
         _chestPrompt->setPosition(pos + Vec2(0, 26));
+    }
+}
+
+void UIController::showFishPrompt(bool visible, const Vec2& worldPos, const std::string& text) {
+    if (!_fishPrompt) {
+        _fishPrompt = Label::createWithTTF(text, "fonts/Marker Felt.ttf", 20);
+        _fishPrompt->setColor(Color3B::YELLOW);
+        if (_scene) _scene->addChild(_fishPrompt, 3);
+    }
+    _fishPrompt->setString(text);
+    _fishPrompt->setVisible(visible);
+    if (visible) {
+        Vec2 pos = worldPos; if (_worldNode) pos = _worldNode->convertToWorldSpace(worldPos);
+        _fishPrompt->setPosition(pos + Vec2(0, 26));
     }
 }
 

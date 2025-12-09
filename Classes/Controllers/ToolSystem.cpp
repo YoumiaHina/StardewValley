@@ -18,6 +18,7 @@ std::string ToolSystem::useSelectedTool() {
             case Game::ToolType::Pickaxe:     return GameConfig::ENERGY_COST_PICKAXE;
             case Game::ToolType::Hoe:         return GameConfig::ENERGY_COST_HOE;
             case Game::ToolType::WateringCan: return GameConfig::ENERGY_COST_WATER;
+            case Game::ToolType::FishingRod:  return 0;
             default: return 0;
         }
     };
@@ -94,6 +95,22 @@ std::string ToolSystem::useSelectedTool() {
             } else {
                 // 非耕地，若在湖边则提示可补水，否则无事发生
                 msg = nearLake ? "Hold to Refill" : "Nothing";
+            }
+        } break;
+        case Game::ToolType::FishingRod: {
+            bool nearLake = false;
+            if (_getPlayerPos) {
+                float s = _map->tileSize();
+                float radius = s * GameConfig::LAKE_REFILL_RADIUS_TILES;
+                nearLake = _map->isNearLake(_getPlayerPos(), radius);
+            }
+            if (nearLake) {
+                msg = "Fishing...";
+                if (_onStartFishing && _getPlayerPos) {
+                    _onStartFishing(_getPlayerPos());
+                }
+            } else {
+                msg = "Need water";
             }
         } break;
         case Game::ToolType::Pickaxe:

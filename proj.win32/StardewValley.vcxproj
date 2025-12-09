@@ -182,6 +182,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClCompile Include="..\Classes\Controllers\FarmInteractor.cpp" />
     <ClCompile Include="..\Classes\Controllers\RoomInteractor.cpp" />
     <ClCompile Include="..\Classes\Managers\AudioManager.cpp" />
+    <ClCompile Include="..\Classes\Controllers\FishingController.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Classes\AppDelegate.h" />
@@ -223,6 +224,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClInclude Include="..\Classes\Controllers\FarmInteractor.h" />
     <ClInclude Include="..\Classes\Controllers\RoomInteractor.h" />
     <ClInclude Include="..\Classes\Managers\AudioManager.h" />
+    <ClInclude Include="..\Classes\Controllers\FishingController.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\cocos2d\cocos\2d\libcocos2d.vcxproj">

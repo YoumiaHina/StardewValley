@@ -11,7 +11,8 @@ enum class ToolType {
     Axe,
     WateringCan,
     Pickaxe,
-    Hoe
+    Hoe,
+    FishingRod
 };
 
 struct Tool {
@@ -28,6 +29,7 @@ inline Tool makeTool(ToolType type) {
         case ToolType::WateringCan:  return Tool(type, "Water Can");
         case ToolType::Pickaxe:      return Tool(type, "Pickaxe");
         case ToolType::Hoe:          return Tool(type, "Hoe");
+        case ToolType::FishingRod:   return Tool(type, "Fishing Rod");
         default:                     return Tool(ToolType::Axe, "Axe");
     }
 }

@@ -16,6 +16,7 @@ enum class ItemType {
     BlueberrySeed = 7,
     Eggplant = 8,
     EggplantSeed = 9,
+    Fish = 100
 };
 
 // 英文名称（内部使用）
@@ -31,6 +32,7 @@ inline const char* itemName(ItemType t) {
         case ItemType::BlueberrySeed: return "Blueberry Seed";
         case ItemType::Eggplant: return "Eggplant";
         case ItemType::EggplantSeed: return "Eggplant Seed";
+        case ItemType::Fish: return "Fish";
         default: return "Unknown";
     }
 }
@@ -48,6 +50,7 @@ inline const char* itemNameZH(ItemType t) {
         case ItemType::BlueberrySeed: return "蓝莓种子";
         case ItemType::Eggplant: return "茄子";
         case ItemType::EggplantSeed: return "茄子种子";
+        case ItemType::Fish: return "鱼";
         default: return "未知";
     }
 }
@@ -66,13 +69,14 @@ inline cocos2d::Color4F itemColor(ItemType t) {
         case ItemType::BlueberrySeed: return Color4F(0.35f, 0.45f, 0.95f, 0.8f);
         case ItemType::Eggplant: return Color4F(0.55f, 0.30f, 0.85f, 1.0f);
         case ItemType::EggplantSeed: return Color4F(0.55f, 0.30f, 0.85f, 0.8f);
+        case ItemType::Fish: return Color4F(0.25f, 0.55f, 1.0f, 1.0f);
         default: return Color4F(1,1,1,1);
     }
 }
 
 // 是否可食用（占位规则：纤维可食用，用于演示）
 inline bool itemEdible(ItemType t) {
-    return t == ItemType::Fiber || t == ItemType::Parsnip || t == ItemType::Blueberry || t == ItemType::Eggplant;
+    return t == ItemType::Fiber || t == ItemType::Parsnip || t == ItemType::Blueberry || t == ItemType::Eggplant || t == ItemType::Fish;
 }
 
 inline int itemEnergyRestore(ItemType t) {
@@ -81,6 +85,7 @@ inline int itemEnergyRestore(ItemType t) {
         case ItemType::Parsnip: return 20;
         case ItemType::Blueberry: return 12;
         case ItemType::Eggplant: return 18;
+        case ItemType::Fish: return 10;
         default: return 0;
     }
 }
@@ -91,6 +96,7 @@ inline int itemHpRestore(ItemType t) {
         case ItemType::Parsnip: return 0;
         case ItemType::Blueberry: return 2;
         case ItemType::Eggplant: return 4;
+        case ItemType::Fish: return 3;
         default: return 0;
     }
 }
