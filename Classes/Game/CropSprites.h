@@ -5,40 +5,25 @@
 
 namespace Game {
 
-inline int cropBaseRow(CropType t) {
-    switch (t) {
-        case CropType::Parsnip: return 1;
-        case CropType::Blueberry: return 23;
-        case CropType::Eggplant: return 9;
-        default: return 0;
-    }
-}
-
-inline int cropStartCol(CropType t) {
-    switch (t) {
-        case CropType::Parsnip: return 8;
-        case CropType::Blueberry: return 8;
-        case CropType::Eggplant: return 0;
-        default: return 0;
-    }
-}
-
+// 计算作物下半块纹理切片矩形（按16像素为单位；baseRow16 为自底向上的行索引）
 inline cocos2d::Rect cropRectBottomHalf(CropType t, int stage, float textureHeight) {
-    int row = cropBaseRow(t);
-    int maxStage = cropMaxStage(t);
+    int bottomRow16 = CropDefs::baseRow16(t);
+    int maxStage = CropDefs::maxStage(t);
     int s = std::max(0, std::min(stage, maxStage));
-    int col = cropStartCol(t) + s;
-    float yTop = textureHeight - (row + 1) * 32.0f;
-    return cocos2d::Rect(col * 16.0f, yTop + 16.0f, 16.0f, 16.0f);
+    int col = CropDefs::startCol(t) + s;
+    float y = textureHeight - (bottomRow16 + 1) * 16.0f;
+    return cocos2d::Rect(col * 16.0f, y, 16.0f, 16.0f);
 }
 
+// 计算作物上半块纹理切片矩形（上半块位于下半块之上一个16像素行）
 inline cocos2d::Rect cropRectTopHalf(CropType t, int stage, float textureHeight) {
-    int row = cropBaseRow(t);
-    int maxStage = cropMaxStage(t);
+    int bottomRow16 = CropDefs::baseRow16(t);
+    int topRow16 = bottomRow16 + 1;
+    int maxStage = CropDefs::maxStage(t);
     int s = std::max(0, std::min(stage, maxStage));
-    int col = cropStartCol(t) + s;
-    float yTop = textureHeight - (row + 1) * 32.0f;
-    return cocos2d::Rect(col * 16.0f, yTop, 16.0f, 16.0f);
+    int col = CropDefs::startCol(t) + s;
+    float y = textureHeight - (topRow16 + 1) * 16.0f;
+    return cocos2d::Rect(col * 16.0f, y, 16.0f, 16.0f);
 }
 
 }

@@ -46,17 +46,11 @@ public:
     // Farm 专用：湖边判定（默认不支持）
     virtual bool isNearLake(const cocos2d::Vec2& playerWorldPos, float radius) const { return false; }
 
-    // Farm 专用：农作物/掉落
+    // Farm 专用：渲染与掉落
     virtual void refreshMapVisuals() {}
     virtual void refreshCropsVisuals() {}
     virtual void refreshDropsVisuals() {}
     virtual void spawnDropAt(int c, int r, int itemType /*Game::ItemType*/ , int qty) {}
-    virtual int  findCropIndex(int c, int r) const { return -1; }
-    virtual void plantCrop(int cropType /*Game::CropType*/, int c, int r) {}
-    virtual void advanceCropsDaily() {}
-    virtual void harvestCropAt(int c, int r) {}
-    virtual void instantMatureAllCrops() {}
-    virtual void advanceCropOnceAt(int c, int r) {}
 
     // Chest 容器访问（Farm/Room 实现）
     virtual const std::vector<Game::Chest>& chests() const = 0;

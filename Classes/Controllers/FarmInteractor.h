@@ -8,6 +8,7 @@
 #include "cocos2d.h"
 #include "Game/Inventory.h"
 #include "Controllers/IMapController.h"
+#include "Controllers/CropSystem.h"
 #include "Controllers/UIController.h"
 #include <functional>
 
@@ -20,9 +21,10 @@ public:
     FarmInteractor(std::shared_ptr<Game::Inventory> inventory,
                    IMapController* map,
                    UIController* ui,
+                   CropSystem* crop,
                    std::function<cocos2d::Vec2()> getPlayerPos,
                    std::function<cocos2d::Vec2()> getLastDir)
-    : _inventory(std::move(inventory)), _map(map), _ui(ui), _getPlayerPos(std::move(getPlayerPos)), _getLastDir(std::move(getLastDir)) {}
+    : _inventory(std::move(inventory)), _map(map), _ui(ui), _crop(crop), _getPlayerPos(std::move(getPlayerPos)), _getLastDir(std::move(getLastDir)) {}
 
     SpaceAction onSpacePressed();
 
@@ -30,6 +32,7 @@ private:
     std::shared_ptr<Game::Inventory> _inventory;
     IMapController* _map = nullptr;
     UIController* _ui = nullptr;
+    CropSystem* _crop = nullptr;
     std::function<cocos2d::Vec2()> _getPlayerPos;
     std::function<cocos2d::Vec2()> _getLastDir;
 };

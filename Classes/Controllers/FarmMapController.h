@@ -52,12 +52,6 @@ public:
     void refreshCropsVisuals() override;
     void refreshDropsVisuals() override;
     void spawnDropAt(int c, int r, int itemType, int qty) override;
-    int  findCropIndex(int c, int r) const override;
-    void plantCrop(int cropType, int c, int r) override;
-    void advanceCropsDaily() override;
-    void harvestCropAt(int c, int r) override;
-    void instantMatureAllCrops() override;
-    void advanceCropOnceAt(int c, int r) override;
 
     // Expose data for other controllers
     const std::vector<Game::Chest>& chests() const { return _chests; }
@@ -86,7 +80,6 @@ private:
     cocos2d::DrawNode* _dropsDraw = nullptr;
     std::vector<Game::Chest> _chests;
     cocos2d::DrawNode* _chestDraw = nullptr;
-    std::vector<Game::Crop> _crops;
     cocos2d::DrawNode* _cropsDraw = nullptr;
     cocos2d::Node* _cropsRoot = nullptr;
     std::unordered_map<long long, cocos2d::Sprite*> _cropSprites;

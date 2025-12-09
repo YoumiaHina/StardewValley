@@ -42,10 +42,23 @@ std::string ToolSystem::useSelectedTool() {
 
     switch (tool->type) {
         case Game::ToolType::Hoe: {
-            int idx = _map->findCropIndex(tc, tr);
+            int idx = _crop ? _crop->findCropIndex(tc, tr) : -1;
             if (idx >= 0) {
-                _map->harvestCropAt(tc, tr);
-                msg = "Harvest!";
+                const auto& cp = _crop->crops()[idx];
+                if (cp.stage >= cp.maxStage) {
+                    auto produce = Game::produceItemFor(cp.type);
+                    int leftover = _inventory->addItems(produce, 1);
+                    if (leftover > 0) {
+                        _map->spawnDropAt(tc, tr, static_cast<int>(produce), leftover);
+                        _map->refreshDropsVisuals();
+                    }
+                    if (_crop) { _crop->harvestCropAt(tc, tr); }
+                    _map->refreshCropsVisuals();
+                    if (_ui) { _ui->refreshHotbar(); }
+                    msg = "Harvest!";
+                } else {
+                    msg = "Not ready";
+                }
             } else if (current == Game::TileType::Soil) {
                 _map->setTile(tc,tr, Game::TileType::Tilled);
                 msg = "Till!";

@@ -25,7 +25,11 @@ void GameStateController::update(float dt) {
         timeChanged = true;
     }
     if (timeChanged && _ui) _ui->refreshHUD();
-    if (dayChanged && _map) { _map->advanceCropsDaily(); _map->refreshMapVisuals(); _map->refreshCropsVisuals(); }
+    if (dayChanged && _map) {
+        if (_crop) { _crop->advanceCropsDaily(_map); }
+        _map->refreshMapVisuals();
+        _map->refreshCropsVisuals();
+    }
 }
 
 } // namespace Controllers

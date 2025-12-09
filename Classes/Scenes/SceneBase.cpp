@@ -58,11 +58,12 @@ bool SceneBase::initBase(float worldScale, bool buildCraftPanel, bool enableTool
 
     // 玩家/时间控制器
     _playerController = new Controllers::PlayerController(_player, _mapController, _worldNode);
-    _stateController = new Controllers::GameStateController(_mapController, _uiController);
+    _cropSystem = new Controllers::CropSystem();
+    _stateController = new Controllers::GameStateController(_mapController, _uiController, _cropSystem);
 
     // 可选工具系统
     if (enableToolOnSpace || enableToolOnLeftClick) {
-        _toolSystem = new Controllers::ToolSystem(_inventory, _mapController,
+        _toolSystem = new Controllers::ToolSystem(_inventory, _mapController, _cropSystem,
             [this]() -> Vec2 { return _player ? _player->getPosition() : Vec2(); },
             [this]() -> Vec2 { return _playerController ? _playerController->lastDir() : Vec2(0,-1); },
             _uiController);
@@ -94,6 +95,36 @@ void SceneBase::registerCommonInputHandlers(bool enableToolOnSpace, bool enableT
                 Game::Cheat::grantBasic(_inventory);
                 _uiController->refreshHotbar();
             } break;
+            case EventKeyboard::KeyCode::KEY_F1: {
+                Game::Cheat::grantSeed(_inventory, Game::CropType::Parsnip, 10);
+                _uiController->refreshHotbar();
+                if (_player) _uiController->popTextAt(_player->getPosition(), "Parsnip Seed x10", Color3B::YELLOW);
+            } break;
+            case EventKeyboard::KeyCode::KEY_F2: {
+                Game::Cheat::grantSeed(_inventory, Game::CropType::Blueberry, 10);
+                _uiController->refreshHotbar();
+                if (_player) _uiController->popTextAt(_player->getPosition(), "Blueberry Seed x10", Color3B::YELLOW);
+            } break;
+            case EventKeyboard::KeyCode::KEY_F3: {
+                Game::Cheat::grantSeed(_inventory, Game::CropType::Eggplant, 10);
+                _uiController->refreshHotbar();
+                if (_player) _uiController->popTextAt(_player->getPosition(), "Eggplant Seed x10", Color3B::YELLOW);
+            } break;
+            case EventKeyboard::KeyCode::KEY_F4: {
+                Game::Cheat::grantProduce(_inventory, Game::CropType::Parsnip, 5);
+                _uiController->refreshHotbar();
+                if (_player) _uiController->popTextAt(_player->getPosition(), "Parsnip x5", Color3B::YELLOW);
+            } break;
+            case EventKeyboard::KeyCode::KEY_F5: {
+                Game::Cheat::grantProduce(_inventory, Game::CropType::Blueberry, 5);
+                _uiController->refreshHotbar();
+                if (_player) _uiController->popTextAt(_player->getPosition(), "Blueberry x5", Color3B::YELLOW);
+            } break;
+            case EventKeyboard::KeyCode::KEY_F6: {
+                Game::Cheat::grantProduce(_inventory, Game::CropType::Eggplant, 5);
+                _uiController->refreshHotbar();
+                if (_player) _uiController->popTextAt(_player->getPosition(), "Eggplant x5", Color3B::YELLOW);
+            } break;
             case EventKeyboard::KeyCode::KEY_X: {
                 // 仅让当前目标格子的作物提升一个阶段
                 int tc = 0, tr = 0;
@@ -102,7 +133,7 @@ void SceneBase::registerCommonInputHandlers(bool enableToolOnSpace, bool enableT
                     Vec2 dir = _playerController ? _playerController->lastDir() : Vec2(0,-1);
                     auto tgt = _mapController->targetTile(playerPos, dir);
                     tc = tgt.first; tr = tgt.second;
-                    _mapController->advanceCropOnceAt(tc, tr);
+                    if (_cropSystem) { _cropSystem->advanceCropOnceAt(tc, tr); }
                 }
                 if (_uiController && _player) {
                     _mapController->refreshCropsVisuals();

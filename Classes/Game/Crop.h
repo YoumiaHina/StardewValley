@@ -7,6 +7,7 @@ namespace Game {
 
 enum class CropType { Parsnip, Blueberry, Eggplant };
 
+// 作物实例：记录所在格子、类型与当前生长状态
 struct Crop {
     int c = 0;
     int r = 0;
@@ -16,20 +17,34 @@ struct Crop {
     int maxStage = 0;
 };
 
-inline std::vector<int> cropStageDays(CropType t) {
-    switch (t) {
-        case CropType::Parsnip: return {1,1,1,1,1,1,1};
-        case CropType::Blueberry: return {1,1,1,1,1,1};
-        case CropType::Eggplant: return {1,1,1,1,1,1,1,1};
-        default: return {1,1,1};
+// 作物静态定义：纹理行(16像素为单位)、起始列与各阶段所需天数（左下角为(0,0)）
+struct CropDef {
+    int baseRow16 = 0; // 以前的 32 像素单位行号 ×2 后的行索引；例如 30.5 → 61
+    int startCol = 0;
+    std::vector<int> stageDays;
+};
+
+// 作物定义表：集中访问每种作物的静态属性
+class CropDefs {
+public:
+    static const CropDef& get(CropType t) {
+        static const CropDef parsnip{60, 8, {1,1,1,1,1,1,1}};
+        static const CropDef blueberry{16, 8, {1,1,1,1,1,1}};
+        static const CropDef eggplant{46, 0, {1,1,1,1,1,1,1}};
+        switch (t) {
+            case CropType::Parsnip: return parsnip;
+            case CropType::Blueberry: return blueberry;
+            case CropType::Eggplant: return eggplant;
+            default: return parsnip;
+        }
     }
-}
+    static const std::vector<int>& stageDays(CropType t) { return get(t).stageDays; }
+    static int maxStage(CropType t) { return static_cast<int>(get(t).stageDays.size()) - 1; }
+    static int startCol(CropType t) { return get(t).startCol; }
+    static int baseRow16(CropType t) { return get(t).baseRow16; }
+};
 
-inline int cropMaxStage(CropType t) {
-    auto v = cropStageDays(t);
-    return static_cast<int>(v.size()) - 1;
-}
-
+// 根据作物类型返回对应的“种子”物品类型
 inline Game::ItemType seedItemFor(CropType t) {
     switch (t) {
         case CropType::Parsnip: return Game::ItemType::ParsnipSeed;
@@ -39,6 +54,7 @@ inline Game::ItemType seedItemFor(CropType t) {
     }
 }
 
+// 根据作物类型返回对应的“收获产物”物品类型
 inline Game::ItemType produceItemFor(CropType t) {
     switch (t) {
         case CropType::Parsnip: return Game::ItemType::Parsnip;
@@ -48,10 +64,12 @@ inline Game::ItemType produceItemFor(CropType t) {
     }
 }
 
+// 是否为“种子”类物品（用于播种判定）
 inline bool isSeed(Game::ItemType t) {
     return t == Game::ItemType::ParsnipSeed || t == Game::ItemType::BlueberrySeed || t == Game::ItemType::EggplantSeed;
 }
 
+// 将“种子”物品映射为作物类型
 inline CropType cropTypeFromSeed(Game::ItemType t) {
     switch (t) {
         case Game::ItemType::ParsnipSeed: return CropType::Parsnip;

@@ -21,6 +21,7 @@
 #include "Controllers/UIController.h"
 #include "Controllers/PlayerController.h"
 #include "Controllers/GameStateController.h"
+#include "Controllers/CropSystem.h"
 #include "Controllers/ToolSystem.h"
 #include <functional>
 #include <vector>
@@ -54,6 +55,7 @@ protected:
     Controllers::PlayerController* _playerController = nullptr;
     Controllers::GameStateController* _stateController = nullptr;
     Controllers::ToolSystem* _toolSystem = nullptr; // 可选
+    Controllers::CropSystem* _cropSystem = nullptr;
 
 protected:
     // 允许子类注册额外的更新回调（用于 Monster/Mining/Combat 等控制器调度）。

@@ -3,7 +3,8 @@
 #include <memory>
 #include "Game/Inventory.h"
 #include "Game/Item.h"
-#include "Controllers/IMapController.h"
+#include "Controllers/CropSystem.h"
+#include "Game/Crop.h"
 
 namespace Game {
 
@@ -17,11 +18,22 @@ struct Cheat {
         }
     }
 
-    static void fastGrowAllCrops(Controllers::IMapController* map) {
-        if (!map) return;
-        map->instantMatureAllCrops();
+    static void fastGrowAllCrops(Controllers::CropSystem* crop) {
+        if (!crop) return;
+        crop->instantMatureAllCrops();
+    }
+
+    static void grantSeed(const std::shared_ptr<Inventory>& inv, Game::CropType type, int qty = 1) {
+        if (!inv || qty <= 0) return;
+        auto item = Game::seedItemFor(type);
+        inv->addItems(item, qty);
+    }
+
+    static void grantProduce(const std::shared_ptr<Inventory>& inv, Game::CropType type, int qty = 1) {
+        if (!inv || qty <= 0) return;
+        auto item = Game::produceItemFor(type);
+        inv->addItems(item, qty);
     }
 };
 
 }
-

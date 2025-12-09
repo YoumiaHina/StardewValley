@@ -42,10 +42,6 @@ public:
     void refreshCropsVisuals() override {} // not used
     void refreshDropsVisuals() override {} // not used
     void spawnDropAt(int, int, int, int) override {} // not used here
-    int  findCropIndex(int, int) const override { return -1; }
-    void plantCrop(int, int, int) override {}
-    void advanceCropsDaily() override {}
-    void harvestCropAt(int, int) override {}
     const std::vector<Game::Chest>& chests() const override { return _emptyChests; }
     std::vector<Game::Chest>& chests() override { return _emptyChests; }
     void addActorToMap(cocos2d::Node* node, int zOrder) override;

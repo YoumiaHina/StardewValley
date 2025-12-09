@@ -22,13 +22,14 @@ FarmInteractor::SpaceAction FarmInteractor::onSpacePressed() {
             auto lastDir = _getLastDir ? _getLastDir() : Vec2(0,-1);
             auto tgt = _map->targetTile(p, lastDir);
             int tc = tgt.first, tr = tgt.second;
-            if (_map->inBounds(tc, tr) && !_map->isNearChest(_map->tileToWorld(tc,tr)) && _map->findCropIndex(tc, tr) < 0) {
+            if (_map->inBounds(tc, tr) && !_map->isNearChest(_map->tileToWorld(tc,tr)) && (_crop ? _crop->findCropIndex(tc, tr) : -1) < 0) {
                 auto t = _map->getTile(tc, tr);
                 if (t == Game::TileType::Tilled || t == Game::TileType::Watered) {
                     int ct = static_cast<int>(Game::cropTypeFromSeed(slot.itemType));
-                    _map->plantCrop(ct, tc, tr);
+                    if (_crop) { _crop->plantCrop(static_cast<Game::CropType>(ct), tc, tr); }
                     bool ok = _inventory->consumeSelectedItem(1);
                     if (ok) { _ui->refreshHotbar(); }
+                    _map->refreshCropsVisuals();
                     _ui->popTextAt(_map->tileToWorld(tc,tr), "Planted", Color3B::YELLOW);
                 }
             }
