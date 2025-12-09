@@ -16,6 +16,7 @@
 #include "Game/Crop.h"
 #include "Game/WorldState.h"
 #include "Game/Tree.h"
+#include "Controllers/TreeSystem.h"
 
 namespace Controllers {
 
@@ -90,9 +91,7 @@ private:
     cocos2d::Node* _tileRoot = nullptr;
     std::unordered_map<long long, cocos2d::Sprite*> _tileSprites;
     cocos2d::Node* _actorsRoot = nullptr;
-    
-    cocos2d::Node* _treesRoot = nullptr;
-    std::unordered_map<long long, Game::Tree*> _trees;
+    Controllers::TreeSystem* _treeSystem = nullptr;
 
 
     // 接口扩展：湖边判定
@@ -101,7 +100,6 @@ public:
     void sortActorWithEnvironment(cocos2d::Node* actor) override;
     bool damageTreeAt(int c, int r, int amount) override;
     Game::Tree* findTreeAt(int c, int r) const;
-    void spawnRandomTrees(int count);
 };
 
 } // namespace Controllers

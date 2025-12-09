@@ -95,29 +95,22 @@ void FarmMapController::init() {
     } else {
         _worldNode->addChild(_actorsRoot, 20);
     }
-    _treesRoot = _actorsRoot;
+
+    _treeSystem = new Controllers::TreeSystem();
+    _treeSystem->attachTo(_actorsRoot);
 
 
     refreshMapVisuals();
     refreshDropsVisuals();
     refreshCropsVisuals();
 
-    if (_trees.empty()) {
+    if (_treeSystem && _treeSystem->isEmpty()) {
         int created = 0;
         for (int r = 0; r < _rows; ++r) {
             for (int c = 0; c < _cols; ++c) {
                 if (getTile(c, r) == Game::TileType::Tree) {
-                    float s = static_cast<float>(GameConfig::TILE_SIZE);
                     auto center = tileToWorld(c, r);
-                    Vec2 footCenter = center + Vec2(0, -s * 0.5f);
-                    bool blocked = _gameMap && _gameMap->collides(footCenter, 8.0f);
-                    if (blocked) continue;
-                    auto tree = Game::Tree::create("Tree/tree.png");
-                    if (tree) {
-                        tree->setPosition(footCenter);
-                        _treesRoot->addChild(tree, 0);
-                        long long key = (static_cast<long long>(r) << 32) | static_cast<unsigned long long>(c);
-                        _trees[key] = tree;
+                    if (_treeSystem && _treeSystem->spawnFromTile(c, r, center, _gameMap, GameConfig::TILE_SIZE)) {
                         setTile(c, r, Game::TileType::Soil);
                         created++;
                     }
@@ -125,29 +118,16 @@ void FarmMapController::init() {
             }
         }
         if (created == 0) {
-            std::mt19937 rng(static_cast<unsigned>(std::time(nullptr)));
-            std::uniform_int_distribution<int> distC(0, _cols - 1);
-            std::uniform_int_distribution<int> distR(0, _rows - 1);
             int cx = _cols / 2;
             int cy = _rows / 2;
             auto safe = [cx, cy](int c, int r){ return std::abs(c - cx) <= 4 && std::abs(r - cy) <= 4; };
             int trees = (_cols * _rows) / 40;
-            for (int i = 0; i < trees; ++i) {
-                int c = distC(rng);
-                int r = distR(rng);
-                if (!inBounds(c,r) || safe(c,r)) continue;
-                float s = static_cast<float>(GameConfig::TILE_SIZE);
-                auto center = tileToWorld(c, r);
-                Vec2 footCenter = center + Vec2(0, -s * 0.5f);
-                bool blocked = _gameMap && _gameMap->collides(footCenter, 8.0f);
-                if (blocked) continue;
-                auto tree = Game::Tree::create("Tree/tree.png");
-                if (tree) {
-                    tree->setPosition(footCenter);
-                    _treesRoot->addChild(tree, 0);
-                    long long key = (static_cast<long long>(r) << 32) | static_cast<unsigned long long>(c);
-                    _trees[key] = tree;
-                }
+            if (_treeSystem) {
+                _treeSystem->spawnRandom(trees, _cols, _rows,
+                    [this](int c, int r){ return this->tileToWorld(c, r); },
+                    _gameMap, GameConfig::TILE_SIZE,
+                    [safe](int c, int r){ return safe(c, r); }
+                );
             }
         }
     }
@@ -183,12 +163,8 @@ Vec2 FarmMapController::clampPosition(const Vec2& current, const Vec2& next, flo
         Vec2 footX = tryX + Vec2(0, -s * 0.5f);
         bool baseBlockedX = _gameMap->collides(footX, radius);
         bool treeBlockedX = false;
-        int tc=0,tr=0; worldToTileIndex(footX, tc, tr);
-        long long tk = (static_cast<long long>(tr) << 32) | static_cast<unsigned long long>(tc);
-        auto it = _trees.find(tk);
-        if (it != _trees.end()) {
-            auto rect = it->second->footRect();
-            treeBlockedX = rect.containsPoint(footX);
+        if (_treeSystem) {
+            treeBlockedX = _treeSystem->collides(footX, radius, GameConfig::TILE_SIZE);
         }
         if (baseBlockedX || treeBlockedX) {
             tryX.x = current.x;
@@ -199,12 +175,8 @@ Vec2 FarmMapController::clampPosition(const Vec2& current, const Vec2& next, flo
         Vec2 footY = tryY + Vec2(0, -s * 0.5f);
         bool baseBlockedY = _gameMap->collides(footY, radius);
         bool treeBlockedY = false;
-        int tc=0,tr=0; worldToTileIndex(footY, tc, tr);
-        long long tk = (static_cast<long long>(tr) << 32) | static_cast<unsigned long long>(tc);
-        auto it = _trees.find(tk);
-        if (it != _trees.end()) {
-            auto rect = it->second->footRect();
-            treeBlockedY = rect.containsPoint(footY);
+        if (_treeSystem) {
+            treeBlockedY = _treeSystem->collides(footY, radius, GameConfig::TILE_SIZE);
         }
         if (baseBlockedY || treeBlockedY) {
             tryY.y = current.y;
@@ -214,7 +186,9 @@ Vec2 FarmMapController::clampPosition(const Vec2& current, const Vec2& next, flo
 }
 
 bool FarmMapController::collides(const Vec2& pos, float radius) const {
-    return _gameMap ? _gameMap->collides(pos, radius) : false;
+    if (_gameMap && _gameMap->collides(pos, radius)) return true;
+    if (_treeSystem && _treeSystem->collides(pos, radius, GameConfig::TILE_SIZE)) return true;
+    return false;
 }
 
 bool FarmMapController::isNearDoor(const Vec2& playerWorldPos) const {
@@ -238,34 +212,19 @@ void FarmMapController::sortActorWithEnvironment(cocos2d::Node* actor) {
     float s = tileSize();
     float footY = actor->getPositionY() - s * 0.5f; // player node is at tile center; use foot for sorting
     actor->setLocalZOrder(static_cast<int>(-footY));
-    for (auto& kv : _trees) {
-        if (kv.second) kv.second->setLocalZOrder(static_cast<int>(-kv.second->getPositionY()));
-    }
+    if (_treeSystem) _treeSystem->sortTrees();
 }
 
 Game::Tree* FarmMapController::findTreeAt(int c, int r) const {
-    long long k = (static_cast<long long>(r) << 32) | static_cast<unsigned long long>(c);
-    auto it = _trees.find(k);
-    if (it != _trees.end()) return it->second;
-    return nullptr;
+    return _treeSystem ? _treeSystem->findTreeAt(c, r) : nullptr;
 }
 
 bool FarmMapController::damageTreeAt(int c, int r, int amount) {
-    auto t = findTreeAt(c, r);
-    if (!t) return false;
-    t->applyDamage(amount);
-    if (t->dead()) {
-        long long k = (static_cast<long long>(r) << 32) | static_cast<unsigned long long>(c);
-        _trees.erase(k);
-        setTile(c, r, Game::TileType::Soil);
-        t->playFallAnimation([this, c, r, t]{
-            t->removeFromParent();
-            spawnDropAt(c, r, static_cast<int>(Game::ItemType::Wood), 3);
-            refreshDropsVisuals();
-        });
-        return true;
-    }
-    return true;
+    if (!_treeSystem) return false;
+    return _treeSystem->damageTreeAt(c, r, amount,
+        [this](int c,int r,int item){ this->spawnDropAt(c, r, item, 3); this->refreshDropsVisuals(); },
+        [this](int c,int r, Game::TileType t){ this->setTile(c, r, t); }
+    );
 }
 
 bool FarmMapController::inBounds(int c, int r) const {
