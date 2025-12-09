@@ -29,7 +29,6 @@
       <UniqueIdentifier>{9D3B8242-29C4-4F3C-9B0E-9A7E2E8B3F56}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
-
   <ItemGroup>
     <!-- Source Files -->
     <ClCompile Include="..\Classes\AppDelegate.cpp">
@@ -80,7 +79,7 @@
     <ClCompile Include="..\Classes\Game\PlayerAppearance.cpp">
       <Filter>Classes\Game</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\Game\GameMap.cpp">
+    <ClCompile Include="..\Classes\Game\FarmMap.cpp">
       <Filter>Classes\Game</Filter>
     </ClCompile>
     <ClCompile Include="..\Classes\Game\WorldState.cpp">
@@ -121,8 +120,16 @@
     <ClCompile Include="main.cpp">
       <Filter>proj.win32</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\Managers\AudioManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\FishingController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\Tree.cpp">
+      <Filter>Classes\Game</Filter>
+    </ClCompile>
   </ItemGroup>
-
   <ItemGroup>
     <!-- Header Files -->
     <ClInclude Include="..\Classes\AppDelegate.h">
@@ -185,7 +192,7 @@
     <ClInclude Include="..\Classes\Game\Crop.h">
       <Filter>Classes\Game</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\Game\GameMap.h">
+    <ClInclude Include="..\Classes\Game\FarmMap.h">
       <Filter>Classes\Game</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\Game\GameConfig.h">
@@ -241,8 +248,16 @@
     <ClInclude Include="main.h">
       <Filter>proj.win32</Filter>
     </ClInclude>
+    <ClInclude Include="..\Classes\Managers\AudioManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\FishingController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\Tree.h">
+      <Filter>Classes\Game</Filter>
+    </ClInclude>
   </ItemGroup>
-
   <ItemGroup>
     <ResourceCompile Include="game.rc">
       <Filter>Resource Files</Filter>

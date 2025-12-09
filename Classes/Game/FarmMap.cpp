@@ -1,9 +1,9 @@
-#include "GameMap.h"
+#include "FarmMap.h"
 
 namespace Game {
 
-GameMap* GameMap::create(const std::string& tmxFile) {
-    GameMap* ret = new (std::nothrow) GameMap();
+FarmMap* FarmMap::create(const std::string& tmxFile) {
+    FarmMap* ret = new (std::nothrow) FarmMap();
     if (ret && ret->initWithFile(tmxFile)) {
         ret->autorelease();
         return ret;
@@ -12,7 +12,7 @@ GameMap* GameMap::create(const std::string& tmxFile) {
     return nullptr;
 }
 
-bool GameMap::initWithFile(const std::string& tmxFile) {
+bool FarmMap::initWithFile(const std::string& tmxFile) {
     if (!Node::init()) return false;
 
     _tmx = cocos2d::TMXTiledMap::create(tmxFile);
@@ -30,7 +30,7 @@ bool GameMap::initWithFile(const std::string& tmxFile) {
     return true;
 }
 
-void GameMap::setupLayerOrder() {
+void FarmMap::setupLayerOrder() {
     if (!_tmx) return;
     _bgLayer = _tmx->getLayer("Background");
     _houseBodyLayer = _tmx->getLayer("HouseBody");
@@ -41,7 +41,7 @@ void GameMap::setupLayerOrder() {
     if (_houseTopLayer) _tmx->reorderChild(_houseTopLayer, 30);
 }
 
-void GameMap::parseWalls() {
+void FarmMap::parseWalls() {
     _wallRects.clear();
     _wallPolygons.clear();
     if (!_tmx) return;
@@ -108,7 +108,7 @@ void GameMap::parseWalls() {
     }
 }
 
-bool GameMap::collides(const cocos2d::Vec2& p, float radius) const {
+bool FarmMap::collides(const cocos2d::Vec2& p, float radius) const {
     for (const auto& r : _wallRects) {
         float cx = std::max(r.getMinX(), std::min(p.x, r.getMaxX()));
         float cy = std::max(r.getMinY(), std::min(p.y, r.getMaxY()));
@@ -180,22 +180,22 @@ bool GameMap::collides(const cocos2d::Vec2& p, float radius) const {
     return false;
 }
 
-cocos2d::Size GameMap::getMapSize() const {
+cocos2d::Size FarmMap::getMapSize() const {
     if (_tmx) return _tmx->getMapSize();
     return cocos2d::Size::ZERO;
 }
 
-cocos2d::Size GameMap::getTileSize() const {
+cocos2d::Size FarmMap::getTileSize() const {
     if (_tmx) return _tmx->getTileSize();
     return cocos2d::Size(GameConfig::TILE_SIZE, GameConfig::TILE_SIZE);
 }
 
-const cocos2d::Size& GameMap::getContentSize() const {
+const cocos2d::Size& FarmMap::getContentSize() const {
     if (_tmx) return _tmx->getContentSize();
     return cocos2d::Size::ZERO;
 }
 
-cocos2d::Vec2 GameMap::tileToWorld(int c, int r) const {
+cocos2d::Vec2 FarmMap::tileToWorld(int c, int r) const {
     float s = _tmx ? _tmx->getTileSize().width : (float)GameConfig::TILE_SIZE;
     // TMX usually starts from top-left, but our logic in GameScene assumed bottom-left for _tiles?
     // In GameScene::tileToWorld, it was:
@@ -206,14 +206,14 @@ cocos2d::Vec2 GameMap::tileToWorld(int c, int r) const {
     return cocos2d::Vec2(c * s + s * 0.5f, r * s + s * 0.5f);
 }
 
-void GameMap::worldToTileIndex(const cocos2d::Vec2& p, int& c, int& r) const {
+void FarmMap::worldToTileIndex(const cocos2d::Vec2& p, int& c, int& r) const {
     // p is in local coordinates of GameMap (which matches TMX node coords)
     float s = _tmx ? _tmx->getTileSize().width : (float)GameConfig::TILE_SIZE;
     c = static_cast<int>(p.x / s);
     r = static_cast<int>(p.y / s);
 }
 
-void GameMap::parseWater() {
+void FarmMap::parseWater() {
     _waterRects.clear();
     _waterPolygons.clear();
     if (!_tmx) return;
@@ -258,7 +258,7 @@ void GameMap::parseWater() {
     }
 }
 
-bool GameMap::nearWater(const cocos2d::Vec2& p, float radius) const {
+bool FarmMap::nearWater(const cocos2d::Vec2& p, float radius) const {
     for (const auto& r : _waterRects) {
         float cx = std::max(r.getMinX(), std::min(p.x, r.getMaxX()));
         float cy = std::max(r.getMinY(), std::min(p.y, r.getMaxY()));

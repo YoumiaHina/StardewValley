@@ -117,10 +117,11 @@ std::string ToolSystem::useSelectedTool() {
             if (current == Game::TileType::Rock) { _map->setTile(tc,tr, Game::TileType::Soil); msg = "Mine!"; _map->spawnDropAt(tc, tr, static_cast<int>(Game::ItemType::Stone), 1); }
             else msg = "Nothing";
             break;
-        case Game::ToolType::Axe:
-            if (current == Game::TileType::Tree) { _map->setTile(tc,tr, Game::TileType::Soil); msg = "Chop!"; _map->spawnDropAt(tc, tr, static_cast<int>(Game::ItemType::Wood), 1); }
-            else msg = "Nothing";
-            break;
+        case Game::ToolType::Axe: {
+            bool acted = _map->damageTreeAt(tc, tr, 1);
+            if (acted) { msg = "Chop!"; }
+            else { msg = "Nothing"; }
+        } break;
         default: msg = "Use"; break;
     }
 

@@ -5,9 +5,9 @@
 
 namespace Game {
 
-class GameMap : public cocos2d::Node {
+class FarmMap : public cocos2d::Node {
 public:
-    static GameMap* create(const std::string& tmxFile);
+    static FarmMap* create(const std::string& tmxFile);
     bool initWithFile(const std::string& tmxFile);
 
     // Coordinate conversions

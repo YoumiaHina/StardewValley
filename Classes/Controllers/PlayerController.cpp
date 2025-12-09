@@ -76,8 +76,7 @@ void PlayerController::update(float dt) {
     Vec2 delta = dir * speed * dt;
     Vec2 next = _player->getPosition() + delta;
 
-    // Map-specific clamp and collision
-    Vec2 clamped = _map->clampPosition(_player->getPosition(), next, /*radius*/6.0f);
+    Vec2 clamped = _map->clampPosition(_player->getPosition(), next, /*radius*/8.0f);
     _player->setPosition(clamped);
 
     // Cursor (Farm) and camera follow
@@ -115,6 +114,8 @@ void PlayerController::update(float dt) {
         }
         _worldNode->setPosition(cam);
     }
+
+    if (_map) { _map->sortActorWithEnvironment(_player); }
 }
 
 } // namespace Controllers

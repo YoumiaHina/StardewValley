@@ -10,11 +10,12 @@
 #include <unordered_map>
 #include "Controllers/IMapController.h"
 #include "Game/GameConfig.h"
-#include "Game/GameMap.h"
+#include "Game/FarmMap.h"
 #include "Game/Chest.h"
 #include "Game/Drop.h"
 #include "Game/Crop.h"
 #include "Game/WorldState.h"
+#include "Game/Tree.h"
 
 namespace Controllers {
 
@@ -57,14 +58,14 @@ public:
     const std::vector<Game::Chest>& chests() const { return _chests; }
     std::vector<Game::Chest>& chests() { return _chests; }
 
-    Game::GameMap* tmx() const { return _gameMap; }
+    Game::FarmMap* tmx() const { return _gameMap; }
     cocos2d::Node* worldNode() const { return _worldNode; }
     void addActorToMap(cocos2d::Node* node, int zOrder) override;
 
 private:
     cocos2d::Node* _worldNode = nullptr;
     cocos2d::Node* _mapNode = nullptr;
-    Game::GameMap* _gameMap = nullptr;
+    Game::FarmMap* _gameMap = nullptr;
     int _cols = GameConfig::MAP_COLS;
     int _rows = GameConfig::MAP_ROWS;
     std::vector<Game::TileType> _tiles; // row-major
@@ -88,11 +89,19 @@ private:
     // Tilled tile overlay sprites
     cocos2d::Node* _tileRoot = nullptr;
     std::unordered_map<long long, cocos2d::Sprite*> _tileSprites;
+    cocos2d::Node* _actorsRoot = nullptr;
+    
+    cocos2d::Node* _treesRoot = nullptr;
+    std::unordered_map<long long, Game::Tree*> _trees;
 
 
     // 接口扩展：湖边判定
 public:
     bool isNearLake(const cocos2d::Vec2& playerWorldPos, float radius) const override;
+    void sortActorWithEnvironment(cocos2d::Node* actor) override;
+    bool damageTreeAt(int c, int r, int amount) override;
+    Game::Tree* findTreeAt(int c, int r) const;
+    void spawnRandomTrees(int count);
 };
 
 } // namespace Controllers

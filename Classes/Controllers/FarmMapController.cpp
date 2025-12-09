@@ -17,7 +17,7 @@ void FarmMapController::init() {
     _mapNode = Node::create();
     _worldNode->addChild(_mapNode, 0);
 
-    _gameMap = Game::GameMap::create("Maps/spring_outdoors/spring_outdoors.tmx");
+    _gameMap = Game::FarmMap::create("Maps/spring_outdoors/spring_outdoors.tmx");
     Size content = _gameMap ? _gameMap->getContentSize() : Size(_cols * GameConfig::TILE_SIZE, _rows * GameConfig::TILE_SIZE);
     auto visibleSize = Director::getInstance()->getVisibleSize();
     auto origin = Director::getInstance()->getVisibleOrigin();
@@ -41,8 +41,8 @@ void FarmMapController::init() {
         std::uniform_int_distribution<int> distC(0, _cols - 1);
         std::uniform_int_distribution<int> distR(0, _rows - 1);
         auto placeIfSoil = [this, &safe](int c, int r, Game::TileType t){ if (inBounds(c,r) && !safe(c,r) && getTile(c,r) == Game::TileType::Soil) setTile(c,r,t); };
-        int rocks = (_cols * _rows) / 18;
-        int trees = (_cols * _rows) / 14;
+        int rocks = (_cols * _rows) / 22;
+        int trees = (_cols * _rows) / 40;
         for (int i = 0; i < rocks; ++i) { placeIfSoil(distC(rng), distR(rng), Game::TileType::Rock); }
         for (int i = 0; i < trees; ++i) { placeIfSoil(distC(rng), distR(rng), Game::TileType::Tree); }
         ws.farmTiles = _tiles;
@@ -89,10 +89,68 @@ void FarmMapController::init() {
         _worldNode->addChild(_tileRoot, 0);
     }
 
+    _actorsRoot = Node::create();
+    if (_gameMap && _gameMap->getTMX()) {
+        _gameMap->getTMX()->addChild(_actorsRoot, 20);
+    } else {
+        _worldNode->addChild(_actorsRoot, 20);
+    }
+    _treesRoot = _actorsRoot;
+
 
     refreshMapVisuals();
     refreshDropsVisuals();
     refreshCropsVisuals();
+
+    if (_trees.empty()) {
+        int created = 0;
+        for (int r = 0; r < _rows; ++r) {
+            for (int c = 0; c < _cols; ++c) {
+                if (getTile(c, r) == Game::TileType::Tree) {
+                    float s = static_cast<float>(GameConfig::TILE_SIZE);
+                    auto center = tileToWorld(c, r);
+                    Vec2 footCenter = center + Vec2(0, -s * 0.5f);
+                    bool blocked = _gameMap && _gameMap->collides(footCenter, 8.0f);
+                    if (blocked) continue;
+                    auto tree = Game::Tree::create("Tree/tree.png");
+                    if (tree) {
+                        tree->setPosition(footCenter);
+                        _treesRoot->addChild(tree, 0);
+                        long long key = (static_cast<long long>(r) << 32) | static_cast<unsigned long long>(c);
+                        _trees[key] = tree;
+                        setTile(c, r, Game::TileType::Soil);
+                        created++;
+                    }
+                }
+            }
+        }
+        if (created == 0) {
+            std::mt19937 rng(static_cast<unsigned>(std::time(nullptr)));
+            std::uniform_int_distribution<int> distC(0, _cols - 1);
+            std::uniform_int_distribution<int> distR(0, _rows - 1);
+            int cx = _cols / 2;
+            int cy = _rows / 2;
+            auto safe = [cx, cy](int c, int r){ return std::abs(c - cx) <= 4 && std::abs(r - cy) <= 4; };
+            int trees = (_cols * _rows) / 40;
+            for (int i = 0; i < trees; ++i) {
+                int c = distC(rng);
+                int r = distR(rng);
+                if (!inBounds(c,r) || safe(c,r)) continue;
+                float s = static_cast<float>(GameConfig::TILE_SIZE);
+                auto center = tileToWorld(c, r);
+                Vec2 footCenter = center + Vec2(0, -s * 0.5f);
+                bool blocked = _gameMap && _gameMap->collides(footCenter, 8.0f);
+                if (blocked) continue;
+                auto tree = Game::Tree::create("Tree/tree.png");
+                if (tree) {
+                    tree->setPosition(footCenter);
+                    _treesRoot->addChild(tree, 0);
+                    long long key = (static_cast<long long>(r) << 32) | static_cast<unsigned long long>(c);
+                    _trees[key] = tree;
+                }
+            }
+        }
+    }
 
     // 门口区域
     float s = static_cast<float>(GameConfig::TILE_SIZE);
@@ -124,7 +182,15 @@ Vec2 FarmMapController::clampPosition(const Vec2& current, const Vec2& next, flo
     if (_gameMap) {
         Vec2 footX = tryX + Vec2(0, -s * 0.5f);
         bool baseBlockedX = _gameMap->collides(footX, radius);
-        if (baseBlockedX) {
+        bool treeBlockedX = false;
+        int tc=0,tr=0; worldToTileIndex(footX, tc, tr);
+        long long tk = (static_cast<long long>(tr) << 32) | static_cast<unsigned long long>(tc);
+        auto it = _trees.find(tk);
+        if (it != _trees.end()) {
+            auto rect = it->second->footRect();
+            treeBlockedX = rect.containsPoint(footX);
+        }
+        if (baseBlockedX || treeBlockedX) {
             tryX.x = current.x;
         }
     }
@@ -132,7 +198,15 @@ Vec2 FarmMapController::clampPosition(const Vec2& current, const Vec2& next, flo
     if (_gameMap) {
         Vec2 footY = tryY + Vec2(0, -s * 0.5f);
         bool baseBlockedY = _gameMap->collides(footY, radius);
-        if (baseBlockedY) {
+        bool treeBlockedY = false;
+        int tc=0,tr=0; worldToTileIndex(footY, tc, tr);
+        long long tk = (static_cast<long long>(tr) << 32) | static_cast<unsigned long long>(tc);
+        auto it = _trees.find(tk);
+        if (it != _trees.end()) {
+            auto rect = it->second->footRect();
+            treeBlockedY = rect.containsPoint(footY);
+        }
+        if (baseBlockedY || treeBlockedY) {
             tryY.y = current.y;
         }
     }
@@ -157,6 +231,41 @@ bool FarmMapController::isNearChest(const Vec2& playerWorldPos) const {
 
 bool FarmMapController::isNearLake(const Vec2& playerWorldPos, float radius) const {
     return _gameMap ? _gameMap->nearWater(playerWorldPos, radius) : false;
+}
+
+void FarmMapController::sortActorWithEnvironment(cocos2d::Node* actor) {
+    if (!actor) return;
+    float s = tileSize();
+    float footY = actor->getPositionY() - s * 0.5f; // player node is at tile center; use foot for sorting
+    actor->setLocalZOrder(static_cast<int>(-footY));
+    for (auto& kv : _trees) {
+        if (kv.second) kv.second->setLocalZOrder(static_cast<int>(-kv.second->getPositionY()));
+    }
+}
+
+Game::Tree* FarmMapController::findTreeAt(int c, int r) const {
+    long long k = (static_cast<long long>(r) << 32) | static_cast<unsigned long long>(c);
+    auto it = _trees.find(k);
+    if (it != _trees.end()) return it->second;
+    return nullptr;
+}
+
+bool FarmMapController::damageTreeAt(int c, int r, int amount) {
+    auto t = findTreeAt(c, r);
+    if (!t) return false;
+    t->applyDamage(amount);
+    if (t->dead()) {
+        long long k = (static_cast<long long>(r) << 32) | static_cast<unsigned long long>(c);
+        _trees.erase(k);
+        setTile(c, r, Game::TileType::Soil);
+        t->playFallAnimation([this, c, r, t]{
+            t->removeFromParent();
+            spawnDropAt(c, r, static_cast<int>(Game::ItemType::Wood), 3);
+            refreshDropsVisuals();
+        });
+        return true;
+    }
+    return true;
 }
 
 bool FarmMapController::inBounds(int c, int r) const {
@@ -251,10 +360,8 @@ void FarmMapController::refreshMapVisuals() {
             _mapDraw->drawLine(c2,d, Color4F(0,0,0,0.25f));
             _mapDraw->drawLine(d,a, Color4F(0,0,0,0.25f));
             switch (getTile(c, r)) {
-                // 去掉浇水提示的蓝色覆盖层
                 case Game::TileType::Rock:    _mapDraw->drawSolidCircle(center, s*0.35f, 0.0f, 12, Color4F(0.6f,0.6f,0.6f,1.0f)); break;
-                case Game::TileType::Tree:    _mapDraw->drawSolidCircle(center, s*0.45f, 0.0f, 12, Color4F(0.2f,0.75f,0.25f,1.0f)); break;
-                default: break;
+                default: break; // 不再为 Tree 绘制占位，避免出现“木桩”效果
             }
 
             // Tilled soil textured overlay using spring_outdoors tileset (configurable row/col)
@@ -393,6 +500,9 @@ void FarmMapController::refreshDropsVisuals() {
     if (!_dropsDraw) return;
     _dropsDraw->clear();
     for (const auto& d : _drops) {
+        if (d.type == Game::ItemType::Wood) {
+            continue; // 砍树掉落的木材不再绘制棕色圆形
+        }
         _dropsDraw->drawSolidCircle(d.pos, GameConfig::DROP_DRAW_RADIUS, 0.0f, 12, Game::itemColor(d.type));
         _dropsDraw->drawCircle(d.pos, GameConfig::DROP_DRAW_RADIUS, 0.0f, 12, false, Color4F(0,0,0,0.4f));
     }
@@ -407,11 +517,15 @@ void FarmMapController::spawnDropAt(int c, int r, int itemType, int qty) {
 
  
 
-void FarmMapController::addActorToMap(cocos2d::Node* node, int zOrder) {
+void FarmMapController::addActorToMap(cocos2d::Node* node, int /*zOrder*/) {
+    if (_actorsRoot) {
+        _actorsRoot->addChild(node, 0);
+        return;
+    }
     if (_gameMap && _gameMap->getTMX()) {
-        _gameMap->getTMX()->addChild(node, zOrder);
+        _gameMap->getTMX()->addChild(node, 20);
     } else if (_worldNode) {
-        _worldNode->addChild(node, zOrder);
+        _worldNode->addChild(node, 20);
     }
 }
 
