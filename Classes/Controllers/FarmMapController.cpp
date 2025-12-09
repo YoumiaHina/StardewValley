@@ -89,55 +89,6 @@ void FarmMapController::init() {
         _worldNode->addChild(_tileRoot, 0);
     }
 
-    // Lake overlay: generate a natural elliptical patch with configured tile
-    _lakeRoot = Node::create();
-    if (_gameMap && _gameMap->getTMX()) {
-        // 提高层级，确保湖面贴图在基础地表层之上
-        _gameMap->getTMX()->addChild(_lakeRoot, 20);
-    } else {
-        _worldNode->addChild(_lakeRoot, 0);
-    }
-    {
-        // Choose a location and shape for the lake
-        int cx = std::max(8, _cols / 4);
-        int cy = std::max(8, _rows / 3);
-        int a = 8; // horizontal radius (tiles)
-        int b = 6; // vertical radius (tiles)
-        for (int r = std::max(0, cy - b - 1); r <= std::min(_rows - 1, cy + b + 1); ++r) {
-            for (int c = std::max(0, cx - a - 1); c <= std::min(_cols - 1, cx + a + 1); ++c) {
-                float dx = static_cast<float>(c - cx);
-                float dy = static_cast<float>(r - cy);
-                float v = (dx*dx) / (static_cast<float>(a*a)) + (dy*dy) / (static_cast<float>(b*b));
-                if (v <= 1.0f) {
-                    // Ensure no rocks/trees remain inside the lake
-                    if (inBounds(c,r)) {
-                        if (getTile(c,r) == Game::TileType::Rock || getTile(c,r) == Game::TileType::Tree) {
-                            setTile(c,r, Game::TileType::Soil);
-                        }
-                    }
-                    long long key = (static_cast<long long>(r) << 32) | static_cast<unsigned long long>(c);
-                    cocos2d::Sprite* spr = cocos2d::Sprite::create("Maps/spring_outdoors/spring_outdoors.png");
-                    spr->setAnchorPoint(cocos2d::Vec2(0.5f, 0.5f));
-                    // Compute texture rect for lake tile
-                    int tw = 16, th = 16;
-                    int columns = GameConfig::SPRING_OUTDOORS_COLUMNS;
-                    int row1 = GameConfig::FARM_LAKE_TILE_ROW;
-                    int col1 = GameConfig::FARM_LAKE_TILE_COL;
-                    int tileId = (row1 - 1) * columns + (col1 - 1);
-                    int col = tileId % columns;
-                    int row = tileId / columns;
-                    float texH = spr->getTexture() ? spr->getTexture()->getContentSize().height : 0.0f;
-                    float x = static_cast<float>(col * tw);
-                    float y = texH - static_cast<float>((row + 1) * th);
-                    spr->setTextureRect(cocos2d::Rect(x, y, static_cast<float>(tw), static_cast<float>(th)));
-                    auto pos = tileToWorld(c, r);
-                    spr->setPosition(pos);
-                    _lakeRoot->addChild(spr, 0);
-                    _lakeSprites[key] = spr;
-                }
-            }
-        }
-    }
 
     refreshMapVisuals();
     refreshDropsVisuals();
@@ -169,26 +120,19 @@ Vec2 FarmMapController::clampPosition(const Vec2& current, const Vec2& next, flo
     candidate.x = std::max(minX, std::min(maxX, candidate.x));
     candidate.y = std::max(minY, std::min(maxY, candidate.y));
 
-    auto lakeBlocked = [&](const Vec2& p){
-        int cc=0, rr=0; worldToTileIndex(p, cc, rr);
-        if (!inBounds(cc, rr)) return false;
-        long long k = (static_cast<long long>(rr) << 32) | static_cast<unsigned long long>(cc);
-        return _lakeSprites.find(k) != _lakeSprites.end();
-    };
-
     Vec2 tryX(candidate.x, current.y);
     if (_gameMap) {
-        bool baseBlockedX = _gameMap->collides(tryX, radius);
-        bool lakeX = lakeBlocked(tryX) || lakeBlocked(tryX + Vec2(radius,0)) || lakeBlocked(tryX + Vec2(-radius,0));
-        if (baseBlockedX || lakeX) {
+        Vec2 footX = tryX + Vec2(0, -s * 0.5f);
+        bool baseBlockedX = _gameMap->collides(footX, radius);
+        if (baseBlockedX) {
             tryX.x = current.x;
         }
     }
     Vec2 tryY(current.x, candidate.y);
     if (_gameMap) {
-        bool baseBlockedY = _gameMap->collides(tryY, radius);
-        bool lakeY = lakeBlocked(tryY) || lakeBlocked(tryY + Vec2(0,radius)) || lakeBlocked(tryY + Vec2(0,-radius));
-        if (baseBlockedY || lakeY) {
+        Vec2 footY = tryY + Vec2(0, -s * 0.5f);
+        bool baseBlockedY = _gameMap->collides(footY, radius);
+        if (baseBlockedY) {
             tryY.y = current.y;
         }
     }
@@ -196,24 +140,7 @@ Vec2 FarmMapController::clampPosition(const Vec2& current, const Vec2& next, flo
 }
 
 bool FarmMapController::collides(const Vec2& pos, float radius) const {
-    bool blocked = _gameMap ? _gameMap->collides(pos, radius) : false;
-    if (blocked) return true;
-    // 追加：湖面不可行走（根据半径采样多点格子判定）
-    auto isLakeAt = [&](const Vec2& p){
-        int cc = 0, rr = 0; worldToTileIndex(p, cc, rr);
-        if (!inBounds(cc, rr)) return false;
-        long long k = (static_cast<long long>(rr) << 32) | static_cast<unsigned long long>(cc);
-        return _lakeSprites.find(k) != _lakeSprites.end();
-    };
-    // 采样中心与四个方向（半径）
-    if (isLakeAt(pos)) return true;
-    Vec2 offsets[4] = {
-        Vec2(radius, 0), Vec2(-radius, 0), Vec2(0, radius), Vec2(0, -radius)
-    };
-    for (auto& d : offsets) {
-        if (isLakeAt(pos + d)) return true;
-    }
-    return false;
+    return _gameMap ? _gameMap->collides(pos, radius) : false;
 }
 
 bool FarmMapController::isNearDoor(const Vec2& playerWorldPos) const {
@@ -226,6 +153,10 @@ bool FarmMapController::isNearChest(const Vec2& playerWorldPos) const {
         if (playerWorldPos.distance(ch.pos) <= maxDist) return true;
     }
     return false;
+}
+
+bool FarmMapController::isNearLake(const Vec2& playerWorldPos, float radius) const {
+    return _gameMap ? _gameMap->nearWater(playerWorldPos, radius) : false;
 }
 
 bool FarmMapController::inBounds(int c, int r) const {
@@ -245,23 +176,6 @@ std::pair<int,int> FarmMapController::targetTile(const Vec2& playerPos, const Ve
     return {tc, tr};
 }
 
-bool FarmMapController::isNearLake(const Vec2& playerWorldPos, float radius) const {
-    if (_lakeSprites.empty()) return false;
-    float s = tileSize();
-    float half = s * 0.5f;
-    for (const auto& kv : _lakeSprites) {
-        long long key = kv.first;
-        int r = static_cast<int>(key >> 32);
-        int c = static_cast<int>(key & 0xffffffff);
-        auto center = tileToWorld(c, r);
-        // 与湖面格子的矩形边界的最近距离（distance to AABB）
-        float dx = std::max(std::abs(playerWorldPos.x - center.x) - half, 0.0f);
-        float dy = std::max(std::abs(playerWorldPos.y - center.y) - half, 0.0f);
-        float distEdge = std::sqrt(dx*dx + dy*dy);
-        if (distEdge <= radius) return true;
-    }
-    return false;
-}
 
 void FarmMapController::updateCursor(const Vec2& playerPos, const Vec2& lastDir) {
     if (!_cursor) return;

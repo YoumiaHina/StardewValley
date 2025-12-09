@@ -77,7 +77,7 @@ void PlayerController::update(float dt) {
     Vec2 next = _player->getPosition() + delta;
 
     // Map-specific clamp and collision
-    Vec2 clamped = _map->clampPosition(_player->getPosition(), next, /*radius*/12.0f);
+    Vec2 clamped = _map->clampPosition(_player->getPosition(), next, /*radius*/6.0f);
     _player->setPosition(clamped);
 
     // Cursor (Farm) and camera follow

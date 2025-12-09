@@ -89,9 +89,6 @@ private:
     cocos2d::Node* _tileRoot = nullptr;
     std::unordered_map<long long, cocos2d::Sprite*> _tileSprites;
 
-    // Lake overlay sprites
-    cocos2d::Node* _lakeRoot = nullptr;
-    std::unordered_map<long long, cocos2d::Sprite*> _lakeSprites;
 
     // 接口扩展：湖边判定
 public:

@@ -25,6 +25,7 @@ bool GameMap::initWithFile(const std::string& tmxFile) {
     
     setupLayerOrder();
     parseWalls();
+    parseWater();
 
     return true;
 }
@@ -108,7 +109,6 @@ void GameMap::parseWalls() {
 }
 
 bool GameMap::collides(const cocos2d::Vec2& p, float radius) const {
-    // Check Rects
     for (const auto& r : _wallRects) {
         float cx = std::max(r.getMinX(), std::min(p.x, r.getMaxX()));
         float cy = std::max(r.getMinY(), std::min(p.y, r.getMaxY()));
@@ -116,12 +116,8 @@ bool GameMap::collides(const cocos2d::Vec2& p, float radius) const {
         float dy = p.y - cy;
         if (dx*dx + dy*dy <= radius*radius) return true;
     }
-    
-    // Check Polygons
     for (const auto& poly : _wallPolygons) {
         if (poly.size() < 3) continue;
-        
-        // 1. Check if point is inside polygon (Ray Casting Algorithm)
         bool inside = false;
         size_t j = poly.size() - 1;
         for (size_t i = 0; i < poly.size(); i++) {
@@ -132,8 +128,40 @@ bool GameMap::collides(const cocos2d::Vec2& p, float radius) const {
             j = i;
         }
         if (inside) return true;
-
-        // 2. Check distance to edges (Segment vs Circle)
+        j = poly.size() - 1;
+        float r2 = radius * radius;
+        for (size_t i = 0; i < poly.size(); i++) {
+            cocos2d::Vec2 p1 = poly[j];
+            cocos2d::Vec2 p2 = poly[i];
+            cocos2d::Vec2 d = p2 - p1;
+            if (d.lengthSquared() > 0) {
+                float t = (p - p1).dot(d) / d.lengthSquared();
+                t = std::max(0.0f, std::min(1.0f, t));
+                cocos2d::Vec2 closest = p1 + d * t;
+                if (p.distanceSquared(closest) <= r2) return true;
+            }
+            j = i;
+        }
+    }
+    for (const auto& r : _waterRects) {
+        float cx = std::max(r.getMinX(), std::min(p.x, r.getMaxX()));
+        float cy = std::max(r.getMinY(), std::min(p.y, r.getMaxY()));
+        float dx = p.x - cx;
+        float dy = p.y - cy;
+        if (dx*dx + dy*dy <= radius*radius) return true;
+    }
+    for (const auto& poly : _waterPolygons) {
+        if (poly.size() < 3) continue;
+        bool inside = false;
+        size_t j = poly.size() - 1;
+        for (size_t i = 0; i < poly.size(); i++) {
+            if ( ((poly[i].y > p.y) != (poly[j].y > p.y)) &&
+                 (p.x < (poly[j].x - poly[i].x) * (p.y - poly[i].y) / (poly[j].y - poly[i].y) + poly[i].x) ) {
+               inside = !inside;
+            }
+            j = i;
+        }
+        if (inside) return true;
         j = poly.size() - 1;
         float r2 = radius * radius;
         for (size_t i = 0; i < poly.size(); i++) {
@@ -183,6 +211,79 @@ void GameMap::worldToTileIndex(const cocos2d::Vec2& p, int& c, int& r) const {
     float s = _tmx ? _tmx->getTileSize().width : (float)GameConfig::TILE_SIZE;
     c = static_cast<int>(p.x / s);
     r = static_cast<int>(p.y / s);
+}
+
+void GameMap::parseWater() {
+    _waterRects.clear();
+    _waterPolygons.clear();
+    if (!_tmx) return;
+    if (_waterDebugNode) { _waterDebugNode->removeFromParent(); _waterDebugNode = nullptr; }
+    _waterDebugNode = cocos2d::DrawNode::create();
+    _tmx->addChild(_waterDebugNode, 998);
+    auto group = _tmx->getObjectGroup("Water");
+    if (!group) group = _tmx->getObjectGroup("water");
+    if (!group) return;
+    auto objects = group->getObjects();
+    for (auto &val : objects) {
+        auto dict = val.asValueMap();
+        float x = dict.at("x").asFloat();
+        float y = dict.at("y").asFloat();
+        if (dict.find("points") != dict.end() || dict.find("polyline") != dict.end() || dict.find("polygon") != dict.end()) {
+            std::vector<cocos2d::Vec2> pts;
+            cocos2d::ValueVector arr;
+            if (dict.find("points") != dict.end()) arr = dict.at("points").asValueVector();
+            else if (dict.find("polygon") != dict.end()) arr = dict.at("polygon").asValueVector();
+            else if (dict.find("polyline") != dict.end()) arr = dict.at("polyline").asValueVector();
+            for (auto &pv : arr) {
+                auto pmap = pv.asValueMap();
+                float px = pmap.at("x").asFloat();
+                float py = pmap.at("y").asFloat();
+                float finalX = x + px;
+                float finalY = y - py;
+                pts.emplace_back(finalX, finalY);
+            }
+            if (!pts.empty()) {
+                _waterPolygons.push_back(pts);
+                _waterDebugNode->drawPoly(pts.data(), (unsigned int)pts.size(), true, cocos2d::Color4F(0, 0, 1, 0.4f));
+                _waterDebugNode->drawSolidPoly(pts.data(), (unsigned int)pts.size(), cocos2d::Color4F(0, 0, 1, 0.2f));
+            }
+        } else if (dict.find("width") != dict.end() && dict.find("height") != dict.end()) {
+            float w = dict.at("width").asFloat();
+            float h = dict.at("height").asFloat();
+            cocos2d::Rect r(x, y, w, h);
+            _waterRects.push_back(r);
+            _waterDebugNode->drawRect(r.origin, r.origin + r.size, cocos2d::Color4F(0, 0, 1, 0.4f));
+            _waterDebugNode->drawSolidRect(r.origin, r.origin + r.size, cocos2d::Color4F(0, 0, 1, 0.2f));
+        }
+    }
+}
+
+bool GameMap::nearWater(const cocos2d::Vec2& p, float radius) const {
+    for (const auto& r : _waterRects) {
+        float cx = std::max(r.getMinX(), std::min(p.x, r.getMaxX()));
+        float cy = std::max(r.getMinY(), std::min(p.y, r.getMaxY()));
+        float dx = p.x - cx;
+        float dy = p.y - cy;
+        if (dx*dx + dy*dy <= radius*radius) return true;
+    }
+    for (const auto& poly : _waterPolygons) {
+        if (poly.size() < 2) continue;
+        size_t j = poly.size() - 1;
+        float r2 = radius * radius;
+        for (size_t i = 0; i < poly.size(); i++) {
+            cocos2d::Vec2 p1 = poly[j];
+            cocos2d::Vec2 p2 = poly[i];
+            cocos2d::Vec2 d = p2 - p1;
+            if (d.lengthSquared() > 0) {
+                float t = (p - p1).dot(d) / d.lengthSquared();
+                t = std::max(0.0f, std::min(1.0f, t));
+                cocos2d::Vec2 closest = p1 + d * t;
+                if (p.distanceSquared(closest) <= r2) return true;
+            }
+            j = i;
+        }
+    }
+    return false;
 }
 
 } // namespace Game
