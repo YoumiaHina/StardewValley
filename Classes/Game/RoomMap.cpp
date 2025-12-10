@@ -59,8 +59,7 @@ void RoomMap::parseCollision() {
     if (_collisionDebug) { _collisionDebug->removeFromParent(); _collisionDebug = nullptr; }
     _collisionDebug = DrawNode::create();
     _tmx->addChild(_collisionDebug, 999);
-    auto group = _tmx->getObjectGroup("collision");
-    if (!group) group = _tmx->getObjectGroup("Collision");
+    auto group = _tmx->getObjectGroup("Wall");
     if (!group) return;
     auto objects = group->getObjects();
     for (auto &val : objects) {
