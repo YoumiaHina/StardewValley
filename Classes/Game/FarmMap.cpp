@@ -27,7 +27,8 @@ bool FarmMap::initWithFile(const std::string& tmxFile) {
     parseWalls();
     parseWater();
     parseDoorToRoom();
-
+    parseDoorToMine();
+    
     return true;
 }
 
@@ -290,6 +291,9 @@ bool FarmMap::nearWater(const cocos2d::Vec2& p, float radius) const {
 void FarmMap::parseDoorToRoom() {
     _doorToRoomRects.clear();
     if (!_tmx) return;
+    if (_doorDebugNode) { _doorDebugNode->removeFromParent(); _doorDebugNode = nullptr; }
+    _doorDebugNode = cocos2d::DrawNode::create();
+    _tmx->addChild(_doorDebugNode, 997);
     auto group = _tmx->getObjectGroup("DoorToRoom");
     if (!group) return;
     auto objects = group->getObjects();
@@ -300,6 +304,9 @@ void FarmMap::parseDoorToRoom() {
         float w = dict.count("width") ? dict.at("width").asFloat() : 0.0f;
         float h = dict.count("height") ? dict.at("height").asFloat() : 0.0f;
         _doorToRoomRects.emplace_back(x, y, w, h);
+        cocos2d::Rect r(x, y, w, h);
+        _doorDebugNode->drawRect(r.origin, r.origin + r.size, cocos2d::Color4F(0, 1, 0, 0.5f));
+        _doorDebugNode->drawSolidRect(r.origin, r.origin + r.size, cocos2d::Color4F(0, 1, 0, 0.2f));
     }
 }
 
@@ -308,6 +315,52 @@ bool FarmMap::nearDoorToRoom(const cocos2d::Vec2& p) const {
         if (r.containsPoint(p)) return true;
     }
     return false;
+}
+
+void FarmMap::parseDoorToMine() {
+    _doorToMineRects.clear();
+    if (!_tmx) return;
+    if (_doorDebugNode == nullptr) {
+        _doorDebugNode = cocos2d::DrawNode::create();
+        _tmx->addChild(_doorDebugNode, 997);
+    }
+    auto group = _tmx->getObjectGroup("DoorToMine");
+    if (!group) return;
+    auto objects = group->getObjects();
+    for (auto &val : objects) {
+        auto dict = val.asValueMap();
+        float x = dict.at("x").asFloat();
+        float y = dict.at("y").asFloat();
+        float w = dict.count("width") ? dict.at("width").asFloat() : 0.0f;
+        float h = dict.count("height") ? dict.at("height").asFloat() : 0.0f;
+        _doorToMineRects.emplace_back(x, y, w, h);
+        cocos2d::Rect r(x, y, w, h);
+        _doorDebugNode->drawRect(r.origin, r.origin + r.size, cocos2d::Color4F(0, 1, 0, 0.5f));
+        _doorDebugNode->drawSolidRect(r.origin, r.origin + r.size, cocos2d::Color4F(0, 1, 0, 0.2f));
+    }
+}
+
+bool FarmMap::nearDoorToMine(const cocos2d::Vec2& p) const {
+    for (const auto& r : _doorToMineRects) {
+        if (r.containsPoint(p)) return true;
+    }
+    return false;
+}
+
+cocos2d::Vec2 FarmMap::doorToMineCenter() const {
+    if (!_doorToMineRects.empty()) {
+        const auto& r = _doorToMineRects.front();
+        return cocos2d::Vec2(r.getMidX(), r.getMidY());
+    }
+    return cocos2d::Vec2::ZERO;
+}
+
+cocos2d::Vec2 FarmMap::doorToRoomCenter() const {
+    if (!_doorToRoomRects.empty()) {
+        const auto& r = _doorToRoomRects.front();
+        return cocos2d::Vec2(r.getMidX(), r.getMidY());
+    }
+    return cocos2d::Vec2::ZERO;
 }
 
 } // namespace Game

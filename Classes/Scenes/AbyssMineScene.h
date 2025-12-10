@@ -4,11 +4,11 @@
 #pragma once
 
 #include "Scenes/SceneBase.h"
-#include "Controllers/AbyssMapController.h"
+#include "Controllers/Map/AbyssMapController.h"
 #include "Controllers/AbyssMonsterController.h"
 #include "Controllers/AbyssMiningController.h"
 #include "Controllers/AbyssCombatController.h"
-#include "Controllers/AbyssInteractor.h"
+#include "Controllers/Interact/AbyssInteractor.h"
 #include "Controllers/AbyssElevatorController.h"
 
 class AbyssMineScene : public SceneBase {

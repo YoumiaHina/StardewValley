@@ -22,8 +22,29 @@
     <Filter Include="Classes\Controllers">
       <UniqueIdentifier>{4E0B1D2F-7A6A-4B1E-8F9B-1B8E83C5AF42}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Classes\Controllers\Input">
+      <UniqueIdentifier>{0F7B6F5A-7E2E-4D8E-8A0E-98B6F894C0A1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Classes\Controllers\UI">
+      <UniqueIdentifier>{B1C6D4A9-33AF-4C4A-9B9A-7A0F2F5F3E2D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Classes\Controllers\Map">
+      <UniqueIdentifier>{9E2D7F50-5BA2-41C1-A34C-6D3C7F8A1B2C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Classes\Controllers\Systems">
+      <UniqueIdentifier>{7A4F9C11-1C34-4C0E-9E6E-4B2D8F3A7C1D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Classes\Controllers\Interact">
+      <UniqueIdentifier>{C2D7A3B4-5E6F-4DA8-9B21-4A7F6C2D1E3F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Classes\Controllers\Environment">
+      <UniqueIdentifier>{A7B3D9E1-4C2A-4FE1-8E3D-5B1C7A9D3F2E}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Classes\Game">
       <UniqueIdentifier>{B2D8E2E1-3A23-4F47-8E39-1E7B91B2C83F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Classes\Game\View">
+      <UniqueIdentifier>{E3A9C7B1-6D2A-4C13-9E71-2A6F4C9D8B7A}</UniqueIdentifier>
     </Filter>
     <Filter Include="proj.win32">
       <UniqueIdentifier>{9D3B8242-29C4-4F3C-9B0E-9A7E2E8B3F56}</UniqueIdentifier>
@@ -55,8 +76,8 @@
     <ClCompile Include="..\Classes\Scenes\AbyssMineScene.cpp">
       <Filter>Classes\Scenes</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\Controllers\AbyssMapController.cpp">
-      <Filter>Classes\Controllers</Filter>
+    <ClCompile Include="..\Classes\Controllers\Map\AbyssMapController.cpp">
+      <Filter>Classes\Controllers\Map</Filter>
     </ClCompile>
     <ClCompile Include="..\Classes\Controllers\AbyssMonsterController.cpp">
       <Filter>Classes\Controllers</Filter>
@@ -67,8 +88,8 @@
     <ClCompile Include="..\Classes\Controllers\AbyssCombatController.cpp">
       <Filter>Classes\Controllers</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\Controllers\AbyssInteractor.cpp">
-      <Filter>Classes\Controllers</Filter>
+    <ClCompile Include="..\Classes\Controllers\Interact\AbyssInteractor.cpp">
+      <Filter>Classes\Controllers\Interact</Filter>
     </ClCompile>
     <ClCompile Include="..\Classes\Controllers\AbyssElevatorController.cpp">
       <Filter>Classes\Controllers</Filter>
@@ -77,6 +98,9 @@
       <Filter>Classes\Scenes</Filter>
     </ClCompile>
     <ClCompile Include="..\Classes\Game\FarmMap.cpp">
+      <Filter>Classes\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\MineMap.cpp">
       <Filter>Classes\Game</Filter>
     </ClCompile>
     <ClCompile Include="..\Classes\Game\WorldState.cpp">
@@ -89,29 +113,29 @@
       <Filter>Classes\Game</Filter>
     </ClCompile>
     <!-- Controllers -->
-    <ClCompile Include="..\Classes\Controllers\PlayerController.cpp">
-      <Filter>Classes\Controllers</Filter>
+    <ClCompile Include="..\Classes\Controllers\Input\PlayerController.cpp">
+      <Filter>Classes\Controllers\Input</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\Controllers\FarmMapController.cpp">
-      <Filter>Classes\Controllers</Filter>
+    <ClCompile Include="..\Classes\Controllers\Map\FarmMapController.cpp">
+      <Filter>Classes\Controllers\Map</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\Controllers\RoomMapController.cpp">
-      <Filter>Classes\Controllers</Filter>
+    <ClCompile Include="..\Classes\Controllers\Map\RoomMapController.cpp">
+      <Filter>Classes\Controllers\Map</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\Controllers\UIController.cpp">
-      <Filter>Classes\Controllers</Filter>
+    <ClCompile Include="..\Classes\Controllers\UI\UIController.cpp">
+      <Filter>Classes\Controllers\UI</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\Controllers\ToolSystem.cpp">
-      <Filter>Classes\Controllers</Filter>
+    <ClCompile Include="..\Classes\Controllers\Systems\ToolSystem.cpp">
+      <Filter>Classes\Controllers\Systems</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\Controllers\GameStateController.cpp">
-      <Filter>Classes\Controllers</Filter>
+    <ClCompile Include="..\Classes\Controllers\Systems\GameStateController.cpp">
+      <Filter>Classes\Controllers\Systems</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\Controllers\FarmInteractor.cpp">
-      <Filter>Classes\Controllers</Filter>
+    <ClCompile Include="..\Classes\Controllers\Interact\FarmInteractor.cpp">
+      <Filter>Classes\Controllers\Interact</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\Controllers\RoomInteractor.cpp">
-      <Filter>Classes\Controllers</Filter>
+    <ClCompile Include="..\Classes\Controllers\Interact\RoomInteractor.cpp">
+      <Filter>Classes\Controllers\Interact</Filter>
     </ClCompile>
     <!-- Win32 entry -->
     <ClCompile Include="main.cpp">
@@ -120,20 +144,20 @@
     <ClCompile Include="..\Classes\Managers\AudioManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\Controllers\FishingController.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="..\Classes\Controllers\Systems\FishingController.cpp">
+      <Filter>Classes\Controllers\Systems</Filter>
     </ClCompile>
     <ClCompile Include="..\Classes\Game\Tree.cpp">
       <Filter>Classes\Game</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\Controllers\TreeSystem.cpp">
-      <Filter>Classes\Controllers</Filter>
+    <ClCompile Include="..\Classes\Controllers\Environment\TreeSystem.cpp">
+      <Filter>Classes\Controllers\Environment</Filter>
     </ClCompile>
     <ClCompile Include="..\Classes\Game\RoomMap.cpp">
       <Filter>Classes\Game</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\Controllers\PlayerActionController.cpp">
-      <Filter>Classes\Controllers</Filter>
+    <ClCompile Include="..\Classes\Game\View\PlayerView.cpp">
+      <Filter>Classes\Game\View</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -162,8 +186,8 @@
     <ClInclude Include="..\Classes\Scenes\AbyssMineScene.h">
       <Filter>Classes\Scenes</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\Controllers\AbyssMapController.h">
-      <Filter>Classes\Controllers</Filter>
+    <ClInclude Include="..\Classes\Controllers\Map\AbyssMapController.h">
+      <Filter>Classes\Controllers\Map</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\Controllers\AbyssMonsterController.h">
       <Filter>Classes\Controllers</Filter>
@@ -172,9 +196,6 @@
       <Filter>Classes\Controllers</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\Controllers\AbyssCombatController.h">
-      <Filter>Classes\Controllers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Classes\Controllers\AbyssInteractor.h">
       <Filter>Classes\Controllers</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\Controllers\AbyssElevatorController.h">
@@ -196,6 +217,9 @@
       <Filter>Classes\Game</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\Game\FarmMap.h">
+      <Filter>Classes\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\MineMap.h">
       <Filter>Classes\Game</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\Game\GameConfig.h">
@@ -223,29 +247,29 @@
     <ClInclude Include="..\Classes\Controllers\IMapController.h">
       <Filter>Classes\Controllers</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\Controllers\PlayerController.h">
-      <Filter>Classes\Controllers</Filter>
+    <ClInclude Include="..\Classes\Controllers\Input\PlayerController.h">
+      <Filter>Classes\Controllers\Input</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\Controllers\FarmMapController.h">
-      <Filter>Classes\Controllers</Filter>
+    <ClInclude Include="..\Classes\Controllers\Map\FarmMapController.h">
+      <Filter>Classes\Controllers\Map</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\Controllers\RoomMapController.h">
-      <Filter>Classes\Controllers</Filter>
+    <ClInclude Include="..\Classes\Controllers\Map\RoomMapController.h">
+      <Filter>Classes\Controllers\Map</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\Controllers\UIController.h">
-      <Filter>Classes\Controllers</Filter>
+    <ClInclude Include="..\Classes\Controllers\UI\UIController.h">
+      <Filter>Classes\Controllers\UI</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\Controllers\ToolSystem.h">
-      <Filter>Classes\Controllers</Filter>
+    <ClInclude Include="..\Classes\Controllers\Systems\ToolSystem.h">
+      <Filter>Classes\Controllers\Systems</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\Controllers\GameStateController.h">
-      <Filter>Classes\Controllers</Filter>
+    <ClInclude Include="..\Classes\Controllers\Systems\GameStateController.h">
+      <Filter>Classes\Controllers\Systems</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\Controllers\FarmInteractor.h">
-      <Filter>Classes\Controllers</Filter>
+    <ClInclude Include="..\Classes\Controllers\Interact\FarmInteractor.h">
+      <Filter>Classes\Controllers\Interact</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\Controllers\RoomInteractor.h">
-      <Filter>Classes\Controllers</Filter>
+    <ClInclude Include="..\Classes\Controllers\Interact\RoomInteractor.h">
+      <Filter>Classes\Controllers\Interact</Filter>
     </ClInclude>
     <!-- Win32 header -->
     <ClInclude Include="main.h">
@@ -254,20 +278,26 @@
     <ClInclude Include="..\Classes\Managers\AudioManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\Controllers\FishingController.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="..\Classes\Controllers\Systems\FishingController.h">
+      <Filter>Classes\Controllers\Systems</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\Game\Tree.h">
       <Filter>Classes\Game</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\Controllers\TreeSystem.h">
-      <Filter>Classes\Controllers</Filter>
+    <ClInclude Include="..\Classes\Controllers\Environment\TreeSystem.h">
+      <Filter>Classes\Controllers\Environment</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\Game\RoomMap.h">
       <Filter>Classes\Game</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\Controllers\PlayerActionController.h">
-      <Filter>Classes\Controllers</Filter>
+    <ClInclude Include="..\Classes\Game\View\IPlayerView.h">
+      <Filter>Classes\Game\View</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\View\PlayerView.h">
+      <Filter>Classes\Game\View</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\Interact\AbyssInteractor.h">
+      <Filter>Classes\Controllers\Interact</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

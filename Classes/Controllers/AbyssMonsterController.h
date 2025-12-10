@@ -6,7 +6,7 @@
 #include "cocos2d.h"
 #include <vector>
 #include <random>
-#include "Controllers/AbyssMapController.h"
+#include "Controllers/Map/AbyssMapController.h"
 #include "Game/Item.h"
 #include "Game/WorldState.h"
 #include "cocos2d.h"

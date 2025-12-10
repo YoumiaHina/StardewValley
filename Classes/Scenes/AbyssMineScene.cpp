@@ -1,6 +1,7 @@
 #include "Scenes/AbyssMineScene.h"
 #include "cocos2d.h"
 #include "Managers/AudioManager.h"
+#include "Scenes/GameScene.h"
 
 USING_NS_CC;
 
@@ -13,11 +14,20 @@ bool AbyssMineScene::init() {
 
     // 组合矿洞模块
     _map = static_cast<Controllers::AbyssMapController*>(_mapController);
-    _map->generateFloor(1);
+    // 入口楼层（零层）：加载 TMX 地图 Resources/Maps/mine/mine_0.tmx
+    _map->loadEntrance();
+    // 设置出生点到 Appear 对象层中心（若无则楼梯中心/fallback）
+    if (_player) {
+        _player->setPosition(_map->entranceSpawnPos());
+        _player->setLocalZOrder(999); // 人物置于图层最上层
+    }
     _monsters = new Controllers::AbyssMonsterController(_map, _worldNode);
-    _monsters->generateInitialWave();
     _mining = new Controllers::AbyssMiningController(_map, _worldNode);
-    _mining->generateNodesForFloor();
+    // 矿洞零层不刷怪、不生成矿点
+    if (_map->currentFloor() > 0) {
+        _monsters->generateInitialWave();
+        _mining->generateNodesForFloor();
+    }
     _combat = new Controllers::AbyssCombatController(_monsters, _mining, [this]() -> Vec2 { return _player ? _player->getPosition() : Vec2(); });
     _interactor = new Controllers::AbyssInteractor(_map, [this]() -> Vec2 { return _player ? _player->getPosition() : Vec2(); });
     _elevator = new Controllers::AbyssElevatorController(_map, _monsters, _mining, this);
@@ -52,6 +62,12 @@ void AbyssMineScene::onSpacePressed() {
         if (_mining) { _mining->generateNodesForFloor(); }
         // 将玩家放置在新楼层的入口附近
         _player->setPosition(_map->stairsWorldPos() + Vec2(0, 28));
+    } else if (act == Controllers::AbyssInteractor::SpaceAction::ReturnToFarm) {
+        auto farm = GameScene::create();
+        // 在农场场景加载完成后，将出生点设置到 DoorToMine 对象层中心
+        farm->setSpawnAtFarmMineDoor();
+        auto trans = TransitionFade::create(0.6f, farm);
+        Director::getInstance()->replaceScene(trans);
     }
 }
 

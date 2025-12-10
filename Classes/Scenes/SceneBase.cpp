@@ -16,7 +16,8 @@ bool SceneBase::initBase(float worldScale, bool buildCraftPanel, bool enableTool
     if (!_mapController) return false;
 
     // 角色外观
-    _player = Controllers::PlayerActionController::create();
+    auto pv = Game::PlayerView::create();
+    _player = pv;
     auto def = UserDefault::getInstance();
     int shirt = def->getIntegerForKey("player_shirt", 0);
     int pants = def->getIntegerForKey("player_pants", 0);
@@ -24,10 +25,10 @@ bool SceneBase::initBase(float worldScale, bool buildCraftPanel, bool enableTool
     int r = def->getIntegerForKey("player_hair_r", 255);
     int g = def->getIntegerForKey("player_hair_g", 255);
     int b = def->getIntegerForKey("player_hair_b", 255);
-    _player->setShirtStyle(shirt);
-    _player->setPantsStyle(pants);
-    _player->setHairStyle(hair);
-    _player->setHairColor(Color3B(r, g, b));
+    pv->setShirtStyle(shirt);
+    pv->setPantsStyle(pants);
+    pv->setHairStyle(hair);
+    pv->setHairColor(Color3B(r, g, b));
     positionPlayerInitial();
 
     // 由 MapController 负责选择正确父节点与层级（Farm: TMX，Room: world）。

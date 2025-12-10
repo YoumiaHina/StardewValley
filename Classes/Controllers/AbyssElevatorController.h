@@ -7,7 +7,7 @@
 #include "ui/CocosGUI.h"
 #include <vector>
 #include <functional>
-#include "Controllers/AbyssMapController.h"
+#include "Controllers/Map/AbyssMapController.h"
 #include "Controllers/AbyssMonsterController.h"
 #include "Controllers/AbyssMiningController.h"
 

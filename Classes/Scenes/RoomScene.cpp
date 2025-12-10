@@ -9,11 +9,11 @@
 #include "Game/Inventory.h"
 #include "Game/WorldState.h"
 #include "Game/GameConfig.h"
-#include "Controllers/PlayerController.h"
-#include "Controllers/RoomMapController.h"
-#include "Controllers/UIController.h"
-#include "Controllers/GameStateController.h"
-#include "Controllers/RoomInteractor.h"
+#include "Controllers/Input/PlayerController.h"
+#include "Controllers/Map/RoomMapController.h"
+#include "Controllers/UI/UIController.h"
+#include "Controllers/Systems/GameStateController.h"
+#include "Controllers/Interact/RoomInteractor.h"
 #include "Game/Cheat.h"
 #include "Managers/AudioManager.h"
 
@@ -51,7 +51,8 @@ void RoomScene::onSpacePressed() {
     auto act = _interactor ? _interactor->onSpacePressed() : Controllers::RoomInteractor::SpaceAction::None;
     if (act == Controllers::RoomInteractor::SpaceAction::ExitHouse) {
         auto farm = GameScene::create();
-        farm->setSpawnAtFarmEntrance();
+        // 返回农场并落在 DoorToRoom 对象层中心
+        farm->setSpawnAtFarmRoomDoor();
         auto trans = TransitionFade::create(0.6f, farm);
         Director::getInstance()->replaceScene(trans);
     }

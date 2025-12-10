@@ -68,10 +68,12 @@ list(APPEND GAME_SOURCE
      Classes/Controllers/ToolSystem.h
      Classes/Controllers/GameStateController.cpp
      Classes/Controllers/GameStateController.h
-     Classes/Controllers/FarmInteractor.cpp
-     Classes/Controllers/FarmInteractor.h
-     Classes/Controllers/RoomInteractor.cpp
-     Classes/Controllers/RoomInteractor.h
+    Classes/Controllers/FarmInteractor.cpp
+    Classes/Controllers/FarmInteractor.h
+    Classes/Controllers/RoomInteractor.cpp
+    Classes/Controllers/RoomInteractor.h
+    Classes/Game/MineMap.cpp
+    Classes/Game/MineMap.h
      Classes/Scenes/AbyssMineScene.cpp
      Classes/Controllers/AbyssMapController.cpp
      Classes/Controllers/AbyssMonsterController.cpp

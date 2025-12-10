@@ -9,15 +9,15 @@
 #include "ui/CocosGUI.h"
 #include "Game/Inventory.h"
 #include "Game/GameConfig.h"
-#include "Controllers/PlayerActionController.h"
+#include "Game/View/PlayerView.h"
 #include "Controllers/IMapController.h"
-#include "Controllers/PlayerController.h"
-#include "Controllers/FarmMapController.h"
-#include "Controllers/ToolSystem.h"
-#include "Controllers/UIController.h"
-#include "Controllers/GameStateController.h"
-#include "Controllers/FarmInteractor.h"
-#include "Controllers/FishingController.h"
+#include "Controllers/Input/PlayerController.h"
+#include "Controllers/Map/FarmMapController.h"
+#include "Controllers/Systems/ToolSystem.h"
+#include "Controllers/UI/UIController.h"
+#include "Controllers/Systems/GameStateController.h"
+#include "Controllers/Interact/FarmInteractor.h"
+#include "Controllers/Systems/FishingController.h"
 #include "Scenes/SceneBase.h"
 
 class GameScene : public SceneBase {
@@ -29,6 +29,10 @@ public:
     
     // 供其他场景调用：将玩家出生在农场门外侧
     void setSpawnAtFarmEntrance();
+    // 供矿洞返回：将玩家出生在 DoorToMine 对象层中心
+    void setSpawnAtFarmMineDoor();
+    // 供房间返回：将玩家出生在 DoorToRoom 对象层中心
+    void setSpawnAtFarmRoomDoor();
 
 private:
     Controllers::FarmMapController* _farmMap = nullptr;
