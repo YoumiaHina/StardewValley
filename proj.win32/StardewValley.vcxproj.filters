@@ -76,9 +76,6 @@
     <ClCompile Include="..\Classes\Scenes\RoomScene.cpp">
       <Filter>Classes\Scenes</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\Game\PlayerAppearance.cpp">
-      <Filter>Classes\Game</Filter>
-    </ClCompile>
     <ClCompile Include="..\Classes\Game\FarmMap.cpp">
       <Filter>Classes\Game</Filter>
     </ClCompile>
@@ -135,6 +132,9 @@
     <ClCompile Include="..\Classes\Game\RoomMap.cpp">
       <Filter>Classes\Game</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\PlayerActionController.cpp">
+      <Filter>Classes\Controllers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <!-- Header Files -->
@@ -184,9 +184,6 @@
       <Filter>Classes\Scenes</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\Game\Bag.h">
-      <Filter>Classes\Game</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Classes\Game\PlayerAppearance.h">
       <Filter>Classes\Game</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\Game\Cheat.h">
@@ -268,6 +265,9 @@
     </ClInclude>
     <ClInclude Include="..\Classes\Game\RoomMap.h">
       <Filter>Classes\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\PlayerActionController.h">
+      <Filter>Classes\Controllers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

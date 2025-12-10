@@ -29,9 +29,9 @@ void Tree::applyDamage(int amount) {
 }
 
 Rect Tree::footRect() const {
-    float w = 16.0f, h = 16.0f;
-    Vec2 base = getPosition(); // bottom-center of tree sprite
-    return Rect(base.x - w * 0.5f, base.y, w, h);
+    float w = 12.0f, h = 12.0f;
+    Vec2 base = getPosition();
+    return Rect(base.x - w * 0.5f, base.y + 4.0f, w, h);
 }
 
 void Tree::playFallAnimation(const std::function<void()>& onComplete) {

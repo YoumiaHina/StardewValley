@@ -14,7 +14,7 @@
 #include <memory>
 #include "Game/Inventory.h"
 #include "Game/WorldState.h"
-#include "Game/PlayerAppearance.h"
+#include "Controllers/PlayerActionController.h"
 #include "Game/GameConfig.h"
 #include "Game/Cheat.h"
 #include "Controllers/IMapController.h"
@@ -48,7 +48,7 @@ protected:
 
     // 公共成员（供子类访问）：
     cocos2d::Node* _worldNode = nullptr;
-    Game::PlayerAppearance* _player = nullptr;
+    Controllers::PlayerActionController* _player = nullptr;
     std::shared_ptr<Game::Inventory> _inventory;
     Controllers::IMapController* _mapController = nullptr;
     Controllers::UIController* _uiController = nullptr;

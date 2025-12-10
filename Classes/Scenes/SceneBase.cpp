@@ -16,7 +16,7 @@ bool SceneBase::initBase(float worldScale, bool buildCraftPanel, bool enableTool
     if (!_mapController) return false;
 
     // 角色外观
-    _player = Game::PlayerAppearance::create();
+    _player = Controllers::PlayerActionController::create();
     auto def = UserDefault::getInstance();
     int shirt = def->getIntegerForKey("player_shirt", 0);
     int pants = def->getIntegerForKey("player_pants", 0);

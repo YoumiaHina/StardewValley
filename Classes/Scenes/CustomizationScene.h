@@ -2,7 +2,7 @@
 #define __CUSTOMIZATION_SCENE_H__
 
 #include "cocos2d.h"
-#include "Game/PlayerAppearance.h"
+#include "Controllers/PlayerActionController.h"
 
 class CustomizationScene : public cocos2d::Scene {
 public:
@@ -15,7 +15,7 @@ public:
     CREATE_FUNC(CustomizationScene);
 
 private:
-    Game::PlayerAppearance* _character;
+    Controllers::PlayerActionController* _character;
     
     int _currentShirt = 0;
     int _currentPants = 0;

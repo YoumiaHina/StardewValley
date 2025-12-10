@@ -164,7 +164,7 @@ Vec2 FarmMapController::clampPosition(const Vec2& current, const Vec2& next, flo
         bool baseBlockedX = _gameMap->collides(footX, radius);
         bool treeBlockedX = false;
         if (_treeSystem) {
-            treeBlockedX = _treeSystem->collides(footX, radius, GameConfig::TILE_SIZE);
+            treeBlockedX = _treeSystem->collides(footX, radius * 0.75f, GameConfig::TILE_SIZE);
         }
         if (baseBlockedX || treeBlockedX) {
             tryX.x = current.x;
@@ -176,7 +176,7 @@ Vec2 FarmMapController::clampPosition(const Vec2& current, const Vec2& next, flo
         bool baseBlockedY = _gameMap->collides(footY, radius);
         bool treeBlockedY = false;
         if (_treeSystem) {
-            treeBlockedY = _treeSystem->collides(footY, radius, GameConfig::TILE_SIZE);
+            treeBlockedY = _treeSystem->collides(footY, radius * 0.75f, GameConfig::TILE_SIZE);
         }
         if (baseBlockedY || treeBlockedY) {
             tryY.y = current.y;

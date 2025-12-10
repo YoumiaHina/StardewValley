@@ -8,7 +8,7 @@
 #include <vector>
 #include "Game/Inventory.h"
 #include "ui/CocosGUI.h"
-#include "Game/PlayerAppearance.h"
+#include "Controllers/PlayerActionController.h"
 #include "Controllers/IMapController.h"
 #include "Controllers/PlayerController.h"
 #include "Controllers/RoomMapController.h"
