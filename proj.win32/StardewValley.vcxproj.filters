@@ -79,6 +79,9 @@
     <ClCompile Include="..\Classes\Game\FarmMap.cpp">
       <Filter>Classes\Game</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\Game\MineMap.cpp">
+      <Filter>Classes\Game</Filter>
+    </ClCompile>
     <ClCompile Include="..\Classes\Game\WorldState.cpp">
       <Filter>Classes\Game</Filter>
     </ClCompile>
@@ -196,6 +199,9 @@
       <Filter>Classes\Game</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\Game\FarmMap.h">
+      <Filter>Classes\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\MineMap.h">
       <Filter>Classes\Game</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\Game\GameConfig.h">

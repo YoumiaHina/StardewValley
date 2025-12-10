@@ -13,11 +13,20 @@ bool AbyssMineScene::init() {
 
     // 组合矿洞模块
     _map = static_cast<Controllers::AbyssMapController*>(_mapController);
-    _map->generateFloor(1);
+    // 入口楼层（零层）：加载 TMX 地图 Resources/Maps/mine/mine_0.tmx
+    _map->loadEntrance();
+    // 设置出生点到 Appear 对象层中心（若无则楼梯中心/fallback）
+    if (_player) {
+        _player->setPosition(_map->entranceSpawnPos());
+        _player->setLocalZOrder(999); // 人物置于图层最上层
+    }
     _monsters = new Controllers::AbyssMonsterController(_map, _worldNode);
-    _monsters->generateInitialWave();
     _mining = new Controllers::AbyssMiningController(_map, _worldNode);
-    _mining->generateNodesForFloor();
+    // 矿洞零层不刷怪、不生成矿点
+    if (_map->currentFloor() > 0) {
+        _monsters->generateInitialWave();
+        _mining->generateNodesForFloor();
+    }
     _combat = new Controllers::AbyssCombatController(_monsters, _mining, [this]() -> Vec2 { return _player ? _player->getPosition() : Vec2(); });
     _interactor = new Controllers::AbyssInteractor(_map, [this]() -> Vec2 { return _player ? _player->getPosition() : Vec2(); });
     _elevator = new Controllers::AbyssElevatorController(_map, _monsters, _mining, this);

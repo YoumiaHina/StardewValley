@@ -9,6 +9,7 @@
 #include <unordered_set>
 #include "Controllers/IMapController.h"
 #include "Game/GameConfig.h"
+#include "Game/MineMap.h"
 
 namespace Controllers {
 
@@ -25,7 +26,7 @@ public:
     cocos2d::Vec2 clampPosition(const cocos2d::Vec2& current,
                                  const cocos2d::Vec2& next,
                                  float radius) const override;
-    bool collides(const cocos2d::Vec2& pos, float radius) const override { return false; }
+    bool collides(const cocos2d::Vec2& pos, float radius) const override;
     bool isNearDoor(const cocos2d::Vec2& playerWorldPos) const override; // 门提示替换为“楼梯/电梯”，这里近似为楼梯区域
     bool isNearChest(const cocos2d::Vec2& playerWorldPos) const override { return false; }
     float tileSize() const override { return static_cast<float>(GameConfig::TILE_SIZE); }
@@ -56,6 +57,10 @@ public:
     bool isNearStairs(const cocos2d::Vec2& p) const;
     cocos2d::Vec2 stairsWorldPos() const { return _stairsPos; }
     std::vector<int> getActivatedElevatorFloors() const;
+    // Entrance (floor 0)
+    void loadEntrance();
+    bool isEntranceLoaded() const { return _entrance != nullptr; }
+    cocos2d::Vec2 entranceSpawnPos() const;
 
 private:
     cocos2d::Node* _worldNode = nullptr;
@@ -67,6 +72,8 @@ private:
     cocos2d::Vec2 _stairsPos;
     std::unordered_set<int> _elevatorFloors; // 已激活楼层（5的倍数）
     std::vector<Game::Chest> _emptyChests; // 深渊内无胸，返回空引用
+    Game::MineMap* _entrance = nullptr;
+    cocos2d::Node* _mapNode = nullptr;
 };
 
 } // namespace Controllers

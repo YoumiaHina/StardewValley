@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="50" height="30" tilewidth="16" tileheight="16" infinite="0" nextlayerid="12" nextobjectid="27">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="50" height="30" tilewidth="16" tileheight="16" infinite="0" nextlayerid="13" nextobjectid="29">
  <tileset firstgid="1" name="spring_outdoors" tilewidth="16" tileheight="16" tilecount="1975" columns="25">
   <image source="../spring_outdoors/spring_outdoors.png" width="400" height="1264"/>
   <tile id="181" probability="0.1"/>
@@ -79,7 +79,6 @@
    <polygon points="0,0 0.666667,32 -15.3333,33.3333 -14.6667,46 -30.6667,46.6667 -31.3333,60.6667 -46.6667,64 -47.3333,75.3333 -63.3333,79.3333 -96,93.3333 -96,-80.6667"/>
   </object>
   <object id="18" x="472" y="520.667" width="1.33333" height="0.666667"/>
-  <object id="19" x="708.667" y="532"/>
   <object id="21" x="238.667" y="226.667" width="37.3333" height="32.6667"/>
   <object id="24" x="375.333" y="228.667"/>
  </objectgroup>
@@ -89,6 +88,11 @@
   </properties>
   <object id="12" x="375.333" y="229.333"/>
   <object id="25" x="352" y="205.333" width="47.3333" height="50.6667"/>
+ </objectgroup>
+ <objectgroup id="12" name="Appear">
+  <object id="27" x="421.333" y="466">
+   <point/>
+  </object>
  </objectgroup>
  <objectgroup id="11" name="elestair">
   <properties>
