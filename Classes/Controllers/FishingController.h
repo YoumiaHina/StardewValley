@@ -35,6 +35,7 @@ private:
     cocos2d::DrawNode* _barCatch = nullptr;
     cocos2d::DrawNode* _progressFill = nullptr;
     cocos2d::Label* _progressLabel = nullptr;
+    cocos2d::Sprite* _bgSprite = nullptr;
     cocos2d::Sprite* _fishSprite = nullptr;
 
     bool _active = false;

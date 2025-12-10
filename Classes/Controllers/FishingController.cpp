@@ -14,6 +14,23 @@ void FishingController::buildOverlayAt(const Vec2& worldPos) {
     _overlay->setPosition(pos + Vec2(140.0f, 40.0f));
     _scene->addChild(_overlay, 5);
 
+    // Background image (Fishing game map)
+    _bgSprite = Sprite::create("fish/Fishing game map.png");
+    if (_bgSprite) {
+        _bgSprite->setAnchorPoint(Vec2(0.5f, 0.5f));
+        _bgSprite->setPosition(Vec2(0, 0));
+        auto vs = Director::getInstance()->getVisibleSize();
+        // Scale to occupy ~60% of screen width/height while preserving aspect
+        auto texSize = _bgSprite->getContentSize();
+        float targetW = vs.width * 0.6f;
+        float targetH = vs.height * 0.6f;
+        float sx = targetW / texSize.width;
+        float sy = targetH / texSize.height;
+        float s = std::min(sx, sy);
+        _bgSprite->setScale(s);
+        _overlay->addChild(_bgSprite, 0);
+    }
+
     _barBg = DrawNode::create();
     _overlay->addChild(_barBg);
     float w = 36.0f; float h = _barHeight;
@@ -32,8 +49,8 @@ void FishingController::buildOverlayAt(const Vec2& worldPos) {
     _progressLabel->setPosition(Vec2(0, h/2 + 22));
     _overlay->addChild(_progressLabel);
 
-    int fishId = 3120 + (std::rand() % 7); // 3120..3126
-    _fishSprite = Sprite::create(StringUtils::format("fish/%d.png", fishId));
+    // Use Bream as fish sprite
+    _fishSprite = Sprite::create("fish/Bream.png");
     if (_fishSprite) { _fishSprite->setScale(0.6f); _overlay->addChild(_fishSprite, 1); }
 
     _kb = EventListenerKeyboard::create();
