@@ -14,6 +14,9 @@ void FishingController::buildOverlayAt(const Vec2& worldPos) {
     _overlay->setPosition(pos + Vec2(140.0f, 40.0f));
     _scene->addChild(_overlay, 5);
 
+    // Expand catch bar vertical range by 3 tiles up and down (total +6 tiles)
+    _barHeight = 220.0f + 6.0f * static_cast<float>(GameConfig::TILE_SIZE);
+
     // Background image (Fishing game map)
     _bgSprite = Sprite::create("fish/Fishing game map.png");
     if (_bgSprite) {
@@ -33,20 +36,18 @@ void FishingController::buildOverlayAt(const Vec2& worldPos) {
 
     _barBg = DrawNode::create();
     _overlay->addChild(_barBg);
+    _barBg->setPosition(Vec2(-static_cast<float>(GameConfig::TILE_SIZE), 0));
     float w = 36.0f; float h = _barHeight;
     Vec2 v[4] = { Vec2(-w/2,-h/2), Vec2(w/2,-h/2), Vec2(w/2,h/2), Vec2(-w/2,h/2) };
-    _barBg->drawSolidPoly(v, 4, Color4F(0.f,0.f,0.f,0.45f));
-    _barBg->drawLine(v[0], v[1], Color4F(1,1,1,0.5f));
-    _barBg->drawLine(v[1], v[2], Color4F(1,1,1,0.5f));
-    _barBg->drawLine(v[2], v[3], Color4F(1,1,1,0.5f));
-    _barBg->drawLine(v[3], v[0], Color4F(1,1,1,0.5f));
 
     _barCatch = DrawNode::create();
     _overlay->addChild(_barCatch);
     _progressFill = DrawNode::create();
     _overlay->addChild(_progressFill);
+    // Shift vertical progress meter right by 1 tile (net left offset becomes -1.5 tiles)
+    _progressFill->setPosition(Vec2(-static_cast<float>(GameConfig::TILE_SIZE) * 1.5f, 0));
     _progressLabel = Label::createWithTTF("Catch 0%", "fonts/Marker Felt.ttf", 18);
-    _progressLabel->setPosition(Vec2(0, h/2 + 22));
+    _progressLabel->setPosition(Vec2(-static_cast<float>(GameConfig::TILE_SIZE), h/2 + 22 + 2.0f * static_cast<float>(GameConfig::TILE_SIZE)));
     _overlay->addChild(_progressLabel);
 
     // Use Bream as fish sprite
@@ -74,6 +75,8 @@ void FishingController::destroyOverlay() {
     _kb = nullptr; _mouse = nullptr;
     if (_overlay) { _overlay->removeFromParent(); _overlay = nullptr; }
     _barBg = nullptr; _barCatch = nullptr; _progressFill = nullptr; _progressLabel = nullptr; _fishSprite = nullptr;
+    // Restore default height after overlay destroyed
+    _barHeight = 220.0f;
 }
 
 void FishingController::startAt(const Vec2& worldPos) {
@@ -140,12 +143,22 @@ void FishingController::update(float dt) {
         float w = 28.0f; float h = catchSize;
         Vec2 v[4] = { Vec2(-w/2, -h/2), Vec2(w/2, -h/2), Vec2(w/2, h/2), Vec2(-w/2, h/2) };
         _barCatch->drawSolidPoly(v, 4, Color4F(0.15f, 0.85f, 0.35f, 0.9f));
-        _barCatch->setPosition(Vec2(0, _barCatchPos - _barHeight*0.5f));
+        _barCatch->setPosition(Vec2(-static_cast<float>(GameConfig::TILE_SIZE), _barCatchPos - _barHeight*0.5f));
     }
     if (_progressFill) {
         _progressFill->clear();
-        float pw = 140.0f, ph = 16.0f; float ratio = _progress / 100.0f; float fillW = pw * ratio;
-        Vec2 bl(-pw/2, -_barHeight/2 - 28), br(-pw/2 + fillW, -_barHeight/2 - 28), tr(-pw/2 + fillW, -_barHeight/2 - 12), tl(-pw/2, -_barHeight/2 - 12);
+        // Extend meter by 2 tiles up and 2 tiles down (total +4 tiles)
+        float extra = static_cast<float>(GameConfig::TILE_SIZE) * 2.0f;
+        float pv = _barHeight + extra * 2.0f;   // extended total height
+        float pw = 12.0f;                // meter width
+        float ratio = _progress / 100.0f;
+        float fillH = pv * ratio;        // fill respects extended range
+        float x = 40.0f;                 // place to the right of track center
+        float yBottom = -_barHeight * 0.5f - extra; // push bottom down by 2 tiles
+        Vec2 bl(x, yBottom);
+        Vec2 br(x + pw, yBottom);
+        Vec2 tr(x + pw, yBottom + fillH);
+        Vec2 tl(x, yBottom + fillH);
         Vec2 rect[4] = { bl, br, tr, tl };
         _progressFill->drawSolidPoly(rect, 4, Color4F(0.2f, 0.6f, 1.0f, 0.85f));
     }
@@ -153,7 +166,7 @@ void FishingController::update(float dt) {
         _progressLabel->setString(StringUtils::format("Catch %d%%", static_cast<int>(_progress + 0.5f)));
     }
     if (_fishSprite) {
-        _fishSprite->setPosition(Vec2(0, _fishPos - _barHeight*0.5f));
+        _fishSprite->setPosition(Vec2(-static_cast<float>(GameConfig::TILE_SIZE), _fishPos - _barHeight*0.5f));
     }
 
     if (_progress >= 100.0f) {
