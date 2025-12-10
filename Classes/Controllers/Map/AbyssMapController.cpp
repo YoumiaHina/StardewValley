@@ -1,4 +1,4 @@
-#include "Controllers/AbyssMapController.h"
+#include "Controllers/Map/AbyssMapController.h"
 #include "cocos2d.h"
 
 using namespace cocos2d;
@@ -219,4 +219,5 @@ bool AbyssMapController::collides(const Vec2& pos, float radius) const {
     if (_entrance) return _entrance->collides(pos, radius);
     return false;
 }
-} // namespace Controllers
+// namespace Controllers
+}

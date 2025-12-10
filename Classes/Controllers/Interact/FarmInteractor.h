@@ -8,8 +8,8 @@
 #include "cocos2d.h"
 #include "Game/Inventory.h"
 #include "Controllers/IMapController.h"
-#include "Controllers/CropSystem.h"
-#include "Controllers/UIController.h"
+#include "Controllers/Systems/CropSystem.h"
+#include "Controllers/UI/UIController.h"
 #include <functional>
 
 namespace Controllers {
@@ -19,9 +19,9 @@ public:
     enum class SpaceAction { None, EnterHouse };
 
     FarmInteractor(std::shared_ptr<Game::Inventory> inventory,
-                   IMapController* map,
-                   UIController* ui,
-                   CropSystem* crop,
+                   Controllers::IMapController* map,
+                   Controllers::UIController* ui,
+                   Controllers::CropSystem* crop,
                    std::function<cocos2d::Vec2()> getPlayerPos,
                    std::function<cocos2d::Vec2()> getLastDir)
     : _inventory(std::move(inventory)), _map(map), _ui(ui), _crop(crop), _getPlayerPos(std::move(getPlayerPos)), _getLastDir(std::move(getLastDir)) {}
@@ -30,11 +30,12 @@ public:
 
 private:
     std::shared_ptr<Game::Inventory> _inventory;
-    IMapController* _map = nullptr;
-    UIController* _ui = nullptr;
-    CropSystem* _crop = nullptr;
+    Controllers::IMapController* _map = nullptr;
+    Controllers::UIController* _ui = nullptr;
+    Controllers::CropSystem* _crop = nullptr;
     std::function<cocos2d::Vec2()> _getPlayerPos;
     std::function<cocos2d::Vec2()> _getLastDir;
 };
 
-} // namespace Controllers
+}
+// namespace Controllers

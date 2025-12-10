@@ -1,4 +1,4 @@
-#include "Controllers/AbyssInteractor.h"
+#include "Controllers/Interact/AbyssInteractor.h"
 #include "cocos2d.h"
 
 using namespace cocos2d;
@@ -14,5 +14,5 @@ AbyssInteractor::SpaceAction AbyssInteractor::onSpacePressed() {
     }
     return SpaceAction::None;
 }
-
-} // namespace Controllers
+// namespace Controllers
+}

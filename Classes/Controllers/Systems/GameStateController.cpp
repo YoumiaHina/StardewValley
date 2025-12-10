@@ -1,4 +1,4 @@
-#include "Controllers/GameStateController.h"
+#include "Controllers/Systems/GameStateController.h"
 #include "Game/GameConfig.h"
 #include "Game/WorldState.h"
 
@@ -31,5 +31,5 @@ void GameStateController::update(float dt) {
         _map->refreshCropsVisuals();
     }
 }
-
-} // namespace Controllers
+// namespace Controllers
+}

@@ -14,15 +14,15 @@
 #include <memory>
 #include "Game/Inventory.h"
 #include "Game/WorldState.h"
-#include "Game/PlayerView.h"
+#include "Game/View/PlayerView.h"
 #include "Game/GameConfig.h"
 #include "Game/Cheat.h"
 #include "Controllers/IMapController.h"
-#include "Controllers/UIController.h"
-#include "Controllers/PlayerController.h"
-#include "Controllers/GameStateController.h"
-#include "Controllers/ToolSystem.h"
-#include "Controllers/CropSystem.h"
+#include "Controllers/UI/UIController.h"
+#include "Controllers/Input/PlayerController.h"
+#include "Controllers/Systems/GameStateController.h"
+#include "Controllers/Systems/ToolSystem.h"
+#include "Controllers/Systems/CropSystem.h"
 #include <functional>
 #include <vector>
 
@@ -54,7 +54,7 @@ protected:
     Controllers::UIController* _uiController = nullptr;
     Controllers::PlayerController* _playerController = nullptr;
     Controllers::GameStateController* _stateController = nullptr;
-    Controllers::ToolSystem* _toolSystem = nullptr; // 可选
+    Controllers::ToolSystem* _toolSystem = nullptr;
     Controllers::CropSystem* _cropSystem = nullptr;
 
 protected:

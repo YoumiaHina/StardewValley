@@ -11,7 +11,7 @@
 
 namespace Controllers {
 
-class RoomMapController : public IMapController {
+class RoomMapController : public Controllers::IMapController {
 public:
     RoomMapController(cocos2d::Node* worldNode)
     : _worldNode(worldNode) {}
@@ -51,4 +51,5 @@ private:
     cocos2d::DrawNode* _chestDraw = nullptr;
 };
 
-} // namespace Controllers
+}
+// namespace Controllers

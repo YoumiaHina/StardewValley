@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Game/IPlayerView.h"
+#include "Game/View/IPlayerView.h"
 
 namespace Game {
 
@@ -50,6 +50,4 @@ private:
     cocos2d::Rect getPantsRect(int index, Direction dir, int frame);
     cocos2d::Rect getHairRect(int index, Direction dir, int frame);
 };
-
 }
-

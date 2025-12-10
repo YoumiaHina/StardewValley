@@ -1,4 +1,4 @@
-#include "Controllers/RoomMapController.h"
+#include "Controllers/Map/RoomMapController.h"
 #include "cocos2d.h"
 #include "Game/GameConfig.h"
 #include "Game/WorldState.h"
@@ -85,5 +85,5 @@ void RoomMapController::addActorToMap(cocos2d::Node* node, int zOrder) {
         _worldNode->addChild(node, zOrder);
     }
 }
-
-} // namespace Controllers
+// namespace Controllers
+}

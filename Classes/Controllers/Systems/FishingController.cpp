@@ -1,4 +1,4 @@
-#include "Controllers/FishingController.h"
+#include "Controllers/Systems/FishingController.h"
 #include "Game/GameConfig.h"
 #include "Game/Item.h"
 
@@ -173,5 +173,5 @@ void FishingController::cancel() {
     _active = false;
     destroyOverlay();
 }
-
-} // namespace Controllers
+// namespace Controllers
+}

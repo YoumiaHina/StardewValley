@@ -1,5 +1,5 @@
-#include "Controllers/FarmInteractor.h"
-#include "Controllers/FarmMapController.h"
+#include "Controllers/Interact/FarmInteractor.h"
+#include "Controllers/Map/FarmMapController.h"
 #include "Game/Crop.h"
 #include "Game/WorldState.h"
 
@@ -74,5 +74,5 @@ FarmInteractor::SpaceAction FarmInteractor::onSpacePressed() {
     }
     return SpaceAction::None;
 }
-
-} // namespace Controllers
+// namespace Controllers
+}

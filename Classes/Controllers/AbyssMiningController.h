@@ -5,7 +5,7 @@
 
 #include "cocos2d.h"
 #include <vector>
-#include "Controllers/AbyssMapController.h"
+#include "Controllers/Map/AbyssMapController.h"
 #include "Game/WorldState.h"
 #include "Game/Item.h"
 

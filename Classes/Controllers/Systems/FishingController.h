@@ -4,15 +4,15 @@
 #include <memory>
 #include "Controllers/IMapController.h"
 #include "Game/Inventory.h"
-#include "Controllers/UIController.h"
+#include "Controllers/UI/UIController.h"
 
 namespace Controllers {
 
 class FishingController {
 public:
-    FishingController(IMapController* map,
+    FishingController(Controllers::IMapController* map,
                       std::shared_ptr<Game::Inventory> inventory,
-                      UIController* ui,
+                      Controllers::UIController* ui,
                       cocos2d::Scene* scene,
                       cocos2d::Node* worldNode)
     : _map(map), _inventory(std::move(inventory)), _ui(ui), _scene(scene), _worldNode(worldNode) {}
@@ -24,9 +24,9 @@ public:
     void cancel();
 
 private:
-    IMapController* _map = nullptr;
+    Controllers::IMapController* _map = nullptr;
     std::shared_ptr<Game::Inventory> _inventory;
-    UIController* _ui = nullptr;
+    Controllers::UIController* _ui = nullptr;
     cocos2d::Scene* _scene = nullptr;
     cocos2d::Node* _worldNode = nullptr;
 
@@ -56,4 +56,5 @@ private:
     void onFail(const cocos2d::Vec2& worldPos);
 };
 
-} // namespace Controllers
+}
+// namespace Controllers

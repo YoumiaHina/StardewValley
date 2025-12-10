@@ -1,5 +1,5 @@
-#include "Controllers/PlayerController.h"
-#include "Game/IPlayerView.h"
+#include "Controllers/Input/PlayerController.h"
+#include "Game/View/IPlayerView.h"
 #include "cocos2d.h"
 
 using namespace cocos2d;
@@ -117,5 +117,5 @@ void PlayerController::update(float dt) {
 
     if (_map) { _map->sortActorWithEnvironment(_player); }
 }
-
-} // namespace Controllers
+// namespace Controllers
+}

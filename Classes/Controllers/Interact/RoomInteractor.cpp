@@ -1,5 +1,5 @@
-#include "Controllers/RoomInteractor.h"
-#include "Controllers/RoomMapController.h"
+#include "Controllers/Interact/RoomInteractor.h"
+#include "Controllers/Map/RoomMapController.h"
 #include "Game/WorldState.h"
 
 using namespace cocos2d;
@@ -9,7 +9,7 @@ namespace Controllers {
 RoomInteractor::SpaceAction RoomInteractor::onSpacePressed() {
     if (!_map || !_inventory || !_ui || !_getPlayerPos) return SpaceAction::None;
     Vec2 p = _getPlayerPos();
-    auto* room = static_cast<RoomMapController*>(_map);
+    auto* room = static_cast<Controllers::RoomMapController*>(_map);
 
     // 出屋
     if (room->isNearDoor(p)) {
@@ -64,5 +64,5 @@ RoomInteractor::SpaceAction RoomInteractor::onSpacePressed() {
 
     return SpaceAction::None;
 }
-
-} // namespace Controllers
+// namespace Controllers
+}

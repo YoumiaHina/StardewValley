@@ -2,7 +2,7 @@
 #define __CUSTOMIZATION_SCENE_H__
 
 #include "cocos2d.h"
-#include "Game/PlayerView.h"
+#include "Game/View/PlayerView.h"
 
 class CustomizationScene : public cocos2d::Scene {
 public:

@@ -14,6 +14,4 @@ public:
     virtual void setMoving(bool moving) = 0;
     virtual void updateAnimation(float dt) = 0;
 };
-
 }
-

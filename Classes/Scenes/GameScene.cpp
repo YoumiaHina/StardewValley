@@ -11,14 +11,14 @@
 #include "Scenes/RoomScene.h"
 #include "Scenes/AbyssMineScene.h"
 #include "Managers/AudioManager.h"
-#include "Controllers/FishingController.h"
+#include "Controllers/Systems/FishingController.h"
 #include "Game/Cheat.h"
-#include "Controllers/PlayerController.h"
-#include "Controllers/FarmMapController.h"
-#include "Controllers/UIController.h"
-#include "Controllers/ToolSystem.h"
-#include "Controllers/GameStateController.h"
-#include "Controllers/FarmInteractor.h"
+#include "Controllers/Input/PlayerController.h"
+#include "Controllers/Map/FarmMapController.h"
+#include "Controllers/UI/UIController.h"
+#include "Controllers/Systems/ToolSystem.h"
+#include "Controllers/Systems/GameStateController.h"
+#include "Controllers/Interact/FarmInteractor.h"
 
 USING_NS_CC;
 

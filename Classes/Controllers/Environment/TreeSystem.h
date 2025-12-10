@@ -36,5 +36,4 @@ private:
     cocos2d::Node* _root = nullptr;
     std::unordered_map<long long, Game::Tree*> _trees;
 };
-
 }

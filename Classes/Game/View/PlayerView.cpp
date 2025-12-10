@@ -1,4 +1,4 @@
-#include "Game/PlayerView.h"
+#include "Game/View/PlayerView.h"
 
 namespace Game {
 
@@ -177,4 +177,3 @@ int PlayerView::getMaxShirtStyles() { return 50; }
 int PlayerView::getMaxPantsStyles() { return 20; }
 
 }
-

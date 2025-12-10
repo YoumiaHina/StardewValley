@@ -96,4 +96,5 @@ private:
     cocos2d::ui::Button* _craftButton = nullptr;
 };
 
-} // namespace Controllers
+}
+// namespace Controllers

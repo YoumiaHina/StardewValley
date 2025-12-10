@@ -29,7 +29,7 @@ public:
         syncSave();
     }
     // 每日推进：依据瓦片是否“浇水”，推进阶段并将浇水格恢复为“耕地”
-    void advanceCropsDaily(IMapController* map) {
+    void advanceCropsDaily(Controllers::IMapController* map) {
         for (auto& cp : _crops) {
             auto t = map ? map->getTile(cp.c, cp.r) : Game::TileType::Soil;
             bool watered = (t == Game::TileType::Watered);
@@ -72,5 +72,4 @@ private:
     void syncLoad() { _crops = Game::globalState().farmCrops; }
     void syncSave() { Game::globalState().farmCrops = _crops; }
 };
-
 }

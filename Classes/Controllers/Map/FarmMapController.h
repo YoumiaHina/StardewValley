@@ -16,11 +16,11 @@
 #include "Game/Crop.h"
 #include "Game/WorldState.h"
 #include "Game/Tree.h"
-#include "Controllers/TreeSystem.h"
+#include "Controllers/Environment/TreeSystem.h"
 
 namespace Controllers {
 
-class FarmMapController : public IMapController {
+class FarmMapController : public Controllers::IMapController {
 public:
     FarmMapController(cocos2d::Node* worldNode)
     : _worldNode(worldNode) {}
@@ -102,4 +102,5 @@ public:
     Game::Tree* findTreeAt(int c, int r) const;
 };
 
-} // namespace Controllers
+}
+// namespace Controllers

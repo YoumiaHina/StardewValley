@@ -9,8 +9,8 @@
 #include "Game/Tool.h"
 #include "Game/WorldState.h"
 #include "Controllers/IMapController.h"
-#include "Controllers/CropSystem.h"
-#include "Controllers/UIController.h"
+#include "Controllers/Systems/CropSystem.h"
+#include "Controllers/UI/UIController.h"
 #include <functional>
 
 namespace Controllers {
@@ -18,11 +18,11 @@ namespace Controllers {
     class ToolSystem {
     public:
     ToolSystem(std::shared_ptr<Game::Inventory> inventory,
-               IMapController* map,
-               CropSystem* crop,
+               Controllers::IMapController* map,
+               Controllers::CropSystem* crop,
                std::function<cocos2d::Vec2()> getPlayerPos,
                std::function<cocos2d::Vec2()> getLastDir,
-               UIController* ui)
+               Controllers::UIController* ui)
     : _inventory(std::move(inventory)), _map(map), _crop(crop), _getPlayerPos(std::move(getPlayerPos)), _getLastDir(std::move(getLastDir)), _ui(ui) {}
 
     // 使用当前选中工具；返回提示消息。
@@ -32,12 +32,13 @@ namespace Controllers {
 
 private:
         std::shared_ptr<Game::Inventory> _inventory;
-        IMapController* _map = nullptr;
-        CropSystem* _crop = nullptr;
+        Controllers::IMapController* _map = nullptr;
+        Controllers::CropSystem* _crop = nullptr;
         std::function<cocos2d::Vec2()> _getPlayerPos; // 提示定位回调
         std::function<cocos2d::Vec2()> _getLastDir;   // 面向方向回调
-        UIController* _ui = nullptr;
+        Controllers::UIController* _ui = nullptr;
         std::function<void(const cocos2d::Vec2&)> _onStartFishing;
     };
 
-} // namespace Controllers
+}
+// namespace Controllers

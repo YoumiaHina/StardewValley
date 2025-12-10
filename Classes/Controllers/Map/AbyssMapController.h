@@ -13,7 +13,7 @@
 
 namespace Controllers {
 
-class AbyssMapController : public IMapController {
+class AbyssMapController : public Controllers::IMapController {
 public:
     enum class Theme { Rock, Ice, Lava };
 
@@ -76,4 +76,5 @@ private:
     cocos2d::Node* _mapNode = nullptr;
 };
 
-} // namespace Controllers
+}
+// namespace Controllers
