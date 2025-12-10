@@ -1,14 +1,12 @@
 #pragma once
 
-#include "cocos2d.h"
+#include "Game/IPlayerView.h"
 
-namespace Controllers {
+namespace Game {
 
-class PlayerActionController : public cocos2d::Node {
+class PlayerView : public IPlayerView {
 public:
-    enum class Direction { DOWN = 0, RIGHT = 1, UP = 2, LEFT = 3 };
-
-    static PlayerActionController* create();
+    static PlayerView* create();
     bool init() override;
 
     void setShirtStyle(int index);
@@ -16,9 +14,9 @@ public:
     void setHairStyle(int index);
     void setHairColor(const cocos2d::Color3B& color);
 
-    void setDirection(Direction dir);
-    void setMoving(bool moving);
-    void updateAnimation(float dt);
+    void setDirection(Direction dir) override;
+    void setMoving(bool moving) override;
+    void updateAnimation(float dt) override;
 
     int getShirtStyle() const { return _shirtIndex; }
     int getPantsStyle() const { return _pantsIndex; }
@@ -51,7 +49,6 @@ private:
     cocos2d::Rect getShirtRect(int index, Direction dir, int frame);
     cocos2d::Rect getPantsRect(int index, Direction dir, int frame);
     cocos2d::Rect getHairRect(int index, Direction dir, int frame);
-    cocos2d::Size getTextureSize(const std::string& filename);
 };
 
 }

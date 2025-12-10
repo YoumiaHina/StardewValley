@@ -25,11 +25,11 @@ bool CustomizationScene::init() {
     this->addChild(label, 1);
 
     // Character Node
-    _character = Controllers::PlayerActionController::create();
+    _character = Game::PlayerView::create();
     _character->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2 + 50));
     _character->setScale(4.0f); // Scale up
     _character->setMoving(true);
-    _character->setDirection(Controllers::PlayerActionController::Direction::DOWN);
+    _character->setDirection(Game::IPlayerView::Direction::DOWN);
     this->addChild(_character);
 
     // Initialize from saved settings if any
@@ -127,7 +127,7 @@ bool CustomizationScene::init() {
 
 void CustomizationScene::changeShirt(int delta) {
     _currentShirt += delta;
-    int max = Controllers::PlayerActionController::getMaxShirtStyles();
+    int max = Game::PlayerView::getMaxShirtStyles();
     if (_currentShirt < 0) _currentShirt = max - 1;
     if (_currentShirt >= max) _currentShirt = 0;
     
@@ -137,7 +137,7 @@ void CustomizationScene::changeShirt(int delta) {
 
 void CustomizationScene::changePants(int delta) {
     _currentPants += delta;
-    int max = Controllers::PlayerActionController::getMaxPantsStyles();
+    int max = Game::PlayerView::getMaxPantsStyles();
     if (_currentPants < 0) _currentPants = max - 1;
     if (_currentPants >= max) _currentPants = 0;
     
@@ -147,7 +147,7 @@ void CustomizationScene::changePants(int delta) {
 
 void CustomizationScene::changeHair(int delta) {
     _currentHair += delta;
-    int max = Controllers::PlayerActionController::getMaxHairStyles();
+    int max = Game::PlayerView::getMaxHairStyles();
     if (_currentHair < 0) _currentHair = max - 1;
     if (_currentHair >= max) _currentHair = 0;
     

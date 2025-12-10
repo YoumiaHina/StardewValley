@@ -7,13 +7,13 @@
 #include <memory>
 #include "Controllers/IMapController.h"
 
-namespace Controllers { class PlayerActionController; }
+namespace Game { class IPlayerView; }
 
 namespace Controllers {
 
 class PlayerController {
 public:
-    PlayerController(Controllers::PlayerActionController* player,
+    PlayerController(Game::IPlayerView* player,
                      IMapController* map,
                      cocos2d::Node* worldNode,
                      float baseSpeed = 140.0f,
@@ -30,7 +30,7 @@ public:
     cocos2d::Vec2 lastDir() const { return _lastDir; }
 
 private:
-    Controllers::PlayerActionController* _player = nullptr;
+    Game::IPlayerView* _player = nullptr;
     IMapController* _map = nullptr;
     cocos2d::Node* _worldNode = nullptr;
 

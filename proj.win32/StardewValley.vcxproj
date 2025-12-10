@@ -153,10 +153,10 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\Classes\AppDelegate.cpp" />
-    <ClCompile Include="..\Classes\Controllers\PlayerActionController.cpp" />
     <ClCompile Include="..\Classes\Controllers\TreeSystem.cpp" />
     <ClCompile Include="..\Classes\Game\FarmMap.cpp" />
     <ClCompile Include="..\Classes\Game\MineMap.cpp" />
+    <ClCompile Include="..\Classes\Game\PlayerView.cpp" />
     <ClCompile Include="..\Classes\Game\RoomMap.cpp" />
     <ClCompile Include="..\Classes\Game\Tree.cpp" />
     <ClCompile Include="..\Classes\HelloWorldScene.cpp" />
@@ -190,14 +190,15 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Classes\AppDelegate.h" />
-    <ClInclude Include="..\Classes\Controllers\PlayerActionController.h" />
     <ClInclude Include="..\Classes\Controllers\TreeSystem.h" />
     <ClInclude Include="..\Classes\Game\Bag.h" />
     <ClInclude Include="..\Classes\Game\Cheat.h" />
     <ClInclude Include="..\Classes\Game\Chest.h" />
     <ClInclude Include="..\Classes\Game\Crop.h" />
     <ClInclude Include="..\Classes\Game\FarmMap.h" />
+    <ClInclude Include="..\Classes\Game\IPlayerView.h" />
     <ClInclude Include="..\Classes\Game\MineMap.h" />
+    <ClInclude Include="..\Classes\Game\PlayerView.h" />
     <ClInclude Include="..\Classes\Game\RoomMap.h" />
     <ClInclude Include="..\Classes\Game\Tree.h" />
     <ClInclude Include="..\Classes\HelloWorldScene.h" />

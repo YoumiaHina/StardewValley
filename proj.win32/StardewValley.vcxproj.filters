@@ -135,8 +135,8 @@
     <ClCompile Include="..\Classes\Game\RoomMap.cpp">
       <Filter>Classes\Game</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\Controllers\PlayerActionController.cpp">
-      <Filter>Classes\Controllers</Filter>
+    <ClCompile Include="..\Classes\Game\PlayerView.cpp">
+      <Filter>Classes\Game</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -272,8 +272,11 @@
     <ClInclude Include="..\Classes\Game\RoomMap.h">
       <Filter>Classes\Game</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\Controllers\PlayerActionController.h">
-      <Filter>Classes\Controllers</Filter>
+    <ClInclude Include="..\Classes\Game\IPlayerView.h">
+      <Filter>Classes\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\PlayerView.h">
+      <Filter>Classes\Game</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

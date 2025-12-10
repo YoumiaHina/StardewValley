@@ -1,9 +1,9 @@
-#include "Controllers/PlayerActionController.h"
+#include "Game/PlayerView.h"
 
-namespace Controllers {
+namespace Game {
 
-PlayerActionController* PlayerActionController::create() {
-    PlayerActionController* node = new (std::nothrow) PlayerActionController();
+PlayerView* PlayerView::create() {
+    PlayerView* node = new (std::nothrow) PlayerView();
     if (node && node->init()) {
         node->autorelease();
         return node;
@@ -12,7 +12,7 @@ PlayerActionController* PlayerActionController::create() {
     return nullptr;
 }
 
-bool PlayerActionController::init() {
+bool PlayerView::init() {
     if (!Node::init()) return false;
 
     _bodySprite = cocos2d::Sprite::create("Farmer/farmer_base.png");
@@ -49,38 +49,38 @@ bool PlayerActionController::init() {
     return true;
 }
 
-void PlayerActionController::setShirtStyle(int index) {
+void PlayerView::setShirtStyle(int index) {
     _shirtIndex = index;
     updateSprites();
 }
 
-void PlayerActionController::setPantsStyle(int index) {
+void PlayerView::setPantsStyle(int index) {
     _pantsIndex = index;
     updateSprites();
 }
 
-void PlayerActionController::setHairStyle(int index) {
+void PlayerView::setHairStyle(int index) {
     _hairIndex = index;
     updateSprites();
 }
 
-void PlayerActionController::setHairColor(const cocos2d::Color3B& color) {
+void PlayerView::setHairColor(const cocos2d::Color3B& color) {
     _hairColor = color;
     if (_hairSprite) { _hairSprite->setColor(_hairColor); }
 }
 
-void PlayerActionController::setDirection(Direction dir) {
+void PlayerView::setDirection(Direction dir) {
     if (_currentDir != dir) { _currentDir = dir; updateSprites(); }
 }
 
-void PlayerActionController::setMoving(bool moving) {
+void PlayerView::setMoving(bool moving) {
     if (_isMoving != moving) {
         _isMoving = moving;
         if (!_isMoving) { _animFrame = 0; updateSprites(); }
     }
 }
 
-void PlayerActionController::updateAnimation(float dt) {
+void PlayerView::updateAnimation(float dt) {
     if (_isMoving) {
         _animTimer += dt;
         if (_animTimer > 0.15f) {
@@ -94,7 +94,7 @@ void PlayerActionController::updateAnimation(float dt) {
     }
 }
 
-void PlayerActionController::updateSprites() {
+void PlayerView::updateSprites() {
     int dirRow = 0;
     switch (_currentDir) {
         case Direction::DOWN: dirRow = 0; break;
@@ -134,19 +134,19 @@ void PlayerActionController::updateSprites() {
     _pantsSprite->setPosition(0, 0);
 }
 
-cocos2d::Rect PlayerActionController::getBodyRect(Direction dir, int frame) {
+cocos2d::Rect PlayerView::getBodyRect(Direction dir, int frame) {
     int w = 16; int h = 32; int row = (int)dir; int frames[] = {0, 1, 0, 2}; int col = frames[frame];
     float y = row * h; float x = col * w;
     return cocos2d::Rect(x, y, w, h);
 }
 
-cocos2d::Rect PlayerActionController::getPantsRect(int index, Direction dir, int frame) {
+cocos2d::Rect PlayerView::getPantsRect(int index, Direction dir, int frame) {
     int w = 16; int h = 32; int row = (int)dir; int styleRowOffset = index * 4; int frames[] = {0, 1, 0, 2}; int col = frames[frame];
     auto texSize = _pantsSprite->getTexture()->getContentSize(); int maxRows = texSize.height / h; if (styleRowOffset >= maxRows) styleRowOffset = 0;
     return cocos2d::Rect(col * w, (styleRowOffset + row) * h, w, h);
 }
 
-cocos2d::Rect PlayerActionController::getShirtRect(int index, Direction dir, int frame) {
+cocos2d::Rect PlayerView::getShirtRect(int index, Direction dir, int frame) {
     int w = 8; int h = 8; int blockIndex = 0;
     switch(dir) {
         case Direction::DOWN: blockIndex = 0; break;
@@ -159,7 +159,7 @@ cocos2d::Rect PlayerActionController::getShirtRect(int index, Direction dir, int
     return cocos2d::Rect(chunkX, y, w, h);
 }
 
-cocos2d::Rect PlayerActionController::getHairRect(int index, Direction dir, int frame) {
+cocos2d::Rect PlayerView::getHairRect(int index, Direction dir, int frame) {
     int w = 16; int h = 32; auto texSize = _hairSprite->getTexture()->getContentSize(); int cols = texSize.width / 16; int chunkCol = index % cols; int chunkRow = index / cols;
     float chunkX = chunkCol * 16; float chunkY = chunkRow * 96; int blockIndex = 0;
     switch(dir) {
@@ -172,15 +172,9 @@ cocos2d::Rect PlayerActionController::getHairRect(int index, Direction dir, int 
     return cocos2d::Rect(chunkX, y, w, h);
 }
 
-int PlayerActionController::getMaxHairStyles() { return 50; }
-int PlayerActionController::getMaxShirtStyles() { return 50; }
-int PlayerActionController::getMaxPantsStyles() { return 20; }
-
-cocos2d::Size PlayerActionController::getTextureSize(const std::string& filename) {
-    auto tex = cocos2d::Director::getInstance()->getTextureCache()->addImage(filename);
-    if (tex) return tex->getContentSize();
-    return cocos2d::Size::ZERO;
-}
+int PlayerView::getMaxHairStyles() { return 50; }
+int PlayerView::getMaxShirtStyles() { return 50; }
+int PlayerView::getMaxPantsStyles() { return 20; }
 
 }
 

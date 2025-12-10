@@ -1,5 +1,5 @@
 #include "Controllers/PlayerController.h"
-#include "Controllers/PlayerActionController.h"
+#include "Game/IPlayerView.h"
 #include "cocos2d.h"
 
 using namespace cocos2d;
@@ -63,11 +63,11 @@ void PlayerController::update(float dt) {
     _player->setMoving(isMoving);
     if (isMoving) {
         if (std::abs(dx) > std::abs(dy)) {
-            _player->setDirection(dx > 0 ? Controllers::PlayerActionController::Direction::RIGHT
-                                          : Controllers::PlayerActionController::Direction::LEFT);
+            _player->setDirection(dx > 0 ? Game::IPlayerView::Direction::RIGHT
+                                          : Game::IPlayerView::Direction::LEFT);
         } else {
-            _player->setDirection(dy > 0 ? Controllers::PlayerActionController::Direction::UP
-                                          : Controllers::PlayerActionController::Direction::DOWN);
+            _player->setDirection(dy > 0 ? Game::IPlayerView::Direction::UP
+                                          : Game::IPlayerView::Direction::DOWN);
         }
     }
     _player->updateAnimation(dt);
