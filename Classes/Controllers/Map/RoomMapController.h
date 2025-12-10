@@ -24,9 +24,10 @@ public:
     cocos2d::Vec2 clampPosition(const cocos2d::Vec2& current,
                                  const cocos2d::Vec2& next,
                                  float radius) const override;
-    bool collides(const cocos2d::Vec2& pos, float radius) const override { return false; }
+    bool collides(const cocos2d::Vec2& pos, float radius) const override;
 
     bool isNearDoor(const cocos2d::Vec2& playerWorldPos) const override;
+    bool isNearFarmDoor(const cocos2d::Vec2& playerWorldPos) const override;
     bool isNearChest(const cocos2d::Vec2& playerWorldPos) const override;
 
     // Room 不涉及瓦片

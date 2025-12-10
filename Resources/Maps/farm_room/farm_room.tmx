@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="24" height="24" tilewidth="8" tileheight="8" infinite="0" nextlayerid="10" nextobjectid="16">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="24" height="24" tilewidth="8" tileheight="8" infinite="0" nextlayerid="12" nextobjectid="26">
  <tileset firstgid="1" source="farm_room.tsx"/>
  <layer id="2" name="BackgroundFloor" width="24" height="24">
   <data encoding="csv">
@@ -41,6 +41,20 @@
   <object id="12" x="136.59" y="120.071" width="30.622" height="14.3037"/>
   <object id="13" x="15.311" y="63.6615" width="31.8308" height="30.622"/>
   <object id="14" x="64.0645" y="63.863" width="102.141" height="16.1168"/>
+ </objectgroup>
+ <objectgroup id="10" name="DoorToFarm">
+  <object id="16" x="41.9406" y="146.64" width="40.725" height="41.3328"/>
+ </objectgroup>
+ <objectgroup id="11" name="collision">
+  <object id="19" x="15.6518" y="94.9743">
+   <polygon points="0,0 32.0633,-0.607835 31.3035,-31.4555 48.019,-31.3035 48.6268,-15.3478 148.768,-14.74 148.92,-26.4408 159.861,-16.7155 161.228,-64.2786 143.905,-82.5137 16.4116,-81.4499 -1.97546,-63.3668"/>
+  </object>
+  <object id="21" x="15.1959" y="94.3664">
+   <polygon points="0,0 0.151959,46.8033 16.5635,46.8033 16.5635,73.7 31.7594,74.4598 32.6712,96.3419 -13.8283,95.4302"/>
+  </object>
+  <object id="23" x="23.2497" y="20.3625" width="156.062" height="60.3277"/>
+  <object id="24" x="64.5825" y="168.218" width="125.062" height="19.6027"/>
+  <object id="25" x="175.512" y="80.5382" width="14.892" height="87.6803"/>
  </objectgroup>
  <objectgroup id="9" name="Bed">
   <object id="15" x="136.59" y="120.272" width="31.0249" height="47.7462"/>

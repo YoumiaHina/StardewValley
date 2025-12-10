@@ -180,6 +180,13 @@ bool AbyssMapController::isNearStairs(const Vec2& p) const {
     return p.distance(_stairsPos) <= s * 0.8f;
 }
 
+bool AbyssMapController::isNearFarmDoor(const Vec2& p) const {
+    if (_entrance) {
+        return _entrance->nearDoorToFarm(p);
+    }
+    return false;
+}
+
 std::vector<int> AbyssMapController::getActivatedElevatorFloors() const {
     std::vector<int> v;
     v.reserve(_elevatorFloors.size());

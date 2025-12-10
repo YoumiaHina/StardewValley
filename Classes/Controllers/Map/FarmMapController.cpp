@@ -198,6 +198,10 @@ bool FarmMapController::isNearDoor(const Vec2& playerWorldPos) const {
     return _farmDoorRect.containsPoint(playerWorldPos - _mapOrigin);
 }
 
+bool FarmMapController::isNearMineDoor(const Vec2& playerWorldPos) const {
+    return _gameMap ? _gameMap->nearDoorToMine(playerWorldPos) : false;
+}
+
 bool FarmMapController::isNearChest(const Vec2& playerWorldPos) const {
     float maxDist = GameConfig::TILE_SIZE * 0.8f;
     for (const auto& ch : _chests) {
@@ -228,6 +232,21 @@ bool FarmMapController::damageTreeAt(int c, int r, int amount) {
         [this](int c,int r,int item){ this->spawnDropAt(c, r, item, 3); this->refreshDropsVisuals(); },
         [this](int c,int r, Game::TileType t){ this->setTile(c, r, t); }
     );
+}
+
+cocos2d::Vec2 FarmMapController::farmMineDoorSpawnPos() const {
+    if (_gameMap) {
+        return _gameMap->doorToMineCenter();
+    }
+    // fallback：使用农场门矩形中心
+    return Vec2(_farmDoorRect.getMidX(), _farmDoorRect.getMidY());
+}
+
+cocos2d::Vec2 FarmMapController::farmRoomDoorSpawnPos() const {
+    if (_gameMap) {
+        return _gameMap->doorToRoomCenter();
+    }
+    return Vec2(_farmDoorRect.getMidX(), _farmDoorRect.getMidY());
 }
 
 bool FarmMapController::inBounds(int c, int r) const {

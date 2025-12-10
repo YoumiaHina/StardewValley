@@ -29,6 +29,10 @@ public:
     
     // 供其他场景调用：将玩家出生在农场门外侧
     void setSpawnAtFarmEntrance();
+    // 供矿洞返回：将玩家出生在 DoorToMine 对象层中心
+    void setSpawnAtFarmMineDoor();
+    // 供房间返回：将玩家出生在 DoorToRoom 对象层中心
+    void setSpawnAtFarmRoomDoor();
 
 private:
     Controllers::FarmMapController* _farmMap = nullptr;

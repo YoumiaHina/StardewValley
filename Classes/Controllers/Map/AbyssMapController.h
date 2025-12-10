@@ -55,6 +55,7 @@ public:
     Theme currentTheme() const;
     void unlockElevatorIfNeeded();
     bool isNearStairs(const cocos2d::Vec2& p) const;
+    bool isNearFarmDoor(const cocos2d::Vec2& p) const;
     cocos2d::Vec2 stairsWorldPos() const { return _stairsPos; }
     std::vector<int> getActivatedElevatorFloors() const;
     // Entrance (floor 0)

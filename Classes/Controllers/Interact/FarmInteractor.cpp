@@ -10,9 +10,12 @@ namespace Controllers {
 FarmInteractor::SpaceAction FarmInteractor::onSpacePressed() {
     if (!_map || !_inventory || !_ui || !_getPlayerPos) return SpaceAction::None;
     Vec2 p = _getPlayerPos();
-    // 进屋
+    // 进屋 / 进矿洞
     if (_map->isNearDoor(p)) {
         return SpaceAction::EnterHouse;
+    }
+    if (_map->isNearMineDoor(p)) {
+        return SpaceAction::EnterMine;
     }
 
     if (_inventory->selectedKind() == Game::SlotKind::Item) {

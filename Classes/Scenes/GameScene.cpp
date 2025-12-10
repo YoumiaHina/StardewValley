@@ -46,6 +46,22 @@ void GameScene::setSpawnAtFarmEntrance() {
     _player->setPosition(_player->getPosition() + Vec2(0, s));
 }
 
+void GameScene::setSpawnAtFarmMineDoor() {
+    if (!_player || !_mapController) return;
+    auto pos = _mapController->farmMineDoorSpawnPos();
+    if (pos != Vec2::ZERO) {
+        _player->setPosition(pos);
+    }
+}
+
+void GameScene::setSpawnAtFarmRoomDoor() {
+    if (!_player || !_mapController) return;
+    auto pos = _mapController->farmRoomDoorSpawnPos();
+    if (pos != Vec2::ZERO) {
+        _player->setPosition(pos);
+    }
+}
+
 // SceneBase overrides
 Controllers::IMapController* GameScene::createMapController(Node* worldNode) {
     _farmMap = new Controllers::FarmMapController(worldNode);
@@ -64,10 +80,14 @@ void GameScene::onSpacePressed() {
         room->setSpawnInsideDoor();
         auto trans = TransitionFade::create(0.6f, room);
         Director::getInstance()->replaceScene(trans);
+    } else if (act == Controllers::FarmInteractor::SpaceAction::EnterMine) {
+        auto abyss = AbyssMineScene::create();
+        auto trans = TransitionFade::create(0.6f, abyss);
+        Director::getInstance()->replaceScene(trans);
     }
 }
 
-const char* GameScene::doorPromptText() const { return "Press Space to Enter House"; }
+const char* GameScene::doorPromptText() const { return "Press Space to Enter"; }
 
 void GameScene::onKeyPressedHook(EventKeyboard::KeyCode code) {
     if (code == EventKeyboard::KeyCode::KEY_K) {

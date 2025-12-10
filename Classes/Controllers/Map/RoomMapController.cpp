@@ -60,14 +60,29 @@ Size RoomMapController::getContentSize() const {
 
 Vec2 RoomMapController::clampPosition(const Vec2& current, const Vec2& next, float radius) const {
     float pad = 16.0f;
-    Vec2 clamped = next;
-    clamped.x = std::max(_roomRect.getMinX() + pad, std::min(_roomRect.getMaxX() - pad, clamped.x));
-    clamped.y = std::max(_roomRect.getMinY() + pad, std::min(_roomRect.getMaxY() - pad, clamped.y));
-    return clamped;
+    Vec2 candidate = next;
+    candidate.x = std::max(_roomRect.getMinX() + pad, std::min(_roomRect.getMaxX() - pad, candidate.x));
+    candidate.y = std::max(_roomRect.getMinY() + pad, std::min(_roomRect.getMaxY() - pad, candidate.y));
+    // 基于对象层碰撞采样（脚下）
+    if (_roomMap) {
+        Vec2 footX(candidate.x, current.y);
+        if (_roomMap->collides(footX + Vec2(0, -pad * 0.5f), radius)) {
+            candidate.x = current.x;
+        }
+        Vec2 footY(current.x, candidate.y);
+        if (_roomMap->collides(footY + Vec2(0, -pad * 0.5f), radius)) {
+            candidate.y = current.y;
+        }
+    }
+    return candidate;
 }
 
 bool RoomMapController::isNearDoor(const Vec2& playerWorldPos) const {
     return _doorRect.containsPoint(playerWorldPos);
+}
+
+bool RoomMapController::isNearFarmDoor(const Vec2& playerWorldPos) const {
+    return _roomMap ? _roomMap->nearDoorToFarm(playerWorldPos) : false;
 }
 
 bool RoomMapController::isNearChest(const Vec2& playerWorldPos) const {
@@ -84,6 +99,9 @@ void RoomMapController::addActorToMap(cocos2d::Node* node, int zOrder) {
     } else if (_worldNode) {
         _worldNode->addChild(node, zOrder);
     }
+}
+bool RoomMapController::collides(const Vec2& pos, float radius) const {
+    return _roomMap ? _roomMap->collides(pos, radius) : false;
 }
 // namespace Controllers
 }

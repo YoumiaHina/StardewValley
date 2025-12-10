@@ -51,7 +51,8 @@ void RoomScene::onSpacePressed() {
     auto act = _interactor ? _interactor->onSpacePressed() : Controllers::RoomInteractor::SpaceAction::None;
     if (act == Controllers::RoomInteractor::SpaceAction::ExitHouse) {
         auto farm = GameScene::create();
-        farm->setSpawnAtFarmEntrance();
+        // 返回农场并落在 DoorToRoom 对象层中心
+        farm->setSpawnAtFarmRoomDoor();
         auto trans = TransitionFade::create(0.6f, farm);
         Director::getInstance()->replaceScene(trans);
     }

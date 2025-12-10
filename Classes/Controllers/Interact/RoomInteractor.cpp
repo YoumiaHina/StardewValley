@@ -11,8 +11,8 @@ RoomInteractor::SpaceAction RoomInteractor::onSpacePressed() {
     Vec2 p = _getPlayerPos();
     auto* room = static_cast<Controllers::RoomMapController*>(_map);
 
-    // 出屋
-    if (room->isNearDoor(p)) {
+    // 出屋：改为 DoorToFarm 对象层判定
+    if (_map->isNearFarmDoor(p)) {
         return SpaceAction::ExitHouse;
     }
 

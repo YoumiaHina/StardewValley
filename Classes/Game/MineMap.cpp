@@ -18,6 +18,7 @@ bool MineMap::initWithFile(const std::string& tmxFile) {
     parseCollision();
     parseStairs();
     parseAppear();
+    parseDoorToFarm();
     return true;
 }
 
@@ -171,6 +172,56 @@ Vec2 MineMap::appearCenter() const {
         return Vec2(r.getMidX(), r.getMidY());
     }
     if (!_appearPoints.empty()) return _appearPoints.front();
+    return Vec2::ZERO;
+}
+
+void MineMap::parseDoorToFarm() {
+    _doorToFarmRects.clear();
+    _doorToFarmPoints.clear();
+    if (!_tmx) return;
+    auto group = _tmx->getObjectGroup("DoorToFarm");
+    if (!group) group = _tmx->getObjectGroup("doorToFarm");
+    if (!group) return;
+    auto objects = group->getObjects();
+    for (auto &val : objects) {
+        auto dict = val.asValueMap();
+        float x = dict.at("x").asFloat();
+        float y = dict.at("y").asFloat();
+        float w = dict.count("width") ? dict.at("width").asFloat() : 0.0f;
+        float h = dict.count("height") ? dict.at("height").asFloat() : 0.0f;
+        if (w > 0 && h > 0) {
+            _doorToFarmRects.emplace_back(x, y, w, h);
+            // 调试绘制（绿色格）
+            if (!_debugNode) { _debugNode = DrawNode::create(); _tmx->addChild(_debugNode, 998); }
+            Rect r(x, y, w, h);
+            _debugNode->drawRect(r.origin, r.origin + r.size, Color4F(0, 1, 0, 0.5f));
+            _debugNode->drawSolidRect(r.origin, r.origin + r.size, Color4F(0, 1, 0, 0.2f));
+        } else {
+            _doorToFarmPoints.emplace_back(x, y);
+            if (!_debugNode) { _debugNode = DrawNode::create(); _tmx->addChild(_debugNode, 998); }
+            _debugNode->drawDot(Vec2(x, y), 6.0f, Color4F(0, 1, 0, 0.7f));
+        }
+    }
+}
+
+bool MineMap::nearDoorToFarm(const Vec2& p) const {
+    for (const auto& r : _doorToFarmRects) {
+        if (r.containsPoint(p)) return true;
+    }
+    // points: small radius check
+    float r2 = (GameConfig::TILE_SIZE * 0.6f); r2 *= r2;
+    for (const auto& pt : _doorToFarmPoints) {
+        if (p.distanceSquared(pt) <= r2) return true;
+    }
+    return false;
+}
+
+Vec2 MineMap::doorToFarmCenter() const {
+    if (!_doorToFarmRects.empty()) {
+        const auto& r = _doorToFarmRects.front();
+        return Vec2(r.getMidX(), r.getMidY());
+    }
+    if (!_doorToFarmPoints.empty()) return _doorToFarmPoints.front();
     return Vec2::ZERO;
 }
 

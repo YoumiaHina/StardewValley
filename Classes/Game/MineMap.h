@@ -24,6 +24,9 @@ public:
     cocos2d::Vec2 stairsCenter() const;
     // Appear (spawn) point
     cocos2d::Vec2 appearCenter() const;
+    // Door to Farm
+    bool nearDoorToFarm(const cocos2d::Vec2& p) const;
+    cocos2d::Vec2 doorToFarmCenter() const;
 
     // Getters
     cocos2d::Size getMapSize() const; // In tiles
@@ -43,10 +46,14 @@ private:
     // Appear objects
     std::vector<cocos2d::Rect> _appearRects;
     std::vector<cocos2d::Vec2> _appearPoints;
+    // DoorToFarm objects
+    std::vector<cocos2d::Rect> _doorToFarmRects;
+    std::vector<cocos2d::Vec2> _doorToFarmPoints;
 
     void parseCollision();
     void parseStairs();
     void parseAppear();
+    void parseDoorToFarm();
 };
 
 } // namespace Game

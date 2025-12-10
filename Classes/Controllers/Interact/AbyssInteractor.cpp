@@ -12,6 +12,9 @@ AbyssInteractor::SpaceAction AbyssInteractor::onSpacePressed() {
         _map->descend(1);
         return SpaceAction::Descend;
     }
+    if (_map->isNearFarmDoor(p)) {
+        return SpaceAction::ReturnToFarm;
+    }
     return SpaceAction::None;
 }
 // namespace Controllers
