@@ -24,6 +24,7 @@ public:
 
     cocos2d::TMXTiledMap* getTMX() const { return _tmx; }
     bool nearWater(const cocos2d::Vec2& p, float radius) const;
+    bool nearDoorToRoom(const cocos2d::Vec2& p) const;
 
 private:
     cocos2d::TMXTiledMap* _tmx = nullptr;
@@ -38,10 +39,12 @@ private:
     std::vector<cocos2d::Rect> _waterRects;
     std::vector<std::vector<cocos2d::Vec2>> _waterPolygons;
     cocos2d::DrawNode* _waterDebugNode = nullptr;
+    std::vector<cocos2d::Rect> _doorToRoomRects;
 
     void setupLayerOrder();
     void parseWalls();
     void parseWater();
+    void parseDoorToRoom();
 };
 
 } // namespace Game

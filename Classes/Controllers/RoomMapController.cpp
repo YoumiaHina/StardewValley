@@ -2,6 +2,7 @@
 #include "cocos2d.h"
 #include "Game/GameConfig.h"
 #include "Game/WorldState.h"
+#include "Game/RoomMap.h"
 
 using namespace cocos2d;
 
@@ -9,57 +10,51 @@ namespace Controllers {
 
 void RoomMapController::init() {
     if (!_worldNode) return;
-    _roomDraw = DrawNode::create();
-    _worldNode->addChild(_roomDraw, 0);
+    _roomMap = Game::RoomMap::create("Maps/farm_room/farm_room.tmx");
+    if (_roomMap) {
+        _roomMap->setAnchorPoint(Vec2(0,0));
+        _roomMap->setPosition(Vec2(0,0));
+        _worldNode->addChild(_roomMap, 0);
 
-    _roomDraw->clear();
-    float roomW = 600.0f;
-    float roomH = 400.0f;
-    _roomRect = Rect(0, 0, roomW, roomH);
+        auto cs = _roomMap->getContentSize();
+        _roomRect = Rect(0, 0, cs.width, cs.height);
 
-    float doorW = 100.0f;
-    float doorH = 24.0f;
-    float dx = _roomRect.getMidX() - doorW * 0.5f;
-    float dy = _roomRect.getMinY() + 2.0f;
-    _doorRect = Rect(dx, dy, doorW, doorH);
+        cocos2d::Rect door;
+        if (_roomMap->getFirstDoorRect(door)) {
+            _doorRect = door;
+        } else {
+            float doorW = 100.0f;
+            float doorH = 24.0f;
+            float dx = _roomRect.getMidX() - doorW * 0.5f;
+            float dy = _roomRect.getMinY() + 2.0f;
+            _doorRect = Rect(dx, dy, doorW, doorH);
+        }
 
-    _roomDraw->drawSolidRect(_roomRect.origin,
-                             Vec2(_roomRect.getMaxX(), _roomRect.getMaxY()),
-                             Color4F(0.85f, 0.75f, 0.60f, 1.0f));
-
-    Vec2 tl(_roomRect.getMinX(), _roomRect.getMaxY());
-    Vec2 tr(_roomRect.getMaxX(), _roomRect.getMaxY());
-    Vec2 bl(_roomRect.getMinX(), _roomRect.getMinY());
-    Vec2 br(_roomRect.getMaxX(), _roomRect.getMinY());
-    Color4F wall(0.f, 0.f, 0.f, 0.55f);
-    _roomDraw->drawLine(tl, tr, wall);
-    _roomDraw->drawLine(tl, bl, wall);
-    _roomDraw->drawLine(tr, br, wall);
-    Vec2 dl(_doorRect.getMinX(), _roomRect.getMinY());
-    Vec2 dr(_doorRect.getMaxX(), _roomRect.getMinY());
-    _roomDraw->drawLine(bl, dl, wall);
-    _roomDraw->drawLine(dr, br, wall);
-
-    _roomDraw->drawSolidRect(_doorRect.origin,
-                             Vec2(_doorRect.getMaxX(), _doorRect.getMaxY()),
-                             Color4F(0.75f, 0.75f, 0.20f, 0.75f));
-
-    float bedW = 120.0f, bedH = 60.0f;
-    _bedRect = Rect(_roomRect.getMinX() + 24.0f,
-                    _roomRect.getMaxY() - bedH - 24.0f,
-                    bedW, bedH);
-    _roomDraw->drawSolidRect(_bedRect.origin,
-                             Vec2(_bedRect.getMaxX(), _bedRect.getMaxY()),
-                             Color4F(0.85f, 0.85f, 0.95f, 1.0f));
-    _roomDraw->drawRect(_bedRect.origin,
-                        Vec2(_bedRect.getMaxX(), _bedRect.getMaxY()),
-                        Color4F(0.2f, 0.2f, 0.3f, 1.0f));
+        const auto& beds = _roomMap->bedRects();
+        if (!beds.empty()) {
+            float minX = beds[0].getMinX(), minY = beds[0].getMinY();
+            float maxX = beds[0].getMaxX(), maxY = beds[0].getMaxY();
+            for (size_t i = 1; i < beds.size(); ++i) {
+                minX = std::min(minX, beds[i].getMinX());
+                minY = std::min(minY, beds[i].getMinY());
+                maxX = std::max(maxX, beds[i].getMaxX());
+                maxY = std::max(maxY, beds[i].getMaxY());
+            }
+            _bedRect = Rect(minX, minY, maxX - minX, maxY - minY);
+        } else {
+            float bedW = 120.0f, bedH = 60.0f;
+            _bedRect = Rect(_roomRect.getMinX() + 24.0f,
+                            _roomRect.getMaxY() - bedH - 24.0f,
+                            bedW, bedH);
+        }
+    }
 
     _chestDraw = DrawNode::create();
     _worldNode->addChild(_chestDraw, 1);
 }
 
 Size RoomMapController::getContentSize() const {
+    if (_roomMap) return _roomMap->getContentSize();
     return Size(_roomRect.size.width, _roomRect.size.height);
 }
 
@@ -84,7 +79,9 @@ bool RoomMapController::isNearChest(const Vec2& playerWorldPos) const {
 }
 
 void RoomMapController::addActorToMap(cocos2d::Node* node, int zOrder) {
-    if (_worldNode) {
+    if (_roomMap && _roomMap->getTMX()) {
+        _roomMap->getTMX()->addChild(node, 20);
+    } else if (_worldNode) {
         _worldNode->addChild(node, zOrder);
     }
 }

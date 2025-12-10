@@ -26,6 +26,7 @@ bool FarmMap::initWithFile(const std::string& tmxFile) {
     setupLayerOrder();
     parseWalls();
     parseWater();
+    parseDoorToRoom();
 
     return true;
 }
@@ -282,6 +283,29 @@ bool FarmMap::nearWater(const cocos2d::Vec2& p, float radius) const {
             }
             j = i;
         }
+    }
+    return false;
+}
+
+void FarmMap::parseDoorToRoom() {
+    _doorToRoomRects.clear();
+    if (!_tmx) return;
+    auto group = _tmx->getObjectGroup("DoorToRoom");
+    if (!group) return;
+    auto objects = group->getObjects();
+    for (auto &val : objects) {
+        auto dict = val.asValueMap();
+        float x = dict.at("x").asFloat();
+        float y = dict.at("y").asFloat();
+        float w = dict.count("width") ? dict.at("width").asFloat() : 0.0f;
+        float h = dict.count("height") ? dict.at("height").asFloat() : 0.0f;
+        _doorToRoomRects.emplace_back(x, y, w, h);
+    }
+}
+
+bool FarmMap::nearDoorToRoom(const cocos2d::Vec2& p) const {
+    for (const auto& r : _doorToRoomRects) {
+        if (r.containsPoint(p)) return true;
     }
     return false;
 }

@@ -132,6 +132,9 @@
     <ClCompile Include="..\Classes\Controllers\TreeSystem.cpp">
       <Filter>Classes\Controllers</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\Game\RoomMap.cpp">
+      <Filter>Classes\Game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <!-- Header Files -->
@@ -262,6 +265,9 @@
     </ClInclude>
     <ClInclude Include="..\Classes\Controllers\TreeSystem.h">
       <Filter>Classes\Controllers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\RoomMap.h">
+      <Filter>Classes\Game</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

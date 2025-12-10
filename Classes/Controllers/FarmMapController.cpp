@@ -192,7 +192,10 @@ bool FarmMapController::collides(const Vec2& pos, float radius) const {
 }
 
 bool FarmMapController::isNearDoor(const Vec2& playerWorldPos) const {
-    return _farmDoorRect.containsPoint(playerWorldPos);
+    if (_gameMap) {
+        return _gameMap->nearDoorToRoom(playerWorldPos);
+    }
+    return _farmDoorRect.containsPoint(playerWorldPos - _mapOrigin);
 }
 
 bool FarmMapController::isNearChest(const Vec2& playerWorldPos) const {

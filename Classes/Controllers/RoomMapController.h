@@ -7,6 +7,7 @@
 #include <vector>
 #include "Controllers/IMapController.h"
 #include "Game/Chest.h"
+#include "Game/RoomMap.h"
 
 namespace Controllers {
 
@@ -42,6 +43,7 @@ public:
 private:
     cocos2d::Node* _worldNode = nullptr;
     cocos2d::DrawNode* _roomDraw = nullptr;
+    Game::RoomMap* _roomMap = nullptr;
     cocos2d::Rect _roomRect;
     cocos2d::Rect _doorRect;
     cocos2d::Rect _bedRect;

@@ -156,6 +156,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClCompile Include="..\Classes\Controllers\TreeSystem.cpp" />
     <ClCompile Include="..\Classes\Game\PlayerAppearance.cpp" />
     <ClCompile Include="..\Classes\Game\FarmMap.cpp" />
+    <ClCompile Include="..\Classes\Game\RoomMap.cpp" />
     <ClCompile Include="..\Classes\Game\Tree.cpp" />
     <ClCompile Include="..\Classes\HelloWorldScene.cpp" />
     <ClCompile Include="..\Classes\Scenes\CustomizationScene.cpp" />
@@ -195,6 +196,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClInclude Include="..\Classes\Game\Chest.h" />
     <ClInclude Include="..\Classes\Game\Crop.h" />
     <ClInclude Include="..\Classes\Game\FarmMap.h" />
+    <ClInclude Include="..\Classes\Game\RoomMap.h" />
     <ClInclude Include="..\Classes\Game\Tree.h" />
     <ClInclude Include="..\Classes\HelloWorldScene.h" />
     <ClInclude Include="..\Classes\Scenes\CustomizationScene.h" />
