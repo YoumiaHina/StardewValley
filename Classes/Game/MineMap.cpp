@@ -19,6 +19,9 @@ bool MineMap::initWithFile(const std::string& tmxFile) {
     parseStairs();
     parseAppear();
     parseDoorToFarm();
+    parseBack0();
+    parseRockArea();
+    parseMonsterArea();
     return true;
 }
 
@@ -223,6 +226,82 @@ Vec2 MineMap::doorToFarmCenter() const {
     }
     if (!_doorToFarmPoints.empty()) return _doorToFarmPoints.front();
     return Vec2::ZERO;
+}
+
+void MineMap::parseBack0() {
+    _back0Rects.clear();
+    if (!_tmx) return;
+    auto group = _tmx->getObjectGroup("Back0");
+    if (!group) return;
+    auto objects = group->getObjects();
+    for (auto &val : objects) {
+        auto dict = val.asValueMap();
+        float x = dict.at("x").asFloat();
+        float y = dict.at("y").asFloat();
+        float w = dict.count("width") ? dict.at("width").asFloat() : 0.0f;
+        float h = dict.count("height") ? dict.at("height").asFloat() : 0.0f;
+        if (w > 0 && h > 0) {
+            _back0Rects.emplace_back(x, y, w, h);
+        }
+    }
+}
+
+bool MineMap::nearBack0(const Vec2& p) const {
+    for (const auto& r : _back0Rects) {
+        if (r.containsPoint(p)) return true;
+    }
+    return false;
+}
+
+void MineMap::parseRockArea() {
+    _rockAreaRects.clear();
+    _rockAreaPolys.clear();
+    if (!_tmx) return;
+    auto group = _tmx->getObjectGroup("RockArea");
+    if (!group) return;
+    auto objects = group->getObjects();
+    for (auto &val : objects) {
+        auto dict = val.asValueMap();
+        float x = dict.at("x").asFloat();
+        float y = dict.at("y").asFloat();
+        if (dict.find("points") != dict.end() || dict.find("polyline") != dict.end() || dict.find("polygon") != dict.end()) {
+            std::vector<Vec2> pts; ValueVector arr;
+            if (dict.find("points") != dict.end()) arr = dict.at("points").asValueVector();
+            else if (dict.find("polygon") != dict.end()) arr = dict.at("polygon").asValueVector();
+            else if (dict.find("polyline") != dict.end()) arr = dict.at("polyline").asValueVector();
+            for (auto &pv : arr) {
+                auto pmap = pv.asValueMap();
+                float px = pmap.at("x").asFloat();
+                float py = pmap.at("y").asFloat();
+                pts.emplace_back(x + px, y - py);
+            }
+            if (!pts.empty()) _rockAreaPolys.push_back(pts);
+        } else if (dict.find("width") != dict.end() && dict.find("height") != dict.end()) {
+            float w = dict.at("width").asFloat(); float h = dict.at("height").asFloat();
+            _rockAreaRects.emplace_back(x, y, w, h);
+        }
+    }
+}
+
+void MineMap::parseMonsterArea() {
+    _monsterPoints.clear();
+    if (!_tmx) return;
+    auto group = _tmx->getObjectGroup("MonsterArea");
+    if (!group) return;
+    auto objects = group->getObjects();
+    for (auto &val : objects) {
+        auto dict = val.asValueMap();
+        float x = dict.at("x").asFloat();
+        float y = dict.at("y").asFloat();
+        // point-only expected; for rects, use center
+        float w = dict.count("width") ? dict.at("width").asFloat() : 0.0f;
+        float h = dict.count("height") ? dict.at("height").asFloat() : 0.0f;
+        if (w > 0 && h > 0) {
+            _monsterPoints.emplace_back(x + w*0.5f, y + h*0.5f);
+        } else {
+            _monsterPoints.emplace_back(x, y);
+        }
+    }
 }
 
 Size MineMap::getMapSize() const {

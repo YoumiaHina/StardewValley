@@ -27,6 +27,12 @@ public:
     // Door to Farm
     bool nearDoorToFarm(const cocos2d::Vec2& p) const;
     cocos2d::Vec2 doorToFarmCenter() const;
+    // Back0: 返回入口（零层）
+    bool nearBack0(const cocos2d::Vec2& p) const;
+    // Spawn helpers for mining/monster
+    const std::vector<cocos2d::Rect>& rockAreaRects() const { return _rockAreaRects; }
+    const std::vector<std::vector<cocos2d::Vec2>>& rockAreaPolys() const { return _rockAreaPolys; }
+    const std::vector<cocos2d::Vec2>& monsterSpawnPoints() const { return _monsterPoints; }
 
     // Getters
     cocos2d::Size getMapSize() const; // In tiles
@@ -49,11 +55,20 @@ private:
     // DoorToFarm objects
     std::vector<cocos2d::Rect> _doorToFarmRects;
     std::vector<cocos2d::Vec2> _doorToFarmPoints;
+    // Back0 objects
+    std::vector<cocos2d::Rect> _back0Rects;
+    // Mining / Monsters
+    std::vector<cocos2d::Rect> _rockAreaRects;
+    std::vector<std::vector<cocos2d::Vec2>> _rockAreaPolys;
+    std::vector<cocos2d::Vec2> _monsterPoints;
 
     void parseCollision();
     void parseStairs();
     void parseAppear();
     void parseDoorToFarm();
+    void parseBack0();
+    void parseRockArea();
+    void parseMonsterArea();
 };
 
 } // namespace Game

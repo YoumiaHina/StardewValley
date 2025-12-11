@@ -8,21 +8,23 @@ namespace Controllers {
 
 void AbyssMonsterController::generateInitialWave() {
     _monsters.clear();
-    std::mt19937 rng{ std::random_device{}() };
-    std::uniform_int_distribution<int> countDist(3,5);
-    int count = countDist(rng);
-    std::uniform_real_distribution<float> distX(0.0f, _map->getContentSize().width);
-    std::uniform_real_distribution<float> distY(0.0f, _map->getContentSize().height);
-    for (int i = 0; i < count; ++i) {
+    auto spawns = _map->monsterSpawnPoints();
+    if (spawns.empty()) {
+        // 没有 MonsterArea：不刷怪
+        refreshVisuals();
+        return;
+    }
+    for (const auto& pt : spawns) {
         Monster m = makeMonsterForTheme(_map->currentTheme());
-        Vec2 p(distX(rng), distY(rng));
-        m.pos = p;
+        m.pos = pt;
         _monsters.push_back(m);
     }
     refreshVisuals();
 }
 
 void AbyssMonsterController::update(float dt) {
+    // 没有 MonsterArea：不进行任何刷新/重生
+    if (_map && _map->monsterSpawnPoints().empty()) return;
     _respawnAccum += dt;
     if (_respawnAccum >= 30.0f) {
         _respawnAccum = 0.0f;

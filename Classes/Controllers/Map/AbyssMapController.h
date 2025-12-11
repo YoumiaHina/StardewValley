@@ -56,12 +56,21 @@ public:
     void unlockElevatorIfNeeded();
     bool isNearStairs(const cocos2d::Vec2& p) const;
     bool isNearFarmDoor(const cocos2d::Vec2& p) const;
+    bool isNearBack0(const cocos2d::Vec2& p) const;
     cocos2d::Vec2 stairsWorldPos() const { return _stairsPos; }
     std::vector<int> getActivatedElevatorFloors() const;
     // Entrance (floor 0)
     void loadEntrance();
     bool isEntranceLoaded() const { return _entrance != nullptr; }
     cocos2d::Vec2 entranceSpawnPos() const;
+    // Floor TMX loading
+    void loadFloorTMX(int floorIndex);
+    bool isFloorTMXLoaded() const { return _floorMap != nullptr; }
+    cocos2d::Vec2 floorSpawnPos() const;
+    // Floor TMX object groups accessors
+    const std::vector<cocos2d::Vec2>& monsterSpawnPoints() const;
+    const std::vector<cocos2d::Rect>& rockAreaRects() const;
+    const std::vector<std::vector<cocos2d::Vec2>>& rockAreaPolys() const;
 
 private:
     cocos2d::Node* _worldNode = nullptr;
@@ -74,6 +83,7 @@ private:
     std::unordered_set<int> _elevatorFloors; // 已激活楼层（5的倍数）
     std::vector<Game::Chest> _emptyChests; // 深渊内无胸，返回空引用
     Game::MineMap* _entrance = nullptr;
+    Game::MineMap* _floorMap = nullptr;
     cocos2d::Node* _mapNode = nullptr;
 };
 

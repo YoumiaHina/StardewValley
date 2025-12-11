@@ -7,6 +7,7 @@ namespace Controllers {
 
 cocos2d::Size AbyssMapController::getContentSize() const {
     if (_entrance) return _entrance->getContentSize();
+    if (_floorMap) return _floorMap->getContentSize();
     return Size(_cols * GameConfig::TILE_SIZE, _rows * GameConfig::TILE_SIZE);
 }
 
@@ -20,27 +21,23 @@ cocos2d::Vec2 AbyssMapController::clampPosition(const Vec2& current, const Vec2&
     float maxY = content.height - s * 0.5f;
     candidate.x = std::max(minX, std::min(maxX, candidate.x));
     candidate.y = std::max(minY, std::min(maxY, candidate.y));
-    if (_entrance) {
-        // sample foot position
-        Vec2 foot(candidate.x, current.y);
-        if (_entrance->collides(foot + Vec2(0, -s * 0.5f), radius)) {
-            candidate.x = current.x;
-        }
-        foot = Vec2(current.x, candidate.y);
-        if (_entrance->collides(foot + Vec2(0, -s * 0.5f), radius)) {
-            candidate.y = current.y;
-        }
-    }
+    auto collidesFn = [this](const Vec2& p, float r){
+        if (_entrance) return _entrance->collides(p, r);
+        if (_floorMap) return _floorMap->collides(p, r);
+        return false;
+    };
+    Vec2 foot(candidate.x, current.y);
+    if (collidesFn(foot + Vec2(0, -s * 0.5f), radius)) candidate.x = current.x;
+    foot = Vec2(current.x, candidate.y);
+    if (collidesFn(foot + Vec2(0, -s * 0.5f), radius)) candidate.y = current.y;
     return candidate;
 }
 
 bool AbyssMapController::isNearDoor(const Vec2& playerWorldPos) const {
     // 用楼梯位置代替“门”提示
-    if (_entrance) {
-        float s = static_cast<float>(GameConfig::TILE_SIZE);
-        return _entrance->nearStairs(playerWorldPos, s * 0.8f);
-    }
     float s = static_cast<float>(GameConfig::TILE_SIZE);
+    if (_entrance) return _entrance->nearStairs(playerWorldPos, s * 0.8f);
+    if (_floorMap) return _floorMap->nearStairs(playerWorldPos, s * 0.8f);
     return playerWorldPos.distance(_stairsPos) <= s * 0.8f;
 }
 
@@ -74,12 +71,14 @@ void AbyssMapController::setTile(int c, int r, Game::TileType t) {
 
 Vec2 AbyssMapController::tileToWorld(int c, int r) const {
     if (_entrance) return _entrance->tileToWorld(c, r);
+    if (_floorMap) return _floorMap->tileToWorld(c, r);
     float s = static_cast<float>(GameConfig::TILE_SIZE);
     return Vec2(c * s + s * 0.5f, r * s + s * 0.5f);
 }
 
 void AbyssMapController::worldToTileIndex(const Vec2& p, int& c, int& r) const {
     if (_entrance) { _entrance->worldToTileIndex(p, c, r); return; }
+    if (_floorMap) { _floorMap->worldToTileIndex(p, c, r); return; }
     float s = static_cast<float>(GameConfig::TILE_SIZE);
     c = static_cast<int>(p.x / s);
     r = static_cast<int>(p.y / s);
@@ -94,6 +93,15 @@ void AbyssMapController::refreshMapVisuals() {
         }
         if (_mapDraw) _mapDraw->clear();
         _stairsPos = _entrance->stairsCenter();
+        return;
+    }
+    if (_floorMap) {
+        if (!_mapDraw && _floorMap && _floorMap->getTMX()) {
+            _mapDraw = DrawNode::create();
+            _floorMap->getTMX()->addChild(_mapDraw, 50);
+        }
+        if (_mapDraw) _mapDraw->clear();
+        _stairsPos = _floorMap->stairsCenter();
         return;
     }
     if (!_mapDraw) {
@@ -131,6 +139,8 @@ void AbyssMapController::addActorToMap(cocos2d::Node* node, int zOrder) {
     if (_entrance && _worldNode) {
         // 入口层：人物置于世界节点最上层，避免被 TMX 图层遮挡且在卸载入口时不被移除
         _worldNode->addChild(node, 999);
+    } else if (_floorMap && _floorMap->getTMX()) {
+        _floorMap->getTMX()->addChild(node, 20);
     } else if (_worldNode) {
         _worldNode->addChild(node, zOrder);
     }
@@ -138,17 +148,9 @@ void AbyssMapController::addActorToMap(cocos2d::Node* node, int zOrder) {
 
 void AbyssMapController::generateFloor(int floorIndex) {
     _floor = std::max(1, std::min(120, floorIndex));
-    if (_entrance) {
-        // Remove entrance visuals when going deeper
-        _entrance->removeFromParent();
-        _entrance = nullptr;
-    }
-    _tiles.assign(_cols * _rows, Game::TileType::Soil);
-    // 设定楼梯位置（随机靠近右下角）
-    float s = static_cast<float>(GameConfig::TILE_SIZE);
-    _stairsPos = Vec2(_cols * s * 0.8f, _rows * s * 0.2f);
-    // 刷新可视
-    refreshMapVisuals();
+    if (_entrance) { _entrance->removeFromParent(); _entrance = nullptr; }
+    if (_floorMap) { _floorMap->removeFromParent(); _floorMap = nullptr; }
+    loadFloorTMX(_floor);
 }
 
 void AbyssMapController::descend(int by) {
@@ -176,6 +178,10 @@ bool AbyssMapController::isNearStairs(const Vec2& p) const {
         float s = static_cast<float>(GameConfig::TILE_SIZE);
         return _entrance->nearStairs(p, s * 0.8f);
     }
+    if (_floorMap) {
+        float s = static_cast<float>(GameConfig::TILE_SIZE);
+        return _floorMap->nearStairs(p, s * 0.8f);
+    }
     float s = static_cast<float>(GameConfig::TILE_SIZE);
     return p.distance(_stairsPos) <= s * 0.8f;
 }
@@ -183,6 +189,13 @@ bool AbyssMapController::isNearStairs(const Vec2& p) const {
 bool AbyssMapController::isNearFarmDoor(const Vec2& p) const {
     if (_entrance) {
         return _entrance->nearDoorToFarm(p);
+    }
+    return false;
+}
+
+bool AbyssMapController::isNearBack0(const Vec2& p) const {
+    if (_floorMap) {
+        return _floorMap->nearBack0(p);
     }
     return false;
 }
@@ -212,6 +225,31 @@ void AbyssMapController::loadEntrance() {
     }
 }
 
+void AbyssMapController::loadFloorTMX(int floorIndex) {
+    if (!_worldNode) return;
+    if (!_mapNode) { _mapNode = Node::create(); _worldNode->addChild(_mapNode, 0); }
+    std::string path;
+    if (floorIndex % 5 == 0) {
+        path = "Maps/mine/mine_bonusroom.tmx";
+    } else {
+        // 随机选择普通层地图
+        std::mt19937 rng{ std::random_device{}() };
+        std::uniform_int_distribution<int> dist(0,1);
+        path = dist(rng) == 0 ? "Maps/mine/mine_corridor.tmx" : "Maps/mine/mine_room.tmx";
+    }
+    _floorMap = Game::MineMap::create(path);
+    if (_floorMap) {
+        _floorMap->setAnchorPoint(Vec2(0,0));
+        _floorMap->setPosition(Vec2(0,0));
+        _mapNode->addChild(_floorMap, 0);
+        auto tsize = _floorMap->getMapSize();
+        _cols = static_cast<int>(tsize.width);
+        _rows = static_cast<int>(tsize.height);
+        _stairsPos = _floorMap->stairsCenter();
+        refreshMapVisuals();
+    }
+}
+
 cocos2d::Vec2 AbyssMapController::entranceSpawnPos() const {
     if (_entrance) {
         auto appear = _entrance->appearCenter();
@@ -222,8 +260,37 @@ cocos2d::Vec2 AbyssMapController::entranceSpawnPos() const {
     float s = static_cast<float>(GameConfig::TILE_SIZE);
     return Vec2(_cols * s * 0.5f, _rows * s * 0.65f);
 }
+
+cocos2d::Vec2 AbyssMapController::floorSpawnPos() const {
+    if (_floorMap) {
+        auto appear = _floorMap->appearCenter();
+        if (appear != Vec2::ZERO) return appear;
+        if (_stairsPos != Vec2::ZERO) return _stairsPos;
+    }
+    float s = static_cast<float>(GameConfig::TILE_SIZE);
+    return Vec2(_cols * s * 0.5f, _rows * s * 0.65f);
+}
+
+const std::vector<cocos2d::Vec2>& AbyssMapController::monsterSpawnPoints() const {
+    static std::vector<Vec2> empty;
+    if (_floorMap) return _floorMap->monsterSpawnPoints();
+    return empty;
+}
+
+const std::vector<cocos2d::Rect>& AbyssMapController::rockAreaRects() const {
+    static std::vector<Rect> empty;
+    if (_floorMap) return _floorMap->rockAreaRects();
+    return empty;
+}
+
+const std::vector<std::vector<cocos2d::Vec2>>& AbyssMapController::rockAreaPolys() const {
+    static std::vector<std::vector<Vec2>> empty;
+    if (_floorMap) return _floorMap->rockAreaPolys();
+    return empty;
+}
 bool AbyssMapController::collides(const Vec2& pos, float radius) const {
     if (_entrance) return _entrance->collides(pos, radius);
+    if (_floorMap) return _floorMap->collides(pos, radius);
     return false;
 }
 // namespace Controllers

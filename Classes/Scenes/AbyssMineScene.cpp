@@ -33,7 +33,11 @@ bool AbyssMineScene::init() {
     _elevator = new Controllers::AbyssElevatorController(_map, _monsters, _mining, this);
     _elevator->buildPanel();
     // 矿洞 HUD：在能量条正上方构建血条（红色）
-    if (_uiController) _uiController->buildHPBarAboveEnergy();
+    if (_uiController) {
+        _uiController->buildHPBarAboveEnergy();
+        _uiController->buildMineFloorLabel();
+        _uiController->setMineFloorNumber(_map->currentFloor());
+    }
 
     // 注册模块更新
     addUpdateCallback([this](float dt){ if (_monsters) _monsters->update(dt); });
@@ -57,17 +61,24 @@ void AbyssMineScene::positionPlayerInitial() {
 void AbyssMineScene::onSpacePressed() {
     auto act = _interactor ? _interactor->onSpacePressed() : Controllers::AbyssInteractor::SpaceAction::None;
     if (act == Controllers::AbyssInteractor::SpaceAction::Descend) {
-        // 重置当层状态
+        // 重置当层状态并根据 TMX 对象层生成
         if (_monsters) { _monsters->resetFloor(); _monsters->generateInitialWave(); }
         if (_mining) { _mining->generateNodesForFloor(); }
-        // 将玩家放置在新楼层的入口附近
-        _player->setPosition(_map->stairsWorldPos() + Vec2(0, 28));
+        // 新楼层出生点：优先 Appear，否则楼梯中心
+        _player->setPosition(_map->floorSpawnPos());
+        if (_uiController) _uiController->setMineFloorNumber(_map->currentFloor());
     } else if (act == Controllers::AbyssInteractor::SpaceAction::ReturnToFarm) {
         auto farm = GameScene::create();
         // 在农场场景加载完成后，将出生点设置到 DoorToMine 对象层中心
         farm->setSpawnAtFarmMineDoor();
         auto trans = TransitionFade::create(0.6f, farm);
         Director::getInstance()->replaceScene(trans);
+    } else if (act == Controllers::AbyssInteractor::SpaceAction::ReturnToEntrance) {
+        // 返回入口（零层）
+        _map->loadEntrance();
+        if (_monsters) _monsters->resetFloor();
+        if (_player) _player->setPosition(_map->entranceSpawnPos());
+        if (_uiController) _uiController->setMineFloorNumber(_map->currentFloor());
     }
 }
 
@@ -80,5 +91,12 @@ void AbyssMineScene::onMouseDown(EventMouse* e) {
 void AbyssMineScene::onKeyPressedHook(EventKeyboard::KeyCode code) {
     if (code == EventKeyboard::KeyCode::KEY_E) {
         if (_elevator) _elevator->togglePanel();
+    } else if (code == EventKeyboard::KeyCode::KEY_N) {
+        // 调试：直接去下一层
+        _map->descend(1);
+        if (_monsters) { _monsters->resetFloor(); _monsters->generateInitialWave(); }
+        if (_mining) { _mining->generateNodesForFloor(); }
+        if (_player) _player->setPosition(_map->floorSpawnPos());
+        if (_uiController) _uiController->setMineFloorNumber(_map->currentFloor());
     }
 }

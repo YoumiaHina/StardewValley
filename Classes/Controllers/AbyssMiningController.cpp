@@ -8,15 +8,39 @@ namespace Controllers {
 
 void AbyssMiningController::generateNodesForFloor() {
     _nodes.clear();
-    std::mt19937 rng{ std::random_device{}() };
-    std::uniform_int_distribution<int> countDist(15, 30);
-    int n = countDist(rng);
-    std::uniform_real_distribution<float> distX(0.0f, _map->getContentSize().width);
-    std::uniform_real_distribution<float> distY(0.0f, _map->getContentSize().height);
-    for (int i=0;i<n;++i) {
-        Node node; node.type = NodeType::Rock; node.hp = 3; // 简化为通用岩石
-        node.pos = Vec2(distX(rng), distY(rng));
-        _nodes.push_back(node);
+    auto rects = _map->rockAreaRects();
+    auto polys = _map->rockAreaPolys();
+    auto addNodeAt = [this](const Vec2& p){ Node node; node.type = NodeType::Rock; node.hp = 3; node.pos = p; _nodes.push_back(node); };
+    // Sample rects with grid spacing ~0.8 tile
+    float s = static_cast<float>(GameConfig::TILE_SIZE);
+    float step = s * 0.8f;
+    for (const auto& r : rects) {
+        for (float y = r.getMinY() + step*0.5f; y <= r.getMaxY() - step*0.5f; y += step) {
+            for (float x = r.getMinX() + step*0.5f; x <= r.getMaxX() - step*0.5f; x += step) {
+                addNodeAt(Vec2(x, y));
+            }
+        }
+    }
+    // Sample polys using rejection within bounding box
+    for (const auto& poly : polys) {
+        if (poly.size() < 3) continue;
+        float minX = poly[0].x, maxX = poly[0].x, minY = poly[0].y, maxY = poly[0].y;
+        for (const auto& p : poly) { minX = std::min(minX, p.x); maxX = std::max(maxX, p.x); minY = std::min(minY, p.y); maxY = std::max(maxY, p.y); }
+        std::mt19937 rng{ std::random_device{}() };
+        std::uniform_real_distribution<float> distX(minX, maxX);
+        std::uniform_real_distribution<float> distY(minY, maxY);
+        auto inside = [&poly](const Vec2& pt){
+            bool in = false; size_t j = poly.size() - 1;
+            for (size_t i=0;i<poly.size();++i){
+                if (((poly[i].y > pt.y) != (poly[j].y > pt.y)) && (pt.x < (poly[j].x - poly[i].x) * (pt.y - poly[i].y) / (poly[j].y - poly[i].y) + poly[i].x)) in = !in;
+                j = i;
+            }
+            return in;
+        };
+        int samples = 40; // reasonable fill
+        for (int k=0;k<samples;++k) {
+            Vec2 pt(distX(rng), distY(rng)); if (inside(pt)) addNodeAt(pt);
+        }
     }
     refreshVisuals();
 }

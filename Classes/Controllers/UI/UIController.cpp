@@ -137,6 +137,25 @@ void UIController::buildHPBarAboveEnergy() {
     refreshHUD();
 }
 
+void UIController::buildMineFloorLabel() {
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    auto origin = Director::getInstance()->getVisibleOrigin();
+    if (!_mineFloorLabel) {
+        _mineFloorLabel = Label::createWithTTF("", "fonts/Marker Felt.ttf", 20);
+        _mineFloorLabel->setColor(Color3B::WHITE);
+        _mineFloorLabel->setAnchorPoint(Vec2(0,1));
+        float pad = 10.0f;
+        _mineFloorLabel->setPosition(Vec2(origin.x + pad, origin.y + visibleSize.height - pad));
+        if (_scene) _scene->addChild(_mineFloorLabel, 3);
+    }
+}
+
+void UIController::setMineFloorNumber(int floor) {
+    if (_mineFloorLabel) {
+        _mineFloorLabel->setString(StringUtils::format("Floor %d", floor));
+    }
+}
+
 void UIController::buildHotbar() {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     auto origin = Director::getInstance()->getVisibleOrigin();
