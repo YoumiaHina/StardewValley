@@ -26,6 +26,8 @@ public:
     void onKeyReleased(cocos2d::EventKeyboard::KeyCode code);
 
     void update(float dt);
+    void setMovementLocked(bool locked) { _movementLocked = locked; }
+    bool isMovementLocked() const { return _movementLocked; }
 
     cocos2d::Vec2 lastDir() const { return _lastDir; }
 
@@ -42,6 +44,7 @@ private:
     bool  _isSprinting = false;
     float _sprintThreshold = 0.5f;
     cocos2d::Vec2 _lastDir = cocos2d::Vec2(0, -1);
+    bool _movementLocked = false;
 };
 
 }

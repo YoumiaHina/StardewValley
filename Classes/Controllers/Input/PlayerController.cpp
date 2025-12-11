@@ -37,6 +37,43 @@ void PlayerController::onKeyReleased(EventKeyboard::KeyCode code) {
 void PlayerController::update(float dt) {
     if (!_player || !_map) return;
 
+    if (_movementLocked) {
+        _player->setMoving(false);
+        _moveHeldDuration = 0.0f;
+        _isSprinting = false;
+        // Keep cursor and camera follow without moving the player
+        _map->updateCursor(_player->getPosition(), _lastDir);
+        if (_worldNode) {
+            auto visibleSize = Director::getInstance()->getVisibleSize();
+            auto origin = Director::getInstance()->getVisibleOrigin();
+            float scale = _worldNode->getScale();
+            auto org = _map->getOrigin();
+            auto playerPos = _player->getPosition();
+            Vec2 screenCenter(origin.x + visibleSize.width * 0.5f, origin.y + visibleSize.height * 0.5f);
+            Vec2 cam = screenCenter - (org + playerPos) * scale;
+            cocos2d::Size mapSize = _map->getContentSize();
+            float mapW = mapSize.width;
+            float mapH = mapSize.height;
+            float minX = (origin.x + visibleSize.width) - (org.x + mapW) * scale;
+            float maxX = origin.x - org.x * scale;
+            float minY = (origin.y + visibleSize.height) - (org.y + mapH) * scale;
+            float maxY = origin.y - org.y * scale;
+            if (mapW * scale <= visibleSize.width) {
+                cam.x = (origin.x + visibleSize.width * 0.5f) - (org.x + mapW * 0.5f) * scale;
+            } else {
+                cam.x = std::max(minX, std::min(maxX, cam.x));
+            }
+            if (mapH * scale <= visibleSize.height) {
+                cam.y = (origin.y + visibleSize.height * 0.5f) - (org.y + mapH * 0.5f) * scale;
+            } else {
+                cam.y = std::max(minY, std::min(maxY, cam.y));
+            }
+            _worldNode->setPosition(cam);
+        }
+        if (_map) { _map->sortActorWithEnvironment(_player); }
+        return;
+    }
+
     // sprint timing: holding ANY movement key
     bool movementHeld = (_up || _down || _left || _right);
     if (movementHeld) {

@@ -35,6 +35,9 @@ bool GameScene::init() {
     if (_toolSystem) {
         _toolSystem->setFishingStarter([this](const Vec2& pos){ if (_fishing) _fishing->startAt(pos); });
     }
+    if (_fishing) {
+        _fishing->setMovementLocker([this](bool locked){ if (_playerController) _playerController->setMovementLocked(locked); });
+    }
     return true;
 }
 
@@ -94,9 +97,5 @@ void GameScene::onKeyPressedHook(EventKeyboard::KeyCode code) {
         auto abyss = AbyssMineScene::create();
         auto trans = TransitionFade::create(0.6f, abyss);
         Director::getInstance()->replaceScene(trans);
-    } else if (code == EventKeyboard::KeyCode::KEY_J) {
-        if (_player && _fishing) {
-            _fishing->startAnywhere(_player->getPosition());
-        }
     }
 }

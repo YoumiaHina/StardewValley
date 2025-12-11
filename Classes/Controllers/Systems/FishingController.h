@@ -22,6 +22,7 @@ public:
     void update(float dt);
     bool isActive() const { return _active; }
     void cancel();
+    void setMovementLocker(std::function<void(bool)> cb) { _setMovementLocked = std::move(cb); }
 
 private:
     Controllers::IMapController* _map = nullptr;
@@ -50,6 +51,7 @@ private:
 
     cocos2d::EventListenerKeyboard* _kb = nullptr;
     cocos2d::EventListenerMouse* _mouse = nullptr;
+    std::function<void(bool)> _setMovementLocked;
 
     void buildOverlayAt(const cocos2d::Vec2& worldPos);
     void destroyOverlay();

@@ -89,6 +89,12 @@ void FishingController::startAt(const Vec2& worldPos) {
     }
     _active = true; _progress = 0.0f; _timeLeft = 12.0f; _barCatchPos = 80.0f; _barCatchVel = 0.0f; _fishPos = 140.0f; _fishVel = 0.0f; _hold = false;
     buildOverlayAt(worldPos);
+    if (_overlay && _scene) {
+        auto vs = cocos2d::Director::getInstance()->getVisibleSize();
+        auto org = cocos2d::Director::getInstance()->getVisibleOrigin();
+        _overlay->setPosition(org + cocos2d::Vec2(vs.width * 0.5f, vs.height * 0.5f));
+    }
+    if (_setMovementLocked) { _setMovementLocked(true); }
     if (_ui) _ui->popTextAt(worldPos, "Fishing...", Color3B::YELLOW);
 }
 
@@ -108,6 +114,7 @@ void FishingController::startAnywhere(const Vec2& worldPos) {
         auto org = cocos2d::Director::getInstance()->getVisibleOrigin();
         _overlay->setPosition(org + cocos2d::Vec2(vs.width * 0.5f, vs.height * 0.5f));
     }
+    if (_setMovementLocked) { _setMovementLocked(true); }
     if (_ui) _ui->popTextAt(worldPos, "Fishing...", Color3B::YELLOW);
 }
 
@@ -181,6 +188,7 @@ void FishingController::update(float dt) {
 void FishingController::onSuccess(const Vec2& worldPos) {
     _active = false;
     destroyOverlay();
+    if (_setMovementLocked) { _setMovementLocked(false); }
     if (_inventory) {
         _inventory->addItems(Game::ItemType::Fish, 1);
     }
@@ -193,6 +201,7 @@ void FishingController::onSuccess(const Vec2& worldPos) {
 void FishingController::onFail(const Vec2& worldPos) {
     _active = false;
     destroyOverlay();
+    if (_setMovementLocked) { _setMovementLocked(false); }
     if (_ui) {
         _ui->popTextAt(worldPos, "Fish escaped", Color3B::RED);
     }
@@ -202,6 +211,7 @@ void FishingController::cancel() {
     if (!_active) return;
     _active = false;
     destroyOverlay();
+    if (_setMovementLocked) { _setMovementLocked(false); }
 }
 // namespace Controllers
 }
