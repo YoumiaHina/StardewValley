@@ -46,9 +46,14 @@ void FarmMapController::init() {
         for (int i = 0; i < rocks; ++i) { placeIfSoil(distC(rng), distR(rng), Game::TileType::Rock); }
         for (int i = 0; i < trees; ++i) { placeIfSoil(distC(rng), distR(rng), Game::TileType::Tree); }
         ws.farmTiles = _tiles;
+        ws.farmCols = _cols;
+        ws.farmRows = _rows;
     } else {
         // 同步已有瓦片
         _tiles = ws.farmTiles;
+        // 如果 WorldState 中未保存尺寸（旧存档兼容），则补全
+        if (ws.farmCols == 0) ws.farmCols = _cols;
+        if (ws.farmRows == 0) ws.farmRows = _rows;
     }
 
     _mapDraw = DrawNode::create();

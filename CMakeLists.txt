@@ -81,6 +81,8 @@ list(APPEND GAME_SOURCE
      Classes/Controllers/AbyssCombatController.cpp
      Classes/Controllers/AbyssInteractor.cpp
      Classes/Controllers/AbyssElevatorController.cpp
+     Classes/Controllers/Store/StoreController.cpp
+     Classes/Controllers/Store/StoreController.h
      )
 list(APPEND GAME_HEADER
      Classes/AppDelegate.h

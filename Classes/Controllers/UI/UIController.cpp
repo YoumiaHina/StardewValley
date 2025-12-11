@@ -25,6 +25,15 @@ void UIController::buildHUD() {
         if (_scene) _scene->addChild(_hudTimeLabel, 3);
     }
 
+    if (!_hudGoldLabel) {
+        _hudGoldLabel = Label::createWithTTF("", "fonts/Marker Felt.ttf", 18);
+        _hudGoldLabel->setColor(Color3B::YELLOW);
+        _hudGoldLabel->setAnchorPoint(Vec2(1,1));
+        float pad = 10.0f;
+        _hudGoldLabel->setPosition(Vec2(origin.x + visibleSize.width - pad, origin.y + visibleSize.height - pad - 24));
+        if (_scene) _scene->addChild(_hudGoldLabel, 3);
+    }
+
     if (!_energyNode) {
         _energyNode = Node::create();
         float pad = 10.0f;
@@ -62,6 +71,9 @@ void UIController::refreshHUD() {
     };
     if (_hudTimeLabel) {
         _hudTimeLabel->setString(StringUtils::format("%s Day %d, %02d:%02d", seasonName(ws.seasonIndex), ws.dayOfSeason, ws.timeHour, ws.timeMinute));
+    }
+    if (_hudGoldLabel) {
+        _hudGoldLabel->setString(StringUtils::format("Gold: %lld", ws.gold));
     }
     if (_energyFill && _energyNode) {
         _energyFill->clear();
@@ -513,4 +525,109 @@ void UIController::refreshWaterBar() {
     Vec2 fillRect[4] = { bl, br, tr, tl };
     _waterBarFill->drawSolidPoly(fillRect, 4, Color4F(0.2f, 0.5f, 1.0f, 0.85f));
 }
+
+void UIController::buildStorePanel() {
+    if (_storePanel) return;
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    auto origin = Director::getInstance()->getVisibleOrigin();
+    _storePanel = Node::create();
+    _storePanel->setPosition(Vec2(origin.x + visibleSize.width/2, origin.y + visibleSize.height/2));
+    if (_scene) _scene->addChild(_storePanel, 4);
+    _storePanel->setVisible(false);
+
+    auto bg = DrawNode::create();
+    float w = 400.f, h = 300.f;
+    Vec2 v[4] = { Vec2(-w/2,-h/2), Vec2(w/2,-h/2), Vec2(w/2,h/2), Vec2(-w/2,h/2) };
+    bg->drawSolidPoly(v, 4, Color4F(0.f,0.f,0.f,0.85f));
+    _storePanel->addChild(bg);
+
+    auto title = Label::createWithTTF("Seed Store", "fonts/arial.ttf", 24);
+    title->setPosition(Vec2(0, h/2 - 26));
+    _storePanel->addChild(title);
+
+    auto closeBtn = ui::Button::create("CloseNormal.png", "CloseSelected.png");
+    closeBtn->setTitleText("X");
+    closeBtn->setTitleFontSize(18);
+    closeBtn->setScale9Enabled(true);
+    closeBtn->setContentSize(Size(36, 36));
+    closeBtn->setPosition(Vec2(w/2 - 20, h/2 - 20));
+    closeBtn->addClickEventListener([this](Ref*){ toggleStorePanel(false); });
+    _storePanel->addChild(closeBtn);
+
+    _storeListNode = Node::create();
+    _storePanel->addChild(_storeListNode);
+}
+
+void UIController::refreshStorePanel() {
+    if (!_storeListNode || !_storeController) return;
+    _storeListNode->removeAllChildren();
+
+    std::vector<Game::ItemType> seeds = {
+        Game::ItemType::ParsnipSeed,
+        Game::ItemType::BlueberrySeed,
+        Game::ItemType::EggplantSeed,
+        Game::ItemType::CornSeed,
+        Game::ItemType::StrawberrySeed
+    };
+
+    float startY = 80.0f;
+    float gapY = 40.0f;
+
+    for (size_t i = 0; i < seeds.size(); ++i) {
+        auto type = seeds[i];
+        float y = startY - i * gapY;
+        
+        auto nameLabel = Label::createWithTTF(Game::itemName(type), "fonts/arial.ttf", 20);
+        nameLabel->setAnchorPoint(Vec2(0, 0.5f));
+        nameLabel->setPosition(Vec2(-180, y));
+        _storeListNode->addChild(nameLabel);
+
+        int price = _storeController->getSeedPrice(type);
+        auto priceLabel = Label::createWithTTF(StringUtils::format("%d G", price), "fonts/arial.ttf", 20);
+        priceLabel->setAnchorPoint(Vec2(1, 0.5f));
+        priceLabel->setPosition(Vec2(80, y));
+        priceLabel->setColor(Color3B::YELLOW);
+        _storeListNode->addChild(priceLabel);
+
+        auto buyLabel = Label::createWithTTF("[Buy]", "fonts/arial.ttf", 20);
+        buyLabel->setPosition(Vec2(140, y));
+        buyLabel->setColor(Color3B::GREEN);
+        
+        auto listener = EventListenerTouchOneByOne::create();
+        listener->setSwallowTouches(true);
+        listener->onTouchBegan = [buyLabel](Touch* t, Event* e){
+            auto target = static_cast<Label*>(e->getCurrentTarget());
+            Vec2 p = target->convertToNodeSpace(t->getLocation());
+            Size s = target->getContentSize();
+            Rect r(0, 0, s.width, s.height);
+            if (r.containsPoint(p)) {
+                target->setScale(0.9f);
+                return true;
+            }
+            return false;
+        };
+        listener->onTouchEnded = [this, type, buyLabel](Touch* t, Event* e){
+            buyLabel->setScale(1.0f);
+            if (_storeController && _storeController->buySeed(type)) {
+                refreshHUD();
+                popTextAt(_storePanel->getParent()->convertToWorldSpace(_storePanel->getPosition()), "Bought!", Color3B::GREEN);
+            } else {
+                popTextAt(_storePanel->getParent()->convertToWorldSpace(_storePanel->getPosition()), "Failed", Color3B::RED);
+            }
+        };
+        _storeListNode->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, buyLabel);
+        _storeListNode->addChild(buyLabel);
+    }
+}
+
+void UIController::toggleStorePanel(bool visible) {
+    if (visible) {
+        buildStorePanel();
+        refreshStorePanel();
+        if (_storePanel) _storePanel->setVisible(true);
+    } else {
+        if (_storePanel) _storePanel->setVisible(false);
+    }
+}
+
 }

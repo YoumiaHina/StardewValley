@@ -97,35 +97,13 @@ void SceneBase::registerCommonInputHandlers(bool enableToolOnSpace, bool enableT
                 Game::Cheat::grantBasic(_inventory);
                 _uiController->refreshHotbar();
             } break;
-            case EventKeyboard::KeyCode::KEY_F1: {
-                Game::Cheat::grantSeed(_inventory, Game::CropType::Parsnip, 10);
-                _uiController->refreshHotbar();
-                if (_player) _uiController->popTextAt(_player->getPosition(), "Parsnip Seed x10", Color3B::YELLOW);
-            } break;
-            case EventKeyboard::KeyCode::KEY_F2: {
-                Game::Cheat::grantSeed(_inventory, Game::CropType::Blueberry, 10);
-                _uiController->refreshHotbar();
-                if (_player) _uiController->popTextAt(_player->getPosition(), "Blueberry Seed x10", Color3B::YELLOW);
-            } break;
-            case EventKeyboard::KeyCode::KEY_F3: {
-                Game::Cheat::grantSeed(_inventory, Game::CropType::Eggplant, 10);
-                _uiController->refreshHotbar();
-                if (_player) _uiController->popTextAt(_player->getPosition(), "Eggplant Seed x10", Color3B::YELLOW);
-            } break;
-            case EventKeyboard::KeyCode::KEY_F4: {
-                Game::Cheat::grantProduce(_inventory, Game::CropType::Parsnip, 5);
-                _uiController->refreshHotbar();
-                if (_player) _uiController->popTextAt(_player->getPosition(), "Parsnip x5", Color3B::YELLOW);
-            } break;
-            case EventKeyboard::KeyCode::KEY_F5: {
-                Game::Cheat::grantProduce(_inventory, Game::CropType::Blueberry, 5);
-                _uiController->refreshHotbar();
-                if (_player) _uiController->popTextAt(_player->getPosition(), "Blueberry x5", Color3B::YELLOW);
-            } break;
             case EventKeyboard::KeyCode::KEY_F6: {
                 Game::Cheat::grantProduce(_inventory, Game::CropType::Eggplant, 5);
                 _uiController->refreshHotbar();
                 if (_player) _uiController->popTextAt(_player->getPosition(), "Eggplant x5", Color3B::YELLOW);
+            } break;
+            case EventKeyboard::KeyCode::KEY_B: {
+                _uiController->toggleStorePanel(true);
             } break;
             case EventKeyboard::KeyCode::KEY_X: {
                 // 仅让当前目标格子的作物提升一个阶段

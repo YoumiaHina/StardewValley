@@ -16,6 +16,10 @@ enum class ItemType {
     BlueberrySeed = 7,
     Eggplant = 8,
     EggplantSeed = 9,
+    Corn = 10,
+    CornSeed = 11,
+    Strawberry = 12,
+    StrawberrySeed = 13,
     Fish = 100
 };
 
@@ -32,6 +36,10 @@ inline const char* itemName(ItemType t) {
         case ItemType::BlueberrySeed: return "Blueberry Seed";
         case ItemType::Eggplant: return "Eggplant";
         case ItemType::EggplantSeed: return "Eggplant Seed";
+        case ItemType::Corn: return "Corn";
+        case ItemType::CornSeed: return "Corn Seed";
+        case ItemType::Strawberry: return "Strawberry";
+        case ItemType::StrawberrySeed: return "Strawberry Seed";
         case ItemType::Fish: return "Fish";
         default: return "Unknown";
     }
@@ -50,6 +58,10 @@ inline const char* itemNameZH(ItemType t) {
         case ItemType::BlueberrySeed: return "蓝莓种子";
         case ItemType::Eggplant: return "茄子";
         case ItemType::EggplantSeed: return "茄子种子";
+        case ItemType::Corn: return "玉米";
+        case ItemType::CornSeed: return "玉米种子";
+        case ItemType::Strawberry: return "草莓";
+        case ItemType::StrawberrySeed: return "草莓种子";
         case ItemType::Fish: return "鱼";
         default: return "未知";
     }
@@ -69,6 +81,10 @@ inline cocos2d::Color4F itemColor(ItemType t) {
         case ItemType::BlueberrySeed: return Color4F(0.35f, 0.45f, 0.95f, 0.8f);
         case ItemType::Eggplant: return Color4F(0.55f, 0.30f, 0.85f, 1.0f);
         case ItemType::EggplantSeed: return Color4F(0.55f, 0.30f, 0.85f, 0.8f);
+        case ItemType::Corn: return Color4F(0.95f, 0.90f, 0.25f, 1.0f);
+        case ItemType::CornSeed: return Color4F(0.95f, 0.90f, 0.25f, 0.8f);
+        case ItemType::Strawberry: return Color4F(0.95f, 0.20f, 0.25f, 1.0f);
+        case ItemType::StrawberrySeed: return Color4F(0.95f, 0.20f, 0.25f, 0.8f);
         case ItemType::Fish: return Color4F(0.25f, 0.55f, 1.0f, 1.0f);
         default: return Color4F(1,1,1,1);
     }
@@ -76,16 +92,34 @@ inline cocos2d::Color4F itemColor(ItemType t) {
 
 // 是否可食用（占位规则：纤维可食用，用于演示）
 inline bool itemEdible(ItemType t) {
-    return t == ItemType::Fiber || t == ItemType::Parsnip || t == ItemType::Blueberry || t == ItemType::Eggplant || t == ItemType::Fish;
+    return t == ItemType::Fiber || t == ItemType::Parsnip || t == ItemType::Blueberry || t == ItemType::Eggplant || t == ItemType::Corn || t == ItemType::Strawberry || t == ItemType::Fish;
 }
 
 inline int itemEnergyRestore(ItemType t) {
     switch (t) {
         case ItemType::Fiber: return 5;
-        case ItemType::Parsnip: return 20;
-        case ItemType::Blueberry: return 12;
-        case ItemType::Eggplant: return 18;
-        case ItemType::Fish: return 10;
+        case ItemType::Parsnip: return 25;
+        case ItemType::Blueberry: return 25;
+        case ItemType::Eggplant: return 20;
+        case ItemType::Corn: return 25;
+        case ItemType::Strawberry: return 50;
+        case ItemType::Fish: return 15;
+        default: return 0;
+    }
+}
+
+// 物品售价（成熟作物固有属性；种子商店售价由商店逻辑另行定义，此处仅为物品本身价值）
+inline int itemPrice(ItemType t) {
+    switch (t) {
+        case ItemType::Parsnip: return 35;
+        case ItemType::Blueberry: return 50;
+        case ItemType::Eggplant: return 60;
+        case ItemType::Corn: return 50;
+        case ItemType::Strawberry: return 120;
+        case ItemType::Fish: return 75;
+        // 种子本身也可以有售价，通常低于买入价，或者不可卖出。
+        // 这里暂时定义种子售价为 0 或者一半？用户只说了买入25。
+        // 假设卖出价格：
         default: return 0;
     }
 }
@@ -96,6 +130,8 @@ inline int itemHpRestore(ItemType t) {
         case ItemType::Parsnip: return 0;
         case ItemType::Blueberry: return 2;
         case ItemType::Eggplant: return 4;
+        case ItemType::Corn: return 2;
+        case ItemType::Strawberry: return 2;
         case ItemType::Fish: return 3;
         default: return 0;
     }

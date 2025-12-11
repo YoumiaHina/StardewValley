@@ -46,17 +46,21 @@ std::string ToolSystem::useSelectedTool() {
             int idx = _crop ? _crop->findCropIndex(tc, tr) : -1;
             if (idx >= 0) {
                 const auto& cp = _crop->crops()[idx];
-                if (cp.stage >= cp.maxStage) {
-                    auto produce = Game::produceItemFor(cp.type);
-                    int leftover = _inventory->addItems(produce, 1);
-                    if (leftover > 0) {
-                        _map->spawnDropAt(tc, tr, static_cast<int>(produce), leftover);
-                        _map->refreshDropsVisuals();
+                bool canHarvest = _crop->canHarvestAt(tc, tr);
+                if (canHarvest) {
+                    bool yields = _crop->yieldsOnHarvestAt(tc, tr);
+                    if (yields) {
+                        auto produce = Game::produceItemFor(cp.type);
+                        int leftover = _inventory->addItems(produce, 1);
+                        if (leftover > 0) {
+                            _map->spawnDropAt(tc, tr, static_cast<int>(produce), leftover);
+                            _map->refreshDropsVisuals();
+                        }
                     }
                     if (_crop) { _crop->harvestCropAt(tc, tr); }
                     _map->refreshCropsVisuals();
                     if (_ui) { _ui->refreshHotbar(); }
-                    msg = "Harvest!";
+                    msg = yields ? "Harvest!" : "Uproot!";
                 } else {
                     msg = "Not ready";
                 }
@@ -89,6 +93,7 @@ std::string ToolSystem::useSelectedTool() {
                     msg = nearLake ? "Refill first" : "No water";
                 } else {
                     _map->setTile(tc,tr, Game::TileType::Watered);
+                    if (_crop) { _crop->markWateredAt(tc, tr); }
                     ws.water = std::max(0, ws.water - GameConfig::WATERING_CAN_CONSUME);
                     msg = std::string("Water! (") + std::to_string(ws.water) + "/" + std::to_string(ws.maxWater) + ")";
                 }

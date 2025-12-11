@@ -29,7 +29,8 @@ FarmInteractor::SpaceAction FarmInteractor::onSpacePressed() {
                 auto t = _map->getTile(tc, tr);
                 if (t == Game::TileType::Tilled || t == Game::TileType::Watered) {
                     int ct = static_cast<int>(Game::cropTypeFromSeed(slot.itemType));
-                    if (_crop) { _crop->plantCrop(static_cast<Game::CropType>(ct), tc, tr); }
+                    auto type = static_cast<Game::CropType>(ct);
+                    if (_crop) { _crop->plantCrop(type, tc, tr); }
                     bool ok = _inventory->consumeSelectedItem(1);
                     if (ok) { _ui->refreshHotbar(); }
                     _map->refreshCropsVisuals();

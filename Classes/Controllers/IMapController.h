@@ -70,6 +70,9 @@ public:
     // Actors sorting and interactive objects
     virtual void sortActorWithEnvironment(cocos2d::Node* actor) {}
     virtual bool damageTreeAt(int c, int r, int amount) { return false; }
+
+    // Type check
+    virtual bool isFarm() const { return false; }
 };
 
 } // namespace Controllers

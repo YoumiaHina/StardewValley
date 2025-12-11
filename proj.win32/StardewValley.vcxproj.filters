@@ -159,6 +159,9 @@
     <ClCompile Include="..\Classes\Game\View\PlayerView.cpp">
       <Filter>Classes\Game\View</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\Store\StoreController.cpp">
+      <Filter>Classes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <!-- Header Files -->

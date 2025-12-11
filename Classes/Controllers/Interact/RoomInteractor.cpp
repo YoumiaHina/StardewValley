@@ -23,6 +23,7 @@ RoomInteractor::SpaceAction RoomInteractor::onSpacePressed() {
         ws.dayOfSeason += 1;
         if (ws.dayOfSeason > 30) { ws.dayOfSeason = 1; ws.seasonIndex = (ws.seasonIndex + 1) % 4; }
         ws.timeHour = 6; ws.timeMinute = 0; ws.timeAccum = 0.0f;
+        if (_crop) { _crop->advanceCropsDaily(_map); }
         _ui->refreshHUD();
         _ui->popTextAt(p, "New Day", Color3B::WHITE);
         return SpaceAction::Slept;

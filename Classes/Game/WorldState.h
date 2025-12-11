@@ -20,6 +20,8 @@ struct WorldState {
 
     // 农场地图（按行主序 r*_cols + c）
     std::vector<TileType> farmTiles;
+    int farmCols = 0;
+    int farmRows = 0;
 
     // 农场掉落（未拾取的物品）
     std::vector<Drop> farmDrops;
@@ -51,6 +53,9 @@ struct WorldState {
     // 水壶水量系统
     int water = GameConfig::WATERING_CAN_MAX;
     int maxWater = GameConfig::WATERING_CAN_MAX;
+
+    // 经济系统
+    long long gold = 500;
 
     // 生命值系统（矿洞 HUD 专属显示）
     int hp = 100;

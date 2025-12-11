@@ -8,6 +8,7 @@
 #include <memory>
 #include "Game/Inventory.h"
 #include "Game/Chest.h"
+#include "Controllers/Store/StoreController.h"
 #include "ui/CocosGUI.h"
 
 namespace Controllers {
@@ -17,7 +18,9 @@ public:
     UIController(cocos2d::Scene* scene,
                  cocos2d::Node* worldNode,
                  std::shared_ptr<Game::Inventory> inventory)
-    : _scene(scene), _worldNode(worldNode), _inventory(std::move(inventory)) {}
+    : _scene(scene), _worldNode(worldNode), _inventory(inventory) {
+        _storeController = std::make_unique<StoreController>(inventory);
+    }
 
     void buildHUD();
     void refreshHUD();
@@ -56,13 +59,20 @@ public:
     void refreshCraftPanel(int woodCount);
     void toggleCraftPanel(bool visible);
 
+    // Store 面板
+    void buildStorePanel();
+    void refreshStorePanel();
+    void toggleStorePanel(bool visible);
+
 private:
     cocos2d::Scene* _scene = nullptr;
     cocos2d::Node* _worldNode = nullptr;
     std::shared_ptr<Game::Inventory> _inventory;
+    std::unique_ptr<StoreController> _storeController;
 
     // HUD
     cocos2d::Label* _hudTimeLabel = nullptr;
+    cocos2d::Label* _hudGoldLabel = nullptr;
     cocos2d::Node* _energyNode = nullptr;
     cocos2d::DrawNode* _energyFill = nullptr;
     cocos2d::Label* _energyLabel = nullptr;
@@ -94,6 +104,10 @@ private:
     // Craft Panel
     cocos2d::Node* _craftNode = nullptr;
     cocos2d::ui::Button* _craftButton = nullptr;
+
+    // Store Panel
+    cocos2d::Node* _storePanel = nullptr;
+    cocos2d::Node* _storeListNode = nullptr;
 };
 
 }

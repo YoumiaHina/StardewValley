@@ -103,6 +103,7 @@ public:
     void sortActorWithEnvironment(cocos2d::Node* actor) override;
     bool damageTreeAt(int c, int r, int amount) override;
     Game::Tree* findTreeAt(int c, int r) const;
+    bool isFarm() const override { return true; }
 };
 
 }
