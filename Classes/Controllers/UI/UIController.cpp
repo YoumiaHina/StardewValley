@@ -169,7 +169,7 @@ void UIController::setInventoryBackground(const std::string& path) {
             _hotbarBgSprite->setAnchorPoint(Vec2(0.5f, 0.5f));
             _hotbarNode->addChild(_hotbarBgSprite, 0);
             int slots = static_cast<int>(_inventory ? _inventory->size() : 0);
-            float slotW = 80.0f, slotH = 32.0f, padding = 6.0f;
+            float slotW = 80.0f * _hotbarScale, slotH = 32.0f * _hotbarScale, padding = 6.0f * _hotbarScale;
             float totalWidth = slots * slotW + (slots - 1) * padding;
             float targetW = totalWidth + 20.0f;
             float targetH = slotH + 16.0f;
@@ -199,7 +199,7 @@ void UIController::buildHotbar() {
     if (_scene) _scene->addChild(_hotbarNode, 2);
 
     int slots = static_cast<int>(_inventory ? _inventory->size() : 0);
-    float slotW = 80.0f, slotH = 32.0f, padding = 6.0f;
+    float slotW = 80.0f * _hotbarScale, slotH = 32.0f * _hotbarScale, padding = 6.0f * _hotbarScale;
     float totalWidth = slots * slotW + (slots - 1) * padding;
     bool useImageBg = false;
     if (!_inventoryBgPath.empty()) {
@@ -261,6 +261,25 @@ void UIController::buildHotbar() {
 
     _hotbarHighlight = DrawNode::create();
     _hotbarNode->addChild(_hotbarHighlight);
+    {
+        bool imageBg = (_hotbarBgSprite != nullptr);
+        float cellHScaled = imageBg ? (_hotbarBgSprite->getContentSize().height * _hotbarBgSprite->getScaleY()) : slotH;
+        float cellHBase = 32.0f; // non-image baseline
+        if (imageBg) {
+            auto cs = _hotbarBgSprite->getContentSize();
+            float slotWBase = 80.0f, slotHBase = 32.0f, paddingBase = 6.0f;
+            float totalWidthBase = slots * slotWBase + (slots - 1) * paddingBase;
+            float targetWBase = totalWidthBase + 20.0f;
+            float targetHBase = slotHBase + 16.0f;
+            float sxBase = targetWBase / cs.width;
+            float syBase = targetHBase / cs.height;
+            float sBase = std::min(sxBase, syBase);
+            cellHBase = cs.height * sBase;
+        }
+        float baseY = origin.y + 28;
+        float adjustY = (cellHScaled - cellHBase) * 0.5f;
+        _hotbarNode->setPosition(Vec2(origin.x + visibleSize.width / 2, baseY + adjustY));
+    }
     refreshHotbar();
 }
 
@@ -268,7 +287,7 @@ void UIController::refreshHotbar() {
     if (!_hotbarNode || !_hotbarHighlight || !_inventory) return;
     int slots = static_cast<int>(_inventory->size());
     if (slots <= 0) return;
-    float slotW = 80.0f, slotH = 32.0f, padding = 6.0f;
+    float slotW = 80.0f * _hotbarScale, slotH = 32.0f * _hotbarScale, padding = 6.0f * _hotbarScale;
     float totalWidth = slots * slotW + (slots - 1) * padding;
     bool imageBg = (_hotbarBgSprite != nullptr);
     float bgScaledW = 0.0f, bgScaledH = 0.0f;
@@ -375,7 +394,7 @@ bool UIController::handleHotbarMouseDown(EventMouse* e) {
     auto local = _hotbarNode->convertToNodeSpace(p);
     int slots = static_cast<int>(_inventory->size());
     if (slots <= 0) return false;
-    float slotW = 80.0f, slotH = 32.0f, padding = 6.0f, hitMarginY = 8.0f;
+    float slotW = 80.0f * _hotbarScale, slotH = 32.0f * _hotbarScale, padding = 6.0f * _hotbarScale, hitMarginY = 8.0f * _hotbarScale;
     bool imageBg = (_hotbarBgSprite != nullptr);
     float bgScaledW = 0.0f, bgScaledH = 0.0f;
     if (imageBg) {
@@ -406,7 +425,7 @@ bool UIController::handleHotbarAtPoint(const Vec2& screenPoint) {
     auto local = _hotbarNode->convertToNodeSpace(screenPoint);
     int slots = static_cast<int>(_inventory->size());
     if (slots <= 0) return false;
-    float slotW = 80.0f, slotH = 32.0f, padding = 6.0f, hitMarginY = 8.0f;
+    float slotW = 80.0f * _hotbarScale, slotH = 32.0f * _hotbarScale, padding = 6.0f * _hotbarScale, hitMarginY = 8.0f * _hotbarScale;
     bool imageBg = (_hotbarBgSprite != nullptr);
     float bgScaledW = 0.0f, bgScaledH = 0.0f;
     if (imageBg) {

@@ -95,6 +95,7 @@ private:
     std::vector<cocos2d::Sprite*> _hotbarIcons;
     cocos2d::Sprite* _hotbarBgSprite = nullptr;
     std::string _inventoryBgPath;
+    float _hotbarScale = 2.0f;
 
     // Water bar (above watering can slot)
     cocos2d::Node* _waterBarNode = nullptr;
