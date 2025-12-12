@@ -7,7 +7,8 @@
 #include "Game/Inventory.h"
 #include "Game/WorldState.h"
 #include "Game/GameConfig.h"
-#include "Game/Tool.h"
+#include "Game/Tool/ToolFactory.h"
+#include "Game/Tool/FishingRod.h"
 #include "Scenes/RoomScene.h"
 #include "Scenes/AbyssMineScene.h"
 #include "Managers/AudioManager.h"
@@ -16,7 +17,6 @@
 #include "Controllers/Input/PlayerController.h"
 #include "Controllers/Map/FarmMapController.h"
 #include "Controllers/UI/UIController.h"
-#include "Controllers/Systems/ToolSystem.h"
 #include "Controllers/Systems/GameStateController.h"
 #include "Controllers/Interact/FarmInteractor.h"
 
@@ -32,8 +32,15 @@ bool GameScene::init() {
         [this]() -> Vec2 { return _playerController ? _playerController->lastDir() : Vec2(0,-1); });
     _fishing = new Controllers::FishingController(_mapController, _inventory, _uiController, this, _worldNode);
     addUpdateCallback([this](float dt){ if (_fishing) _fishing->update(dt); });
-    if (_toolSystem) {
-        _toolSystem->setFishingStarter([this](const Vec2& pos){ if (_fishing) _fishing->startAt(pos); });
+    if (_inventory && _fishing) {
+        for (std::size_t i = 0; i < _inventory->size(); ++i) {
+            auto tb = _inventory->toolAtMutable(i);
+            if (tb && tb->kind() == Game::ToolKind::FishingRod) {
+                auto rod = dynamic_cast<Game::FishingRod*>(tb);
+                if (rod) { rod->setFishingStarter([this](const Vec2& pos){ if (_fishing) _fishing->startAt(pos); }); }
+                break;
+            }
+        }
     }
     if (_fishing) {
         _fishing->setMovementLocker([this](bool locked){ if (_playerController) _playerController->setMovementLocked(locked); });

@@ -29,6 +29,8 @@ public:
     void refreshHotbar();
     void selectHotbarIndex(int idx);
 
+    void setInventoryBackground(const std::string& path);
+
     // 水壶水量蓝条：显示在热键栏的水壶上方
     void buildWaterBarAboveCan();
     void refreshWaterBar();
@@ -91,6 +93,8 @@ private:
     cocos2d::DrawNode* _hotbarHighlight = nullptr;
     std::vector<cocos2d::Label*> _hotbarLabels;
     std::vector<cocos2d::Sprite*> _hotbarIcons;
+    cocos2d::Sprite* _hotbarBgSprite = nullptr;
+    std::string _inventoryBgPath;
 
     // Water bar (above watering can slot)
     cocos2d::Node* _waterBarNode = nullptr;

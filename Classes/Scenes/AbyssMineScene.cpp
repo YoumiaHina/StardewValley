@@ -9,7 +9,7 @@ cocos2d::Scene* AbyssMineScene::createScene() { return AbyssMineScene::create();
 
 bool AbyssMineScene::init() {
     // 深渊矿洞：不启用空格工具、不启用左键工具；不显示 Craft 面板
-    if (!initBase(/*worldScale*/2.5f, /*buildCraftPanel*/false, /*enableToolOnSpace*/false, /*enableToolOnLeftClick*/false)) return false;
+    if (!initBase(/*worldScale*/3.0f, /*buildCraftPanel*/false, /*enableToolOnSpace*/false, /*enableToolOnLeftClick*/false)) return false;
     Managers::AudioManager::getInstance().playBackgroundFor(Managers::SceneZone::Abyss);
 
     // 组合矿洞模块

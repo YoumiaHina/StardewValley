@@ -1,5 +1,6 @@
 #include "Scenes/SceneBase.h"
 #include "cocos2d.h"
+#include "Game/Tool/ToolFactory.h"
 
 using namespace cocos2d;
 
@@ -38,11 +39,11 @@ bool SceneBase::initBase(float worldScale, bool buildCraftPanel, bool enableTool
     auto &ws = Game::globalState();
     if (!ws.inventory) {
         ws.inventory = std::make_shared<Game::Inventory>(GameConfig::TOOLBAR_SLOTS);
-        ws.inventory->setTool(0, Game::makeTool(Game::ToolType::Axe));
-        ws.inventory->setTool(1, Game::makeTool(Game::ToolType::Hoe));
-        ws.inventory->setTool(2, Game::makeTool(Game::ToolType::Pickaxe));
-        ws.inventory->setTool(3, Game::makeTool(Game::ToolType::WateringCan));
-        ws.inventory->setTool(4, Game::makeTool(Game::ToolType::FishingRod));
+        ws.inventory->setTool(0, Game::makeTool(Game::ToolKind::Axe));
+        ws.inventory->setTool(1, Game::makeTool(Game::ToolKind::Hoe));
+        ws.inventory->setTool(2, Game::makeTool(Game::ToolKind::Pickaxe));
+        ws.inventory->setTool(3, Game::makeTool(Game::ToolKind::WaterCan));
+        ws.inventory->setTool(4, Game::makeTool(Game::ToolKind::FishingRod));
     }
     _inventory = ws.inventory;
     if (_inventory) _inventory->selectIndex(ws.selectedIndex);
@@ -50,11 +51,8 @@ bool SceneBase::initBase(float worldScale, bool buildCraftPanel, bool enableTool
     // UI 控制器
     _uiController = new Controllers::UIController(this, _worldNode, _inventory);
     _uiController->buildHUD();
+    _uiController->setInventoryBackground("inventory.png");
     _uiController->buildHotbar();
-    // 在水壶上方构建水量蓝条
-    _uiController->buildWaterBarAboveCan();
-    // 初次刷新蓝条以显示当前水量
-    _uiController->refreshWaterBar();
     _uiController->buildChestPanel();
     if (buildCraftPanel) _uiController->buildCraftPanel();
 
@@ -63,13 +61,7 @@ bool SceneBase::initBase(float worldScale, bool buildCraftPanel, bool enableTool
     _cropSystem = new Controllers::CropSystem();
     _stateController = new Controllers::GameStateController(_mapController, _uiController, _cropSystem);
 
-    // 可选工具系统
-    if (enableToolOnSpace || enableToolOnLeftClick) {
-        _toolSystem = new Controllers::ToolSystem(_inventory, _mapController, _cropSystem,
-            [this]() -> Vec2 { return _player ? _player->getPosition() : Vec2(); },
-            [this]() -> Vec2 { return _playerController ? _playerController->lastDir() : Vec2(0,-1); },
-            _uiController);
-    }
+    // 工具使用由具体工具类处理
 
     // 事件监听
     registerCommonInputHandlers(enableToolOnSpace, enableToolOnLeftClick, buildCraftPanel);
@@ -139,7 +131,15 @@ void SceneBase::registerCommonInputHandlers(bool enableToolOnSpace, bool enableT
                 }
             } break;
             case EventKeyboard::KeyCode::KEY_SPACE: {
-                if (enableToolOnSpace && _toolSystem) { _toolSystem->useSelectedTool(); }
+                if (enableToolOnSpace) {
+                    auto t = _inventory ? _inventory->selectedTool() : nullptr;
+                    if (t) {
+                        t->use(_mapController, _cropSystem,
+                            [this]() -> Vec2 { return _player ? _player->getPosition() : Vec2(); },
+                            [this]() -> Vec2 { return _playerController ? _playerController->lastDir() : Vec2(0,-1); },
+                            _uiController);
+                    }
+                }
                 onSpacePressed();
             } break;
             default: break;
@@ -157,7 +157,13 @@ void SceneBase::registerCommonInputHandlers(bool enableToolOnSpace, bool enableT
     mouse->onMouseDown = [this, enableToolOnLeftClick](EventMouse* e){
         if (_uiController->handleHotbarMouseDown(e)) return;
         if (enableToolOnLeftClick && e->getMouseButton() == EventMouse::MouseButton::BUTTON_LEFT) {
-            if (_toolSystem) { _toolSystem->useSelectedTool(); }
+            auto t = _inventory ? _inventory->selectedTool() : nullptr;
+            if (t) {
+                t->use(_mapController, _cropSystem,
+                    [this]() -> Vec2 { return _player ? _player->getPosition() : Vec2(); },
+                    [this]() -> Vec2 { return _playerController ? _playerController->lastDir() : Vec2(0,-1); },
+                    _uiController);
+            }
             return;
         }
         if (e->getMouseButton() == EventMouse::MouseButton::BUTTON_RIGHT) {
@@ -190,7 +196,7 @@ void SceneBase::update(float dt) {
         _uiController->showDoorPrompt(nearDoor, p, doorPromptText());
         _uiController->showChestPrompt(nearChest, p, "Right-click to Open / Space to Deposit");
         bool nearLake = _mapController->isNearLake(p, _mapController->tileSize() * (GameConfig::LAKE_REFILL_RADIUS_TILES + 0.5f));
-        bool rodSelected = (_inventory && _inventory->selectedTool() && _inventory->selectedTool()->type == Game::ToolType::FishingRod);
+        bool rodSelected = (_inventory && _inventory->selectedTool() && _inventory->selectedTool()->kind() == Game::ToolKind::FishingRod);
         _uiController->showFishPrompt(nearLake && rodSelected, p, "Space/Left-click to Fish");
     }
 }
@@ -198,3 +204,4 @@ void SceneBase::update(float dt) {
 void SceneBase::addUpdateCallback(const std::function<void(float)>& cb) {
     _extraUpdates.push_back(cb);
 }
+#include "Game/Tool/ToolFactory.h"

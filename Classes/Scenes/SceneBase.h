@@ -21,7 +21,6 @@
 #include "Controllers/UI/UIController.h"
 #include "Controllers/Input/PlayerController.h"
 #include "Controllers/Systems/GameStateController.h"
-#include "Controllers/Systems/ToolSystem.h"
 #include "Controllers/Systems/CropSystem.h"
 #include <functional>
 #include <vector>
@@ -54,7 +53,6 @@ protected:
     Controllers::UIController* _uiController = nullptr;
     Controllers::PlayerController* _playerController = nullptr;
     Controllers::GameStateController* _stateController = nullptr;
-    Controllers::ToolSystem* _toolSystem = nullptr;
     Controllers::CropSystem* _cropSystem = nullptr;
 
 protected:

@@ -7,17 +7,24 @@ namespace Game {
 
 Inventory::Inventory(std::size_t slots) : _slots(slots) {}
 
-void Inventory::setTool(std::size_t index, const Tool& tool) {
+void Inventory::setTool(std::size_t index, std::shared_ptr<ToolBase> tool) {
     if (index < _slots.size()) {
         _slots[index].kind = SlotKind::Tool;
-        _slots[index].tool = tool;
+        _slots[index].tool = std::move(tool);
         _slots[index].itemQty = 0;
     }
 }
 
-const Tool* Inventory::toolAt(std::size_t index) const {
+const ToolBase* Inventory::toolAt(std::size_t index) const {
     if (index < _slots.size() && _slots[index].kind == SlotKind::Tool) {
-        return &_slots[index].tool;
+        return _slots[index].tool.get();
+    }
+    return nullptr;
+}
+
+ToolBase* Inventory::toolAtMutable(std::size_t index) {
+    if (index < _slots.size() && _slots[index].kind == SlotKind::Tool) {
+        return _slots[index].tool.get();
     }
     return nullptr;
 }

@@ -64,8 +64,12 @@ list(APPEND GAME_SOURCE
      Classes/Controllers/RoomMapController.h
      Classes/Controllers/UIController.cpp
      Classes/Controllers/UIController.h
-     Classes/Controllers/ToolSystem.cpp
-     Classes/Controllers/ToolSystem.h
+     Classes/Game/Tool/Axe.cpp
+     Classes/Game/Tool/Hoe.cpp
+     Classes/Game/Tool/Pickaxe.cpp
+     Classes/Game/Tool/WaterCan.cpp
+     Classes/Game/Tool/FishingRod.cpp
+     Classes/Game/Tool/ToolFactory.cpp
      Classes/Controllers/GameStateController.cpp
      Classes/Controllers/GameStateController.h
     Classes/Controllers/FarmInteractor.cpp
@@ -99,6 +103,13 @@ list(APPEND GAME_HEADER
      Classes/Controllers/AbyssCombatController.h
      Classes/Controllers/AbyssInteractor.h
      Classes/Controllers/AbyssElevatorController.h
+     Classes/Game/Tool/ToolBase.h
+     Classes/Game/Tool/Axe.h
+     Classes/Game/Tool/Hoe.h
+     Classes/Game/Tool/Pickaxe.h
+     Classes/Game/Tool/WaterCan.h
+     Classes/Game/Tool/FishingRod.h
+     Classes/Game/Tool/ToolFactory.h
      Classes/Game/GameConfig.h
      )
 

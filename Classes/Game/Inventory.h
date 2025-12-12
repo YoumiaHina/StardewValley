@@ -6,7 +6,8 @@
 #include <vector>
 #include <cstddef>
 #include <utility>
-#include "Game/Tool.h"
+#include <memory>
+#include "Game/Tool/ToolBase.h"
 #include "Game/Item.h"
 
 namespace Game {
@@ -21,7 +22,7 @@ struct ItemStack {
 
 struct Slot {
     SlotKind kind = SlotKind::Empty;
-    Tool tool;            // valid when kind == Tool
+    std::shared_ptr<ToolBase> tool;            // valid when kind == Tool
     ItemType itemType = ItemType::Wood; // valid when kind == Item
     int itemQty = 0;      // valid when kind == Item
 };
@@ -33,8 +34,9 @@ public:
     std::size_t size() const { return _slots.size(); }
 
     // tools
-    void setTool(std::size_t index, const Tool& tool);
-    const Tool* toolAt(std::size_t index) const;
+    void setTool(std::size_t index, std::shared_ptr<ToolBase> tool);
+    const ToolBase* toolAt(std::size_t index) const;
+    ToolBase* toolAtMutable(std::size_t index);
 
     // items
     const ItemStack itemAt(std::size_t index) const;
@@ -56,7 +58,7 @@ public:
     void next();
     void prev();
 
-    const Tool* selectedTool() const { return toolAt(static_cast<std::size_t>(_selected)); }
+    ToolBase* selectedTool() { return toolAtMutable(static_cast<std::size_t>(_selected)); }
     SlotKind selectedKind() const { return _slots.empty() ? SlotKind::Empty : _slots[_selected].kind; }
     Slot const& selectedSlot() const { return _slots[_selected]; }
 

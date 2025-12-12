@@ -49,6 +49,9 @@
     <Filter Include="proj.win32">
       <UniqueIdentifier>{9D3B8242-29C4-4F3C-9B0E-9A7E2E8B3F56}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Classes\Game\Tool">
+      <UniqueIdentifier>{dac7a4a0-c781-4948-85d5-b649c03cec5d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <!-- Source Files -->
@@ -125,9 +128,6 @@
     <ClCompile Include="..\Classes\Controllers\UI\UIController.cpp">
       <Filter>Classes\Controllers\UI</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\Controllers\Systems\ToolSystem.cpp">
-      <Filter>Classes\Controllers\Systems</Filter>
-    </ClCompile>
     <ClCompile Include="..\Classes\Controllers\Systems\GameStateController.cpp">
       <Filter>Classes\Controllers\Systems</Filter>
     </ClCompile>
@@ -161,6 +161,24 @@
     </ClCompile>
     <ClCompile Include="..\Classes\Controllers\Store\StoreController.cpp">
       <Filter>Classes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\Tool\Axe.cpp">
+      <Filter>Classes\Game\Tool</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\Tool\FishingRod.cpp">
+      <Filter>Classes\Game\Tool</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\Tool\Hoe.cpp">
+      <Filter>Classes\Game\Tool</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\Tool\Pickaxe.cpp">
+      <Filter>Classes\Game\Tool</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\Tool\ToolFactory.cpp">
+      <Filter>Classes\Game\Tool</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\Tool\WaterCan.cpp">
+      <Filter>Classes\Game\Tool</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -234,9 +252,6 @@
     <ClInclude Include="..\Classes\Game\Inventory.h">
       <Filter>Classes\Game</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\Game\Tool.h">
-      <Filter>Classes\Game</Filter>
-    </ClInclude>
     <ClInclude Include="..\Classes\Game\Tile.h">
       <Filter>Classes\Game</Filter>
     </ClInclude>
@@ -261,9 +276,6 @@
     </ClInclude>
     <ClInclude Include="..\Classes\Controllers\UI\UIController.h">
       <Filter>Classes\Controllers\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Classes\Controllers\Systems\ToolSystem.h">
-      <Filter>Classes\Controllers\Systems</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\Controllers\Systems\GameStateController.h">
       <Filter>Classes\Controllers\Systems</Filter>
@@ -301,6 +313,27 @@
     </ClInclude>
     <ClInclude Include="..\Classes\Controllers\Interact\AbyssInteractor.h">
       <Filter>Classes\Controllers\Interact</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\Tool\Axe.h">
+      <Filter>Classes\Game\Tool</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\Tool\FishingRod.h">
+      <Filter>Classes\Game\Tool</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\Tool\Hoe.h">
+      <Filter>Classes\Game\Tool</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\Tool\Pickaxe.h">
+      <Filter>Classes\Game\Tool</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\Tool\ToolBase.h">
+      <Filter>Classes\Game\Tool</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\Tool\ToolFactory.h">
+      <Filter>Classes\Game\Tool</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\Tool\WaterCan.h">
+      <Filter>Classes\Game\Tool</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
