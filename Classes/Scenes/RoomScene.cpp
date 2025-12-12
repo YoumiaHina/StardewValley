@@ -2,7 +2,7 @@
  * RoomScene: 精简场景，仅负责组合模块、更新调度与事件分发。
  */
 #include "Scenes/RoomScene.h"
-#include "Scenes/GameScene.h"
+#include "Scenes/FarmScene.h"
 #include "Scenes/AbyssMineScene.h"
 #include "cocos2d.h"
 #include "ui/CocosGUI.h"
@@ -53,7 +53,7 @@ void RoomScene::positionPlayerInitial() {
 void RoomScene::onSpacePressed() {
     auto act = _interactor ? _interactor->onSpacePressed() : Controllers::RoomInteractor::SpaceAction::None;
     if (act == Controllers::RoomInteractor::SpaceAction::ExitHouse) {
-        auto farm = GameScene::create();
+        auto farm = FarmScene::create();
         // 返回农场并落在 DoorToRoom 对象层中心
         farm->setSpawnAtFarmRoomDoor();
         auto trans = TransitionFade::create(0.6f, farm);

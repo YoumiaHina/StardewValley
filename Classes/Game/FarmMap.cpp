@@ -200,8 +200,8 @@ const cocos2d::Size& FarmMap::getContentSize() const {
 
 cocos2d::Vec2 FarmMap::tileToWorld(int c, int r) const {
     float s = _tmx ? _tmx->getTileSize().width : (float)GameConfig::TILE_SIZE;
-    // TMX usually starts from top-left, but our logic in GameScene assumed bottom-left for _tiles?
-    // In GameScene::tileToWorld, it was:
+    // TMX usually starts from top-left, but our logic in FarmScene assumed bottom-left for _tiles?
+    // In FarmScene::tileToWorld, it was:
     // if (_tmx) return Vec2(c * s + s * 0.5f, r * s + s * 0.5f);
     // This assumes (0,0) is bottom-left of the TMX node.
     // TMX node anchor is (0,0), so its local (0,0) is bottom-left.

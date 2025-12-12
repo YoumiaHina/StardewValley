@@ -1,5 +1,5 @@
 /**
- * RoomScene: 玩家出生在室内，走到门口自动切换到农场（GameScene）。
+ * RoomScene: 玩家出生在室内，走到门口自动切换到农场（FarmScene）。
  */
 #pragma once
 

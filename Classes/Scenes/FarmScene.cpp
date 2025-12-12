@@ -1,7 +1,7 @@
 /**
- * GameScene: 精简场景，仅负责：创建场景、加载模块、调度更新、分发输入事件、控制场景切换。
+ * FarmScene: 精简场景，仅负责：创建场景、加载模块、调度更新、分发输入事件、控制场景切换。
  */
-#include "Scenes/GameScene.h"
+#include "Scenes/FarmScene.h"
 #include "cocos2d.h"
 #include "ui/CocosGUI.h"
 #include "Game/Inventory.h"
@@ -22,9 +22,9 @@
 
 USING_NS_CC;
 
-Scene* GameScene::createScene() { return GameScene::create(); }
+Scene* FarmScene::createScene() { return FarmScene::create(); }
 
-bool GameScene::init() {
+bool FarmScene::init() {
     if (!initBase(/*worldScale*/3.0f, /*buildCraftPanel*/true, /*enableToolOnSpace*/true, /*enableToolOnLeftClick*/true)) return false;
     Managers::AudioManager::getInstance().playBackgroundFor(Managers::SceneZone::Farm);
     _interactor = new Controllers::FarmInteractor(_inventory, _mapController, _uiController, _cropSystem,
@@ -48,7 +48,7 @@ bool GameScene::init() {
     return true;
 }
 
-void GameScene::setSpawnAtFarmEntrance() {
+void FarmScene::setSpawnAtFarmEntrance() {
     if (!_player || !_mapController) return;
     float s = static_cast<float>(GameConfig::TILE_SIZE);
     // 使用门矩形中点向上偏移 1 格
@@ -56,7 +56,7 @@ void GameScene::setSpawnAtFarmEntrance() {
     _player->setPosition(_player->getPosition() + Vec2(0, s));
 }
 
-void GameScene::setSpawnAtFarmMineDoor() {
+void FarmScene::setSpawnAtFarmMineDoor() {
     if (!_player || !_mapController) return;
     auto pos = _mapController->farmMineDoorSpawnPos();
     if (pos != Vec2::ZERO) {
@@ -64,7 +64,7 @@ void GameScene::setSpawnAtFarmMineDoor() {
     }
 }
 
-void GameScene::setSpawnAtFarmRoomDoor() {
+void FarmScene::setSpawnAtFarmRoomDoor() {
     if (!_player || !_mapController) return;
     auto pos = _mapController->farmRoomDoorSpawnPos();
     if (pos != Vec2::ZERO) {
@@ -73,17 +73,17 @@ void GameScene::setSpawnAtFarmRoomDoor() {
 }
 
 // SceneBase overrides
-Controllers::IMapController* GameScene::createMapController(Node* worldNode) {
+Controllers::IMapController* FarmScene::createMapController(Node* worldNode) {
     _farmMap = new Controllers::FarmMapController(worldNode);
     _farmMap->init();
     return _farmMap;
 }
 
-void GameScene::positionPlayerInitial() {
+void FarmScene::positionPlayerInitial() {
     _player->setPosition(_mapController->tileToWorld(GameConfig::MAP_COLS / 2, GameConfig::MAP_ROWS / 2));
 }
 
-void GameScene::onSpacePressed() {
+void FarmScene::onSpacePressed() {
     auto act = _interactor ? _interactor->onSpacePressed() : Controllers::FarmInteractor::SpaceAction::None;
     if (act == Controllers::FarmInteractor::SpaceAction::EnterHouse) {
         auto room = RoomScene::create();
@@ -97,9 +97,9 @@ void GameScene::onSpacePressed() {
     }
 }
 
-const char* GameScene::doorPromptText() const { return "Press Space to Enter"; }
+const char* FarmScene::doorPromptText() const { return "Press Space to Enter"; }
 
-void GameScene::onKeyPressedHook(EventKeyboard::KeyCode code) {
+void FarmScene::onKeyPressedHook(EventKeyboard::KeyCode code) {
     if (code == EventKeyboard::KeyCode::KEY_K) {
         auto abyss = AbyssMineScene::create();
         auto trans = TransitionFade::create(0.6f, abyss);

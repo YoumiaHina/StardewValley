@@ -1,5 +1,5 @@
 /**
- * GameScene: Main game scene placeholder.
+ * FarmScene: Main game scene placeholder.
  */
 #pragma once
 
@@ -19,12 +19,12 @@
 #include "Controllers/Systems/FishingController.h"
 #include "Scenes/SceneBase.h"
 
-class GameScene : public SceneBase {
+class FarmScene : public SceneBase {
 public:
     static cocos2d::Scene* createScene();
     virtual bool init() override;
 
-    CREATE_FUNC(GameScene);
+    CREATE_FUNC(FarmScene);
     
     // 供其他场景调用：将玩家出生在农场门外侧
     void setSpawnAtFarmEntrance();

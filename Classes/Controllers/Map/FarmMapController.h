@@ -60,7 +60,7 @@ public:
     const std::vector<Game::Chest>& chests() const { return _chests; }
     std::vector<Game::Chest>& chests() { return _chests; }
 
-    Game::FarmMap* tmx() const { return _gameMap; }
+    Game::FarmMap* tmx() const { return _farmMap; }
     cocos2d::Node* worldNode() const { return _worldNode; }
     void addActorToMap(cocos2d::Node* node, int zOrder) override;
     cocos2d::Vec2 farmMineDoorSpawnPos() const override;
@@ -69,7 +69,7 @@ public:
 private:
     cocos2d::Node* _worldNode = nullptr;
     cocos2d::Node* _mapNode = nullptr;
-    Game::FarmMap* _gameMap = nullptr;
+    Game::FarmMap* _farmMap = nullptr;
     int _cols = GameConfig::MAP_COLS;
     int _rows = GameConfig::MAP_ROWS;
     std::vector<Game::TileType> _tiles; // row-major

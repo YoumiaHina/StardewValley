@@ -17,18 +17,18 @@ void FarmMapController::init() {
     _mapNode = Node::create();
     _worldNode->addChild(_mapNode, 0);
 
-    _gameMap = Game::FarmMap::create("Maps/spring_outdoors/spring_outdoors.tmx");
-    Size content = _gameMap ? _gameMap->getContentSize() : Size(_cols * GameConfig::TILE_SIZE, _rows * GameConfig::TILE_SIZE);
+    _farmMap = Game::FarmMap::create("Maps/spring_outdoors/spring_outdoors.tmx");
+    Size content = _farmMap ? _farmMap->getContentSize() : Size(_cols * GameConfig::TILE_SIZE, _rows * GameConfig::TILE_SIZE);
     auto visibleSize = Director::getInstance()->getVisibleSize();
     auto origin = Director::getInstance()->getVisibleOrigin();
     _mapOrigin = Vec2(origin.x + (visibleSize.width - content.width) * 0.5f,
                       origin.y + (visibleSize.height - content.height) * 0.5f);
-    if (_gameMap) {
-        _gameMap->setAnchorPoint(Vec2(0,0));
-        _gameMap->setPosition(_mapOrigin);
-        _mapNode->addChild(_gameMap, 0);
-        _cols = static_cast<int>(_gameMap->getMapSize().width);
-        _rows = static_cast<int>(_gameMap->getMapSize().height);
+    if (_farmMap) {
+        _farmMap->setAnchorPoint(Vec2(0,0));
+        _farmMap->setPosition(_mapOrigin);
+        _mapNode->addChild(_farmMap, 0);
+        _cols = static_cast<int>(_farmMap->getMapSize().width);
+        _rows = static_cast<int>(_farmMap->getMapSize().height);
     }
 
     auto &ws = Game::globalState();
@@ -44,10 +44,10 @@ void FarmMapController::init() {
             if (!inBounds(c,r)) return;
             if (safe(c,r)) return;
             if (getTile(c,r) != Game::TileType::Soil) return;
-            if (t == Game::TileType::Tree && _gameMap) {
+            if (t == Game::TileType::Tree && _farmMap) {
                 auto center = this->tileToWorld(c, r);
                 cocos2d::Vec2 footCenter = center + cocos2d::Vec2(0, -static_cast<float>(GameConfig::TILE_SIZE) * 0.5f);
-                if (_gameMap->inNoTreeArea(footCenter)) return;
+                if (_farmMap->inNoTreeArea(footCenter)) return;
             }
             setTile(c, r, t);
         };
@@ -70,8 +70,8 @@ void FarmMapController::init() {
     _mapNode->addChild(_mapDraw, -1);
 
     _cursor = DrawNode::create();
-    if (_gameMap && _gameMap->getTMX()) {
-        _gameMap->getTMX()->addChild(_cursor, 21);
+    if (_farmMap && _farmMap->getTMX()) {
+        _farmMap->getTMX()->addChild(_cursor, 21);
     } else {
         _mapNode->addChild(_cursor, 1);
     }
@@ -80,8 +80,8 @@ void FarmMapController::init() {
     _drops = ws.farmDrops;
     _chests = ws.farmChests;
     _dropsDraw = DrawNode::create();
-    if (_gameMap && _gameMap->getTMX()) {
-        _gameMap->getTMX()->addChild(_dropsDraw, 19);
+    if (_farmMap && _farmMap->getTMX()) {
+        _farmMap->getTMX()->addChild(_dropsDraw, 19);
     } else {
         _worldNode->addChild(_dropsDraw, 1);
     }
@@ -90,23 +90,23 @@ void FarmMapController::init() {
     _cropsDraw = DrawNode::create();
     _worldNode->addChild(_cropsDraw, 1);
     _cropsRoot = Node::create();
-    if (_gameMap && _gameMap->getTMX()) {
-        _gameMap->getTMX()->addChild(_cropsRoot, 22);
+    if (_farmMap && _farmMap->getTMX()) {
+        _farmMap->getTMX()->addChild(_cropsRoot, 22);
     } else {
         _worldNode->addChild(_cropsRoot, 18);
     }
 
     // Tile overlay root for textured tilled soil
     _tileRoot = Node::create();
-    if (_gameMap && _gameMap->getTMX()) {
-        _gameMap->getTMX()->addChild(_tileRoot, 18);
+    if (_farmMap && _farmMap->getTMX()) {
+        _farmMap->getTMX()->addChild(_tileRoot, 18);
     } else {
         _worldNode->addChild(_tileRoot, 0);
     }
 
     _actorsRoot = Node::create();
-    if (_gameMap && _gameMap->getTMX()) {
-        _gameMap->getTMX()->addChild(_actorsRoot, 20);
+    if (_farmMap && _farmMap->getTMX()) {
+        _farmMap->getTMX()->addChild(_actorsRoot, 20);
     } else {
         _worldNode->addChild(_actorsRoot, 20);
     }
@@ -123,7 +123,7 @@ void FarmMapController::init() {
         if (!ws.farmTrees.empty()) {
             for (const auto& tp : ws.farmTrees) {
                 auto center = tileToWorld(tp.c, tp.r);
-                _treeSystem->spawnFromTile(tp.c, tp.r, center, _gameMap, GameConfig::TILE_SIZE);
+                _treeSystem->spawnFromTile(tp.c, tp.r, center, _farmMap, GameConfig::TILE_SIZE);
             }
         } else {
             std::vector<Game::TreePos> saved;
@@ -133,9 +133,9 @@ void FarmMapController::init() {
                     if (getTile(c, r) == Game::TileType::Tree) {
                         auto center = tileToWorld(c, r);
                         Vec2 footCenter = center + Vec2(0, -static_cast<float>(GameConfig::TILE_SIZE) * 0.5f);
-                        bool skip = _gameMap && _gameMap->inNoTreeArea(footCenter);
+                        bool skip = _farmMap && _farmMap->inNoTreeArea(footCenter);
                         if (skip) continue;
-                        if (_treeSystem->spawnFromTile(c, r, center, _gameMap, GameConfig::TILE_SIZE)) {
+                        if (_treeSystem->spawnFromTile(c, r, center, _farmMap, GameConfig::TILE_SIZE)) {
                             setTile(c, r, Game::TileType::Soil);
                             saved.push_back(Game::TreePos{c, r});
                             created++;
@@ -148,17 +148,17 @@ void FarmMapController::init() {
                 int cy = _rows / 2;
                 auto safe = [this, cx, cy](int c, int r){
                     if (std::abs(c - cx) <= 4 && std::abs(r - cy) <= 4) return true;
-                    if (_gameMap) {
+                    if (_farmMap) {
                         auto center = this->tileToWorld(c, r);
                         Vec2 footCenter = center + Vec2(0, -static_cast<float>(GameConfig::TILE_SIZE) * 0.5f);
-                        if (_gameMap->inNoTreeArea(footCenter)) return true;
+                        if (_farmMap->inNoTreeArea(footCenter)) return true;
                     }
                     return false;
                 };
                 int trees = (_cols * _rows) / 40;
                 _treeSystem->spawnRandom(trees, _cols, _rows,
                     [this](int c, int r){ return this->tileToWorld(c, r); },
-                    _gameMap, GameConfig::TILE_SIZE,
+                    _farmMap, GameConfig::TILE_SIZE,
                     [safe](int c, int r){ return safe(c, r); }
                 );
                 saved = _treeSystem->getAllTreeTiles();
@@ -177,26 +177,26 @@ void FarmMapController::init() {
 }
 
 Size FarmMapController::getContentSize() const {
-    if (_gameMap) return _gameMap->getContentSize();
+    if (_farmMap) return _farmMap->getContentSize();
     return Size(_cols * GameConfig::TILE_SIZE, _rows * GameConfig::TILE_SIZE);
 }
 
 Vec2 FarmMapController::clampPosition(const Vec2& current, const Vec2& next, float radius) const {
     float s = static_cast<float>(GameConfig::TILE_SIZE);
-    float mapW = _gameMap ? _gameMap->getContentSize().width : (_cols * s);
-    float mapH = _gameMap ? _gameMap->getContentSize().height : (_rows * s);
+    float mapW = _farmMap ? _farmMap->getContentSize().width : (_cols * s);
+    float mapH = _farmMap ? _farmMap->getContentSize().height : (_rows * s);
     Vec2 candidate = next;
-    float minX = _gameMap ? (s * 0.5f) : (_mapOrigin.x + s * 0.5f);
-    float minY = _gameMap ? (s * 0.5f) : (_mapOrigin.y + s * 0.5f);
-    float maxX = _gameMap ? (mapW - s * 0.5f) : (_mapOrigin.x + mapW - s * 0.5f);
-    float maxY = _gameMap ? (mapH - s * 0.5f) : (_mapOrigin.y + mapH - s * 0.5f);
+    float minX = _farmMap ? (s * 0.5f) : (_mapOrigin.x + s * 0.5f);
+    float minY = _farmMap ? (s * 0.5f) : (_mapOrigin.y + s * 0.5f);
+    float maxX = _farmMap ? (mapW - s * 0.5f) : (_mapOrigin.x + mapW - s * 0.5f);
+    float maxY = _farmMap ? (mapH - s * 0.5f) : (_mapOrigin.y + mapH - s * 0.5f);
     candidate.x = std::max(minX, std::min(maxX, candidate.x));
     candidate.y = std::max(minY, std::min(maxY, candidate.y));
 
     Vec2 tryX(candidate.x, current.y);
-    if (_gameMap) {
+    if (_farmMap) {
         Vec2 footX = tryX + Vec2(0, -s * 0.5f);
-        bool baseBlockedX = _gameMap->collides(footX, radius);
+        bool baseBlockedX = _farmMap->collides(footX, radius);
         bool treeBlockedX = false;
         if (_treeSystem) {
             treeBlockedX = _treeSystem->collides(footX, radius * 0.75f, GameConfig::TILE_SIZE);
@@ -206,9 +206,9 @@ Vec2 FarmMapController::clampPosition(const Vec2& current, const Vec2& next, flo
         }
     }
     Vec2 tryY(current.x, candidate.y);
-    if (_gameMap) {
+    if (_farmMap) {
         Vec2 footY = tryY + Vec2(0, -s * 0.5f);
-        bool baseBlockedY = _gameMap->collides(footY, radius);
+        bool baseBlockedY = _farmMap->collides(footY, radius);
         bool treeBlockedY = false;
         if (_treeSystem) {
             treeBlockedY = _treeSystem->collides(footY, radius * 0.75f, GameConfig::TILE_SIZE);
@@ -221,20 +221,20 @@ Vec2 FarmMapController::clampPosition(const Vec2& current, const Vec2& next, flo
 }
 
 bool FarmMapController::collides(const Vec2& pos, float radius) const {
-    if (_gameMap && _gameMap->collides(pos, radius)) return true;
+    if (_farmMap && _farmMap->collides(pos, radius)) return true;
     if (_treeSystem && _treeSystem->collides(pos, radius, GameConfig::TILE_SIZE)) return true;
     return false;
 }
 
 bool FarmMapController::isNearDoor(const Vec2& playerWorldPos) const {
-    if (_gameMap) {
-        return _gameMap->nearDoorToRoom(playerWorldPos);
+    if (_farmMap) {
+        return _farmMap->nearDoorToRoom(playerWorldPos);
     }
     return _farmDoorRect.containsPoint(playerWorldPos - _mapOrigin);
 }
 
 bool FarmMapController::isNearMineDoor(const Vec2& playerWorldPos) const {
-    return _gameMap ? _gameMap->nearDoorToMine(playerWorldPos) : false;
+    return _farmMap ? _farmMap->nearDoorToMine(playerWorldPos) : false;
 }
 
 bool FarmMapController::isNearChest(const Vec2& playerWorldPos) const {
@@ -246,7 +246,7 @@ bool FarmMapController::isNearChest(const Vec2& playerWorldPos) const {
 }
 
 bool FarmMapController::isNearLake(const Vec2& playerWorldPos, float radius) const {
-    return _gameMap ? _gameMap->nearWater(playerWorldPos, radius) : false;
+    return _farmMap ? _farmMap->nearWater(playerWorldPos, radius) : false;
 }
 
 void FarmMapController::sortActorWithEnvironment(cocos2d::Node* actor) {
@@ -280,16 +280,16 @@ bool FarmMapController::damageTreeAt(int c, int r, int amount) {
 }
 
 cocos2d::Vec2 FarmMapController::farmMineDoorSpawnPos() const {
-    if (_gameMap) {
-        return _gameMap->doorToMineCenter();
+    if (_farmMap) {
+        return _farmMap->doorToMineCenter();
     }
     // fallback：使用农场门矩形中心
     return Vec2(_farmDoorRect.getMidX(), _farmDoorRect.getMidY());
 }
 
 cocos2d::Vec2 FarmMapController::farmRoomDoorSpawnPos() const {
-    if (_gameMap) {
-        return _gameMap->doorToRoomCenter();
+    if (_farmMap) {
+        return _farmMap->doorToRoomCenter();
     }
     return Vec2(_farmDoorRect.getMidX(), _farmDoorRect.getMidY());
 }
@@ -343,13 +343,13 @@ void FarmMapController::setTile(int c, int r, Game::TileType t) {
 }
 
 Vec2 FarmMapController::tileToWorld(int c, int r) const {
-    if (_gameMap) return _gameMap->tileToWorld(c, r);
+    if (_farmMap) return _farmMap->tileToWorld(c, r);
     float s = tileSize();
     return _mapOrigin + Vec2(c * s + s * 0.5f, r * s + s * 0.5f);
 }
 
 void FarmMapController::worldToTileIndex(const Vec2& p, int& c, int& r) const {
-    if (_gameMap) { _gameMap->worldToTileIndex(p, c, r); return; }
+    if (_farmMap) { _farmMap->worldToTileIndex(p, c, r); return; }
     float s = tileSize();
     c = static_cast<int>((p.x - _mapOrigin.x) / s);
     r = static_cast<int>((p.y - _mapOrigin.y) / s);
@@ -548,8 +548,8 @@ void FarmMapController::addActorToMap(cocos2d::Node* node, int /*zOrder*/) {
         _actorsRoot->addChild(node, 0);
         return;
     }
-    if (_gameMap && _gameMap->getTMX()) {
-        _gameMap->getTMX()->addChild(node, 20);
+    if (_farmMap && _farmMap->getTMX()) {
+        _farmMap->getTMX()->addChild(node, 20);
     } else if (_worldNode) {
         _worldNode->addChild(node, 20);
     }

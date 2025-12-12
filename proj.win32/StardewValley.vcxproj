@@ -175,9 +175,9 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClCompile Include="..\Classes\Game\Tree.cpp" />
     <ClCompile Include="..\Classes\HelloWorldScene.cpp" />
     <ClCompile Include="..\Classes\Scenes\CustomizationScene.cpp" />
+    <ClCompile Include="..\Classes\Scenes\FarmScene.cpp" />
     <ClCompile Include="..\Classes\Scenes\SplashScene.cpp" />
     <ClCompile Include="..\Classes\Scenes\MainMenuScene.cpp" />
-    <ClCompile Include="..\Classes\Scenes\GameScene.cpp" />
     <ClCompile Include="..\Classes\Scenes\RoomScene.cpp" />
     <ClCompile Include="..\Classes\Scenes\AbyssMineScene.cpp" />
     <ClCompile Include="..\Classes\Controllers\Map\AbyssMapController.cpp" />
@@ -234,7 +234,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClInclude Include="..\Classes\Scenes\CustomizationScene.h" />
     <ClInclude Include="..\Classes\Scenes\SplashScene.h" />
     <ClInclude Include="..\Classes\Scenes\MainMenuScene.h" />
-    <ClInclude Include="..\Classes\Scenes\GameScene.h" />
+    <ClInclude Include="..\Classes\Scenes\FarmScene.h" />
     <ClInclude Include="..\Classes\Scenes\RoomScene.h" />
     <ClInclude Include="..\Classes\Scenes\AbyssMineScene.h" />
     <ClInclude Include="..\Classes\Controllers\Map\AbyssMapController.h" />

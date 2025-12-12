@@ -1,7 +1,7 @@
 #include "Scenes/AbyssMineScene.h"
 #include "cocos2d.h"
 #include "Managers/AudioManager.h"
-#include "Scenes/GameScene.h"
+#include "Scenes/FarmScene.h"
 #include "Game/Tool/ToolFactory.h"
 
 USING_NS_CC;
@@ -94,7 +94,7 @@ void AbyssMineScene::onSpacePressed() {
         _player->setPosition(_map->floorSpawnPos());
         if (_uiController) _uiController->setMineFloorNumber(_map->currentFloor());
     } else if (act == Controllers::AbyssInteractor::SpaceAction::ReturnToFarm) {
-        auto farm = GameScene::create();
+        auto farm = FarmScene::create();
         // 在农场场景加载完成后，将出生点设置到 DoorToMine 对象层中心
         farm->setSpawnAtFarmMineDoor();
         auto trans = TransitionFade::create(0.6f, farm);
