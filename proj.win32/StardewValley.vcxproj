@@ -155,6 +155,12 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClCompile Include="..\Classes\AppDelegate.cpp" />
     <ClCompile Include="..\Classes\Controllers\Environment\TreeSystem.cpp" />
     <ClCompile Include="..\Classes\Controllers\Store\StoreController.cpp" />
+    <ClCompile Include="..\Classes\Controllers\UI\ChestPanelUI.cpp" />
+    <ClCompile Include="..\Classes\Controllers\UI\CraftPanelUI.cpp" />
+    <ClCompile Include="..\Classes\Controllers\UI\HotbarUI.cpp" />
+    <ClCompile Include="..\Classes\Controllers\UI\HUDUI.cpp" />
+    <ClCompile Include="..\Classes\Controllers\UI\PromptUI.cpp" />
+    <ClCompile Include="..\Classes\Controllers\UI\StorePanelUI.cpp" />
     <ClCompile Include="..\Classes\Game\FarmMap.cpp" />
     <ClCompile Include="..\Classes\Game\MineMap.cpp" />
     <ClCompile Include="..\Classes\Game\Tool\Axe.cpp" />
@@ -199,6 +205,12 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClInclude Include="..\Classes\AppDelegate.h" />
     <ClInclude Include="..\Classes\Controllers\Environment\TreeSystem.h" />
     <ClInclude Include="..\Classes\Controllers\Interact\AbyssInteractor.h" />
+    <ClInclude Include="..\Classes\Controllers\UI\ChestPanelUI.h" />
+    <ClInclude Include="..\Classes\Controllers\UI\CraftPanelUI.h" />
+    <ClInclude Include="..\Classes\Controllers\UI\HotbarUI.h" />
+    <ClInclude Include="..\Classes\Controllers\UI\HUDUI.h" />
+    <ClInclude Include="..\Classes\Controllers\UI\PromptUI.h" />
+    <ClInclude Include="..\Classes\Controllers\UI\StorePanelUI.h" />
     <ClInclude Include="..\Classes\Game\Bag.h" />
     <ClInclude Include="..\Classes\Game\Cheat.h" />
     <ClInclude Include="..\Classes\Game\Chest.h" />

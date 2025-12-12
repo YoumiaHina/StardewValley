@@ -8,7 +8,12 @@
 #include <memory>
 #include "Game/Inventory.h"
 #include "Game/Chest.h"
-#include "Controllers/Store/StoreController.h"
+#include "Controllers/UI/HUDUI.h"
+#include "Controllers/UI/HotbarUI.h"
+#include "Controllers/UI/PromptUI.h"
+#include "Controllers/UI/ChestPanelUI.h"
+#include "Controllers/UI/CraftPanelUI.h"
+#include "Controllers/UI/StorePanelUI.h"
 #include "ui/CocosGUI.h"
 
 namespace Controllers {
@@ -18,8 +23,14 @@ public:
     UIController(cocos2d::Scene* scene,
                  cocos2d::Node* worldNode,
                  std::shared_ptr<Game::Inventory> inventory)
-    : _scene(scene), _worldNode(worldNode), _inventory(inventory) {
-        _storeController = std::make_unique<StoreController>(inventory);
+    : _scene(scene), _worldNode(worldNode), _inventory(inventory) {}
+    ~UIController() {
+        delete _hud; _hud = nullptr;
+        delete _hotbar; _hotbar = nullptr;
+        delete _prompts; _prompts = nullptr;
+        delete _chestPanel; _chestPanel = nullptr;
+        delete _craftPanel; _craftPanel = nullptr;
+        delete _storePanel; _storePanel = nullptr;
     }
 
     void buildHUD();
@@ -31,9 +42,6 @@ public:
 
     void setInventoryBackground(const std::string& path);
 
-    // 水壶水量蓝条：显示在热键栏的水壶上方
-    void buildWaterBarAboveCan();
-    void refreshWaterBar();
 
     // 事件转发：处理热键栏点击选择与右键打开箱子面板
     bool handleHotbarMouseDown(cocos2d::EventMouse* e);
@@ -68,60 +76,17 @@ public:
     void buildStorePanel();
     void refreshStorePanel();
     void toggleStorePanel(bool visible);
-    // Store 分页与商品列表
-    int _storePageIndex = 0;
-    int _storePageSize = 6;
-    std::vector<Game::ItemType> _storeItems;
 
 private:
     cocos2d::Scene* _scene = nullptr;
     cocos2d::Node* _worldNode = nullptr;
     std::shared_ptr<Game::Inventory> _inventory;
-    std::unique_ptr<StoreController> _storeController;
-
-    // HUD
-    cocos2d::Label* _hudTimeLabel = nullptr;
-    cocos2d::Label* _hudGoldLabel = nullptr;
-    cocos2d::Node* _energyNode = nullptr;
-    cocos2d::DrawNode* _energyFill = nullptr;
-    cocos2d::Label* _energyLabel = nullptr;
-    // HP HUD（矿洞专属）
-    cocos2d::Node* _hpNode = nullptr;
-    cocos2d::DrawNode* _hpFill = nullptr;
-    cocos2d::Label* _hpLabel = nullptr;
-    // Mine floor label
-    cocos2d::Label* _mineFloorLabel = nullptr;
-
-    // Hotbar
-    cocos2d::Node* _hotbarNode = nullptr;
-    cocos2d::DrawNode* _hotbarHighlight = nullptr;
-    std::vector<cocos2d::Label*> _hotbarLabels;
-    std::vector<cocos2d::Sprite*> _hotbarIcons;
-    cocos2d::Sprite* _hotbarBgSprite = nullptr;
-    std::string _inventoryBgPath;
-    float _hotbarScale = 2.0f;
-
-    // Water bar (above watering can slot)
-    cocos2d::Node* _waterBarNode = nullptr;
-    cocos2d::DrawNode* _waterBarBg = nullptr;
-    cocos2d::DrawNode* _waterBarFill = nullptr;
-
-    // Prompts
-    cocos2d::Label* _doorPrompt = nullptr;
-    cocos2d::Label* _chestPrompt = nullptr;
-    cocos2d::Label* _fishPrompt = nullptr;
-
-    // Chest Panel
-    cocos2d::Node* _chestPanel = nullptr;
-    cocos2d::Node* _chestListNode = nullptr;
-
-    // Craft Panel
-    cocos2d::Node* _craftNode = nullptr;
-    cocos2d::ui::Button* _craftButton = nullptr;
-
-    // Store Panel
-    cocos2d::Node* _storePanel = nullptr;
-    cocos2d::Node* _storeListNode = nullptr;
+    HUDUI* _hud = nullptr;
+    HotbarUI* _hotbar = nullptr;
+    PromptUI* _prompts = nullptr;
+    ChestPanelUI* _chestPanel = nullptr;
+    CraftPanelUI* _craftPanel = nullptr;
+    StorePanelUI* _storePanel = nullptr;
 };
 
 }

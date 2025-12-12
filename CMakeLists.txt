@@ -64,12 +64,23 @@ list(APPEND GAME_SOURCE
      Classes/Controllers/RoomMapController.h
      Classes/Controllers/UIController.cpp
      Classes/Controllers/UIController.h
+     Classes/Controllers/UI/HUDUI.cpp
+     Classes/Controllers/UI/HUDUI.h
+     Classes/Controllers/UI/HotbarUI.cpp
+     Classes/Controllers/UI/HotbarUI.h
+     Classes/Controllers/UI/PromptUI.cpp
+     Classes/Controllers/UI/PromptUI.h
+     Classes/Controllers/UI/ChestPanelUI.cpp
+     Classes/Controllers/UI/ChestPanelUI.h
+     Classes/Controllers/UI/CraftPanelUI.cpp
+     Classes/Controllers/UI/CraftPanelUI.h
+     Classes/Controllers/UI/StorePanelUI.cpp
+     Classes/Controllers/UI/StorePanelUI.h
      Classes/Game/Tool/Axe.cpp
      Classes/Game/Tool/Hoe.cpp
      Classes/Game/Tool/Pickaxe.cpp
      Classes/Game/Tool/WaterCan.cpp
      Classes/Game/Tool/FishingRod.cpp
-     Classes/Game/Tool/Sword.cpp
      Classes/Game/Tool/ToolFactory.cpp
      Classes/Controllers/GameStateController.cpp
      Classes/Controllers/GameStateController.h
@@ -110,8 +121,6 @@ list(APPEND GAME_HEADER
      Classes/Game/Tool/Pickaxe.h
      Classes/Game/Tool/WaterCan.h
      Classes/Game/Tool/FishingRod.h
-     Classes/Game/Tool/Weapon.h
-     Classes/Game/Tool/Sword.h
      Classes/Game/Tool/ToolFactory.h
      Classes/Game/GameConfig.h
      )

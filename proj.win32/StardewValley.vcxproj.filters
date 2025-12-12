@@ -183,6 +183,24 @@
     <ClCompile Include="..\Classes\Game\Tool\WaterCan.cpp">
       <Filter>Classes\Game\Tool</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\UI\ChestPanelUI.cpp">
+      <Filter>Classes\Controllers\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\UI\CraftPanelUI.cpp">
+      <Filter>Classes\Controllers\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\UI\HotbarUI.cpp">
+      <Filter>Classes\Controllers\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\UI\HUDUI.cpp">
+      <Filter>Classes\Controllers\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\UI\PromptUI.cpp">
+      <Filter>Classes\Controllers\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\UI\StorePanelUI.cpp">
+      <Filter>Classes\Controllers\UI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <!-- Header Files -->
@@ -343,6 +361,24 @@
     </ClInclude>
     <ClInclude Include="..\Classes\Game\Tool\WaterCan.h">
       <Filter>Classes\Game\Tool</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\UI\ChestPanelUI.h">
+      <Filter>Classes\Controllers\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\UI\CraftPanelUI.h">
+      <Filter>Classes\Controllers\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\UI\HotbarUI.h">
+      <Filter>Classes\Controllers\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\UI\HUDUI.h">
+      <Filter>Classes\Controllers\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\UI\PromptUI.h">
+      <Filter>Classes\Controllers\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\UI\StorePanelUI.h">
+      <Filter>Classes\Controllers\UI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
