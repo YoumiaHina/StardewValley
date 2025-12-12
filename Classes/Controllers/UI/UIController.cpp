@@ -187,6 +187,13 @@ void UIController::setInventoryBackground(const std::string& path) {
 void UIController::buildHotbar() {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     auto origin = Director::getInstance()->getVisibleOrigin();
+    if (_inventory) {
+        int slotsPre = static_cast<int>(_inventory->size());
+        for (int i = 0; i < slotsPre; ++i) {
+            auto t = _inventory->toolAtMutable(i);
+            if (t) { t->detachHotbarOverlay(); }
+        }
+    }
     _hotbarNode = Node::create();
     _hotbarNode->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + 28));
     if (_scene) _scene->addChild(_hotbarNode, 2);

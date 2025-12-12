@@ -80,29 +80,25 @@ void WaterCan::attachHotbarOverlay(cocos2d::Sprite* iconSprite, float cellW, flo
     _cellH = cellH;
     auto parent = iconSprite->getParent();
     if (!parent) return;
-    if (!_waterBarNode) {
-        _waterBarNode = cocos2d::Node::create();
-        _waterBarBg = cocos2d::DrawNode::create();
-        _waterBarFill = cocos2d::DrawNode::create();
-        _waterBarNode->addChild(_waterBarBg);
-        _waterBarNode->addChild(_waterBarFill);
-        parent->addChild(_waterBarNode, iconSprite->getLocalZOrder() + 1);
-
-        float bw = _cellW;
-        float bh = 8.0f;
-        cocos2d::Vec2 bl(-bw/2, 0), br(bw/2, 0), tr(bw/2, bh), tl(-bw/2, bh);
-        cocos2d::Vec2 rect[4] = { bl, br, tr, tl };
-        _waterBarBg->drawSolidPoly(rect, 4, cocos2d::Color4F(0.f,0.f,0.f,0.35f));
-        _waterBarBg->drawLine(bl, br, cocos2d::Color4F(1,1,1,0.4f));
-        _waterBarBg->drawLine(br, tr, cocos2d::Color4F(1,1,1,0.4f));
-        _waterBarBg->drawLine(tr, tl, cocos2d::Color4F(1,1,1,0.4f));
-        _waterBarBg->drawLine(tl, bl, cocos2d::Color4F(1,1,1,0.4f));
-    } else {
-        if (_waterBarNode->getParent() != parent) {
-            _waterBarNode->removeFromParent();
-            parent->addChild(_waterBarNode, iconSprite->getLocalZOrder() + 1);
-        }
+    if (_waterBarNode && _waterBarNode->getParent()) {
+        _waterBarNode->removeFromParent();
     }
+    _waterBarNode = cocos2d::Node::create();
+    _waterBarBg = cocos2d::DrawNode::create();
+    _waterBarFill = cocos2d::DrawNode::create();
+    _waterBarNode->addChild(_waterBarBg);
+    _waterBarNode->addChild(_waterBarFill);
+    parent->addChild(_waterBarNode, iconSprite->getLocalZOrder() + 1);
+
+    float bw = _cellW;
+    float bh = 8.0f;
+    cocos2d::Vec2 bl(-bw/2, 0), br(bw/2, 0), tr(bw/2, bh), tl(-bw/2, bh);
+    cocos2d::Vec2 rect[4] = { bl, br, tr, tl };
+    _waterBarBg->drawSolidPoly(rect, 4, cocos2d::Color4F(0.f,0.f,0.f,0.35f));
+    _waterBarBg->drawLine(bl, br, cocos2d::Color4F(1,1,1,0.4f));
+    _waterBarBg->drawLine(br, tr, cocos2d::Color4F(1,1,1,0.4f));
+    _waterBarBg->drawLine(tr, tl, cocos2d::Color4F(1,1,1,0.4f));
+    _waterBarBg->drawLine(tl, bl, cocos2d::Color4F(1,1,1,0.4f));
     refreshHotbarOverlay();
 }
 
@@ -127,12 +123,9 @@ void WaterCan::refreshHotbarOverlay() {
 }
 
 void WaterCan::detachHotbarOverlay() {
-    if (_waterBarNode) {
-        _waterBarNode->removeFromParent();
-        _waterBarNode = nullptr;
-        _waterBarBg = nullptr;
-        _waterBarFill = nullptr;
-    }
+    _waterBarNode = nullptr;
+    _waterBarBg = nullptr;
+    _waterBarFill = nullptr;
     _iconSprite = nullptr;
 }
 
