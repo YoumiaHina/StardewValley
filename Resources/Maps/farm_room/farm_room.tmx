@@ -33,19 +33,19 @@
   <object id="1" x="-0.201461" y="-0.604382" width="192.596" height="63.0572"/>
   <object id="2" x="-0.402921" y="62.0499" width="15.311" height="129.741"/>
   <object id="3" x="14.9081" y="141.022" width="16.5198" height="50.9695"/>
-  <object id="4" x="31.6293" y="168.421" width="15.7139" height="23.7723"/>
+  <object id="4" x="31.6293" y="168.421" width="14.7066" height="23.7723"/>
   <object id="5" x="47.9476" y="184.538" width="16.7212" height="8.46134"/>
-  <object id="9" x="64.2659" y="168.22" width="112.818" height="23.7723"/>
+  <object id="9" x="65.2732" y="168.22" width="111.811" height="23.7723"/>
   <object id="10" x="176.278" y="0.402921" width="16.1168" height="191.79"/>
   <object id="11" x="136.59" y="164.794" width="30.8235" height="3.62627"/>
   <object id="12" x="136.59" y="120.474" width="30.622" height="20.9519"/>
   <object id="13" x="15.311" y="63.6615" width="31.8308" height="30.622"/>
   <object id="14" x="64.0645" y="63.863" width="102.141" height="16.1168"/>
  </objectgroup>
- <objectgroup id="10" name="DoorToFarm" visible="0">
-  <object id="16" x="41.9406" y="146.64" width="40.725" height="41.3328"/>
+ <objectgroup id="10" name="DoorToFarm">
+  <object id="16" x="41.9406" y="146.64" width="27.8315" height="41.3328"/>
  </objectgroup>
- <objectgroup id="9" name="Bed" visible="0">
+ <objectgroup id="9" name="Bed">
   <object id="15" x="136.59" y="120.272" width="31.0249" height="47.7462"/>
  </objectgroup>
  <layer id="7" name="PottedPlant" width="24" height="24">

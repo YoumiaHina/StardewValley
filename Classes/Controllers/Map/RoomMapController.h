@@ -40,6 +40,7 @@ public:
     const std::vector<Game::Chest>& chests() const { return _chests; }
     std::vector<Game::Chest>& chests() { return _chests; }
     void addActorToMap(cocos2d::Node* node, int zOrder) override;
+    cocos2d::Vec2 roomFarmDoorSpawnPos() const;
 
 private:
     cocos2d::Node* _worldNode = nullptr;

@@ -31,9 +31,10 @@ bool RoomScene::init() {
 
 void RoomScene::setSpawnInsideDoor() {
     if (!_player || !_roomMap) return;
-    float offsetY = 28.0f;
-    Vec2 spawn(_roomMap->doorRect().getMidX(), _roomMap->doorRect().getMinY() + _roomMap->doorRect().size.height + offsetY);
+    Vec2 spawn = _roomMap->roomFarmDoorSpawnPos();
     _player->setPosition(spawn);
+    _player->setDirection(Game::IPlayerView::Direction::UP);
+    _player->setMoving(false);
 }
 
 // SceneBase overrides

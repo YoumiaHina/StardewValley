@@ -110,5 +110,11 @@ void RoomMapController::addActorToMap(cocos2d::Node* node, int zOrder) {
 bool RoomMapController::collides(const Vec2& pos, float radius) const {
     return _roomMap ? _roomMap->collides(pos, radius) : false;
 }
+cocos2d::Vec2 RoomMapController::roomFarmDoorSpawnPos() const {
+    if (_roomMap) {
+		return _roomMap->doorToFarmCenter();
+    }
+    return cocos2d::Vec2(_doorRect.getMidX(), _doorRect.getMinY());
+}
 // namespace Controllers
 }
