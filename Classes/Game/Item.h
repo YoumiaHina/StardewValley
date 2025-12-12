@@ -20,7 +20,13 @@ enum class ItemType {
     CornSeed = 11,
     Strawberry = 12,
     StrawberrySeed = 13,
-    Fish = 100
+    Fish = 100,
+    CopperGrain = 101,
+    CopperIngot = 102,
+    IronGrain   = 103,
+    IronIngot   = 104,
+    GoldGrain   = 105,
+    GoldIngot   = 106
 };
 
 // 英文名称（内部使用）
@@ -41,6 +47,12 @@ inline const char* itemName(ItemType t) {
         case ItemType::Strawberry: return "Strawberry";
         case ItemType::StrawberrySeed: return "Strawberry Seed";
         case ItemType::Fish: return "Fish";
+        case ItemType::CopperGrain: return "Copper Grain";
+        case ItemType::CopperIngot: return "Copper Ingot";
+        case ItemType::IronGrain:   return "Iron Grain";
+        case ItemType::IronIngot:   return "Iron Ingot";
+        case ItemType::GoldGrain:   return "Gold Grain";
+        case ItemType::GoldIngot:   return "Gold Ingot";
         default: return "Unknown";
     }
 }
@@ -63,6 +75,12 @@ inline const char* itemNameZH(ItemType t) {
         case ItemType::Strawberry: return "草莓";
         case ItemType::StrawberrySeed: return "草莓种子";
         case ItemType::Fish: return "鱼";
+        case ItemType::CopperGrain: return "铜矿粒";
+        case ItemType::CopperIngot: return "铜锭";
+        case ItemType::IronGrain:   return "铁矿粒";
+        case ItemType::IronIngot:   return "铁锭";
+        case ItemType::GoldGrain:   return "金矿粒";
+        case ItemType::GoldIngot:   return "金锭";
         default: return "未知";
     }
 }
@@ -86,6 +104,12 @@ inline cocos2d::Color4F itemColor(ItemType t) {
         case ItemType::Strawberry: return Color4F(0.95f, 0.20f, 0.25f, 1.0f);
         case ItemType::StrawberrySeed: return Color4F(0.95f, 0.20f, 0.25f, 0.8f);
         case ItemType::Fish: return Color4F(0.25f, 0.55f, 1.0f, 1.0f);
+        case ItemType::CopperGrain: return Color4F(0.85f, 0.45f, 0.25f, 1.0f);
+        case ItemType::CopperIngot: return Color4F(0.90f, 0.50f, 0.30f, 1.0f);
+        case ItemType::IronGrain:   return Color4F(0.60f, 0.60f, 0.65f, 1.0f);
+        case ItemType::IronIngot:   return Color4F(0.70f, 0.70f, 0.75f, 1.0f);
+        case ItemType::GoldGrain:   return Color4F(0.95f, 0.80f, 0.20f, 1.0f);
+        case ItemType::GoldIngot:   return Color4F(0.98f, 0.85f, 0.25f, 1.0f);
         default: return Color4F(1,1,1,1);
     }
 }
@@ -117,6 +141,12 @@ inline int itemPrice(ItemType t) {
         case ItemType::Corn: return 50;
         case ItemType::Strawberry: return 120;
         case ItemType::Fish: return 75;
+        case ItemType::CopperGrain: return 20;
+        case ItemType::CopperIngot: return 90;
+        case ItemType::IronGrain:   return 25;
+        case ItemType::IronIngot:   return 110;
+        case ItemType::GoldGrain:   return 40;
+        case ItemType::GoldIngot:   return 180;
         // 种子本身也可以有售价，通常低于买入价，或者不可卖出。
         // 这里暂时定义种子售价为 0 或者一半？用户只说了买入25。
         // 假设卖出价格：

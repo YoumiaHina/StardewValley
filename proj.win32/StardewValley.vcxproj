@@ -161,6 +161,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClCompile Include="..\Classes\Game\Tool\FishingRod.cpp" />
     <ClCompile Include="..\Classes\Game\Tool\Hoe.cpp" />
     <ClCompile Include="..\Classes\Game\Tool\Pickaxe.cpp" />
+    <ClCompile Include="..\Classes\Game\Tool\Sword.cpp" />
     <ClCompile Include="..\Classes\Game\Tool\ToolFactory.cpp" />
     <ClCompile Include="..\Classes\Game\Tool\WaterCan.cpp" />
     <ClCompile Include="..\Classes\Game\View\PlayerView.cpp" />
@@ -207,6 +208,8 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClInclude Include="..\Classes\Game\Tool\FishingRod.h" />
     <ClInclude Include="..\Classes\Game\Tool\Hoe.h" />
     <ClInclude Include="..\Classes\Game\Tool\Pickaxe.h" />
+    <ClInclude Include="..\Classes\Game\Tool\Weapon.h" />
+    <ClInclude Include="..\Classes\Game\Tool\Sword.h" />
     <ClInclude Include="..\Classes\Game\Tool\ToolBase.h" />
     <ClInclude Include="..\Classes\Game\Tool\ToolFactory.h" />
     <ClInclude Include="..\Classes\Game\Tool\WaterCan.h" />

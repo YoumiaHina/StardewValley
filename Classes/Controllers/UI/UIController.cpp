@@ -326,6 +326,7 @@ void UIController::refreshHotbar() {
                     case Game::ToolKind::Pickaxe:    path = "Tool/Pickaxe.png"; break;
                     case Game::ToolKind::WaterCan:   path = "Tool/WaterCan.png"; break;
                     case Game::ToolKind::FishingRod: path = "Tool/FishingRod.png"; break;
+                    case Game::ToolKind::Sword:      path = "Weapon/sword.png"; break;
                     default: path.clear(); break;
                 }
                 if (!path.empty()) {
@@ -368,6 +369,35 @@ void UIController::refreshHotbar() {
                         icon->setPosition(Vec2(cx, 0));
                         icon->setVisible(true);
                     } else { icon->setVisible(false); }
+                } else if (st.quantity > 0) {
+                    std::string path;
+                    switch (st.type) {
+                        case Game::ItemType::CopperGrain: path = "Mineral/copperGrain.png"; break;
+                        case Game::ItemType::CopperIngot: path = "Mineral/copperIngot.png"; break;
+                        case Game::ItemType::IronGrain:   path = "Mineral/ironGrain.png"; break;
+                        case Game::ItemType::IronIngot:   path = "Mineral/ironIngot.png"; break;
+                        case Game::ItemType::GoldGrain:   path = "Mineral/goldGrain.png"; break;
+                        case Game::ItemType::GoldIngot:   path = "Mineral/goldIngot.png"; break;
+                        default: break;
+                    }
+                    if (!path.empty()) {
+                        bool ok = icon->initWithFile(path);
+                        if (ok) {
+                            auto cs = icon->getContentSize();
+                            float targetH = cellH;
+                            float targetW = cellW;
+                            float sx = (cs.width > 0) ? (targetW / cs.width) : 1.0f;
+                            float sy = (cs.height > 0) ? (targetH / cs.height) : 1.0f;
+                            float scale = std::min(sx, sy);
+                            icon->setScale(scale);
+                            icon->setPosition(Vec2(cx, 0));
+                            icon->setVisible(true);
+                        } else {
+                            icon->setVisible(false);
+                        }
+                    } else {
+                        icon->setVisible(false);
+                    }
                 } else {
                     icon->setVisible(false);
                 }
@@ -699,7 +729,7 @@ void UIController::buildStorePanel() {
     bg->drawSolidPoly(v, 4, Color4F(0.f,0.f,0.f,0.85f));
     _storePanel->addChild(bg);
 
-    auto title = Label::createWithTTF("Seed Store", "fonts/arial.ttf", 24);
+    auto title = Label::createWithTTF("General Store", "fonts/arial.ttf", 24);
     title->setPosition(Vec2(0, h/2 - 26));
     _storePanel->addChild(title);
 
@@ -714,43 +744,108 @@ void UIController::buildStorePanel() {
 
     _storeListNode = Node::create();
     _storePanel->addChild(_storeListNode);
+
+    // 分页按钮
+    auto prevBtn = ui::Button::create("CloseNormal.png", "CloseSelected.png");
+    prevBtn->setTitleText("<"); prevBtn->setTitleFontSize(18);
+    prevBtn->setScale9Enabled(true); prevBtn->setContentSize(Size(36, 36));
+    prevBtn->setPosition(Vec2(-w/2 + 30, -h/2 + 30));
+    prevBtn->addClickEventListener([this](Ref*){
+        if (_storePageIndex > 0) { _storePageIndex--; refreshStorePanel(); }
+    });
+    _storePanel->addChild(prevBtn);
+
+    auto nextBtn = ui::Button::create("CloseNormal.png", "CloseSelected.png");
+    nextBtn->setTitleText(">"); nextBtn->setTitleFontSize(18);
+    nextBtn->setScale9Enabled(true); nextBtn->setContentSize(Size(36, 36));
+    nextBtn->setPosition(Vec2(w/2 - 30, -h/2 + 30));
+    nextBtn->addClickEventListener([this](Ref*){
+        _storePageIndex++; refreshStorePanel();
+    });
+    _storePanel->addChild(nextBtn);
 }
 
 void UIController::refreshStorePanel() {
     if (!_storeListNode || !_storeController) return;
     _storeListNode->removeAllChildren();
-
-    std::vector<Game::ItemType> seeds = {
-        Game::ItemType::ParsnipSeed,
-        Game::ItemType::BlueberrySeed,
-        Game::ItemType::EggplantSeed,
-        Game::ItemType::CornSeed,
-        Game::ItemType::StrawberrySeed
-    };
+    // 组装商品列表（一次性缓存）
+    if (_storeItems.empty()) {
+        std::vector<Game::ItemType> seeds = {
+            Game::ItemType::ParsnipSeed,
+            Game::ItemType::BlueberrySeed,
+            Game::ItemType::EggplantSeed,
+            Game::ItemType::CornSeed,
+            Game::ItemType::StrawberrySeed
+        };
+        std::vector<Game::ItemType> minerals = {
+            Game::ItemType::CopperGrain,
+            Game::ItemType::CopperIngot,
+            Game::ItemType::IronGrain,
+            Game::ItemType::IronIngot,
+            Game::ItemType::GoldGrain,
+            Game::ItemType::GoldIngot
+        };
+        _storeItems.reserve(seeds.size() + minerals.size());
+        _storeItems.insert(_storeItems.end(), seeds.begin(), seeds.end());
+        _storeItems.insert(_storeItems.end(), minerals.begin(), minerals.end());
+    }
 
     float startY = 80.0f;
     float gapY = 40.0f;
+    // 计算分页范围
+    int total = static_cast<int>(_storeItems.size());
+    int startIdx = std::max(0, _storePageIndex * _storePageSize);
+    int endIdx = std::min(total, startIdx + _storePageSize);
+    if (startIdx >= total) { _storePageIndex = std::max(0, (total - 1) / _storePageSize); startIdx = _storePageIndex * _storePageSize; endIdx = std::min(total, startIdx + _storePageSize); }
 
-    for (size_t i = 0; i < seeds.size(); ++i) {
-        auto type = seeds[i];
-        float y = startY - i * gapY;
-        
+    // 标题显示当前页
+    auto pageLabel = Label::createWithTTF(StringUtils::format("Page %d/%d", _storePageIndex + 1, std::max(1, (total + _storePageSize - 1)/_storePageSize)), "fonts/arial.ttf", 16);
+    pageLabel->setPosition(Vec2(0, -120));
+    _storeListNode->addChild(pageLabel);
+
+    // 绘制当前页商品列表
+    for (int row = 0, i = startIdx; i < endIdx; ++i, ++row) {
+        auto type = _storeItems[i];
+        float y = startY - row * gapY;
+        // 图标
+        std::string iconPath;
+        switch (type) {
+            case Game::ItemType::CopperGrain: iconPath = "Mineral/copperGrain.png"; break;
+            case Game::ItemType::CopperIngot: iconPath = "Mineral/copperIngot.png"; break;
+            case Game::ItemType::IronGrain:   iconPath = "Mineral/ironGrain.png"; break;
+            case Game::ItemType::IronIngot:   iconPath = "Mineral/ironIngot.png"; break;
+            case Game::ItemType::GoldGrain:   iconPath = "Mineral/goldGrain.png"; break;
+            case Game::ItemType::GoldIngot:   iconPath = "Mineral/goldIngot.png"; break;
+            default: break;
+        }
+        if (!iconPath.empty()) {
+            auto icon = Sprite::create(iconPath);
+            if (icon) {
+                float targetH = 24.0f; float targetW = 24.0f;
+                auto cs = icon->getContentSize();
+                float sx = (cs.width > 0) ? (targetW / cs.width) : 1.0f;
+                float sy = (cs.height > 0) ? (targetH / cs.height) : 1.0f;
+                icon->setScale(std::min(sx, sy));
+                icon->setPosition(Vec2(-200, y));
+                _storeListNode->addChild(icon);
+            }
+        }
+        // 名称
         auto nameLabel = Label::createWithTTF(Game::itemName(type), "fonts/arial.ttf", 20);
         nameLabel->setAnchorPoint(Vec2(0, 0.5f));
         nameLabel->setPosition(Vec2(-180, y));
         _storeListNode->addChild(nameLabel);
-
-        int price = _storeController->getSeedPrice(type);
+        // 价格与购买逻辑（区分种子与普通物品）
+        bool isSeed = Game::isSeed(type);
+        int price = isSeed ? _storeController->getSeedPrice(type) : _storeController->getItemPrice(type);
         auto priceLabel = Label::createWithTTF(StringUtils::format("%d G", price), "fonts/arial.ttf", 20);
         priceLabel->setAnchorPoint(Vec2(1, 0.5f));
         priceLabel->setPosition(Vec2(80, y));
         priceLabel->setColor(Color3B::YELLOW);
         _storeListNode->addChild(priceLabel);
-
         auto buyLabel = Label::createWithTTF("[Buy]", "fonts/arial.ttf", 20);
         buyLabel->setPosition(Vec2(140, y));
         buyLabel->setColor(Color3B::GREEN);
-        
         auto listener = EventListenerTouchOneByOne::create();
         listener->setSwallowTouches(true);
         listener->onTouchBegan = [buyLabel](Touch* t, Event* e){
@@ -758,16 +853,18 @@ void UIController::refreshStorePanel() {
             Vec2 p = target->convertToNodeSpace(t->getLocation());
             Size s = target->getContentSize();
             Rect r(0, 0, s.width, s.height);
-            if (r.containsPoint(p)) {
-                target->setScale(0.9f);
-                return true;
-            }
+            if (r.containsPoint(p)) { target->setScale(0.9f); return true; }
             return false;
         };
-        listener->onTouchEnded = [this, type, buyLabel](Touch* t, Event* e){
+        listener->onTouchEnded = [this, type, isSeed, buyLabel](Touch* t, Event* e){
             buyLabel->setScale(1.0f);
-            if (_storeController && _storeController->buySeed(type)) {
+            bool ok = false;
+            if (_storeController) {
+                ok = isSeed ? _storeController->buySeed(type) : _storeController->buyItem(type);
+            }
+            if (ok) {
                 refreshHUD();
+                refreshHotbar();
                 popTextAt(_storePanel->getParent()->convertToWorldSpace(_storePanel->getPosition()), "Bought!", Color3B::GREEN);
             } else {
                 popTextAt(_storePanel->getParent()->convertToWorldSpace(_storePanel->getPosition()), "Failed", Color3B::RED);

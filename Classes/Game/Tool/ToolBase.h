@@ -8,7 +8,7 @@ namespace Controllers { class IMapController; class UIController; class CropSyst
 
 namespace Game {
 
-enum class ToolKind { Axe, Hoe, Pickaxe, WaterCan, FishingRod };
+enum class ToolKind { Axe, Hoe, Pickaxe, WaterCan, FishingRod, Sword };
 
 class ToolBase {
 public:

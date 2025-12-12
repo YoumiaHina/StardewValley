@@ -68,6 +68,10 @@ public:
     void buildStorePanel();
     void refreshStorePanel();
     void toggleStorePanel(bool visible);
+    // Store 分页与商品列表
+    int _storePageIndex = 0;
+    int _storePageSize = 6;
+    std::vector<Game::ItemType> _storeItems;
 
 private:
     cocos2d::Scene* _scene = nullptr;

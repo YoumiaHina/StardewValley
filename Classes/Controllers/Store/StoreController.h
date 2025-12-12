@@ -17,6 +17,10 @@ public:
     // 获取种子价格
     int getSeedPrice(Game::ItemType seedType) const;
 
+    // 购买一般物品（矿物等），价格来自 Game::itemPrice(type)
+    bool buyItem(Game::ItemType type);
+    int getItemPrice(Game::ItemType type) const;
+
 private:
     std::shared_ptr<Game::Inventory> _inventory;
 };

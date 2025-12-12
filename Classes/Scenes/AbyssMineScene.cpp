@@ -2,6 +2,7 @@
 #include "cocos2d.h"
 #include "Managers/AudioManager.h"
 #include "Scenes/GameScene.h"
+#include "Game/Tool/ToolFactory.h"
 
 USING_NS_CC;
 
@@ -20,6 +21,31 @@ bool AbyssMineScene::init() {
     if (_player) {
         _player->setPosition(_map->entranceSpawnPos());
         _player->setLocalZOrder(999); // 人物置于图层最上层
+    }
+    // 第一次进入矿洞0层：仅赠送一次剑（即使之后丢弃也不再发放）
+    {
+        auto &ws = Game::globalState();
+        if (!ws.grantedSwordAtEntrance && ws.inventory) {
+            bool hasSword = false;
+            for (std::size_t i = 0; i < ws.inventory->size(); ++i) {
+                if (auto t = ws.inventory->toolAt(i)) {
+                    if (t->kind() == Game::ToolKind::Sword) { hasSword = true; break; }
+                }
+            }
+            if (!hasSword) {
+                // 放到第一个空槽位
+                for (std::size_t i = 0; i < ws.inventory->size(); ++i) {
+                    if (ws.inventory->isEmpty(i)) {
+                        ws.inventory->setTool(i, Game::makeTool(Game::ToolKind::Sword));
+                        if (_uiController) _uiController->refreshHotbar();
+                        if (_player) _uiController->popTextAt(_player->getPosition(), "Got Sword!", cocos2d::Color3B::GREEN);
+                        break;
+                    }
+                }
+            }
+            // 标记为已赠送，避免后续再次发放
+            ws.grantedSwordAtEntrance = true;
+        }
     }
     _monsters = new Controllers::AbyssMonsterController(_map, _worldNode);
     _mining = new Controllers::AbyssMiningController(_map, _worldNode);

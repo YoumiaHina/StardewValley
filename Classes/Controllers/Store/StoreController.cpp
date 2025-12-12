@@ -29,4 +29,21 @@ int StoreController::getSeedPrice(Game::ItemType seedType) const {
     return 25;
 }
 
+bool StoreController::buyItem(Game::ItemType type) {
+    // 非种子物品：使用物品自身价格；不消耗能量
+    int price = getItemPrice(type);
+    auto& ws = Game::globalState();
+    if (ws.gold >= price) {
+        if (_inventory && _inventory->addItems(type, 1) == 0) {
+            ws.gold -= price;
+            return true;
+        }
+    }
+    return false;
+}
+
+int StoreController::getItemPrice(Game::ItemType type) const {
+    return Game::itemPrice(type);
+}
+
 }

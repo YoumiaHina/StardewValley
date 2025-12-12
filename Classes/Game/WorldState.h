@@ -60,6 +60,9 @@ struct WorldState {
     // 生命值系统（矿洞 HUD 专属显示）
     int hp = 100;
     int maxHp = 100;
+
+    // 入口赠剑标记：仅在第一次进入矿洞0层时赠送一次
+    bool grantedSwordAtEntrance = false;
 };
 
 // 获取全局状态（惰性初始化由调用方保证）

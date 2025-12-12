@@ -69,6 +69,7 @@ list(APPEND GAME_SOURCE
      Classes/Game/Tool/Pickaxe.cpp
      Classes/Game/Tool/WaterCan.cpp
      Classes/Game/Tool/FishingRod.cpp
+     Classes/Game/Tool/Sword.cpp
      Classes/Game/Tool/ToolFactory.cpp
      Classes/Controllers/GameStateController.cpp
      Classes/Controllers/GameStateController.h
@@ -109,6 +110,8 @@ list(APPEND GAME_HEADER
      Classes/Game/Tool/Pickaxe.h
      Classes/Game/Tool/WaterCan.h
      Classes/Game/Tool/FishingRod.h
+     Classes/Game/Tool/Weapon.h
+     Classes/Game/Tool/Sword.h
      Classes/Game/Tool/ToolFactory.h
      Classes/Game/GameConfig.h
      )
