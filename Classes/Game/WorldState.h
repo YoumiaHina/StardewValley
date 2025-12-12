@@ -11,6 +11,7 @@
 #include "Game/Chest.h"
 #include "Game/GameConfig.h"
 #include "Game/Crop.h"
+#include "Game/Tree.h"
 
 namespace Game {
 
@@ -31,6 +32,8 @@ struct WorldState {
 
     // 农场作物
     std::vector<Crop> farmCrops;
+
+    std::vector<TreePos> farmTrees;
 
 
     // 室内箱子（房屋内放置的储物箱）

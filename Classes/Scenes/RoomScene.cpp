@@ -44,7 +44,9 @@ Controllers::IMapController* RoomScene::createMapController(Node* worldNode) {
 }
 
 void RoomScene::positionPlayerInitial() {
-    _player->setPosition(Vec2(_roomMap->roomRect().getMidX(), _roomMap->roomRect().getMidY() + 80));
+    if (!_roomMap || !_player) return;
+    const auto& b = _roomMap->bedRect();
+    _player->setPosition(Vec2(b.getMidX(), b.getMidY()));
 }
 
 void RoomScene::onSpacePressed() {

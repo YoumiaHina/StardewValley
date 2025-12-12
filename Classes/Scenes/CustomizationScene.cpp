@@ -1,5 +1,5 @@
 #include "CustomizationScene.h"
-#include "GameScene.h"
+#include "Scenes/RoomScene.h"
 #include "ui/CocosGUI.h"
 
 USING_NS_CC;
@@ -178,5 +178,5 @@ void CustomizationScene::onStartGame(Ref* sender) {
     def->flush();
 
     // Transition
-    Director::getInstance()->replaceScene(TransitionFade::create(1.0, GameScene::createScene()));
+    Director::getInstance()->replaceScene(TransitionFade::create(1.0, RoomScene::createScene()));
 }

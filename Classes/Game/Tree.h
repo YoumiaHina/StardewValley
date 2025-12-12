@@ -22,4 +22,9 @@ private:
     bool _falling = false;
 };
 
+struct TreePos {
+    int c = 0;
+    int r = 0;
+};
+
 }

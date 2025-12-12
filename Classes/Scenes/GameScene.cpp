@@ -68,7 +68,7 @@ void GameScene::setSpawnAtFarmRoomDoor() {
     if (!_player || !_mapController) return;
     auto pos = _mapController->farmRoomDoorSpawnPos();
     if (pos != Vec2::ZERO) {
-        _player->setPosition(pos);
+        _player->setPosition(pos + Vec2(0, -3.0f));
     }
 }
 

@@ -28,6 +28,7 @@ bool FarmMap::initWithFile(const std::string& tmxFile) {
     parseWater();
     parseDoorToRoom();
     parseDoorToMine();
+    parseNoTree();
     
     return true;
 }
@@ -361,6 +362,72 @@ cocos2d::Vec2 FarmMap::doorToRoomCenter() const {
         return cocos2d::Vec2(r.getMidX(), r.getMidY());
     }
     return cocos2d::Vec2::ZERO;
+}
+
+void FarmMap::parseNoTree() {
+    _noTreeRects.clear();
+    _noTreePolygons.clear();
+    if (!_tmx) return;
+    auto group = _tmx->getObjectGroup("NoTree");
+    if (!group) group = _tmx->getObjectGroup("noTree");
+    if (!group) return;
+    auto objects = group->getObjects();
+    for (auto &val : objects) {
+        auto dict = val.asValueMap();
+        float x = dict.at("x").asFloat();
+        float y = dict.at("y").asFloat();
+        if (dict.find("points") != dict.end() || dict.find("polyline") != dict.end() || dict.find("polygon") != dict.end()) {
+            std::vector<cocos2d::Vec2> pts;
+            cocos2d::ValueVector arr;
+            if (dict.find("points") != dict.end()) arr = dict.at("points").asValueVector();
+            else if (dict.find("polygon") != dict.end()) arr = dict.at("polygon").asValueVector();
+            else if (dict.find("polyline") != dict.end()) arr = dict.at("polyline").asValueVector();
+            for (auto &pv : arr) {
+                auto pmap = pv.asValueMap();
+                float px = pmap.at("x").asFloat();
+                float py = pmap.at("y").asFloat();
+                float finalX = x + px;
+                float finalY = y - py;
+                pts.emplace_back(finalX, finalY);
+            }
+            if (!pts.empty()) {
+                _noTreePolygons.push_back(pts);
+            }
+        } else if (dict.find("width") != dict.end() && dict.find("height") != dict.end()) {
+            float w = dict.at("width").asFloat();
+            float h = dict.at("height").asFloat();
+            cocos2d::Rect r(x, y, w, h);
+            _noTreeRects.push_back(r);
+        }
+    }
+}
+
+bool FarmMap::inNoTreeArea(const cocos2d::Vec2& p) const {
+    for (const auto& r : _noTreeRects) {
+        if (r.containsPoint(p)) return true;
+    }
+    for (const auto& poly : _noTreePolygons) {
+        if (poly.size() < 3) continue;
+        bool inside = false; size_t j = poly.size() - 1;
+        for (size_t i = 0; i < poly.size(); ++i) {
+            if (((poly[i].y > p.y) != (poly[j].y > p.y)) &&
+                (p.x < (poly[j].x - poly[i].x) * (p.y - poly[i].y) / (poly[j].y - poly[i].y) + poly[i].x)) {
+                inside = !inside;
+            }
+            j = i;
+        }
+        if (inside) return true;
+        j = poly.size() - 1;
+        for (size_t i = 0; i < poly.size(); ++i) {
+            cocos2d::Vec2 p1 = poly[j]; cocos2d::Vec2 p2 = poly[i]; cocos2d::Vec2 d = p2 - p1;
+            if (d.lengthSquared() > 0) {
+                float t = (p - p1).dot(d) / d.lengthSquared(); t = std::max(0.0f, std::min(1.0f, t));
+                cocos2d::Vec2 closest = p1 + d * t; if (p.distanceSquared(closest) <= 1.0f) return true;
+            }
+            j = i;
+        }
+    }
+    return false;
 }
 
 } // namespace Game

@@ -28,6 +28,7 @@ public:
     bool nearDoorToMine(const cocos2d::Vec2& p) const;
     cocos2d::Vec2 doorToMineCenter() const;
     cocos2d::Vec2 doorToRoomCenter() const;
+    bool inNoTreeArea(const cocos2d::Vec2& p) const;
 
 private:
     cocos2d::TMXTiledMap* _tmx = nullptr;
@@ -45,12 +46,15 @@ private:
     std::vector<cocos2d::Rect> _doorToRoomRects;
     std::vector<cocos2d::Rect> _doorToMineRects;
     cocos2d::DrawNode* _doorDebugNode = nullptr;
+    std::vector<cocos2d::Rect> _noTreeRects;
+    std::vector<std::vector<cocos2d::Vec2>> _noTreePolygons;
 
     void setupLayerOrder();
     void parseWalls();
     void parseWater();
     void parseDoorToRoom();
     void parseDoorToMine();
+    void parseNoTree();
 };
 
 } // namespace Game

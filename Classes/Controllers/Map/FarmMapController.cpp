@@ -40,7 +40,17 @@ void FarmMapController::init() {
         std::mt19937 rng(static_cast<unsigned>(std::time(nullptr)));
         std::uniform_int_distribution<int> distC(0, _cols - 1);
         std::uniform_int_distribution<int> distR(0, _rows - 1);
-        auto placeIfSoil = [this, &safe](int c, int r, Game::TileType t){ if (inBounds(c,r) && !safe(c,r) && getTile(c,r) == Game::TileType::Soil) setTile(c,r,t); };
+        auto placeIfSoil = [this, &safe](int c, int r, Game::TileType t){
+            if (!inBounds(c,r)) return;
+            if (safe(c,r)) return;
+            if (getTile(c,r) != Game::TileType::Soil) return;
+            if (t == Game::TileType::Tree && _gameMap) {
+                auto center = this->tileToWorld(c, r);
+                cocos2d::Vec2 footCenter = center + cocos2d::Vec2(0, -static_cast<float>(GameConfig::TILE_SIZE) * 0.5f);
+                if (_gameMap->inNoTreeArea(footCenter)) return;
+            }
+            setTile(c, r, t);
+        };
         int rocks = (_cols * _rows) / 22;
         int trees = (_cols * _rows) / 40;
         for (int i = 0; i < rocks; ++i) { placeIfSoil(distC(rng), distR(rng), Game::TileType::Rock); }
@@ -110,30 +120,50 @@ void FarmMapController::init() {
     refreshCropsVisuals();
 
     if (_treeSystem && _treeSystem->isEmpty()) {
-        int created = 0;
-        for (int r = 0; r < _rows; ++r) {
-            for (int c = 0; c < _cols; ++c) {
-                if (getTile(c, r) == Game::TileType::Tree) {
-                    auto center = tileToWorld(c, r);
-                    if (_treeSystem && _treeSystem->spawnFromTile(c, r, center, _gameMap, GameConfig::TILE_SIZE)) {
-                        setTile(c, r, Game::TileType::Soil);
-                        created++;
+        if (!ws.farmTrees.empty()) {
+            for (const auto& tp : ws.farmTrees) {
+                auto center = tileToWorld(tp.c, tp.r);
+                _treeSystem->spawnFromTile(tp.c, tp.r, center, _gameMap, GameConfig::TILE_SIZE);
+            }
+        } else {
+            std::vector<Game::TreePos> saved;
+            int created = 0;
+            for (int r = 0; r < _rows; ++r) {
+                for (int c = 0; c < _cols; ++c) {
+                    if (getTile(c, r) == Game::TileType::Tree) {
+                        auto center = tileToWorld(c, r);
+                        Vec2 footCenter = center + Vec2(0, -static_cast<float>(GameConfig::TILE_SIZE) * 0.5f);
+                        bool skip = _gameMap && _gameMap->inNoTreeArea(footCenter);
+                        if (skip) continue;
+                        if (_treeSystem->spawnFromTile(c, r, center, _gameMap, GameConfig::TILE_SIZE)) {
+                            setTile(c, r, Game::TileType::Soil);
+                            saved.push_back(Game::TreePos{c, r});
+                            created++;
+                        }
                     }
                 }
             }
-        }
-        if (created == 0) {
-            int cx = _cols / 2;
-            int cy = _rows / 2;
-            auto safe = [cx, cy](int c, int r){ return std::abs(c - cx) <= 4 && std::abs(r - cy) <= 4; };
-            int trees = (_cols * _rows) / 40;
-            if (_treeSystem) {
+            if (created == 0) {
+                int cx = _cols / 2;
+                int cy = _rows / 2;
+                auto safe = [this, cx, cy](int c, int r){
+                    if (std::abs(c - cx) <= 4 && std::abs(r - cy) <= 4) return true;
+                    if (_gameMap) {
+                        auto center = this->tileToWorld(c, r);
+                        Vec2 footCenter = center + Vec2(0, -static_cast<float>(GameConfig::TILE_SIZE) * 0.5f);
+                        if (_gameMap->inNoTreeArea(footCenter)) return true;
+                    }
+                    return false;
+                };
+                int trees = (_cols * _rows) / 40;
                 _treeSystem->spawnRandom(trees, _cols, _rows,
                     [this](int c, int r){ return this->tileToWorld(c, r); },
                     _gameMap, GameConfig::TILE_SIZE,
                     [safe](int c, int r){ return safe(c, r); }
                 );
+                saved = _treeSystem->getAllTreeTiles();
             }
+            ws.farmTrees = saved;
         }
     }
 
@@ -233,10 +263,20 @@ Game::Tree* FarmMapController::findTreeAt(int c, int r) const {
 
 bool FarmMapController::damageTreeAt(int c, int r, int amount) {
     if (!_treeSystem) return false;
-    return _treeSystem->damageTreeAt(c, r, amount,
+    bool ok = _treeSystem->damageTreeAt(c, r, amount,
         [this](int c,int r,int item){ this->spawnDropAt(c, r, item, 3); this->refreshDropsVisuals(); },
         [this](int c,int r, Game::TileType t){ this->setTile(c, r, t); }
     );
+    if (ok && !_treeSystem->findTreeAt(c, r)) {
+        auto& ws = Game::globalState();
+        std::vector<Game::TreePos> v;
+        v.reserve(ws.farmTrees.size());
+        for (const auto& tp : ws.farmTrees) {
+            if (!(tp.c == c && tp.r == r)) v.push_back(tp);
+        }
+        ws.farmTrees = v;
+    }
+    return ok;
 }
 
 cocos2d::Vec2 FarmMapController::farmMineDoorSpawnPos() const {

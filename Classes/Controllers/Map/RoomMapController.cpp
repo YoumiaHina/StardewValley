@@ -16,6 +16,13 @@ void RoomMapController::init() {
         _roomMap->setPosition(Vec2(0,0));
         _worldNode->addChild(_roomMap, 0);
 
+        if (auto tmx = _roomMap->getTMX()) {
+            auto bedBody = tmx->getLayer("BedBody");
+            if (bedBody) {
+                bedBody->setLocalZOrder(100);
+            }
+        }
+
         auto cs = _roomMap->getContentSize();
         _roomRect = Rect(0, 0, cs.width, cs.height);
 

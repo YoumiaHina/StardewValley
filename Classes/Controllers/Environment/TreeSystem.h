@@ -31,6 +31,7 @@ public:
 
     void sortTrees();
     bool isEmpty() const;
+    std::vector<Game::TreePos> getAllTreeTiles() const;
 
 private:
     cocos2d::Node* _root = nullptr;

@@ -46,6 +46,7 @@ void TreeSystem::spawnRandom(int count, int cols, int rows,
         Vec2 center = tileToWorld ? tileToWorld(c, r) : Vec2::ZERO;
         float s = static_cast<float>(tileSize);
         Vec2 footCenter = center + Vec2(0, -s * 0.5f);
+        if (map && map->inNoTreeArea(footCenter)) continue;
         bool blocked = map && map->collides(footCenter, 8.0f);
         if (blocked) continue;
         auto tree = Tree::create("Tree/tree.png");
@@ -107,6 +108,18 @@ void TreeSystem::sortTrees() {
 
 bool TreeSystem::isEmpty() const {
     return _trees.empty();
+}
+
+std::vector<Game::TreePos> TreeSystem::getAllTreeTiles() const {
+    std::vector<Game::TreePos> out;
+    out.reserve(_trees.size());
+    for (const auto& kv : _trees) {
+        long long k = kv.first;
+        int r = static_cast<int>(k >> 32);
+        int c = static_cast<int>(k & 0xFFFFFFFF);
+        out.push_back(Game::TreePos{c, r});
+    }
+    return out;
 }
 
 }

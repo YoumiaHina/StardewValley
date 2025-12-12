@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="80" height="65" tilewidth="16" tileheight="16" infinite="0" nextlayerid="14" nextobjectid="65">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="80" height="65" tilewidth="16" tileheight="16" infinite="0" nextlayerid="15" nextobjectid="66">
  <tileset firstgid="1" source="spring_outdoors.tsx"/>
  <tileset firstgid="1976" source="houses.tsx"/>
  <layer id="8" name="Water" width="80" height="65">
@@ -379,6 +379,9 @@
   <object id="46" x="1232" y="146.667" width="14" height="144.667"/>
   <object id="47" x="1230" y="290.667" width="51.3333" height="27.3333"/>
   <object id="48" x="1214.67" y="370.667" width="65.3333" height="26.6667"/>
+ </objectgroup>
+ <objectgroup id="14" name="NoTree">
+  <object id="65" x="503" y="174" width="303" height="190"/>
  </objectgroup>
  <objectgroup id="13" name="DoorToMine">
   <object id="53" x="327.333" y="168.667"/>
