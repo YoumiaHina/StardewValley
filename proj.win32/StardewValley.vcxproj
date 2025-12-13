@@ -199,7 +199,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClCompile Include="..\Classes\Controllers\Systems\GameStateController.cpp" />
     <ClCompile Include="..\Classes\Controllers\Interact\FarmInteractor.cpp" />
     <ClCompile Include="..\Classes\Controllers\Interact\RoomInteractor.cpp" />
-    <ClCompile Include="..\Classes\Managers\AudioManager.cpp" />
+    <ClCompile Include="..\Classes\Controllers\Managers\AudioManager.cpp" />
     <ClCompile Include="..\Classes\Controllers\Systems\FishingController.cpp" />
     <ClCompile Include="..\Classes\Controllers\Systems\CropSystem.cpp" />
     <ClCompile Include="..\Classes\Game\Crop.cpp" />
@@ -277,7 +277,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClInclude Include="..\Classes\Controllers\Systems\GameStateController.h" />
     <ClInclude Include="..\Classes\Controllers\Interact\FarmInteractor.h" />
     <ClInclude Include="..\Classes\Controllers\Interact\RoomInteractor.h" />
-    <ClInclude Include="..\Classes\Managers\AudioManager.h" />
+    <ClInclude Include="..\Classes\Controllers\Managers\AudioManager.h" />
     <ClInclude Include="..\Classes\Controllers\Systems\FishingController.h" />
     <ClInclude Include="..\Classes\Controllers\Systems\CropSystem.h" />
     <ClInclude Include="..\Classes\Game\Crops\crop\CropBase.h" />

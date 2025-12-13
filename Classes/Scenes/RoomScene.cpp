@@ -15,7 +15,7 @@
 #include "Controllers/Systems/GameStateController.h"
 #include "Controllers/Interact/RoomInteractor.h"
 #include "Game/Cheat.h"
-#include "Managers/AudioManager.h"
+#include "Controllers/Managers/AudioManager.h"
 
 USING_NS_CC;
 
