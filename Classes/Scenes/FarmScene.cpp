@@ -117,9 +117,5 @@ void FarmScene::onKeyPressedHook(EventKeyboard::KeyCode code) {
         auto mine = MineScene::create();
         auto trans = TransitionFade::create(0.6f, mine);
         Director::getInstance()->replaceScene(trans);
-    } else if (code == EventKeyboard::KeyCode::KEY_B) {
-        auto beach = BeachScene::createScene();
-        auto trans = TransitionFade::create(0.6f, beach);
-        Director::getInstance()->replaceScene(trans);
     }
 }
