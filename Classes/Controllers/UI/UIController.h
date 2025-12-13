@@ -58,6 +58,7 @@ public:
     void showDoorPrompt(bool visible, const cocos2d::Vec2& worldPos, const std::string& text);
     void showChestPrompt(bool visible, const cocos2d::Vec2& worldPos, const std::string& text);
     void showFishPrompt(bool visible, const cocos2d::Vec2& worldPos, const std::string& text);
+    void showNpcPrompt(bool visible, const cocos2d::Vec2& worldPos, const std::string& text);
 
     // 弹出短文本
     void popTextAt(const cocos2d::Vec2& worldPos, const std::string& text, const cocos2d::Color3B& color);

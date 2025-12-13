@@ -6,6 +6,7 @@
 #include <memory>
 #include <vector>
 #include <unordered_set>
+#include <unordered_map>
 #include "Game/Inventory.h"
 #include "Game/Tile.h"
 #include "Game/Drop.h"
@@ -70,6 +71,9 @@ struct WorldState {
 
     // 已激活电梯楼层（5 的倍数），长期保存，不因进出矿洞而清空
     std::unordered_set<int> abyssElevatorFloors;
+
+    std::unordered_map<int, int> npcFriendship;
+    std::unordered_map<int, bool> npcRomanceUnlocked;
 };
 
 // 获取全局状态（惰性初始化由调用方保证）

@@ -10,6 +10,9 @@ TownInteractor::SpaceAction TownInteractor::onSpacePressed() {
     if (_map->isNearDoor(p)) {
         return SpaceAction::EnterFarm;
     }
+    if (_npc) {
+        _npc->handleTalkAt(p);
+    }
     return SpaceAction::None;
 }
 

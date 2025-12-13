@@ -291,6 +291,12 @@
     <ClCompile Include="..\Classes\Controllers\Map\TownMapController.cpp">
       <Filter>Classes\Controllers\Map</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\Game\Npc.cpp">
+      <Filter>Classes\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\Systems\TownNpcController.cpp">
+      <Filter>Classes\Controllers\Systems</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <!-- Header Files -->
@@ -508,6 +514,12 @@
     </ClInclude>
     <ClInclude Include="..\Classes\Controllers\Map\TownMapController.h">
       <Filter>Classes\Controllers\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\Npc.h">
+      <Filter>Classes\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\Systems\TownNpcController.h">
+      <Filter>Classes\Controllers\Systems</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -13,6 +13,7 @@ public:
     void showDoorPrompt(bool visible, const cocos2d::Vec2& worldPos, const std::string& text);
     void showChestPrompt(bool visible, const cocos2d::Vec2& worldPos, const std::string& text);
     void showFishPrompt(bool visible, const cocos2d::Vec2& worldPos, const std::string& text);
+    void showNpcPrompt(bool visible, const cocos2d::Vec2& worldPos, const std::string& text);
     void popTextAt(const cocos2d::Vec2& worldPos, const std::string& text, const cocos2d::Color3B& color);
 
 private:
@@ -21,6 +22,7 @@ private:
     cocos2d::Label* _doorPrompt = nullptr;
     cocos2d::Label* _chestPrompt = nullptr;
     cocos2d::Label* _fishPrompt = nullptr;
+    cocos2d::Label* _npcPrompt = nullptr;
 };
 
 }

@@ -49,6 +49,19 @@ void PromptUI::showFishPrompt(bool visible, const Vec2& worldPos, const std::str
     }
 }
 
+void PromptUI::showNpcPrompt(bool visible, const Vec2& worldPos, const std::string& text) {
+    if (!_npcPrompt) {
+        _npcPrompt = Label::createWithTTF("", "fonts/Marker Felt.ttf", 18);
+        _npcPrompt->setAnchorPoint(Vec2(0.5f, 0.5f));
+        if (_scene) _scene->addChild(_npcPrompt, 3);
+    }
+    _npcPrompt->setString(text);
+    _npcPrompt->setVisible(visible);
+    if (visible) {
+        _npcPrompt->setPosition(worldPos + Vec2(0, 10));
+    }
+}
+
 void PromptUI::popTextAt(const Vec2& worldPos, const std::string& text, const Color3B& color) {
     auto label = Label::createWithTTF(text, "fonts/Marker Felt.ttf", 16);
     label->setColor(color);

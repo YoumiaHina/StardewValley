@@ -3,6 +3,7 @@
 #include "Scenes/SceneBase.h"
 #include "Controllers/Map/TownMapController.h"
 #include "Controllers/Interact/TownInteractor.h"
+#include "Controllers/Systems/TownNpcController.h"
 
 class TownScene : public SceneBase {
 public:
@@ -19,5 +20,6 @@ protected:
 private:
     Controllers::TownMapController* _townMap = nullptr;
     Controllers::TownInteractor _interactor;
+    Controllers::TownNpcController* _npcController = nullptr;
 };
 

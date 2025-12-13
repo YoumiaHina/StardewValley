@@ -92,6 +92,11 @@ void UIController::showFishPrompt(bool visible, const Vec2& worldPos, const std:
     _prompts->showFishPrompt(visible, worldPos, text);
 }
 
+void UIController::showNpcPrompt(bool visible, const Vec2& worldPos, const std::string& text) {
+    if (!_prompts) _prompts = new PromptUI(_scene, _worldNode);
+    _prompts->showNpcPrompt(visible, worldPos, text);
+}
+
 void UIController::popTextAt(const Vec2& worldPos, const std::string& text, const Color3B& color) {
     if (!_prompts) _prompts = new PromptUI(_scene, _worldNode);
     _prompts->popTextAt(worldPos, text, color);

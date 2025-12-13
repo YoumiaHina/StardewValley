@@ -10,8 +10,17 @@ Scene* TownScene::createScene() { return TownScene::create(); }
 
 bool TownScene::init() {
     if (!SceneBase::initBase(3.0f, true, true, true)) return false;
+    _npcController = new TownNpcController(_townMap, _worldNode, _uiController, _inventory);
+    addUpdateCallback([this](float) {
+        if (_npcController && _player) {
+            _npcController->update(_player->getPosition());
+        }
+    });
     _interactor.setMap(_townMap);
     _interactor.setGetPlayerPos([this]() { return _player ? _player->getPosition() : Vec2::ZERO; });
+    _interactor.setNpcController(_npcController);
+    _interactor.setUI(_uiController);
+    _interactor.setInventory(_inventory);
     return true;
 }
 
