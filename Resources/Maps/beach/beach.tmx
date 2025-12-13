@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="50" height="50" tilewidth="16" tileheight="16" infinite="0" nextlayerid="10" nextobjectid="14">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="50" height="50" tilewidth="16" tileheight="16" infinite="0" nextlayerid="11" nextobjectid="16">
  <tileset firstgid="1" source="spring_beach.zh-CN.tsx"/>
  <layer id="1" name="Background" width="50" height="50">
   <data encoding="csv">
@@ -59,6 +59,9 @@
   <object id="13" x="54" y="1.33333">
    <polygon points="0,0 -0.5,255 104,357.5 107.5,360.5 176,360.5 216.5,388.5 249,388 281,419 310.5,418.5 312,593.5 601.5,593.5 603.5,593.5 603,543.5 507.5,543.5 508,511 362.5,511 363.5,432.5 744.5,431.5 745.5,799 -53.5,798.5 -53.5,0"/>
   </object>
+ </objectgroup>
+ <objectgroup id="10" name="DoorToFarm">
+  <object id="14" x="449.333" y="0" width="78.6667" height="32.6667"/>
  </objectgroup>
  <layer id="3" name="SeaBoundary" width="50" height="50">
   <data encoding="csv">

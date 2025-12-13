@@ -12,7 +12,7 @@
 #include "Scenes/RoomScene.h"
 #include "Scenes/MineScene.h"
 #include "Scenes/BeachScene.h"
-#include "Managers/AudioManager.h"
+#include "Controllers/Managers/AudioManager.h"
 #include "Controllers/Systems/FishingController.h"
 #include "Game/Cheat.h"
 #include "Controllers/Input/PlayerController.h"

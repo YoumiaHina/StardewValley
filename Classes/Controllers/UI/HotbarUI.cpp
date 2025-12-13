@@ -106,7 +106,7 @@ void HotbarUI::buildHotbar() {
         }
         auto label = Label::createWithTTF(text, "fonts/Marker Felt.ttf", 18);
         label->setPosition(Vec2(x, 0));
-        _hotbarNode->addChild(label);
+        _hotbarNode->addChild(label, 2);
         _hotbarLabels.push_back(label);
     }
 
@@ -215,12 +215,21 @@ void HotbarUI::refreshHotbar() {
         } else if (_inventory->isItem(i)) {
             auto st = _inventory->itemAt(i);
             std::string text = StringUtils::format("%s x%d", Game::itemName(st.type), st.quantity);
-            if (label) { label->setString(text); label->setPosition(Vec2(cx, 0)); label->setVisible(true); }
+            if (label) {
+                label->setString(text);
+                label->setPosition(Vec2(cx, 0));
+                label->setVisible(true);
+                if (st.type == Game::ItemType::Fish) {
+                    label->setColor(Color3B(64, 200, 255));
+                } else {
+                    label->setColor(Color3B::WHITE);
+                }
+            }
             if (icon) {
                 if (st.quantity > 0) {
                     std::string path;
                     if (st.type == Game::ItemType::Fish) {
-                        path = "fish/3120.png";
+                        path = "fish/globefish.png";
                     } else {
                         switch (st.type) {
                             case Game::ItemType::Coal:         path = "Mineral/Coal.png"; break;
@@ -256,7 +265,12 @@ void HotbarUI::refreshHotbar() {
                 }
             }
         } else {
-            if (label) { label->setString("-"); label->setPosition(Vec2(cx, 0)); label->setVisible(true); }
+            if (label) {
+                label->setString("-");
+                label->setPosition(Vec2(cx, 0));
+                label->setVisible(true);
+                label->setColor(Color3B::WHITE);
+            }
             if (icon) icon->setVisible(false);
         }
     }

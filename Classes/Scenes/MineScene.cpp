@@ -1,6 +1,6 @@
 #include "Scenes/MineScene.h"
 #include "cocos2d.h"
-#include "Managers/AudioManager.h"
+#include "Controllers/Managers/AudioManager.h"
 #include "Scenes/FarmScene.h"
 #include "Game/Tool/ToolFactory.h"
 
