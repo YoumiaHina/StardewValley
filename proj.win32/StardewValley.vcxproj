@@ -200,6 +200,23 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClCompile Include="..\Classes\Controllers\Interact\RoomInteractor.cpp" />
     <ClCompile Include="..\Classes\Managers\AudioManager.cpp" />
     <ClCompile Include="..\Classes\Controllers\Systems\FishingController.cpp" />
+    <ClCompile Include="..\Classes\Controllers\Systems\CropSystem.cpp" />
+    <ClCompile Include="..\Classes\Game\Crop.cpp" />
+    <ClCompile Include="..\Classes\Game\Crops\crop\ParsnipCrop.cpp" />
+    <ClCompile Include="..\Classes\Game\Crops\crop\BlueberryCrop.cpp" />
+    <ClCompile Include="..\Classes\Game\Crops\crop\EggplantCrop.cpp" />
+    <ClCompile Include="..\Classes\Game\Crops\crop\CornCrop.cpp" />
+    <ClCompile Include="..\Classes\Game\Crops\crop\StrawberryCrop.cpp" />
+    <ClCompile Include="..\Classes\Game\Crops\seed\ParsnipSeed.cpp" />
+    <ClCompile Include="..\Classes\Game\Crops\seed\BlueberrySeed.cpp" />
+    <ClCompile Include="..\Classes\Game\Crops\seed\EggplantSeed.cpp" />
+    <ClCompile Include="..\Classes\Game\Crops\seed\CornSeed.cpp" />
+    <ClCompile Include="..\Classes\Game\Crops\seed\StrawberrySeed.cpp" />
+    <ClCompile Include="..\Classes\Game\Crops\vegetable\ParsnipVegetable.cpp" />
+    <ClCompile Include="..\Classes\Game\Crops\vegetable\BlueberryVegetable.cpp" />
+    <ClCompile Include="..\Classes\Game\Crops\vegetable\EggplantVegetable.cpp" />
+    <ClCompile Include="..\Classes\Game\Crops\vegetable\CornVegetable.cpp" />
+    <ClCompile Include="..\Classes\Game\Crops\vegetable\StrawberryVegetable.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Classes\AppDelegate.h" />
@@ -260,6 +277,10 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClInclude Include="..\Classes\Controllers\Interact\RoomInteractor.h" />
     <ClInclude Include="..\Classes\Managers\AudioManager.h" />
     <ClInclude Include="..\Classes\Controllers\Systems\FishingController.h" />
+    <ClInclude Include="..\Classes\Controllers\Systems\CropSystem.h" />
+    <ClInclude Include="..\Classes\Game\Crops\crop\CropBase.h" />
+    <ClInclude Include="..\Classes\Game\Crops\seed\SeedBase.h" />
+    <ClInclude Include="..\Classes\Game\Crops\vegetable\VegetableBase.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\cocos2d\cocos\2d\libcocos2d.vcxproj">

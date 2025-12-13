@@ -1,0 +1,13 @@
+#include "Game/Crops/seed/SeedBase.h"
+
+namespace Game {
+
+class StrawberrySeed : public SeedBase {
+public:
+    ItemType item() const override { return ItemType::StrawberrySeed; }
+    CropType cropType() const override { return CropType::Strawberry; }
+    const char* name() const override { return "Strawberry Seed"; }
+    int price() const override { return 25; }
+};
+
+}
