@@ -1,4 +1,4 @@
-#include "Game/MineMap.h"
+#include "Game/Map/MineMap.h"
 
 using namespace cocos2d;
 
@@ -11,10 +11,7 @@ MineMap* MineMap::create(const std::string& tmxFile) {
 }
 
 bool MineMap::initWithFile(const std::string& tmxFile) {
-    if (!Node::init()) return false;
-    _tmx = TMXTiledMap::create(tmxFile);
-    if (!_tmx) return false;
-    this->addChild(_tmx);
+    if (!MapBase::initWithFile(tmxFile)) return false;
     parseCollision();
     parseStairs();
     parseAppear();
@@ -28,48 +25,10 @@ bool MineMap::initWithFile(const std::string& tmxFile) {
 }
 
 void MineMap::parseCollision() {
-    _collisionRects.clear();
-    _collisionPolygons.clear();
-    if (!_tmx) return;
     if (_debugNode) { _debugNode->removeFromParent(); _debugNode = nullptr; }
     _debugNode = DrawNode::create();
     _tmx->addChild(_debugNode, 999);
-    auto group = _tmx->getObjectGroup("collision");
-    if (!group) group = _tmx->getObjectGroup("Collision");
-    if (!group) return;
-    auto objects = group->getObjects();
-    for (auto &val : objects) {
-        auto dict = val.asValueMap();
-        float x = dict.at("x").asFloat();
-        float y = dict.at("y").asFloat();
-        if (dict.find("points") != dict.end() || dict.find("polyline") != dict.end() || dict.find("polygon") != dict.end()) {
-            std::vector<Vec2> pts;
-            ValueVector arr;
-            if (dict.find("points") != dict.end()) arr = dict.at("points").asValueVector();
-            else if (dict.find("polygon") != dict.end()) arr = dict.at("polygon").asValueVector();
-            else if (dict.find("polyline") != dict.end()) arr = dict.at("polyline").asValueVector();
-            for (auto &pv : arr) {
-                auto pmap = pv.asValueMap();
-                float px = pmap.at("x").asFloat();
-                float py = pmap.at("y").asFloat();
-                float finalX = x + px;
-                float finalY = y - py;
-                pts.emplace_back(finalX, finalY);
-            }
-            if (!pts.empty()) {
-                _collisionPolygons.push_back(pts);
-                _debugNode->drawPoly(pts.data(), (unsigned int)pts.size(), true, Color4F(1, 0, 0, 0.5f));
-                _debugNode->drawSolidPoly(pts.data(), (unsigned int)pts.size(), Color4F(1, 0, 0, 0.2f));
-            }
-        } else if (dict.find("width") != dict.end() && dict.find("height") != dict.end()) {
-            float w = dict.at("width").asFloat();
-            float h = dict.at("height").asFloat();
-            Rect r(x, y, w, h);
-            _collisionRects.push_back(r);
-            _debugNode->drawRect(r.origin, r.origin + r.size, Color4F(1, 0, 0, 0.5f));
-            _debugNode->drawSolidRect(r.origin, r.origin + r.size, Color4F(1, 0, 0, 0.2f));
-        }
-    }
+    MapBase::parseWalls(_tmx, _collisionRects, _collisionPolygons, _debugNode);
 }
 
 void MineMap::parseStairs() {
@@ -117,36 +76,7 @@ void MineMap::parseAppear() {
 }
 
 bool MineMap::collides(const Vec2& p, float radius) const {
-    for (const auto& r : _collisionRects) {
-        float cx = std::max(r.getMinX(), std::min(p.x, r.getMaxX()));
-        float cy = std::max(r.getMinY(), std::min(p.y, r.getMaxY()));
-        float dx = p.x - cx;
-        float dy = p.y - cy;
-        if (dx*dx + dy*dy <= radius*radius) return true;
-    }
-    for (const auto& poly : _collisionPolygons) {
-        if (poly.size() < 3) continue;
-        bool inside = false; size_t j = poly.size() - 1;
-        for (size_t i = 0; i < poly.size(); ++i) {
-            if (((poly[i].y > p.y) != (poly[j].y > p.y)) &&
-                (p.x < (poly[j].x - poly[i].x) * (p.y - poly[i].y) / (poly[j].y - poly[i].y) + poly[i].x)) {
-                inside = !inside;
-            }
-            j = i;
-        }
-        if (inside) return true;
-        j = poly.size() - 1;
-        float r2 = radius * radius;
-        for (size_t i = 0; i < poly.size(); ++i) {
-            Vec2 p1 = poly[j]; Vec2 p2 = poly[i]; Vec2 d = p2 - p1;
-            if (d.lengthSquared() > 0) {
-                float t = (p - p1).dot(d) / d.lengthSquared(); t = std::max(0.0f, std::min(1.0f, t));
-                Vec2 closest = p1 + d * t; if (p.distanceSquared(closest) <= r2) return true;
-            }
-            j = i;
-        }
-    }
-    return false;
+    return MapBase::collidesAt(p, radius, _collisionRects, _collisionPolygons);
 }
 
 bool MineMap::nearStairs(const Vec2& p, float radius) const {
@@ -210,24 +140,12 @@ void MineMap::parseDoorToFarm() {
 }
 
 bool MineMap::nearDoorToFarm(const Vec2& p) const {
-    for (const auto& r : _doorToFarmRects) {
-        if (r.containsPoint(p)) return true;
-    }
-    // points: small radius check
     float r2 = (GameConfig::TILE_SIZE * 0.6f); r2 *= r2;
-    for (const auto& pt : _doorToFarmPoints) {
-        if (p.distanceSquared(pt) <= r2) return true;
-    }
-    return false;
+    return MapBase::nearRectOrPoints(p, _doorToFarmRects, _doorToFarmPoints, r2);
 }
 
 Vec2 MineMap::doorToFarmCenter() const {
-    if (!_doorToFarmRects.empty()) {
-        const auto& r = _doorToFarmRects.front();
-        return Vec2(r.getMidX(), r.getMidY());
-    }
-    if (!_doorToFarmPoints.empty()) return _doorToFarmPoints.front();
-    return Vec2::ZERO;
+    return MapBase::centerFromRectsPoints(_doorToFarmRects, _doorToFarmPoints);
 }
 
 void MineMap::parseBack0() {

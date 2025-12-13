@@ -61,6 +61,9 @@
     <Filter Include="Classes\Game\Vegetable">
       <UniqueIdentifier>{e631b5bc-4b8c-4254-9de5-06bdebc3808f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Classes\Game\Map">
+      <UniqueIdentifier>{580f6630-072e-4d6a-8c93-f93c37bdbb37}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <!-- Source Files -->
@@ -105,12 +108,6 @@
     </ClCompile>
     <ClCompile Include="..\Classes\Scenes\RoomScene.cpp">
       <Filter>Classes\Scenes</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Classes\Game\FarmMap.cpp">
-      <Filter>Classes\Game</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Classes\Game\MineMap.cpp">
-      <Filter>Classes\Game</Filter>
     </ClCompile>
     <ClCompile Include="..\Classes\Game\WorldState.cpp">
       <Filter>Classes\Game</Filter>
@@ -164,9 +161,6 @@
     </ClCompile>
     <ClCompile Include="..\Classes\Controllers\Environment\TreeSystem.cpp">
       <Filter>Classes\Controllers\Environment</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Classes\Game\RoomMap.cpp">
-      <Filter>Classes\Game</Filter>
     </ClCompile>
     <ClCompile Include="..\Classes\Game\View\PlayerView.cpp">
       <Filter>Classes\Game\View</Filter>
@@ -261,6 +255,18 @@
     <ClCompile Include="..\Classes\Game\Crops\vegetable\ParsnipVegetable.cpp">
       <Filter>Classes\Game\Vegetable</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\Game\Map\FarmMap.cpp">
+      <Filter>Classes\Game\Map</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\Map\MapBase.cpp">
+      <Filter>Classes\Game\Map</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\Map\MineMap.cpp">
+      <Filter>Classes\Game\Map</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\Map\RoomMap.cpp">
+      <Filter>Classes\Game\Map</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <!-- Header Files -->
@@ -316,12 +322,6 @@
       <Filter>Classes\Game</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\Game\Crop.h">
-      <Filter>Classes\Game</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Classes\Game\FarmMap.h">
-      <Filter>Classes\Game</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Classes\Game\MineMap.h">
       <Filter>Classes\Game</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\Game\GameConfig.h">
@@ -386,9 +386,6 @@
     <ClInclude Include="..\Classes\Controllers\Environment\TreeSystem.h">
       <Filter>Classes\Controllers\Environment</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\Game\RoomMap.h">
-      <Filter>Classes\Game</Filter>
-    </ClInclude>
     <ClInclude Include="..\Classes\Game\View\IPlayerView.h">
       <Filter>Classes\Game\View</Filter>
     </ClInclude>
@@ -451,6 +448,18 @@
     </ClInclude>
     <ClInclude Include="..\Classes\Game\Crops\vegetable\VegetableBase.h">
       <Filter>Classes\Game\Vegetable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\Map\FarmMap.h">
+      <Filter>Classes\Game\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\Map\MapBase.h">
+      <Filter>Classes\Game\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\Map\MineMap.h">
+      <Filter>Classes\Game\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\Map\RoomMap.h">
+      <Filter>Classes\Game\Map</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

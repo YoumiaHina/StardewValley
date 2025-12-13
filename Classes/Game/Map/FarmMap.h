@@ -1,11 +1,12 @@
 #pragma once
 
 #include "cocos2d.h"
-#include "GameConfig.h"
+#include "Game/GameConfig.h"
+#include "Game/Map/MapBase.h"
 
 namespace Game {
 
-class FarmMap : public cocos2d::Node {
+class FarmMap : public MapBase {
 public:
     static FarmMap* create(const std::string& tmxFile);
     bool initWithFile(const std::string& tmxFile);
@@ -31,7 +32,6 @@ public:
     bool inNoTreeArea(const cocos2d::Vec2& p) const;
 
 private:
-    cocos2d::TMXTiledMap* _tmx = nullptr;
     cocos2d::TMXLayer* _bgLayer = nullptr;
     cocos2d::TMXLayer* _houseBodyLayer = nullptr;
     cocos2d::TMXLayer* _houseTopLayer = nullptr;

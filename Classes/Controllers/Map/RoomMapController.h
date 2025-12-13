@@ -7,7 +7,7 @@
 #include <vector>
 #include "Controllers/IMapController.h"
 #include "Game/Chest.h"
-#include "Game/RoomMap.h"
+#include "Game/Map/RoomMap.h"
 
 namespace Controllers {
 

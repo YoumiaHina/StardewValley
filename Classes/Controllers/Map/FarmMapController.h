@@ -10,7 +10,7 @@
 #include <unordered_map>
 #include "Controllers/IMapController.h"
 #include "Game/GameConfig.h"
-#include "Game/FarmMap.h"
+#include "Game/Map/FarmMap.h"
 #include "Game/Chest.h"
 #include "Game/Drop.h"
 #include "Game/Crop.h"

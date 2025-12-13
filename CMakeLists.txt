@@ -99,23 +99,6 @@ list(APPEND GAME_SOURCE
      Classes/Controllers/AbyssElevatorController.cpp
      Classes/Controllers/Store/StoreController.cpp
      Classes/Controllers/Store/StoreController.h
-     Classes/Controllers/Systems/CropSystem.cpp
-     Classes/Game/Crop.cpp
-     Classes/Game/Crops/crop/ParsnipCrop.cpp
-     Classes/Game/Crops/crop/BlueberryCrop.cpp
-     Classes/Game/Crops/crop/EggplantCrop.cpp
-     Classes/Game/Crops/crop/CornCrop.cpp
-     Classes/Game/Crops/crop/StrawberryCrop.cpp
-     Classes/Game/Crops/seed/ParsnipSeed.cpp
-     Classes/Game/Crops/seed/BlueberrySeed.cpp
-     Classes/Game/Crops/seed/EggplantSeed.cpp
-     Classes/Game/Crops/seed/CornSeed.cpp
-     Classes/Game/Crops/seed/StrawberrySeed.cpp
-     Classes/Game/Crops/vegetable/ParsnipVegetable.cpp
-     Classes/Game/Crops/vegetable/BlueberryVegetable.cpp
-     Classes/Game/Crops/vegetable/EggplantVegetable.cpp
-     Classes/Game/Crops/vegetable/CornVegetable.cpp
-     Classes/Game/Crops/vegetable/StrawberryVegetable.cpp
      )
 list(APPEND GAME_HEADER
      Classes/AppDelegate.h

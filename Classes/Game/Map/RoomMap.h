@@ -1,10 +1,11 @@
 #pragma once
 
 #include "cocos2d.h"
+#include "Game/Map/MapBase.h"
 
 namespace Game {
 
-class RoomMap : public cocos2d::Node {
+class RoomMap : public MapBase {
 public:
     static RoomMap* create(const std::string& tmxFile);
     bool initWithFile(const std::string& tmxFile);
@@ -26,7 +27,6 @@ public:
     cocos2d::Vec2 doorToFarmCenter() const;
 
 private:
-    cocos2d::TMXTiledMap* _tmx = nullptr;
     std::vector<cocos2d::Rect> _bedRects;
     cocos2d::Rect _doorRect;
     bool _hasDoor = false;

@@ -17,7 +17,7 @@
  <objectgroup id="4" name="Back0" visible="0">
   <object id="13" x="129.245" y="-1.72327" width="70.6541" height="94.7799"/>
  </objectgroup>
- <objectgroup id="5" name="collision">
+ <objectgroup id="5" name="Wall">
   <object id="1" x="109.141" y="0.574424" width="247.577" height="64.3355"/>
   <object id="2" x="305.019" y="63.1866" width="276.872" height="132.692"/>
   <object id="3" x="337.187" y="191.283" width="264.809" height="32.7422"/>

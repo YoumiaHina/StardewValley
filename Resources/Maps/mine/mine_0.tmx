@@ -61,7 +61,7 @@
  <objectgroup id="13" name="DoorToFarm">
   <object id="29" x="318.667" y="414.667" width="200" height="68.6667"/>
  </objectgroup>
- <objectgroup id="6" name="collision">
+ <objectgroup id="6" name="Wall">
   <properties>
    <property name="collision" type="bool" value="true"/>
   </properties>

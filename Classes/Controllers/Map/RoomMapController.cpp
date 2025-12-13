@@ -2,7 +2,7 @@
 #include "cocos2d.h"
 #include "Game/GameConfig.h"
 #include "Game/WorldState.h"
-#include "Game/RoomMap.h"
+#include "Game/Map/RoomMap.h"
 
 using namespace cocos2d;
 

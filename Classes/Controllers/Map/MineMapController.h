@@ -9,7 +9,7 @@
 #include <unordered_set>
 #include "Controllers/IMapController.h"
 #include "Game/GameConfig.h"
-#include "Game/MineMap.h"
+#include "Game/Map/MineMap.h"
 
 namespace Controllers {
 

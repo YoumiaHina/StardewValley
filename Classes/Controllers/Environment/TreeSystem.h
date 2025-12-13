@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include <functional>
 #include "Game/Tree.h"
-#include "Game/FarmMap.h"
+#include "Game/Map/FarmMap.h"
 #include "Game/Tile.h"
 
 namespace Controllers {

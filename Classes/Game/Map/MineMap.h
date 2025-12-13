@@ -1,13 +1,14 @@
 #pragma once
 
 #include "cocos2d.h"
-#include "GameConfig.h"
+#include "Game/GameConfig.h"
+#include "Game/Map/MapBase.h"
 #include <vector>
 
 namespace Game {
 
 // MineMap: TMX wrapper for mine entrance (floor 0)
-class MineMap : public cocos2d::Node {
+class MineMap : public MapBase {
 public:
     static MineMap* create(const std::string& tmxFile);
     bool initWithFile(const std::string& tmxFile);
@@ -41,7 +42,6 @@ public:
     cocos2d::TMXTiledMap* getTMX() const { return _tmx; }
 
 private:
-    cocos2d::TMXTiledMap* _tmx = nullptr;
     // Collision data
     std::vector<cocos2d::Rect> _collisionRects;
     std::vector<std::vector<cocos2d::Vec2>> _collisionPolygons;
