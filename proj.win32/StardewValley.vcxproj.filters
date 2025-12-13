@@ -267,6 +267,18 @@
     <ClCompile Include="..\Classes\Game\Map\RoomMap.cpp">
       <Filter>Classes\Game\Map</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\Game\Map\BeachMap.cpp">
+      <Filter>Classes\Game\Map</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Scenes\BeachScene.cpp">
+      <Filter>Classes\Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\Map\BeachMapController.cpp">
+      <Filter>Classes\Controllers\Map</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\Interact\BeachInteractor.cpp">
+      <Filter>Classes\Controllers\Interact</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <!-- Header Files -->
@@ -460,6 +472,18 @@
     </ClInclude>
     <ClInclude Include="..\Classes\Game\Map\RoomMap.h">
       <Filter>Classes\Game\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\Map\BeachMap.h">
+      <Filter>Classes\Game\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Scenes\BeachScene.h">
+      <Filter>Classes\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\Map\BeachMapController.h">
+      <Filter>Classes\Controllers\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\Interact\BeachInteractor.h">
+      <Filter>Classes\Controllers\Interact</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

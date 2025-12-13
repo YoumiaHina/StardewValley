@@ -37,6 +37,7 @@ public:
 
     bool isNearDoor(const cocos2d::Vec2& playerWorldPos) const override;
     bool isNearMineDoor(const cocos2d::Vec2& playerWorldPos) const override;
+    bool isNearBeachDoor(const cocos2d::Vec2& playerWorldPos) const override;
     bool isNearChest(const cocos2d::Vec2& playerWorldPos) const override;
 
     float tileSize() const override { return static_cast<float>(GameConfig::TILE_SIZE); }
@@ -65,6 +66,7 @@ public:
     void addActorToMap(cocos2d::Node* node, int zOrder) override;
     cocos2d::Vec2 farmMineDoorSpawnPos() const override;
     cocos2d::Vec2 farmRoomDoorSpawnPos() const override;
+    cocos2d::Vec2 farmBeachDoorSpawnPos() const override;
 
 private:
     cocos2d::Node* _worldNode = nullptr;

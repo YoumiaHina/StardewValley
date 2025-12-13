@@ -132,12 +132,22 @@ void SceneBase::registerCommonInputHandlers(bool enableToolOnSpace, bool enableT
             } break;
             case EventKeyboard::KeyCode::KEY_SPACE: {
                 if (enableToolOnSpace) {
-                    auto t = _inventory ? _inventory->selectedTool() : nullptr;
-                    if (t) {
-                        t->use(_mapController, _cropSystem,
-                            [this]() -> Vec2 { return _player ? _player->getPosition() : Vec2(); },
-                            [this]() -> Vec2 { return _playerController ? _playerController->lastDir() : Vec2(0,-1); },
-                            _uiController);
+                    bool nearDoor = false;
+                    if (_player && _mapController) {
+                        Vec2 p = _player->getPosition();
+                        nearDoor = _mapController->isNearDoor(p)
+                                   || _mapController->isNearMineDoor(p)
+                                   || _mapController->isNearBeachDoor(p)
+                                   || _mapController->isNearFarmDoor(p);
+                    }
+                    if (!nearDoor) {
+                        auto t = _inventory ? _inventory->selectedTool() : nullptr;
+                        if (t) {
+                            t->use(_mapController, _cropSystem,
+                                [this]() -> Vec2 { return _player ? _player->getPosition() : Vec2(); },
+                                [this]() -> Vec2 { return _playerController ? _playerController->lastDir() : Vec2(0,-1); },
+                                _uiController);
+                        }
                     }
                 }
                 onSpacePressed();

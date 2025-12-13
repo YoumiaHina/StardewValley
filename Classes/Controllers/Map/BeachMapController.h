@@ -1,0 +1,70 @@
+#pragma once
+
+#include "Controllers/IMapController.h"
+#include "Game/Map/BeachMap.h"
+
+namespace Controllers {
+
+class BeachMapController : public IMapController {
+public:
+    explicit BeachMapController(Game::BeachMap* map, cocos2d::Node* worldNode)
+        : _map(map), _worldNode(worldNode) {
+        if (_worldNode && _map) {
+            cocos2d::Size content = _map->getContentSize();
+            auto visibleSize = cocos2d::Director::getInstance()->getVisibleSize();
+            auto origin = cocos2d::Director::getInstance()->getVisibleOrigin();
+            _origin = cocos2d::Vec2(origin.x + (visibleSize.width - content.width) * 0.5f,
+                                    origin.y + (visibleSize.height - content.height) * 0.5f);
+            _map->setAnchorPoint(cocos2d::Vec2(0,0));
+            _map->setPosition(_origin);
+            _worldNode->addChild(_map, 0);
+        }
+    }
+
+    void addActorToMap(cocos2d::Node* node, int zOrder) override;
+
+    cocos2d::Size getContentSize() const override { return _map ? _map->getContentSize() : cocos2d::Size::ZERO; }
+    cocos2d::Vec2 getOrigin() const override { return _origin; }
+
+    float tileSize() const override { return _map ? _map->getTileSize().width : 0.0f; }
+    void worldToTileIndex(const cocos2d::Vec2& p, int& c, int& r) const override {
+        if (_map) { _map->worldToTileIndex(p, c, r); } else { c = 0; r = 0; }
+    }
+    cocos2d::Vec2 tileToWorld(int c, int r) const override { return _map ? _map->tileToWorld(c,r) : cocos2d::Vec2(); }
+    bool inBounds(int c, int r) const override {
+        return _map && c>=0 && r>=0 && c < (int)_map->getMapSize().width && r < (int)_map->getMapSize().height;
+    }
+
+    cocos2d::Vec2 clampPosition(const cocos2d::Vec2& current,
+                                const cocos2d::Vec2& next,
+                                float radius) const override;
+    bool collides(const cocos2d::Vec2& p, float radius) const override { return _map ? _map->collides(p, radius) : false; }
+
+    bool isNearDoor(const cocos2d::Vec2& p) const override { return _map ? _map->nearDoorToFarm(p) : false; }
+    bool isNearMineDoor(const cocos2d::Vec2& p) const override { return false; }
+    bool isNearChest(const cocos2d::Vec2& p) const override { return false; }
+    bool isNearLake(const cocos2d::Vec2& p, float radius) const override { return _map ? _map->nearWater(p, radius) : false; }
+
+    Game::TileType getTile(int c, int r) const override { return Game::TileType::Soil; }
+
+    std::pair<int,int> targetTile(const cocos2d::Vec2& p, const cocos2d::Vec2& lastDir) const override { return {0,0}; }
+
+    void refreshMapVisuals() override {}
+    void refreshCropsVisuals() override {}
+
+    cocos2d::Vec2 farmRoomDoorSpawnPos() const override { return cocos2d::Vec2::ZERO; }
+    cocos2d::Vec2 farmMineDoorSpawnPos() const override { return cocos2d::Vec2::ZERO; }
+
+    std::vector<Game::Chest>& chests() override { return _chests; }
+    const std::vector<Game::Chest>& chests() const override { return _chests; }
+
+    Game::BeachMap* getBeachMap() const { return _map; }
+
+private:
+    Game::BeachMap* _map = nullptr;
+    cocos2d::Node* _worldNode = nullptr;
+    cocos2d::Vec2 _origin = cocos2d::Vec2::ZERO;
+    std::vector<Game::Chest> _chests;
+};
+
+} // namespace Controllers

@@ -49,10 +49,14 @@ public:
     virtual bool isNearLake(const cocos2d::Vec2& playerWorldPos, float radius) const { return false; }
     // 矿洞入口（矿→农场）判定（默认不支持）
     virtual bool isNearFarmDoor(const cocos2d::Vec2& playerWorldPos) const { return false; }
+    // 沙滩入口（农场→沙滩）判定（默认不支持）
+    virtual bool isNearBeachDoor(const cocos2d::Vec2& playerWorldPos) const { return false; }
     // 农场 DoorToMine 出生点（默认 Vec2::ZERO）
     virtual cocos2d::Vec2 farmMineDoorSpawnPos() const { return cocos2d::Vec2::ZERO; }
     // 农场 DoorToRoom 出生点（默认 Vec2::ZERO）
     virtual cocos2d::Vec2 farmRoomDoorSpawnPos() const { return cocos2d::Vec2::ZERO; }
+    // 农场 DoorToBeach 出生点（默认 Vec2::ZERO）
+    virtual cocos2d::Vec2 farmBeachDoorSpawnPos() const { return cocos2d::Vec2::ZERO; }
 
     // Farm 专用：渲染与掉落
     virtual void refreshMapVisuals() {}

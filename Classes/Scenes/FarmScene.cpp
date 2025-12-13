@@ -11,6 +11,7 @@
 #include "Game/Tool/FishingRod.h"
 #include "Scenes/RoomScene.h"
 #include "Scenes/MineScene.h"
+#include "Scenes/BeachScene.h"
 #include "Managers/AudioManager.h"
 #include "Controllers/Systems/FishingController.h"
 #include "Game/Cheat.h"
@@ -94,6 +95,10 @@ void FarmScene::onSpacePressed() {
         auto mine = MineScene::create();
         auto trans = TransitionFade::create(0.6f, mine);
         Director::getInstance()->replaceScene(trans);
+    } else if (act == Controllers::FarmInteractor::SpaceAction::EnterBeach) {
+        auto beach = BeachScene::createScene();
+        auto trans = TransitionFade::create(0.6f, beach);
+        Director::getInstance()->replaceScene(trans);
     }
 }
 
@@ -103,6 +108,10 @@ void FarmScene::onKeyPressedHook(EventKeyboard::KeyCode code) {
     if (code == EventKeyboard::KeyCode::KEY_K) {
         auto mine = MineScene::create();
         auto trans = TransitionFade::create(0.6f, mine);
+        Director::getInstance()->replaceScene(trans);
+    } else if (code == EventKeyboard::KeyCode::KEY_B) {
+        auto beach = BeachScene::createScene();
+        auto trans = TransitionFade::create(0.6f, beach);
         Director::getInstance()->replaceScene(trans);
     }
 }
