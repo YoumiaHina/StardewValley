@@ -21,9 +21,9 @@ private:
     int _currentPants = 0;
     int _currentHair = 0;
     
-    cocos2d::Label* _shirtLabel;
-    cocos2d::Label* _pantsLabel;
-    cocos2d::Label* _hairLabel;
+    cocos2d::Label* _shirtLabel = nullptr;
+    cocos2d::Label* _pantsLabel = nullptr;
+    cocos2d::Label* _hairLabel = nullptr;
     
     void changeShirt(int delta);
     void changePants(int delta);

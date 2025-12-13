@@ -21,13 +21,14 @@ bool SceneBase::initBase(float worldScale, bool buildCraftPanel, bool enableTool
     _player = pv;
     auto def = UserDefault::getInstance();
     int shirt = def->getIntegerForKey("player_shirt", 0);
-    int pants = def->getIntegerForKey("player_pants", 0);
     int hair  = def->getIntegerForKey("player_hair", 0);
     int r = def->getIntegerForKey("player_hair_r", 255);
     int g = def->getIntegerForKey("player_hair_g", 255);
     int b = def->getIntegerForKey("player_hair_b", 255);
+    int maxShirt = Game::PlayerView::getMaxShirtStyles();
+    if (shirt < 0 || shirt >= maxShirt) shirt = 0;
     pv->setShirtStyle(shirt);
-    pv->setPantsStyle(pants);
+    pv->setPantsStyle(0);
     pv->setHairStyle(hair);
     pv->setHairColor(Color3B(r, g, b));
     positionPlayerInitial();

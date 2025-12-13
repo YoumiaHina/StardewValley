@@ -173,7 +173,7 @@ cocos2d::Rect PlayerView::getHairRect(int index, Direction dir, int frame) {
 }
 
 int PlayerView::getMaxHairStyles() { return 50; }
-int PlayerView::getMaxShirtStyles() { return 50; }
+int PlayerView::getMaxShirtStyles() { return 8; }
 int PlayerView::getMaxPantsStyles() { return 20; }
 
 }

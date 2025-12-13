@@ -32,7 +32,6 @@ bool CustomizationScene::init() {
     _character->setDirection(Game::IPlayerView::Direction::DOWN);
     this->addChild(_character);
 
-    // Initialize from saved settings if any
     auto def = UserDefault::getInstance();
     _currentShirt = def->getIntegerForKey("player_shirt", 0);
     _currentPants = def->getIntegerForKey("player_pants", 0);
@@ -40,6 +39,10 @@ bool CustomizationScene::init() {
     int r = def->getIntegerForKey("player_hair_r", 255);
     int g = def->getIntegerForKey("player_hair_g", 255);
     int b = def->getIntegerForKey("player_hair_b", 255);
+
+    int maxShirt = Game::PlayerView::getMaxShirtStyles();
+    if (_currentShirt < 0 || _currentShirt >= maxShirt) _currentShirt = 0;
+    _currentPants = 0;
 
     _character->setShirtStyle(_currentShirt);
     _character->setPantsStyle(_currentPants);
@@ -73,10 +76,6 @@ bool CustomizationScene::init() {
     _shirtLabel = createControl("Shirt", _currentShirt, startY, [this](int d){ changeShirt(d); });
     _shirtLabel->setPosition(Vec2(visibleSize.width/2, startY));
     this->addChild(_shirtLabel);
-
-    _pantsLabel = createControl("Pants", _currentPants, startY - gapY, [this](int d){ changePants(d); });
-    _pantsLabel->setPosition(Vec2(visibleSize.width/2, startY - gapY));
-    this->addChild(_pantsLabel);
 
     _hairLabel = createControl("Hair", _currentHair, startY - gapY*2, [this](int d){ changeHair(d); });
     _hairLabel->setPosition(Vec2(visibleSize.width/2, startY - gapY*2));
@@ -160,16 +159,15 @@ void CustomizationScene::changeHairColor(const cocos2d::Color3B& color) {
 }
 
 void CustomizationScene::updateLabels() {
-    _shirtLabel->setString(std::to_string(_currentShirt));
-    _pantsLabel->setString(std::to_string(_currentPants));
-    _hairLabel->setString(std::to_string(_currentHair));
+    _shirtLabel->setString(std::to_string(_currentShirt + 1));
+    if (_pantsLabel) _pantsLabel->setString(std::to_string(_currentPants));
+    _hairLabel->setString(std::to_string(_currentHair + 1));
 }
 
 void CustomizationScene::onStartGame(Ref* sender) {
-    // Save settings
     auto def = UserDefault::getInstance();
     def->setIntegerForKey("player_shirt", _character->getShirtStyle());
-    def->setIntegerForKey("player_pants", _character->getPantsStyle());
+    def->setIntegerForKey("player_pants", 0);
     def->setIntegerForKey("player_hair", _character->getHairStyle());
     auto color = _character->getHairColor();
     def->setIntegerForKey("player_hair_r", color.r);
