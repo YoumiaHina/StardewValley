@@ -52,6 +52,15 @@
     <Filter Include="Classes\Game\Tool">
       <UniqueIdentifier>{dac7a4a0-c781-4948-85d5-b649c03cec5d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Classes\Game\Seed">
+      <UniqueIdentifier>{2dba554c-c342-4fb1-9887-244f9e440a69}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Classes\Game\Crop">
+      <UniqueIdentifier>{a9298139-5ead-471e-922c-b597b4c31cbc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Classes\Game\Vegetable">
+      <UniqueIdentifier>{e631b5bc-4b8c-4254-9de5-06bdebc3808f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <!-- Source Files -->
@@ -150,51 +159,6 @@
     <ClCompile Include="..\Classes\Game\Crop.cpp">
       <Filter>Classes\Game</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\Game\Crops\crop\ParsnipCrop.cpp">
-      <Filter>Classes\Game</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Classes\Game\Crops\crop\BlueberryCrop.cpp">
-      <Filter>Classes\Game</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Classes\Game\Crops\crop\EggplantCrop.cpp">
-      <Filter>Classes\Game</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Classes\Game\Crops\crop\CornCrop.cpp">
-      <Filter>Classes\Game</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Classes\Game\Crops\crop\StrawberryCrop.cpp">
-      <Filter>Classes\Game</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Classes\Game\Crops\seed\ParsnipSeed.cpp">
-      <Filter>Classes\Game</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Classes\Game\Crops\seed\BlueberrySeed.cpp">
-      <Filter>Classes\Game</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Classes\Game\Crops\seed\EggplantSeed.cpp">
-      <Filter>Classes\Game</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Classes\Game\Crops\seed\CornSeed.cpp">
-      <Filter>Classes\Game</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Classes\Game\Crops\seed\StrawberrySeed.cpp">
-      <Filter>Classes\Game</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Classes\Game\Crops\vegetable\ParsnipVegetable.cpp">
-      <Filter>Classes\Game</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Classes\Game\Crops\vegetable\BlueberryVegetable.cpp">
-      <Filter>Classes\Game</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Classes\Game\Crops\vegetable\EggplantVegetable.cpp">
-      <Filter>Classes\Game</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Classes\Game\Crops\vegetable\CornVegetable.cpp">
-      <Filter>Classes\Game</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Classes\Game\Crops\vegetable\StrawberryVegetable.cpp">
-      <Filter>Classes\Game</Filter>
-    </ClCompile>
     <ClCompile Include="..\Classes\Game\Tree.cpp">
       <Filter>Classes\Game</Filter>
     </ClCompile>
@@ -251,6 +215,51 @@
     </ClCompile>
     <ClCompile Include="..\Classes\Scenes\FarmScene.cpp">
       <Filter>Classes\Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\Crops\seed\StrawberrySeed.cpp">
+      <Filter>Classes\Game\Seed</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\Crops\seed\EggplantSeed.cpp">
+      <Filter>Classes\Game\Seed</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\Crops\seed\CornSeed.cpp">
+      <Filter>Classes\Game\Seed</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\Crops\seed\BlueberrySeed.cpp">
+      <Filter>Classes\Game\Seed</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\Crops\seed\ParsnipSeed.cpp">
+      <Filter>Classes\Game\Seed</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\Crops\crop\BlueberryCrop.cpp">
+      <Filter>Classes\Game\Crop</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\Crops\crop\CornCrop.cpp">
+      <Filter>Classes\Game\Crop</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\Crops\crop\EggplantCrop.cpp">
+      <Filter>Classes\Game\Crop</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\Crops\crop\ParsnipCrop.cpp">
+      <Filter>Classes\Game\Crop</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\Crops\crop\StrawberryCrop.cpp">
+      <Filter>Classes\Game\Crop</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\Crops\vegetable\BlueberryVegetable.cpp">
+      <Filter>Classes\Game\Vegetable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\Crops\vegetable\EggplantVegetable.cpp">
+      <Filter>Classes\Game\Vegetable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\Crops\vegetable\StrawberryVegetable.cpp">
+      <Filter>Classes\Game\Vegetable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\Crops\vegetable\CornVegetable.cpp">
+      <Filter>Classes\Game\Vegetable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\Crops\vegetable\ParsnipVegetable.cpp">
+      <Filter>Classes\Game\Vegetable</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -371,15 +380,6 @@
     <ClInclude Include="..\Classes\Controllers\Systems\CropSystem.h">
       <Filter>Classes\Controllers\Systems</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\Game\Crops\crop\CropBase.h">
-      <Filter>Classes\Game</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Classes\Game\Crops\seed\SeedBase.h">
-      <Filter>Classes\Game</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Classes\Game\Crops\vegetable\VegetableBase.h">
-      <Filter>Classes\Game</Filter>
-    </ClInclude>
     <ClInclude Include="..\Classes\Game\Tree.h">
       <Filter>Classes\Game</Filter>
     </ClInclude>
@@ -442,6 +442,15 @@
     </ClInclude>
     <ClInclude Include="..\Classes\Controllers\UI\StorePanelUI.h">
       <Filter>Classes\Controllers\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\Crops\seed\SeedBase.h">
+      <Filter>Classes\Game\Seed</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\Crops\crop\CropBase.h">
+      <Filter>Classes\Game\Crop</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\Crops\vegetable\VegetableBase.h">
+      <Filter>Classes\Game\Vegetable</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
