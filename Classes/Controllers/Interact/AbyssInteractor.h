@@ -11,7 +11,7 @@ namespace Controllers {
 
 class AbyssInteractor {
 public:
-    enum class SpaceAction { None, Descend, ReturnToFarm, ReturnToEntrance };
+    enum class SpaceAction { None, Descend, ReturnToFarm, ReturnToEntrance, UseElevator };
 
     AbyssInteractor(Controllers::AbyssMapController* map,
                     std::function<cocos2d::Vec2()> getPlayerPos)

@@ -21,12 +21,13 @@ enum class ItemType {
     Strawberry = 12,
     StrawberrySeed = 13,
     Fish = 100,
-    CopperGrain = 101,
-    CopperIngot = 102,
-    IronGrain   = 103,
-    IronIngot   = 104,
-    GoldGrain   = 105,
-    GoldIngot   = 106
+    Coal = 101,
+    CopperGrain = 102,
+    CopperIngot = 103,
+    IronGrain   = 104,
+    IronIngot   = 105,
+    GoldGrain   = 106,
+    GoldIngot   = 107
 };
 
 // 英文名称（内部使用）
@@ -47,6 +48,7 @@ inline const char* itemName(ItemType t) {
         case ItemType::Strawberry: return "Strawberry";
         case ItemType::StrawberrySeed: return "Strawberry Seed";
         case ItemType::Fish: return "Fish";
+        case ItemType::Coal: return "Coal";
         case ItemType::CopperGrain: return "Copper Grain";
         case ItemType::CopperIngot: return "Copper Ingot";
         case ItemType::IronGrain:   return "Iron Grain";
@@ -75,6 +77,7 @@ inline const char* itemNameZH(ItemType t) {
         case ItemType::Strawberry: return "草莓";
         case ItemType::StrawberrySeed: return "草莓种子";
         case ItemType::Fish: return "鱼";
+        case ItemType::Coal: return "煤炭";
         case ItemType::CopperGrain: return "铜矿粒";
         case ItemType::CopperIngot: return "铜锭";
         case ItemType::IronGrain:   return "铁矿粒";
@@ -104,6 +107,7 @@ inline cocos2d::Color4F itemColor(ItemType t) {
         case ItemType::Strawberry: return Color4F(0.95f, 0.20f, 0.25f, 1.0f);
         case ItemType::StrawberrySeed: return Color4F(0.95f, 0.20f, 0.25f, 0.8f);
         case ItemType::Fish: return Color4F(0.25f, 0.55f, 1.0f, 1.0f);
+        case ItemType::Coal: return Color4F(0.15f, 0.15f, 0.15f, 1.0f);
         case ItemType::CopperGrain: return Color4F(0.85f, 0.45f, 0.25f, 1.0f);
         case ItemType::CopperIngot: return Color4F(0.90f, 0.50f, 0.30f, 1.0f);
         case ItemType::IronGrain:   return Color4F(0.60f, 0.60f, 0.65f, 1.0f);
@@ -141,6 +145,7 @@ inline int itemPrice(ItemType t) {
         case ItemType::Corn: return 50;
         case ItemType::Strawberry: return 120;
         case ItemType::Fish: return 75;
+        case ItemType::Coal: return 20;
         case ItemType::CopperGrain: return 20;
         case ItemType::CopperIngot: return 90;
         case ItemType::IronGrain:   return 25;

@@ -22,6 +22,8 @@ public:
 
     void generateNodesForFloor();
     void update(float dt) {}
+    // 清空当前楼层的采矿点并刷新可视
+    void resetFloor();
     // 命中采矿点：返回是否破坏成功并进行掉落
     bool hitNearestNode(const cocos2d::Vec2& worldPos, int power);
     void refreshVisuals();

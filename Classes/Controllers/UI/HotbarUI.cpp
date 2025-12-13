@@ -177,11 +177,12 @@ void HotbarUI::refreshHotbar() {
                     case Game::ToolKind::Pickaxe:    path = "Tool/Pickaxe.png"; break;
                     case Game::ToolKind::WaterCan:   path = "Tool/WaterCan.png"; break;
                     case Game::ToolKind::FishingRod: path = "Tool/FishingRod.png"; break;
+                    case Game::ToolKind::Sword:      path = "Weapon/sword.png"; break;
                     default: path.clear(); break;
                 }
                 if (!path.empty()) {
-                    bool ok = icon->initWithFile(path);
-                    if (ok) {
+                    icon->setTexture(path);
+                    if (icon->getTexture()) {
                         auto cs = icon->getContentSize();
                         float targetH = cellH;
                         float targetW = cellW;
@@ -195,10 +196,20 @@ void HotbarUI::refreshHotbar() {
                     } else {
                         icon->setVisible(false);
                         if (t) t->detachHotbarOverlay();
+                        if (label) { // 回退显示工具名称
+                            label->setString(tConst->displayName());
+                            label->setPosition(Vec2(cx, 0));
+                            label->setVisible(true);
+                        }
                     }
                 } else {
                     icon->setVisible(false);
                     if (t) t->detachHotbarOverlay();
+                    if (label) { // 无图标路径时回退显示工具名称
+                        label->setString(tConst->displayName());
+                        label->setPosition(Vec2(cx, 0));
+                        label->setVisible(true);
+                    }
                 }
             }
         } else if (_inventory->isItem(i)) {
@@ -206,19 +217,40 @@ void HotbarUI::refreshHotbar() {
             std::string text = StringUtils::format("%s x%d", Game::itemName(st.type), st.quantity);
             if (label) { label->setString(text); label->setPosition(Vec2(cx, 0)); label->setVisible(true); }
             if (icon) {
-                if (st.type == Game::ItemType::Fish && st.quantity > 0) {
-                    bool ok = icon->initWithFile("fish/3120.png");
-                    if (ok) {
-                        auto cs = icon->getContentSize();
-                        float targetH = cellH;
-                        float targetW = cellW;
-                        float sx = (cs.width > 0) ? (targetW / cs.width) : 1.0f;
-                        float sy = (cs.height > 0) ? (targetH / cs.height) : 1.0f;
-                        float scale = std::min(sx, sy);
-                        icon->setScale(scale);
-                        icon->setPosition(Vec2(cx, 0));
-                        icon->setVisible(true);
-                    } else { icon->setVisible(false); }
+                if (st.quantity > 0) {
+                    std::string path;
+                    if (st.type == Game::ItemType::Fish) {
+                        path = "fish/3120.png";
+                    } else {
+                        switch (st.type) {
+                            case Game::ItemType::Coal:         path = "Mineral/Coal.png"; break;
+                            case Game::ItemType::CopperGrain: path = "Mineral/copperGrain.png"; break;
+                            case Game::ItemType::CopperIngot: path = "Mineral/copperIngot.png"; break;
+                            case Game::ItemType::IronGrain:   path = "Mineral/ironGrain.png"; break;
+                            case Game::ItemType::IronIngot:   path = "Mineral/ironIngot.png"; break;
+                            case Game::ItemType::GoldGrain:   path = "Mineral/goldGrain.png"; break;
+                            case Game::ItemType::GoldIngot:   path = "Mineral/goldIngot.png"; break;
+                            default: break;
+                        }
+                    }
+                    if (!path.empty()) {
+                        icon->setTexture(path);
+                        if (icon->getTexture()) {
+                            auto cs = icon->getContentSize();
+                            float targetH = cellH;
+                            float targetW = cellW;
+                            float sx = (cs.width > 0) ? (targetW / cs.width) : 1.0f;
+                            float sy = (cs.height > 0) ? (targetH / cs.height) : 1.0f;
+                            float scale = std::min(sx, sy);
+                            icon->setScale(scale);
+                            icon->setPosition(Vec2(cx, 0));
+                            icon->setVisible(true);
+                        } else {
+                            icon->setVisible(false);
+                        }
+                    } else {
+                        icon->setVisible(false);
+                    }
                 } else {
                     icon->setVisible(false);
                 }

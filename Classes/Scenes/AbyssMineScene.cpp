@@ -22,6 +22,8 @@ bool AbyssMineScene::init() {
         _player->setPosition(_map->entranceSpawnPos());
         _player->setLocalZOrder(999); // 人物置于图层最上层
     }
+    // 刷新热键栏以反映入口阶段可能发生的背包变化（如赠剑）
+    if (_uiController) _uiController->refreshHotbar();
     // 第一次进入矿洞0层：仅赠送一次剑（即使之后丢弃也不再发放）
     {
         auto &ws = Game::globalState();
@@ -32,19 +34,26 @@ bool AbyssMineScene::init() {
                     if (t->kind() == Game::ToolKind::Sword) { hasSword = true; break; }
                 }
             }
+            bool inserted = false;
             if (!hasSword) {
                 // 放到第一个空槽位
                 for (std::size_t i = 0; i < ws.inventory->size(); ++i) {
                     if (ws.inventory->isEmpty(i)) {
                         ws.inventory->setTool(i, Game::makeTool(Game::ToolKind::Sword));
+                        inserted = true;
                         if (_uiController) _uiController->refreshHotbar();
                         if (_player) _uiController->popTextAt(_player->getPosition(), "Got Sword!", cocos2d::Color3B::GREEN);
                         break;
                     }
                 }
+                if (!inserted && _player && _uiController) {
+                    _uiController->popTextAt(_player->getPosition(), "Inventory Full", cocos2d::Color3B::RED);
+                }
             }
-            // 标记为已赠送，避免后续再次发放
-            ws.grantedSwordAtEntrance = true;
+            // 仅在成功放入或已拥有剑时标记为已赠送，避免“未实际获得却阻断后续赠送”
+            if (inserted || hasSword) {
+                ws.grantedSwordAtEntrance = true;
+            }
         }
     }
     _monsters = new Controllers::AbyssMonsterController(_map, _worldNode);
@@ -58,6 +67,12 @@ bool AbyssMineScene::init() {
     _interactor = new Controllers::AbyssInteractor(_map, [this]() -> Vec2 { return _player ? _player->getPosition() : Vec2(); });
     _elevator = new Controllers::AbyssElevatorController(_map, _monsters, _mining, this);
     _elevator->buildPanel();
+    // 电梯面板打开时锁定移动；跳转后更新楼层标签并定位到该层出生点
+    _elevator->setMovementLocker([this](bool locked){ if (_playerController) _playerController->setMovementLocked(locked); });
+    _elevator->setOnFloorChanged([this](int floor){
+        if (_uiController) _uiController->setMineFloorNumber(floor);
+        if (_player) _player->setPosition(_map->floorSpawnPos());
+    });
     // 矿洞 HUD：在能量条正上方构建血条（红色）
     if (_uiController) {
         _uiController->buildHPBarAboveEnergy();
@@ -85,6 +100,8 @@ void AbyssMineScene::positionPlayerInitial() {
 }
 
 void AbyssMineScene::onSpacePressed() {
+    if (_inTransition) return;
+    _inTransition = true;
     auto act = _interactor ? _interactor->onSpacePressed() : Controllers::AbyssInteractor::SpaceAction::None;
     if (act == Controllers::AbyssInteractor::SpaceAction::Descend) {
         // 重置当层状态并根据 TMX 对象层生成
@@ -93,6 +110,12 @@ void AbyssMineScene::onSpacePressed() {
         // 新楼层出生点：优先 Appear，否则楼梯中心
         _player->setPosition(_map->floorSpawnPos());
         if (_uiController) _uiController->setMineFloorNumber(_map->currentFloor());
+        // UI 提示：显示当前楼层
+        if (_uiController && _player) {
+            _uiController->popTextAt(_player->getPosition(), StringUtils::format("Floor %d", _map->currentFloor()), Color3B::YELLOW);
+        }
+    } else if (act == Controllers::AbyssInteractor::SpaceAction::UseElevator) {
+        if (_elevator) _elevator->togglePanel();
     } else if (act == Controllers::AbyssInteractor::SpaceAction::ReturnToFarm) {
         auto farm = FarmScene::create();
         // 在农场场景加载完成后，将出生点设置到 DoorToMine 对象层中心
@@ -103,9 +126,15 @@ void AbyssMineScene::onSpacePressed() {
         // 返回入口（零层）
         _map->loadEntrance();
         if (_monsters) _monsters->resetFloor();
-        if (_player) _player->setPosition(_map->entranceSpawnPos());
+        if (_mining) _mining->resetFloor();
+        if (_player) _player->setPosition(_map->entranceBackSpawnPos());
         if (_uiController) _uiController->setMineFloorNumber(_map->currentFloor());
+        // UI 提示：返回入口
+        if (_uiController && _player) {
+            _uiController->popTextAt(_player->getPosition(), "Returned to Entrance", Color3B::YELLOW);
+        }
     }
+    _inTransition = false;
 }
 
 const char* AbyssMineScene::doorPromptText() const { return "Press Space to Descend"; }
@@ -115,14 +144,15 @@ void AbyssMineScene::onMouseDown(EventMouse* e) {
 }
 
 void AbyssMineScene::onKeyPressedHook(EventKeyboard::KeyCode code) {
-    if (code == EventKeyboard::KeyCode::KEY_E) {
-        if (_elevator) _elevator->togglePanel();
-    } else if (code == EventKeyboard::KeyCode::KEY_N) {
+    if (code == EventKeyboard::KeyCode::KEY_N) {
         // 调试：直接去下一层
         _map->descend(1);
         if (_monsters) { _monsters->resetFloor(); _monsters->generateInitialWave(); }
         if (_mining) { _mining->generateNodesForFloor(); }
         if (_player) _player->setPosition(_map->floorSpawnPos());
         if (_uiController) _uiController->setMineFloorNumber(_map->currentFloor());
+        if (_uiController && _player) {
+            _uiController->popTextAt(_player->getPosition(), StringUtils::format("Floor %d", _map->currentFloor()), Color3B::YELLOW);
+        }
     }
 }

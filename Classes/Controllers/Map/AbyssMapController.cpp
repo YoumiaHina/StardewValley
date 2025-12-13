@@ -1,5 +1,7 @@
 #include "Controllers/Map/AbyssMapController.h"
 #include "cocos2d.h"
+#include "Game/WorldState.h"
+#include "Game/Tool/ToolFactory.h"
 
 using namespace cocos2d;
 
@@ -170,7 +172,12 @@ AbyssMapController::Theme AbyssMapController::currentTheme() const {
 }
 
 void AbyssMapController::unlockElevatorIfNeeded() {
-    if (_floor % 5 == 0) _elevatorFloors.insert(_floor);
+    if (_floor % 5 == 0) {
+        _elevatorFloors.insert(_floor);
+        // 写回持久化集合
+        auto &ws = Game::globalState();
+        ws.abyssElevatorFloors.insert(_floor);
+    }
 }
 
 bool AbyssMapController::isNearStairs(const Vec2& p) const {
@@ -200,6 +207,13 @@ bool AbyssMapController::isNearBack0(const Vec2& p) const {
     return false;
 }
 
+bool AbyssMapController::isNearElestair(const Vec2& p) const {
+    if (_entrance) {
+        return _entrance->nearElestair(p);
+    }
+    return false;
+}
+
 std::vector<int> AbyssMapController::getActivatedElevatorFloors() const {
     std::vector<int> v;
     v.reserve(_elevatorFloors.size());
@@ -211,6 +225,17 @@ std::vector<int> AbyssMapController::getActivatedElevatorFloors() const {
 void AbyssMapController::loadEntrance() {
     if (!_worldNode) return;
     if (!_mapNode) { _mapNode = Node::create(); _worldNode->addChild(_mapNode, 0); }
+    // 清理当前楼层 TMX，切换到入口
+    if (_floorMap) { _floorMap->removeFromParent(); _floorMap = nullptr; }
+    if (_entrance) { _entrance->removeFromParent(); _entrance = nullptr; }
+    // 同步电梯楼层（持久化）到控制器
+    {
+        auto &ws = Game::globalState();
+        if (!ws.abyssElevatorFloors.empty()) {
+            _elevatorFloors.clear();
+            for (int f : ws.abyssElevatorFloors) _elevatorFloors.insert(f);
+        }
+    }
     _entrance = Game::MineMap::create("Maps/mine/mine_0.tmx");
     if (_entrance) {
         _floor = 0; // 标记为零层入口
@@ -222,6 +247,30 @@ void AbyssMapController::loadEntrance() {
         _rows = static_cast<int>(tsize.height);
         _stairsPos = _entrance->stairsCenter();
         refreshMapVisuals();
+
+        // 首次进入矿洞0层：仅赠送一次剑（控制器内处理，避免场景包含业务逻辑）
+        auto &ws = Game::globalState();
+        if (!ws.grantedSwordAtEntrance && ws.inventory) {
+            bool hasSword = false;
+            for (std::size_t i = 0; i < ws.inventory->size(); ++i) {
+                if (auto t = ws.inventory->toolAt(i)) {
+                    if (t->kind() == Game::ToolKind::Sword) { hasSword = true; break; }
+                }
+            }
+            bool inserted = false;
+            if (!hasSword) {
+                for (std::size_t i = 0; i < ws.inventory->size(); ++i) {
+                    if (ws.inventory->isEmpty(i)) {
+                        ws.inventory->setTool(i, Game::makeTool(Game::ToolKind::Sword));
+                        inserted = true;
+                        break;
+                    }
+                }
+            }
+            if (inserted || hasSword) {
+                ws.grantedSwordAtEntrance = true;
+            }
+        }
     }
 }
 
@@ -257,6 +306,19 @@ cocos2d::Vec2 AbyssMapController::entranceSpawnPos() const {
         if (_stairsPos != Vec2::ZERO) return _stairsPos;
     }
     // fallback: center-top area
+    float s = static_cast<float>(GameConfig::TILE_SIZE);
+    return Vec2(_cols * s * 0.5f, _rows * s * 0.65f);
+}
+
+cocos2d::Vec2 AbyssMapController::entranceBackSpawnPos() const {
+    if (_entrance) {
+        auto back = _entrance->backAppearCenter();
+        if (back != Vec2::ZERO) return back;
+        // 若未配置 BackAppear，回退到 Appear 或楼梯
+        auto appear = _entrance->appearCenter();
+        if (appear != Vec2::ZERO) return appear;
+        if (_stairsPos != Vec2::ZERO) return _stairsPos;
+    }
     float s = static_cast<float>(GameConfig::TILE_SIZE);
     return Vec2(_cols * s * 0.5f, _rows * s * 0.65f);
 }

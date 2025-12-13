@@ -17,7 +17,7 @@
  <objectgroup id="4" name="Back0" visible="0">
   <object id="13" x="129.245" y="-1.72327" width="70.6541" height="94.7799"/>
  </objectgroup>
- <objectgroup id="5" name="collision" visible="0">
+ <objectgroup id="5" name="collision">
   <object id="1" x="109.141" y="0.574424" width="247.577" height="64.3355"/>
   <object id="2" x="305.019" y="63.1866" width="276.872" height="132.692"/>
   <object id="3" x="337.187" y="191.283" width="264.809" height="32.7422"/>
@@ -48,13 +48,13 @@
    <point/>
   </object>
  </objectgroup>
- <objectgroup id="8" name="RockArea" visible="0">
+ <objectgroup id="8" name="RockArea">
   <object id="18" x="80.4193" y="93.6311" width="224.025" height="182.092"/>
   <object id="19" x="80.9938" y="275.149">
    <polygon points="0,0 13.7862,13.2117 31.5933,12.6373 78.6961,41.9329 80.9938,65.4843 156.818,106.268 278.021,3.44654"/>
   </object>
-  <object id="21" x="306.742" y="221.153" width="278.596" height="54.5703"/>
-  <object id="22" x="512.386" y="272.277" width="77.5472" height="353.845"/>
+  <object id="21" x="306.742" y="226.153" width="242.096" height="47.5703"/>
+  <object id="22" x="513.386" y="277.277" width="62.0472" height="334.845"/>
   <object id="23" x="167.732" y="610.612" width="193.581" height="216.558"/>
   <object id="24" x="360.738" y="685.862" width="157.967" height="192.432"/>
  </objectgroup>

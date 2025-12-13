@@ -5,6 +5,7 @@
 
 #include <memory>
 #include <vector>
+#include <unordered_set>
 #include "Game/Inventory.h"
 #include "Game/Tile.h"
 #include "Game/Drop.h"
@@ -66,6 +67,9 @@ struct WorldState {
 
     // 入口赠剑标记：仅在第一次进入矿洞0层时赠送一次
     bool grantedSwordAtEntrance = false;
+
+    // 已激活电梯楼层（5 的倍数），长期保存，不因进出矿洞而清空
+    std::unordered_set<int> abyssElevatorFloors;
 };
 
 // 获取全局状态（惰性初始化由调用方保证）

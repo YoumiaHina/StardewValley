@@ -57,6 +57,12 @@ private:
     std::vector<cocos2d::Vec2> _doorToFarmPoints;
     // Back0 objects
     std::vector<cocos2d::Rect> _back0Rects;
+    // Elevator stairs (elestair) objects：仅入口层，用于唤起电梯
+    std::vector<cocos2d::Rect> _elestairRects;
+    std::vector<cocos2d::Vec2> _elestairPoints;
+    // BackAppear objects: 返回入口时的出生点
+    std::vector<cocos2d::Rect> _backAppearRects;
+    std::vector<cocos2d::Vec2> _backAppearPoints;
     // Mining / Monsters
     std::vector<cocos2d::Rect> _rockAreaRects;
     std::vector<std::vector<cocos2d::Vec2>> _rockAreaPolys;
@@ -67,8 +73,16 @@ private:
     void parseAppear();
     void parseDoorToFarm();
     void parseBack0();
+    void parseElestair();
+    void parseBackAppear();
     void parseRockArea();
     void parseMonsterArea();
+
+public:
+    // 返回入口出生点（BackAppear）
+    cocos2d::Vec2 backAppearCenter() const;
+    // elestair 交互判定（入口层）
+    bool nearElestair(const cocos2d::Vec2& p) const;
 };
 
 } // namespace Game

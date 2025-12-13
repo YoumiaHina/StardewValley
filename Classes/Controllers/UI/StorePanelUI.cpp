@@ -38,6 +38,31 @@ void StorePanelUI::buildStorePanel() {
     _panelNode->addChild(_listNode);
 
     _storeController = std::make_unique<StoreController>(_inventory);
+
+    // 翻页按钮
+    auto prevBtn = ui::Button::create("CloseNormal.png", "CloseSelected.png");
+    prevBtn->setTitleText("<"); prevBtn->setTitleFontSize(18);
+    prevBtn->setScale9Enabled(true); prevBtn->setContentSize(Size(36, 36));
+    prevBtn->setPosition(Vec2(-w/2 + 30, -h/2 + 30));
+    prevBtn->addClickEventListener([this](Ref*){
+        if (_pageIndex > 0) { _pageIndex--; }
+        refreshStorePanel();
+    });
+    _panelNode->addChild(prevBtn);
+
+    auto nextBtn = ui::Button::create("CloseNormal.png", "CloseSelected.png");
+    nextBtn->setTitleText(">"); nextBtn->setTitleFontSize(18);
+    nextBtn->setScale9Enabled(true); nextBtn->setContentSize(Size(36, 36));
+    nextBtn->setPosition(Vec2(w/2 - 30, -h/2 + 30));
+    nextBtn->addClickEventListener([this](Ref*){
+        // 先刷新一次以确保 _items 准备好
+        if (_items.empty()) refreshStorePanel();
+        int total = static_cast<int>(_items.size());
+        int maxPage = std::max(1, (total + _pageSize - 1)/_pageSize);
+        if (_pageIndex < maxPage - 1) { _pageIndex++; }
+        refreshStorePanel();
+    });
+    _panelNode->addChild(nextBtn);
 }
 
 void StorePanelUI::refreshStorePanel() {
@@ -52,6 +77,7 @@ void StorePanelUI::refreshStorePanel() {
             Game::ItemType::StrawberrySeed
         };
         std::vector<Game::ItemType> minerals = {
+            Game::ItemType::Coal,
             Game::ItemType::CopperGrain,
             Game::ItemType::CopperIngot,
             Game::ItemType::IronGrain,
@@ -80,6 +106,7 @@ void StorePanelUI::refreshStorePanel() {
         float y = startY - row * gapY;
         std::string iconPath;
         switch (type) {
+            case Game::ItemType::Coal:         iconPath = "Mineral/Coal.png"; break;
             case Game::ItemType::CopperGrain: iconPath = "Mineral/copperGrain.png"; break;
             case Game::ItemType::CopperIngot: iconPath = "Mineral/copperIngot.png"; break;
             case Game::ItemType::IronGrain:   iconPath = "Mineral/ironGrain.png"; break;
@@ -89,8 +116,9 @@ void StorePanelUI::refreshStorePanel() {
             default: break;
         }
         if (!iconPath.empty()) {
-            auto icon = Sprite::create(iconPath);
-            if (icon) {
+            auto icon = Sprite::create();
+            icon->setTexture(iconPath);
+            if (icon->getTexture()) {
                 float targetH = 24.0f; float targetW = 24.0f;
                 auto cs = icon->getContentSize();
                 float sx = (cs.width > 0) ? (targetW / cs.width) : 1.0f;

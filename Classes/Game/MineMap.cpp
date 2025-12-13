@@ -20,6 +20,8 @@ bool MineMap::initWithFile(const std::string& tmxFile) {
     parseAppear();
     parseDoorToFarm();
     parseBack0();
+    parseElestair();
+    parseBackAppear();
     parseRockArea();
     parseMonsterArea();
     return true;
@@ -251,6 +253,70 @@ bool MineMap::nearBack0(const Vec2& p) const {
         if (r.containsPoint(p)) return true;
     }
     return false;
+}
+
+void MineMap::parseElestair() {
+    _elestairRects.clear();
+    _elestairPoints.clear();
+    if (!_tmx) return;
+    auto group = _tmx->getObjectGroup("elestair");
+    if (!group) group = _tmx->getObjectGroup("Elestair");
+    if (!group) return;
+    auto objects = group->getObjects();
+    for (auto &val : objects) {
+        auto dict = val.asValueMap();
+        float x = dict.at("x").asFloat();
+        float y = dict.at("y").asFloat();
+        float w = dict.count("width") ? dict.at("width").asFloat() : 0.0f;
+        float h = dict.count("height") ? dict.at("height").asFloat() : 0.0f;
+        if (w > 0 && h > 0) {
+            _elestairRects.emplace_back(x, y, w, h);
+        } else {
+            _elestairPoints.emplace_back(x, y);
+        }
+    }
+}
+
+bool MineMap::nearElestair(const Vec2& p) const {
+    for (const auto& r : _elestairRects) {
+        if (r.containsPoint(p)) return true;
+    }
+    float r2 = (GameConfig::TILE_SIZE * 0.6f); r2 *= r2;
+    for (const auto& pt : _elestairPoints) {
+        if (p.distanceSquared(pt) <= r2) return true;
+    }
+    return false;
+}
+
+void MineMap::parseBackAppear() {
+    _backAppearRects.clear();
+    _backAppearPoints.clear();
+    if (!_tmx) return;
+    auto group = _tmx->getObjectGroup("BackAppear");
+    if (!group) group = _tmx->getObjectGroup("backAppear");
+    if (!group) return;
+    auto objects = group->getObjects();
+    for (auto &val : objects) {
+        auto dict = val.asValueMap();
+        float x = dict.at("x").asFloat();
+        float y = dict.at("y").asFloat();
+        float w = dict.count("width") ? dict.at("width").asFloat() : 0.0f;
+        float h = dict.count("height") ? dict.at("height").asFloat() : 0.0f;
+        if (w > 0 && h > 0) {
+            _backAppearRects.emplace_back(x, y, w, h);
+        } else {
+            _backAppearPoints.emplace_back(x, y);
+        }
+    }
+}
+
+cocos2d::Vec2 MineMap::backAppearCenter() const {
+    if (!_backAppearRects.empty()) {
+        const auto& r = _backAppearRects.front();
+        return Vec2(r.getMidX(), r.getMidY());
+    }
+    if (!_backAppearPoints.empty()) return _backAppearPoints.front();
+    return Vec2::ZERO;
 }
 
 void MineMap::parseRockArea() {

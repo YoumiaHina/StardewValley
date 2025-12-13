@@ -24,6 +24,7 @@ private:
     Controllers::AbyssCombatController* _combat = nullptr;
     Controllers::AbyssInteractor* _interactor = nullptr;
     Controllers::AbyssElevatorController* _elevator = nullptr;
+    bool _inTransition = false;
 
     // SceneBase overrides
     Controllers::IMapController* createMapController(cocos2d::Node* worldNode) override;

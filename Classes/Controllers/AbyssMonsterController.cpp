@@ -8,6 +8,7 @@ namespace Controllers {
 
 void AbyssMonsterController::generateInitialWave() {
     _monsters.clear();
+    if (_map && _map->currentFloor() <= 0) { refreshVisuals(); return; }
     auto spawns = _map->monsterSpawnPoints();
     if (spawns.empty()) {
         // 没有 MonsterArea：不刷怪
@@ -23,6 +24,7 @@ void AbyssMonsterController::generateInitialWave() {
 }
 
 void AbyssMonsterController::update(float dt) {
+    if (_map && _map->currentFloor() <= 0) return; // 入口层：不刷新/重生
     // 没有 MonsterArea：不进行任何刷新/重生
     if (_map && _map->monsterSpawnPoints().empty()) return;
     _respawnAccum += dt;
@@ -38,6 +40,7 @@ void AbyssMonsterController::update(float dt) {
 void AbyssMonsterController::resetFloor() {
     _monsters.clear();
     _respawnAccum = 0.0f;
+    refreshVisuals();
 }
 
 void AbyssMonsterController::applyDamageAt(const Vec2& worldPos, int baseDamage) {

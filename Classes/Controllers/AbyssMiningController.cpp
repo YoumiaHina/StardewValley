@@ -6,7 +6,13 @@ using namespace cocos2d;
 
 namespace Controllers {
 
+void AbyssMiningController::resetFloor() {
+    _nodes.clear();
+    refreshVisuals();
+}
+
 void AbyssMiningController::generateNodesForFloor() {
+    if (_map && _map->currentFloor() <= 0) { _nodes.clear(); refreshVisuals(); return; }
     _nodes.clear();
     auto rects = _map->rockAreaRects();
     auto polys = _map->rockAreaPolys();

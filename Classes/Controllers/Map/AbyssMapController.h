@@ -57,12 +57,15 @@ public:
     bool isNearStairs(const cocos2d::Vec2& p) const;
     bool isNearFarmDoor(const cocos2d::Vec2& p) const;
     bool isNearBack0(const cocos2d::Vec2& p) const;
+    bool isNearElestair(const cocos2d::Vec2& p) const;
     cocos2d::Vec2 stairsWorldPos() const { return _stairsPos; }
     std::vector<int> getActivatedElevatorFloors() const;
     // Entrance (floor 0)
     void loadEntrance();
     bool isEntranceLoaded() const { return _entrance != nullptr; }
     cocos2d::Vec2 entranceSpawnPos() const;
+    // 返回入口时的出生点（BackAppear 优先）
+    cocos2d::Vec2 entranceBackSpawnPos() const;
     // Floor TMX loading
     void loadFloorTMX(int floorIndex);
     bool isFloorTMXLoaded() const { return _floorMap != nullptr; }

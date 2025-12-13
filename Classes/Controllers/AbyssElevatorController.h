@@ -24,6 +24,9 @@ public:
     void buildPanel();
     void togglePanel();
     bool isPanelVisible() const { return _panel && _panel->isVisible(); }
+    // 外部回调
+    void setMovementLocker(std::function<void(bool)> cb) { _setMovementLocked = std::move(cb); }
+    void setOnFloorChanged(std::function<void(int)> cb) { _onFloorChanged = std::move(cb); }
 
 private:
     AbyssMapController* _map = nullptr;
@@ -31,6 +34,8 @@ private:
     AbyssMiningController* _mining = nullptr;
     cocos2d::Scene* _scene = nullptr;
     cocos2d::ui::Layout* _panel = nullptr;
+    std::function<void(bool)> _setMovementLocked;
+    std::function<void(int)> _onFloorChanged;
 
     void _refreshButtons();
     void _jumpToFloor(int floor);
