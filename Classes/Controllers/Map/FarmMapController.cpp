@@ -457,7 +457,7 @@ void FarmMapController::refreshCropsVisuals() {
 
         auto itB = _cropSprites.find(key);
         if (itB == _cropSprites.end()) {
-            sprB = cocos2d::Sprite::create("crops/crops.png");
+            sprB = cocos2d::Sprite::create("Crops/Crops.png");
             if (sprB) {
                 sprB->setAnchorPoint(cocos2d::Vec2(0.5f, 0.0f));
                 _cropsRoot->addChild(sprB, 0);
@@ -469,7 +469,7 @@ void FarmMapController::refreshCropsVisuals() {
 
         auto itT = _cropSpritesTop.find(key);
         if (itT == _cropSpritesTop.end()) {
-            sprT = cocos2d::Sprite::create("crops/crops.png");
+            sprT = cocos2d::Sprite::create("Crops/Crops.png");
             if (sprT) {
                 sprT->setAnchorPoint(cocos2d::Vec2(0.5f, 0.0f));
                 _cropsRoot->addChild(sprT, 1);
