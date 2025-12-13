@@ -33,7 +33,8 @@ void BeachScene::positionPlayerInitial() {
 void BeachScene::onSpacePressed() {
     auto act = _interactor.onSpacePressed();
     if (act == BeachInteractor::SpaceAction::EnterFarm) {
-        auto next = FarmScene::createScene();
+        auto next = FarmScene::create();
+        next->setSpawnAtFarmBeachDoor();
         Director::getInstance()->replaceScene(TransitionFade::create(0.6f, next));
     }
 }

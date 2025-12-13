@@ -73,6 +73,14 @@ void FarmScene::setSpawnAtFarmRoomDoor() {
     }
 }
 
+void FarmScene::setSpawnAtFarmBeachDoor() {
+    if (!_player || !_mapController) return;
+    auto pos = _mapController->farmBeachDoorSpawnPos();
+    if (pos != Vec2::ZERO) {
+        _player->setPosition(pos);
+    }
+}
+
 // SceneBase overrides
 Controllers::IMapController* FarmScene::createMapController(Node* worldNode) {
     _farmMap = new Controllers::FarmMapController(worldNode);
