@@ -9,8 +9,8 @@ USING_NS_CC;
 cocos2d::Scene* AbyssMineScene::createScene() { return AbyssMineScene::create(); }
 
 bool AbyssMineScene::init() {
-    // 深渊矿洞：不启用空格工具、不启用左键工具；不显示 Craft 面板
-    if (!initBase(/*worldScale*/3.0f, /*buildCraftPanel*/false, /*enableToolOnSpace*/false, /*enableToolOnLeftClick*/false)) return false;
+    // 深渊矿洞：不启用空格工具，启用左键工具；不显示 Craft 面板
+    if (!initBase(/*worldScale*/3.0f, /*buildCraftPanel*/false, /*enableToolOnSpace*/false, /*enableToolOnLeftClick*/true)) return false;
     Managers::AudioManager::getInstance().playBackgroundFor(Managers::SceneZone::Abyss);
 
     // 组合矿洞模块
@@ -58,6 +58,8 @@ bool AbyssMineScene::init() {
     }
     _monsters = new Controllers::AbyssMonsterController(_map, _worldNode);
     _mining = new Controllers::AbyssMiningController(_map, _worldNode);
+    // 镐子采掘回调：由 MapController 转发到 MiningController
+    _map->setMineHitCallback([this](const Vec2& wp, int power){ return _mining ? _mining->hitNearestNode(wp, power) : false; });
     // 矿洞零层不刷怪、不生成矿点
     if (_map->currentFloor() > 0) {
         _monsters->generateInitialWave();

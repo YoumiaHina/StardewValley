@@ -31,34 +31,39 @@ std::string Hoe::use(Controllers::IMapController* map,
     auto tgt = map->targetTile(playerPos, lastDir);
     int tc = tgt.first, tr = tgt.second;
     if (!map->inBounds(tc, tr)) return std::string("");
-    auto current = map->getTile(tc, tr);
     std::string msg;
-    int idx = crop ? crop->findCropIndex(tc, tr) : -1;
-    if (idx >= 0) {
-        const auto& cp = crop->crops()[idx];
-        bool canHarvest = crop->canHarvestAt(tc, tr);
-        if (canHarvest) {
-            bool yields = crop->yieldsOnHarvestAt(tc, tr);
-            if (yields) {
-                auto produce = Game::produceItemFor(cp.type);
-                int leftover = ws.inventory ? ws.inventory->addItems(produce, 1) : 0;
-                if (leftover > 0) {
-                    map->spawnDropAt(tc, tr, static_cast<int>(produce), leftover);
-                    map->refreshDropsVisuals();
-                }
-            }
-            if (crop) { crop->harvestCropAt(tc, tr); }
-            map->refreshCropsVisuals();
-            if (ui) { ui->refreshHotbar(); }
-            msg = yields ? std::string("Harvest!") : std::string("Uproot!");
-        } else {
-            msg = std::string("Not ready");
-        }
-    } else if (current == Game::TileType::Soil) {
-        map->setTile(tc, tr, Game::TileType::Tilled);
-        msg = std::string("Till!");
-    } else {
+    // 仅在农场地图进行耕地/收获逻辑；矿洞/室内直接返回 Nothing，避免访问不存在的瓦片数组
+    if (!map->isFarm()) {
         msg = std::string("Nothing");
+    } else {
+        auto current = map->getTile(tc, tr);
+        int idx = crop ? crop->findCropIndex(tc, tr) : -1;
+        if (idx >= 0) {
+            const auto& cp = crop->crops()[idx];
+            bool canHarvest = crop->canHarvestAt(tc, tr);
+            if (canHarvest) {
+                bool yields = crop->yieldsOnHarvestAt(tc, tr);
+                if (yields) {
+                    auto produce = Game::produceItemFor(cp.type);
+                    int leftover = ws.inventory ? ws.inventory->addItems(produce, 1) : 0;
+                    if (leftover > 0) {
+                        map->spawnDropAt(tc, tr, static_cast<int>(produce), leftover);
+                        map->refreshDropsVisuals();
+                    }
+                }
+                if (crop) { crop->harvestCropAt(tc, tr); }
+                map->refreshCropsVisuals();
+                if (ui) { ui->refreshHotbar(); }
+                msg = yields ? std::string("Harvest!") : std::string("Uproot!");
+            } else {
+                msg = std::string("Not ready");
+            }
+        } else if (current == Game::TileType::Soil) {
+            map->setTile(tc, tr, Game::TileType::Tilled);
+            msg = std::string("Till!");
+        } else {
+            msg = std::string("Nothing");
+        }
     }
     ws.energy = std::max(0, ws.energy - need);
     if (ui) {

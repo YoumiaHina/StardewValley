@@ -43,9 +43,12 @@ public:
     void refreshCropsVisuals() override {} // not used
     void refreshDropsVisuals() override {} // not used
     void spawnDropAt(int, int, int, int) override {} // not used here
+    bool applyPickaxeAt(const cocos2d::Vec2& worldPos, int power) override;
+    void setDynamicColliders(const std::vector<cocos2d::Rect>& rects) { _dynamicColliders = rects; }
     const std::vector<Game::Chest>& chests() const override { return _emptyChests; }
     std::vector<Game::Chest>& chests() override { return _emptyChests; }
     void addActorToMap(cocos2d::Node* node, int zOrder) override;
+    void setMineHitCallback(std::function<bool(const cocos2d::Vec2&, int)> cb) { _mineHit = std::move(cb); }
 
     // Abyss specific
     void generateFloor(int floorIndex);
@@ -78,6 +81,7 @@ public:
 private:
     cocos2d::Node* _worldNode = nullptr;
     cocos2d::DrawNode* _mapDraw = nullptr;
+    cocos2d::DrawNode* _cursor = nullptr;
     int _cols = 80;
     int _rows = 60;
     std::vector<Game::TileType> _tiles; // 简化：使用 TileType 渲染主题色块
@@ -88,6 +92,8 @@ private:
     Game::MineMap* _entrance = nullptr;
     Game::MineMap* _floorMap = nullptr;
     cocos2d::Node* _mapNode = nullptr;
+    std::function<bool(const cocos2d::Vec2&, int)> _mineHit;
+    std::vector<cocos2d::Rect> _dynamicColliders; // 采矿节点临时碰撞
 };
 
 }

@@ -31,12 +31,20 @@ std::string Pickaxe::use(Controllers::IMapController* map,
     auto tgt = map->targetTile(playerPos, lastDir);
     int tc = tgt.first, tr = tgt.second;
     if (!map->inBounds(tc, tr)) return std::string("");
-    auto current = map->getTile(tc, tr);
+    Vec2 targetWorld = map->tileToWorld(tc, tr);
     std::string msg;
-    if (current == Game::TileType::Rock) {
-        map->setTile(tc, tr, Game::TileType::Soil);
-        msg = std::string("Mine!");
-        map->spawnDropAt(tc, tr, static_cast<int>(Game::ItemType::Stone), 1);
+    // 优先走矿洞采掘接口；农场则走原有瓦片逻辑
+    if (map->applyPickaxeAt(targetWorld, 1)) {
+        msg = std::string("Hit!");
+    } else if (map->isFarm()) {
+        auto current = map->getTile(tc, tr);
+        if (current == Game::TileType::Rock) {
+            map->setTile(tc, tr, Game::TileType::Soil);
+            msg = std::string("Mine!");
+            map->spawnDropAt(tc, tr, static_cast<int>(Game::ItemType::Stone), 1);
+        } else {
+            msg = std::string("Nothing");
+        }
     } else {
         msg = std::string("Nothing");
     }

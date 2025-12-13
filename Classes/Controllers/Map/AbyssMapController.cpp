@@ -24,8 +24,11 @@ cocos2d::Vec2 AbyssMapController::clampPosition(const Vec2& current, const Vec2&
     candidate.x = std::max(minX, std::min(maxX, candidate.x));
     candidate.y = std::max(minY, std::min(maxY, candidate.y));
     auto collidesFn = [this](const Vec2& p, float r){
-        if (_entrance) return _entrance->collides(p, r);
-        if (_floorMap) return _floorMap->collides(p, r);
+        bool base = false;
+        if (_entrance) base = _entrance->collides(p, r);
+        else if (_floorMap) base = _floorMap->collides(p, r);
+        if (base) return true;
+        for (const auto& rc : _dynamicColliders) { if (rc.containsPoint(p)) return true; }
         return false;
     };
     Vec2 foot(candidate.x, current.y);
@@ -59,12 +62,38 @@ std::pair<int,int> AbyssMapController::targetTile(const Vec2& playerPos, const V
 }
 
 void AbyssMapController::updateCursor(const Vec2& playerPos, const Vec2& lastDir) {
-    if (!_mapDraw) return;
-    // 简化：不绘制独立光标，地形已足够提示
+    // 在矿洞中也绘制选点黄框，便于镐子定位
+    float s = static_cast<float>(GameConfig::TILE_SIZE);
+    if (!_cursor) {
+        if (_entrance && _entrance->getTMX()) {
+            _cursor = DrawNode::create();
+            _entrance->getTMX()->addChild(_cursor, 51);
+        } else if (_floorMap && _floorMap->getTMX()) {
+            _cursor = DrawNode::create();
+            _floorMap->getTMX()->addChild(_cursor, 51);
+        } else if (_worldNode) {
+            _cursor = DrawNode::create();
+            _worldNode->addChild(_cursor, 51);
+        }
+    }
+    if (!_cursor) return;
+    _cursor->clear();
+    auto tgt = targetTile(playerPos, lastDir);
+    Vec2 c = tileToWorld(tgt.first, tgt.second);
+    Vec2 a(c.x - s*0.5f, c.y - s*0.5f);
+    Vec2 b(c.x + s*0.5f, c.y - s*0.5f);
+    Vec2 d(c.x - s*0.5f, c.y + s*0.5f);
+    Vec2 e(c.x + s*0.5f, c.y + s*0.5f);
+    _cursor->drawLine(a,b, Color4F(1.f,0.9f,0.2f,1.f));
+    _cursor->drawLine(b,e, Color4F(1.f,0.9f,0.2f,1.f));
+    _cursor->drawLine(e,d, Color4F(1.f,0.9f,0.2f,1.f));
+    _cursor->drawLine(d,a, Color4F(1.f,0.9f,0.2f,1.f));
 }
 
 Game::TileType AbyssMapController::getTile(int c, int r) const {
-    return _tiles[r * _cols + c];
+    size_t idx = static_cast<size_t>(r) * static_cast<size_t>(_cols) + static_cast<size_t>(c);
+    if (idx < _tiles.size()) return _tiles[idx];
+    return Game::TileType::Soil;
 }
 
 void AbyssMapController::setTile(int c, int r, Game::TileType t) {
@@ -137,6 +166,11 @@ void AbyssMapController::refreshMapVisuals() {
     _mapDraw->drawSolidCircle(_stairsPos, s*0.4f, 0.0f, 16, Color4F(0.95f,0.85f,0.15f,1.0f));
 }
 
+bool AbyssMapController::applyPickaxeAt(const Vec2& worldPos, int power) {
+    if (_mineHit) return _mineHit(worldPos, power);
+    return false;
+}
+
 void AbyssMapController::addActorToMap(cocos2d::Node* node, int zOrder) {
     if (_entrance && _worldNode) {
         // 入口层：人物置于世界节点最上层，避免被 TMX 图层遮挡且在卸载入口时不被移除
@@ -152,6 +186,8 @@ void AbyssMapController::generateFloor(int floorIndex) {
     _floor = std::max(1, std::min(120, floorIndex));
     if (_entrance) { _entrance->removeFromParent(); _entrance = nullptr; }
     if (_floorMap) { _floorMap->removeFromParent(); _floorMap = nullptr; }
+    // 旧 TMX 被移除时，伴随挂载的光标节点也不再有效，重置指针避免野引用
+    _cursor = nullptr;
     loadFloorTMX(_floor);
 }
 
@@ -228,6 +264,8 @@ void AbyssMapController::loadEntrance() {
     // 清理当前楼层 TMX，切换到入口
     if (_floorMap) { _floorMap->removeFromParent(); _floorMap = nullptr; }
     if (_entrance) { _entrance->removeFromParent(); _entrance = nullptr; }
+    // 切换地图时重置光标节点，避免指向已被移除的父节点
+    _cursor = nullptr;
     // 同步电梯楼层（持久化）到控制器
     {
         auto &ws = Game::globalState();
@@ -351,8 +389,11 @@ const std::vector<std::vector<cocos2d::Vec2>>& AbyssMapController::rockAreaPolys
     return empty;
 }
 bool AbyssMapController::collides(const Vec2& pos, float radius) const {
-    if (_entrance) return _entrance->collides(pos, radius);
-    if (_floorMap) return _floorMap->collides(pos, radius);
+    bool base = false;
+    if (_entrance) base = _entrance->collides(pos, radius);
+    else if (_floorMap) base = _floorMap->collides(pos, radius);
+    if (base) return true;
+    for (const auto& rc : _dynamicColliders) { if (rc.containsPoint(pos)) return true; }
     return false;
 }
 // namespace Controllers

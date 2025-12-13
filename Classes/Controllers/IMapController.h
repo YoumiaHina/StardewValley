@@ -73,6 +73,9 @@ public:
 
     // Type check
     virtual bool isFarm() const { return false; }
+
+    // Mining hook: 供镐子在矿洞中触发采掘（默认不支持）
+    virtual bool applyPickaxeAt(const cocos2d::Vec2& worldPos, int power) { return false; }
 };
 
 } // namespace Controllers
