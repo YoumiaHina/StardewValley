@@ -155,7 +155,9 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClCompile Include="..\Classes\AppDelegate.cpp" />
     <ClCompile Include="..\Classes\Controllers\Environment\TreeSystem.cpp" />
     <ClCompile Include="..\Classes\Controllers\Interact\BeachInteractor.cpp" />
+    <ClCompile Include="..\Classes\Controllers\Interact\TownInteractor.cpp" />
     <ClCompile Include="..\Classes\Controllers\Map\BeachMapController.cpp" />
+    <ClCompile Include="..\Classes\Controllers\Map\TownMapController.cpp" />
     <ClCompile Include="..\Classes\Controllers\Store\StoreController.cpp" />
     <ClCompile Include="..\Classes\Controllers\UI\ChestPanelUI.cpp" />
     <ClCompile Include="..\Classes\Controllers\UI\CraftPanelUI.cpp" />
@@ -168,6 +170,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClCompile Include="..\Classes\Game\Map\MapBase.cpp" />
     <ClCompile Include="..\Classes\Game\Map\MineMap.cpp" />
     <ClCompile Include="..\Classes\Game\Map\RoomMap.cpp" />
+    <ClCompile Include="..\Classes\Game\Map\TownMap.cpp" />
     <ClCompile Include="..\Classes\Game\Tool\Axe.cpp" />
     <ClCompile Include="..\Classes\Game\Tool\FishingRod.cpp" />
     <ClCompile Include="..\Classes\Game\Tool\Hoe.cpp" />
@@ -195,6 +198,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClCompile Include="..\Classes\Game\WorldState.cpp" />
     <ClCompile Include="..\Classes\Game\Inventory.cpp" />
     <ClCompile Include="..\Classes\Game\Bag.cpp" />
+    <ClCompile Include="..\Classes\Scenes\TownScene.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="..\Classes\Controllers\Input\PlayerController.cpp" />
     <ClCompile Include="..\Classes\Controllers\Map\FarmMapController.cpp" />
@@ -228,7 +232,9 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClInclude Include="..\Classes\Controllers\Environment\TreeSystem.h" />
     <ClInclude Include="..\Classes\Controllers\Interact\BeachInteractor.h" />
     <ClInclude Include="..\Classes\Controllers\Interact\MineInteractor.h" />
+    <ClInclude Include="..\Classes\Controllers\Interact\TownInteractor.h" />
     <ClInclude Include="..\Classes\Controllers\Map\BeachMapController.h" />
+    <ClInclude Include="..\Classes\Controllers\Map\TownMapController.h" />
     <ClInclude Include="..\Classes\Controllers\UI\ChestPanelUI.h" />
     <ClInclude Include="..\Classes\Controllers\UI\CraftPanelUI.h" />
     <ClInclude Include="..\Classes\Controllers\UI\HotbarUI.h" />
@@ -244,6 +250,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClInclude Include="..\Classes\Game\Map\MapBase.h" />
     <ClInclude Include="..\Classes\Game\Map\MineMap.h" />
     <ClInclude Include="..\Classes\Game\Map\RoomMap.h" />
+    <ClInclude Include="..\Classes\Game\Map\TownMap.h" />
     <ClInclude Include="..\Classes\Game\Tool\Axe.h" />
     <ClInclude Include="..\Classes\Game\Tool\FishingRod.h" />
     <ClInclude Include="..\Classes\Game\Tool\Hoe.h" />
@@ -276,6 +283,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClInclude Include="..\Classes\Game\Tile.h" />
     <ClInclude Include="..\Classes\Game\Item.h" />
     <ClInclude Include="..\Classes\Game\Drop.h" />
+    <ClInclude Include="..\Classes\Scenes\TownScene.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="..\Classes\Controllers\IMapController.h" />
     <ClInclude Include="..\Classes\Controllers\Input\PlayerController.h" />

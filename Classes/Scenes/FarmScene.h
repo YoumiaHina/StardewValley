@@ -34,6 +34,8 @@ public:
     void setSpawnAtFarmRoomDoor();
     // 供沙滩返回：将玩家出生在 DoorToBeach 对象层中心
     void setSpawnAtFarmBeachDoor();
+    // 供城镇返回：将玩家出生在 DoorToTown 对象层中心
+    void setSpawnAtFarmTownDoor();
 
 private:
     Controllers::FarmMapController* _farmMap = nullptr;

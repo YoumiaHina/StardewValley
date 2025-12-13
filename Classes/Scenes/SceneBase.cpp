@@ -139,7 +139,8 @@ void SceneBase::registerCommonInputHandlers(bool enableToolOnSpace, bool enableT
                         nearDoor = _mapController->isNearDoor(p)
                                    || _mapController->isNearMineDoor(p)
                                    || _mapController->isNearBeachDoor(p)
-                                   || _mapController->isNearFarmDoor(p);
+                                   || _mapController->isNearFarmDoor(p)
+                                   || _mapController->isNearTownDoor(p);
                     }
                     if (!nearDoor) {
                         auto t = _inventory ? _inventory->selectedTool() : nullptr;

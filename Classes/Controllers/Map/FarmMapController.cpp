@@ -241,6 +241,10 @@ bool FarmMapController::isNearBeachDoor(const Vec2& playerWorldPos) const {
     return _farmMap ? _farmMap->nearDoorToBeach(playerWorldPos) : false;
 }
 
+bool FarmMapController::isNearTownDoor(const Vec2& playerWorldPos) const {
+    return _farmMap ? _farmMap->nearDoorToTown(playerWorldPos) : false;
+}
+
 bool FarmMapController::isNearChest(const Vec2& playerWorldPos) const {
     float maxDist = GameConfig::TILE_SIZE * 0.8f;
     for (const auto& ch : _chests) {
@@ -301,6 +305,13 @@ cocos2d::Vec2 FarmMapController::farmRoomDoorSpawnPos() const {
 cocos2d::Vec2 FarmMapController::farmBeachDoorSpawnPos() const {
     if (_farmMap) {
         return _farmMap->doorToBeachCenter();
+    }
+    return Vec2(_farmDoorRect.getMidX(), _farmDoorRect.getMidY());
+}
+
+cocos2d::Vec2 FarmMapController::farmTownDoorSpawnPos() const {
+    if (_farmMap) {
+        return _farmMap->doorToTownCenter();
     }
     return Vec2(_farmDoorRect.getMidX(), _farmDoorRect.getMidY());
 }

@@ -21,6 +21,7 @@ bool FarmMap::initWithFile(const std::string& tmxFile) {
     parseDoorToRoom();
     parseDoorToMine();
     parseDoorToBeach();
+    parseDoorToTown();
     parseNoTree();
     
     return true;
@@ -265,6 +266,45 @@ bool FarmMap::nearDoorToBeach(const cocos2d::Vec2& p) const {
 cocos2d::Vec2 FarmMap::doorToBeachCenter() const {
     if (!_doorToBeachRects.empty()) {
         const auto& r = _doorToBeachRects.front();
+        return cocos2d::Vec2(r.getMidX(), r.getMidY());
+    }
+    return cocos2d::Vec2::ZERO;
+}
+
+void FarmMap::parseDoorToTown() {
+    _doorToTownRects.clear();
+    if (!_tmx) return;
+    if (_doorDebugNode == nullptr) {
+        _doorDebugNode = cocos2d::DrawNode::create();
+        _tmx->addChild(_doorDebugNode, 997);
+    }
+    auto group = _tmx->getObjectGroup("DoorToTown");
+    if (!group) group = _tmx->getObjectGroup("doorToTown");
+    if (!group) return;
+    auto objects = group->getObjects();
+    for (auto &val : objects) {
+        auto dict = val.asValueMap();
+        float x = dict.at("x").asFloat();
+        float y = dict.at("y").asFloat();
+        float w = dict.count("width") ? dict.at("width").asFloat() : 0.0f;
+        float h = dict.count("height") ? dict.at("height").asFloat() : 0.0f;
+        _doorToTownRects.emplace_back(x, y, w, h);
+        cocos2d::Rect r(x, y, w, h);
+        _doorDebugNode->drawRect(r.origin, r.origin + r.size, cocos2d::Color4F(1, 0, 1, 0.5f));
+        _doorDebugNode->drawSolidRect(r.origin, r.origin + r.size, cocos2d::Color4F(1, 0, 1, 0.2f));
+    }
+}
+
+bool FarmMap::nearDoorToTown(const cocos2d::Vec2& p) const {
+    for (const auto& r : _doorToTownRects) {
+        if (r.containsPoint(p)) return true;
+    }
+    return false;
+}
+
+cocos2d::Vec2 FarmMap::doorToTownCenter() const {
+    if (!_doorToTownRects.empty()) {
+        const auto& r = _doorToTownRects.front();
         return cocos2d::Vec2(r.getMidX(), r.getMidY());
     }
     return cocos2d::Vec2::ZERO;

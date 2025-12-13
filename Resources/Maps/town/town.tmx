@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="50" height="50" tilewidth="16" tileheight="16" infinite="0" nextlayerid="5" nextobjectid="14">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="50" height="50" tilewidth="16" tileheight="16" infinite="0" nextlayerid="5" nextobjectid="15">
  <tileset firstgid="1" source="spring_town.zh-CN.tsx"/>
  <tileset firstgid="2305" source="../spring_outdoors/spring_outdoors.tsx"/>
  <layer id="1" name="Background" width="50" height="50">
@@ -70,6 +70,7 @@
  </objectgroup>
  <objectgroup id="4" name="DoorToFarm">
   <object id="13" x="0.666667" y="299.333" width="29.3333" height="74"/>
+  <object id="14" x="894" y="366"/>
  </objectgroup>
  <layer id="2" name="House" width="50" height="50">
   <data encoding="csv">

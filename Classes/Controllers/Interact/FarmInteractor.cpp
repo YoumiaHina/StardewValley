@@ -10,7 +10,7 @@ namespace Controllers {
 FarmInteractor::SpaceAction FarmInteractor::onSpacePressed() {
     if (!_map || !_inventory || !_ui || !_getPlayerPos) return SpaceAction::None;
     Vec2 p = _getPlayerPos();
-    // 进屋 / 进矿洞 / 去沙滩
+    // 进屋 / 进矿洞 / 去沙滩 / 去城镇
     if (_map->isNearDoor(p)) {
         return SpaceAction::EnterHouse;
     }
@@ -19,6 +19,9 @@ FarmInteractor::SpaceAction FarmInteractor::onSpacePressed() {
     }
     if (_map->isNearBeachDoor(p)) {
         return SpaceAction::EnterBeach;
+    }
+    if (_map->isNearTownDoor(p)) {
+        return SpaceAction::EnterTown;
     }
 
     if (_inventory->selectedKind() == Game::SlotKind::Item) {

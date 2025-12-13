@@ -16,7 +16,7 @@ namespace Controllers {
 
 class FarmInteractor {
 public:
-    enum class SpaceAction { None, EnterHouse, EnterMine, EnterBeach };
+    enum class SpaceAction { None, EnterHouse, EnterMine, EnterBeach, EnterTown };
 
     FarmInteractor(std::shared_ptr<Game::Inventory> inventory,
                    Controllers::IMapController* map,

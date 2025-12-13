@@ -12,6 +12,7 @@
 #include "Scenes/RoomScene.h"
 #include "Scenes/MineScene.h"
 #include "Scenes/BeachScene.h"
+#include "Scenes/TownScene.h"
 #include "Controllers/Managers/AudioManager.h"
 #include "Controllers/Systems/FishingController.h"
 #include "Game/Cheat.h"
@@ -81,6 +82,14 @@ void FarmScene::setSpawnAtFarmBeachDoor() {
     }
 }
 
+void FarmScene::setSpawnAtFarmTownDoor() {
+    if (!_player || !_mapController) return;
+    auto pos = _mapController->farmTownDoorSpawnPos();
+    if (pos != Vec2::ZERO) {
+        _player->setPosition(pos);
+    }
+}
+
 // SceneBase overrides
 Controllers::IMapController* FarmScene::createMapController(Node* worldNode) {
     _farmMap = new Controllers::FarmMapController(worldNode);
@@ -106,6 +115,10 @@ void FarmScene::onSpacePressed() {
     } else if (act == Controllers::FarmInteractor::SpaceAction::EnterBeach) {
         auto beach = BeachScene::createScene();
         auto trans = TransitionFade::create(0.6f, beach);
+        Director::getInstance()->replaceScene(trans);
+    } else if (act == Controllers::FarmInteractor::SpaceAction::EnterTown) {
+        auto town = TownScene::createScene();
+        auto trans = TransitionFade::create(0.6f, town);
         Director::getInstance()->replaceScene(trans);
     }
 }

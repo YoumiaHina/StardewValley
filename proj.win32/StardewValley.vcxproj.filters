@@ -144,9 +144,6 @@
     <ClCompile Include="main.cpp">
       <Filter>proj.win32</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\Managers\AudioManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\Classes\Controllers\Systems\FishingController.cpp">
       <Filter>Classes\Controllers\Systems</Filter>
     </ClCompile>
@@ -279,6 +276,21 @@
     <ClCompile Include="..\Classes\Controllers\Interact\BeachInteractor.cpp">
       <Filter>Classes\Controllers\Interact</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\Managers\AudioManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Scenes\TownScene.cpp">
+      <Filter>Classes\Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\Map\TownMap.cpp">
+      <Filter>Classes\Game\Map</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\Interact\TownInteractor.cpp">
+      <Filter>Classes\Controllers\Interact</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\Map\TownMapController.cpp">
+      <Filter>Classes\Controllers\Map</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <!-- Header Files -->
@@ -383,9 +395,6 @@
     <ClInclude Include="main.h">
       <Filter>proj.win32</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\Managers\AudioManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\Classes\Controllers\Systems\FishingController.h">
       <Filter>Classes\Controllers\Systems</Filter>
     </ClInclude>
@@ -484,6 +493,21 @@
     </ClInclude>
     <ClInclude Include="..\Classes\Controllers\Interact\BeachInteractor.h">
       <Filter>Classes\Controllers\Interact</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\Managers\AudioManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Scenes\TownScene.h">
+      <Filter>Classes\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\Map\TownMap.h">
+      <Filter>Classes\Game\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\Interact\TownInteractor.h">
+      <Filter>Classes\Controllers\Interact</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\Map\TownMapController.h">
+      <Filter>Classes\Controllers\Map</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
