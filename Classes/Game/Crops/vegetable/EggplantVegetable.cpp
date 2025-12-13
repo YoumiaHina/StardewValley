@@ -1,3 +1,4 @@
+// 茄子成熟作物：物品栏静态信息（名称/售价/恢复效果）
 #include "Game/Crops/vegetable/VegetableBase.h"
 
 namespace Game {

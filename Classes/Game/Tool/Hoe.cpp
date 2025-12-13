@@ -40,10 +40,13 @@ std::string Hoe::use(Controllers::IMapController* map,
         int idx = crop ? crop->findCropIndex(tc, tr) : -1;
         if (idx >= 0) {
             const auto& cp = crop->crops()[idx];
+            // 可收获由具体作物行为判定（成熟/倒数阶段等）
             bool canHarvest = crop->canHarvestAt(tc, tr);
             if (canHarvest) {
+                // 是否产出（如倒数阶段采摘）由行为判定
                 bool yields = crop->yieldsOnHarvestAt(tc, tr);
                 if (yields) {
+                    // 产物类型由作物类型映射决定
                     auto produce = Game::produceItemFor(cp.type);
                     int leftover = ws.inventory ? ws.inventory->addItems(produce, 1) : 0;
                     if (leftover > 0) {
@@ -51,6 +54,7 @@ std::string Hoe::use(Controllers::IMapController* map,
                         map->refreshDropsVisuals();
                     }
                 }
+                // 执行收获（可能拔除或转为成熟占位）
                 if (crop) { crop->harvestCropAt(tc, tr); }
                 map->refreshCropsVisuals();
                 if (ui) { ui->refreshHotbar(); }
