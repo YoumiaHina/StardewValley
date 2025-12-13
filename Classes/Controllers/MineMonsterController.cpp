@@ -1,4 +1,4 @@
-#include "Controllers/AbyssMonsterController.h"
+#include "Controllers/MineMonsterController.h"
 #include "cocos2d.h"
 #include <algorithm>
 
@@ -6,7 +6,7 @@ using namespace cocos2d;
 
 namespace Controllers {
 
-void AbyssMonsterController::generateInitialWave() {
+void MineMonsterController::generateInitialWave() {
     _monsters.clear();
     if (_map && _map->currentFloor() <= 0) { refreshVisuals(); return; }
     auto spawns = _map->monsterSpawnPoints();
@@ -23,7 +23,7 @@ void AbyssMonsterController::generateInitialWave() {
     refreshVisuals();
 }
 
-void AbyssMonsterController::update(float dt) {
+void MineMonsterController::update(float dt) {
     if (_map && _map->currentFloor() <= 0) return; // 入口层：不刷新/重生
     // 没有 MonsterArea：不进行任何刷新/重生
     if (_map && _map->monsterSpawnPoints().empty()) return;
@@ -37,13 +37,13 @@ void AbyssMonsterController::update(float dt) {
     }
 }
 
-void AbyssMonsterController::resetFloor() {
+void MineMonsterController::resetFloor() {
     _monsters.clear();
     _respawnAccum = 0.0f;
     refreshVisuals();
 }
 
-void AbyssMonsterController::applyDamageAt(const Vec2& worldPos, int baseDamage) {
+void MineMonsterController::applyDamageAt(const Vec2& worldPos, int baseDamage) {
     // 简化：对距离最近的一只怪物造成伤害
     int idx = -1; float best = 1e9f;
     for (int i=0;i<(int)_monsters.size();++i) {
@@ -58,7 +58,7 @@ void AbyssMonsterController::applyDamageAt(const Vec2& worldPos, int baseDamage)
             // 掉落：简化为添加对应主题碎片 1 个
             auto theme = _map->currentTheme();
             Game::ItemType drop = Game::ItemType::Fiber; // placeholder
-            if (theme == AbyssMapController::Theme::Ice) drop = Game::ItemType::ParsnipSeed; // placeholder swap
+            if (theme == MineMapController::Theme::Ice) drop = Game::ItemType::ParsnipSeed; // placeholder swap
             if (auto inv = Game::globalState().inventory) {
                 inv->addItems(drop, 1);
             }
@@ -68,21 +68,21 @@ void AbyssMonsterController::applyDamageAt(const Vec2& worldPos, int baseDamage)
     }
 }
 
-AbyssMonsterController::Monster AbyssMonsterController::makeMonsterForTheme(AbyssMapController::Theme theme) {
+MineMonsterController::Monster MineMonsterController::makeMonsterForTheme(MineMapController::Theme theme) {
     Monster m{};
     switch (theme) {
-        case AbyssMapController::Theme::Rock:
+        case MineMapController::Theme::Rock:
             m.type = Monster::Type::RockSlime; m.hp=80; m.maxHp=80; m.dmg=8; m.def=3; m.searchRangeTiles=4; break;
-        case AbyssMapController::Theme::Ice:
+        case MineMapController::Theme::Ice:
             m.type = Monster::Type::IceBat; m.hp=60; m.maxHp=60; m.dmg=12; m.def=1; m.searchRangeTiles=6; break;
-        case AbyssMapController::Theme::Lava:
+        case MineMapController::Theme::Lava:
             m.type = Monster::Type::LavaCrab; m.hp=200; m.maxHp=200; m.dmg=20; m.def=8; m.searchRangeTiles=3; break;
     }
     m.elite = false;
     return m;
 }
 
-void AbyssMonsterController::refreshVisuals() {
+void MineMonsterController::refreshVisuals() {
     if (!_monsterDraw) {
         _monsterDraw = DrawNode::create();
         if (_worldNode) _worldNode->addChild(_monsterDraw, 3);

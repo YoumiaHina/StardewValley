@@ -82,25 +82,25 @@
     <ClCompile Include="..\Classes\Scenes\SceneBase.cpp">
       <Filter>Classes\Scenes</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\Scenes\AbyssMineScene.cpp">
+    <ClCompile Include="..\Classes\Scenes\MineScene.cpp">
       <Filter>Classes\Scenes</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\Controllers\Map\AbyssMapController.cpp">
+    <ClCompile Include="..\Classes\Controllers\Map\MineMapController.cpp">
       <Filter>Classes\Controllers\Map</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\Controllers\AbyssMonsterController.cpp">
+    <ClCompile Include="..\Classes\Controllers\MineMonsterController.cpp">
       <Filter>Classes\Controllers</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\Controllers\AbyssMiningController.cpp">
+    <ClCompile Include="..\Classes\Controllers\MineMiningController.cpp">
       <Filter>Classes\Controllers</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\Controllers\AbyssCombatController.cpp">
+    <ClCompile Include="..\Classes\Controllers\MineCombatController.cpp">
       <Filter>Classes\Controllers</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\Controllers\Interact\AbyssInteractor.cpp">
+    <ClCompile Include="..\Classes\Controllers\Interact\MineInteractor.cpp">
       <Filter>Classes\Controllers\Interact</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\Controllers\AbyssElevatorController.cpp">
+    <ClCompile Include="..\Classes\Controllers\MineElevatorController.cpp">
       <Filter>Classes\Controllers</Filter>
     </ClCompile>
     <ClCompile Include="..\Classes\Scenes\RoomScene.cpp">
@@ -285,22 +285,22 @@
     <ClInclude Include="..\Classes\Scenes\SceneBase.h">
       <Filter>Classes\Scenes</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\Scenes\AbyssMineScene.h">
+    <ClInclude Include="..\Classes\Scenes\MineScene.h">
       <Filter>Classes\Scenes</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\Controllers\Map\AbyssMapController.h">
+    <ClInclude Include="..\Classes\Controllers\Map\MineMapController.h">
       <Filter>Classes\Controllers\Map</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\Controllers\AbyssMonsterController.h">
+    <ClInclude Include="..\Classes\Controllers\MineMonsterController.h">
       <Filter>Classes\Controllers</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\Controllers\AbyssMiningController.h">
+    <ClInclude Include="..\Classes\Controllers\MineMiningController.h">
       <Filter>Classes\Controllers</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\Controllers\AbyssCombatController.h">
+    <ClInclude Include="..\Classes\Controllers\MineCombatController.h">
       <Filter>Classes\Controllers</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\Controllers\AbyssElevatorController.h">
+    <ClInclude Include="..\Classes\Controllers\MineElevatorController.h">
       <Filter>Classes\Controllers</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\Scenes\RoomScene.h">
@@ -395,7 +395,7 @@
     <ClInclude Include="..\Classes\Game\View\PlayerView.h">
       <Filter>Classes\Game\View</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\Controllers\Interact\AbyssInteractor.h">
+    <ClInclude Include="..\Classes\Controllers\Interact\MineInteractor.h">
       <Filter>Classes\Controllers\Interact</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\Game\Tool\Axe.h">

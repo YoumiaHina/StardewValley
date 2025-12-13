@@ -1,5 +1,5 @@
 /**
- * AbyssElevatorController: 深渊矿洞电梯面板（跳转已激活楼层）。
+ * MineElevatorController: 矿洞电梯面板（跳转已激活楼层）。
  */
 #pragma once
 
@@ -7,17 +7,17 @@
 #include "ui/CocosGUI.h"
 #include <vector>
 #include <functional>
-#include "Controllers/Map/AbyssMapController.h"
-#include "Controllers/AbyssMonsterController.h"
-#include "Controllers/AbyssMiningController.h"
+#include "Controllers/Map/MineMapController.h"
+#include "Controllers/MineMonsterController.h"
+#include "Controllers/MineMiningController.h"
 
 namespace Controllers {
 
-class AbyssElevatorController {
+class MineElevatorController {
 public:
-    AbyssElevatorController(AbyssMapController* map,
-                            AbyssMonsterController* monsters,
-                            AbyssMiningController* mining,
+    MineElevatorController(MineMapController* map,
+                            MineMonsterController* monsters,
+                            MineMiningController* mining,
                             cocos2d::Scene* scene)
     : _map(map), _monsters(monsters), _mining(mining), _scene(scene) {}
 
@@ -29,9 +29,9 @@ public:
     void setOnFloorChanged(std::function<void(int)> cb) { _onFloorChanged = std::move(cb); }
 
 private:
-    AbyssMapController* _map = nullptr;
-    AbyssMonsterController* _monsters = nullptr;
-    AbyssMiningController* _mining = nullptr;
+    MineMapController* _map = nullptr;
+    MineMonsterController* _monsters = nullptr;
+    MineMiningController* _mining = nullptr;
     cocos2d::Scene* _scene = nullptr;
     cocos2d::ui::Layout* _panel = nullptr;
     std::function<void(bool)> _setMovementLocked;

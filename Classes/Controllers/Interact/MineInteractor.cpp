@@ -1,11 +1,11 @@
-#include "Controllers/Interact/AbyssInteractor.h"
+#include "Controllers/Interact/MineInteractor.h"
 #include "cocos2d.h"
 
 using namespace cocos2d;
 
 namespace Controllers {
 
-AbyssInteractor::SpaceAction AbyssInteractor::onSpacePressed() {
+MineInteractor::SpaceAction MineInteractor::onSpacePressed() {
     if (!_map) return SpaceAction::None;
     Vec2 p = _getPlayerPos ? _getPlayerPos() : Vec2();
     // 0 层电梯：优先判定 elestair

@@ -1,18 +1,18 @@
 /**
- * AbyssMiningController: 深渊矿洞采矿系统（分布、挖掘规则、特殊元素）。
+ * MineMiningController: 矿洞采矿系统（分布、挖掘规则、特殊元素）。
  */
 #pragma once
 
 #include "cocos2d.h"
 #include <vector>
 #include <string>
-#include "Controllers/Map/AbyssMapController.h"
+#include "Controllers/Map/MineMapController.h"
 #include "Game/WorldState.h"
 #include "Game/Item.h"
 
 namespace Controllers {
 
-class AbyssMiningController {
+class MineMiningController {
 public:
     enum class NodeType { Rock, HardRock, HugeRock, CopperOre, IronOre, GoldOre };
 
@@ -25,7 +25,7 @@ public:
         cocos2d::Sprite* sprite = nullptr;
     };
 
-    AbyssMiningController(AbyssMapController* map, cocos2d::Node* worldNode)
+    MineMiningController(MineMapController* map, cocos2d::Node* worldNode)
     : _map(map), _worldNode(worldNode) {}
 
     void generateNodesForFloor();
@@ -37,7 +37,7 @@ public:
     void refreshVisuals();
 
 private:
-    AbyssMapController* _map = nullptr;
+    MineMapController* _map = nullptr;
     cocos2d::Node* _worldNode = nullptr;
     std::vector<Node> _nodes;
     cocos2d::DrawNode* _miningDraw = nullptr; // legacy, kept for cleanup

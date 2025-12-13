@@ -1,4 +1,4 @@
-#include "Controllers/AbyssCombatController.h"
+#include "Controllers/MineCombatController.h"
 #include "cocos2d.h"
 #include "Game/WorldState.h"
 #include "Game/Tool/ToolBase.h"
@@ -7,7 +7,7 @@ using namespace cocos2d;
 
 namespace Controllers {
 
-void AbyssCombatController::onMouseDown(EventMouse* e) {
+void MineCombatController::onMouseDown(EventMouse* e) {
     if (e->getMouseButton() != EventMouse::MouseButton::BUTTON_LEFT) return;
     Vec2 pos = _getPlayerPos ? _getPlayerPos() : Vec2();
     // 根据当前选中的工具调整伤害（Sword 更高伤害）

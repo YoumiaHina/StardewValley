@@ -1,11 +1,11 @@
-#include "Controllers/AbyssElevatorController.h"
+#include "Controllers/MineElevatorController.h"
 
 using namespace cocos2d;
 using namespace cocos2d::ui;
 
 namespace Controllers {
 
-void AbyssElevatorController::buildPanel() {
+void MineElevatorController::buildPanel() {
     if (_panel) return;
     _panel = Layout::create();
     _panel->setBackGroundColorType(Layout::BackGroundColorType::SOLID);
@@ -23,7 +23,7 @@ void AbyssElevatorController::buildPanel() {
     _refreshButtons();
 }
 
-void AbyssElevatorController::togglePanel() {
+void MineElevatorController::togglePanel() {
     if (!_panel) buildPanel();
     // 仅允许在 0 层使用电梯
     if (_map && _map->currentFloor() > 0) { if (_panel) _panel->setVisible(false); return; }
@@ -33,7 +33,7 @@ void AbyssElevatorController::togglePanel() {
     if (_setMovementLocked) _setMovementLocked(newVisible);
 }
 
-void AbyssElevatorController::_refreshButtons() {
+void MineElevatorController::_refreshButtons() {
     if (!_panel) return;
     _panel->removeAllChildren();
     auto floors = _map->getActivatedElevatorFloors();
@@ -66,7 +66,7 @@ void AbyssElevatorController::_refreshButtons() {
     }
 }
 
-void AbyssElevatorController::_jumpToFloor(int floor) {
+void MineElevatorController::_jumpToFloor(int floor) {
     if (!_map) return;
     _map->setFloor(floor);
     if (_monsters) { _monsters->resetFloor(); }

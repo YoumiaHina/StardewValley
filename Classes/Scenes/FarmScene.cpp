@@ -10,7 +10,7 @@
 #include "Game/Tool/ToolFactory.h"
 #include "Game/Tool/FishingRod.h"
 #include "Scenes/RoomScene.h"
-#include "Scenes/AbyssMineScene.h"
+#include "Scenes/MineScene.h"
 #include "Managers/AudioManager.h"
 #include "Controllers/Systems/FishingController.h"
 #include "Game/Cheat.h"
@@ -91,8 +91,8 @@ void FarmScene::onSpacePressed() {
         auto trans = TransitionFade::create(0.6f, room);
         Director::getInstance()->replaceScene(trans);
     } else if (act == Controllers::FarmInteractor::SpaceAction::EnterMine) {
-        auto abyss = AbyssMineScene::create();
-        auto trans = TransitionFade::create(0.6f, abyss);
+        auto mine = MineScene::create();
+        auto trans = TransitionFade::create(0.6f, mine);
         Director::getInstance()->replaceScene(trans);
     }
 }
@@ -101,8 +101,8 @@ const char* FarmScene::doorPromptText() const { return "Press Space to Enter"; }
 
 void FarmScene::onKeyPressedHook(EventKeyboard::KeyCode code) {
     if (code == EventKeyboard::KeyCode::KEY_K) {
-        auto abyss = AbyssMineScene::create();
-        auto trans = TransitionFade::create(0.6f, abyss);
+        auto mine = MineScene::create();
+        auto trans = TransitionFade::create(0.6f, mine);
         Director::getInstance()->replaceScene(trans);
     }
 }

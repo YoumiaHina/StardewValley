@@ -1,4 +1,4 @@
-#include "Controllers/Map/AbyssMapController.h"
+#include "Controllers/Map/MineMapController.h"
 #include "cocos2d.h"
 #include "Game/WorldState.h"
 #include "Game/Tool/ToolFactory.h"
@@ -7,13 +7,13 @@ using namespace cocos2d;
 
 namespace Controllers {
 
-cocos2d::Size AbyssMapController::getContentSize() const {
+cocos2d::Size MineMapController::getContentSize() const {
     if (_entrance) return _entrance->getContentSize();
     if (_floorMap) return _floorMap->getContentSize();
     return Size(_cols * GameConfig::TILE_SIZE, _rows * GameConfig::TILE_SIZE);
 }
 
-cocos2d::Vec2 AbyssMapController::clampPosition(const Vec2& current, const Vec2& next, float radius) const {
+cocos2d::Vec2 MineMapController::clampPosition(const Vec2& current, const Vec2& next, float radius) const {
     float s = static_cast<float>(GameConfig::TILE_SIZE);
     Vec2 candidate = next;
     Size content = getContentSize();
@@ -38,7 +38,7 @@ cocos2d::Vec2 AbyssMapController::clampPosition(const Vec2& current, const Vec2&
     return candidate;
 }
 
-bool AbyssMapController::isNearDoor(const Vec2& playerWorldPos) const {
+bool MineMapController::isNearDoor(const Vec2& playerWorldPos) const {
     // 用楼梯位置代替“门”提示
     float s = static_cast<float>(GameConfig::TILE_SIZE);
     if (_entrance) return _entrance->nearStairs(playerWorldPos, s * 0.8f);
@@ -46,11 +46,11 @@ bool AbyssMapController::isNearDoor(const Vec2& playerWorldPos) const {
     return playerWorldPos.distance(_stairsPos) <= s * 0.8f;
 }
 
-bool AbyssMapController::inBounds(int c, int r) const {
+bool MineMapController::inBounds(int c, int r) const {
     return c >= 0 && r >= 0 && c < _cols && r < _rows;
 }
 
-std::pair<int,int> AbyssMapController::targetTile(const Vec2& playerPos, const Vec2& lastDir) const {
+std::pair<int,int> MineMapController::targetTile(const Vec2& playerPos, const Vec2& lastDir) const {
     int pc, pr; worldToTileIndex(playerPos, pc, pr);
     int dc = (lastDir.x > 0.1f) ? 1 : ((lastDir.x < -0.1f) ? -1 : 0);
     int dr = (lastDir.y > 0.1f) ? 1 : ((lastDir.y < -0.1f) ? -1 : 0);
@@ -61,7 +61,7 @@ std::pair<int,int> AbyssMapController::targetTile(const Vec2& playerPos, const V
     return { tc, tr };
 }
 
-void AbyssMapController::updateCursor(const Vec2& playerPos, const Vec2& lastDir) {
+void MineMapController::updateCursor(const Vec2& playerPos, const Vec2& lastDir) {
     // 在矿洞中也绘制选点黄框，便于镐子定位
     float s = static_cast<float>(GameConfig::TILE_SIZE);
     if (!_cursor) {
@@ -90,24 +90,24 @@ void AbyssMapController::updateCursor(const Vec2& playerPos, const Vec2& lastDir
     _cursor->drawLine(d,a, Color4F(1.f,0.9f,0.2f,1.f));
 }
 
-Game::TileType AbyssMapController::getTile(int c, int r) const {
+Game::TileType MineMapController::getTile(int c, int r) const {
     size_t idx = static_cast<size_t>(r) * static_cast<size_t>(_cols) + static_cast<size_t>(c);
     if (idx < _tiles.size()) return _tiles[idx];
     return Game::TileType::Soil;
 }
 
-void AbyssMapController::setTile(int c, int r, Game::TileType t) {
+void MineMapController::setTile(int c, int r, Game::TileType t) {
     _tiles[r * _cols + c] = t;
 }
 
-Vec2 AbyssMapController::tileToWorld(int c, int r) const {
+Vec2 MineMapController::tileToWorld(int c, int r) const {
     if (_entrance) return _entrance->tileToWorld(c, r);
     if (_floorMap) return _floorMap->tileToWorld(c, r);
     float s = static_cast<float>(GameConfig::TILE_SIZE);
     return Vec2(c * s + s * 0.5f, r * s + s * 0.5f);
 }
 
-void AbyssMapController::worldToTileIndex(const Vec2& p, int& c, int& r) const {
+void MineMapController::worldToTileIndex(const Vec2& p, int& c, int& r) const {
     if (_entrance) { _entrance->worldToTileIndex(p, c, r); return; }
     if (_floorMap) { _floorMap->worldToTileIndex(p, c, r); return; }
     float s = static_cast<float>(GameConfig::TILE_SIZE);
@@ -115,7 +115,7 @@ void AbyssMapController::worldToTileIndex(const Vec2& p, int& c, int& r) const {
     r = static_cast<int>(p.y / s);
 }
 
-void AbyssMapController::refreshMapVisuals() {
+void MineMapController::refreshMapVisuals() {
     if (_entrance) {
         // Entrance TMX handles all visuals; 不绘制额外标记（去掉黄色圆圈）
         if (!_mapDraw && _entrance && _entrance->getTMX()) {
@@ -166,12 +166,12 @@ void AbyssMapController::refreshMapVisuals() {
     _mapDraw->drawSolidCircle(_stairsPos, s*0.4f, 0.0f, 16, Color4F(0.95f,0.85f,0.15f,1.0f));
 }
 
-bool AbyssMapController::applyPickaxeAt(const Vec2& worldPos, int power) {
+bool MineMapController::applyPickaxeAt(const Vec2& worldPos, int power) {
     if (_mineHit) return _mineHit(worldPos, power);
     return false;
 }
 
-void AbyssMapController::addActorToMap(cocos2d::Node* node, int zOrder) {
+void MineMapController::addActorToMap(cocos2d::Node* node, int zOrder) {
     if (_entrance && _worldNode) {
         // 入口层：人物置于世界节点最上层，避免被 TMX 图层遮挡且在卸载入口时不被移除
         _worldNode->addChild(node, 999);
@@ -182,7 +182,7 @@ void AbyssMapController::addActorToMap(cocos2d::Node* node, int zOrder) {
     }
 }
 
-void AbyssMapController::generateFloor(int floorIndex) {
+void MineMapController::generateFloor(int floorIndex) {
     _floor = std::max(1, std::min(120, floorIndex));
     if (_entrance) { _entrance->removeFromParent(); _entrance = nullptr; }
     if (_floorMap) { _floorMap->removeFromParent(); _floorMap = nullptr; }
@@ -191,23 +191,23 @@ void AbyssMapController::generateFloor(int floorIndex) {
     loadFloorTMX(_floor);
 }
 
-void AbyssMapController::descend(int by) {
+void MineMapController::descend(int by) {
     if (_entrance) { setFloor(1); return; }
     setFloor(_floor + by);
 }
 
-void AbyssMapController::setFloor(int floorIndex) {
+void MineMapController::setFloor(int floorIndex) {
     generateFloor(floorIndex);
     unlockElevatorIfNeeded();
 }
 
-AbyssMapController::Theme AbyssMapController::currentTheme() const {
+MineMapController::Theme MineMapController::currentTheme() const {
     if (_floor <= 40) return Theme::Rock;
     if (_floor <= 80) return Theme::Ice;
     return Theme::Lava;
 }
 
-void AbyssMapController::unlockElevatorIfNeeded() {
+void MineMapController::unlockElevatorIfNeeded() {
     if (_floor % 5 == 0) {
         _elevatorFloors.insert(_floor);
         // 写回持久化集合
@@ -216,7 +216,7 @@ void AbyssMapController::unlockElevatorIfNeeded() {
     }
 }
 
-bool AbyssMapController::isNearStairs(const Vec2& p) const {
+bool MineMapController::isNearStairs(const Vec2& p) const {
     if (_entrance) {
         float s = static_cast<float>(GameConfig::TILE_SIZE);
         return _entrance->nearStairs(p, s * 0.8f);
@@ -229,28 +229,28 @@ bool AbyssMapController::isNearStairs(const Vec2& p) const {
     return p.distance(_stairsPos) <= s * 0.8f;
 }
 
-bool AbyssMapController::isNearFarmDoor(const Vec2& p) const {
+bool MineMapController::isNearFarmDoor(const Vec2& p) const {
     if (_entrance) {
         return _entrance->nearDoorToFarm(p);
     }
     return false;
 }
 
-bool AbyssMapController::isNearBack0(const Vec2& p) const {
+bool MineMapController::isNearBack0(const Vec2& p) const {
     if (_floorMap) {
         return _floorMap->nearBack0(p);
     }
     return false;
 }
 
-bool AbyssMapController::isNearElestair(const Vec2& p) const {
+bool MineMapController::isNearElestair(const Vec2& p) const {
     if (_entrance) {
         return _entrance->nearElestair(p);
     }
     return false;
 }
 
-std::vector<int> AbyssMapController::getActivatedElevatorFloors() const {
+std::vector<int> MineMapController::getActivatedElevatorFloors() const {
     std::vector<int> v;
     v.reserve(_elevatorFloors.size());
     for (int f : _elevatorFloors) v.push_back(f);
@@ -258,7 +258,7 @@ std::vector<int> AbyssMapController::getActivatedElevatorFloors() const {
     return v;
 }
 
-void AbyssMapController::loadEntrance() {
+void MineMapController::loadEntrance() {
     if (!_worldNode) return;
     if (!_mapNode) { _mapNode = Node::create(); _worldNode->addChild(_mapNode, 0); }
     // 清理当前楼层 TMX，切换到入口
@@ -312,7 +312,7 @@ void AbyssMapController::loadEntrance() {
     }
 }
 
-void AbyssMapController::loadFloorTMX(int floorIndex) {
+void MineMapController::loadFloorTMX(int floorIndex) {
     if (!_worldNode) return;
     if (!_mapNode) { _mapNode = Node::create(); _worldNode->addChild(_mapNode, 0); }
     std::string path;
@@ -337,7 +337,7 @@ void AbyssMapController::loadFloorTMX(int floorIndex) {
     }
 }
 
-cocos2d::Vec2 AbyssMapController::entranceSpawnPos() const {
+cocos2d::Vec2 MineMapController::entranceSpawnPos() const {
     if (_entrance) {
         auto appear = _entrance->appearCenter();
         if (appear != Vec2::ZERO) return appear;
@@ -348,7 +348,7 @@ cocos2d::Vec2 AbyssMapController::entranceSpawnPos() const {
     return Vec2(_cols * s * 0.5f, _rows * s * 0.65f);
 }
 
-cocos2d::Vec2 AbyssMapController::entranceBackSpawnPos() const {
+cocos2d::Vec2 MineMapController::entranceBackSpawnPos() const {
     if (_entrance) {
         auto back = _entrance->backAppearCenter();
         if (back != Vec2::ZERO) return back;
@@ -361,7 +361,7 @@ cocos2d::Vec2 AbyssMapController::entranceBackSpawnPos() const {
     return Vec2(_cols * s * 0.5f, _rows * s * 0.65f);
 }
 
-cocos2d::Vec2 AbyssMapController::floorSpawnPos() const {
+cocos2d::Vec2 MineMapController::floorSpawnPos() const {
     if (_floorMap) {
         auto appear = _floorMap->appearCenter();
         if (appear != Vec2::ZERO) return appear;
@@ -371,24 +371,24 @@ cocos2d::Vec2 AbyssMapController::floorSpawnPos() const {
     return Vec2(_cols * s * 0.5f, _rows * s * 0.65f);
 }
 
-const std::vector<cocos2d::Vec2>& AbyssMapController::monsterSpawnPoints() const {
+const std::vector<cocos2d::Vec2>& MineMapController::monsterSpawnPoints() const {
     static std::vector<Vec2> empty;
     if (_floorMap) return _floorMap->monsterSpawnPoints();
     return empty;
 }
 
-const std::vector<cocos2d::Rect>& AbyssMapController::rockAreaRects() const {
+const std::vector<cocos2d::Rect>& MineMapController::rockAreaRects() const {
     static std::vector<Rect> empty;
     if (_floorMap) return _floorMap->rockAreaRects();
     return empty;
 }
 
-const std::vector<std::vector<cocos2d::Vec2>>& AbyssMapController::rockAreaPolys() const {
+const std::vector<std::vector<cocos2d::Vec2>>& MineMapController::rockAreaPolys() const {
     static std::vector<std::vector<Vec2>> empty;
     if (_floorMap) return _floorMap->rockAreaPolys();
     return empty;
 }
-bool AbyssMapController::collides(const Vec2& pos, float radius) const {
+bool MineMapController::collides(const Vec2& pos, float radius) const {
     bool base = false;
     if (_entrance) base = _entrance->collides(pos, radius);
     else if (_floorMap) base = _floorMap->collides(pos, radius);

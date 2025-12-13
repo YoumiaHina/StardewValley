@@ -3,7 +3,7 @@
  */
 #include "Scenes/RoomScene.h"
 #include "Scenes/FarmScene.h"
-#include "Scenes/AbyssMineScene.h"
+#include "Scenes/MineScene.h"
 #include "cocos2d.h"
 #include "ui/CocosGUI.h"
 #include "Game/Inventory.h"
@@ -65,8 +65,8 @@ const char* RoomScene::doorPromptText() const { return "Press Space to Exit"; }
 
 void RoomScene::onKeyPressedHook(EventKeyboard::KeyCode code) {
     if (code == EventKeyboard::KeyCode::KEY_K) {
-        auto abyss = AbyssMineScene::create();
-        auto trans = TransitionFade::create(0.6f, abyss);
+        auto mine = MineScene::create();
+        auto trans = TransitionFade::create(0.6f, mine);
         Director::getInstance()->replaceScene(trans);
     }
 }

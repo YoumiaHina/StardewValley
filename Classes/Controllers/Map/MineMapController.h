@@ -1,5 +1,5 @@
 /**
- * AbyssMapController: 深渊矿洞地图控制器（120层，三阶段主题）。
+ * MineMapController: 矿洞地图控制器（120层，三阶段主题）。
  * 管理楼层、主题、地形绘制、楼梯/电梯、障碍与可视。
  */
 #pragma once
@@ -13,11 +13,11 @@
 
 namespace Controllers {
 
-class AbyssMapController : public Controllers::IMapController {
+class MineMapController : public Controllers::IMapController {
 public:
     enum class Theme { Rock, Ice, Lava };
 
-    AbyssMapController(cocos2d::Node* worldNode)
+    MineMapController(cocos2d::Node* worldNode)
     : _worldNode(worldNode) {}
 
     // IMapController overrides
@@ -50,7 +50,7 @@ public:
     void addActorToMap(cocos2d::Node* node, int zOrder) override;
     void setMineHitCallback(std::function<bool(const cocos2d::Vec2&, int)> cb) { _mineHit = std::move(cb); }
 
-    // Abyss specific
+    // Mine specific
     void generateFloor(int floorIndex);
     void descend(int by = 1);
     void setFloor(int floorIndex);

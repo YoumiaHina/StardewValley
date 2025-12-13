@@ -1,4 +1,4 @@
-#include "Scenes/AbyssMineScene.h"
+#include "Scenes/MineScene.h"
 #include "cocos2d.h"
 #include "Managers/AudioManager.h"
 #include "Scenes/FarmScene.h"
@@ -6,15 +6,15 @@
 
 USING_NS_CC;
 
-cocos2d::Scene* AbyssMineScene::createScene() { return AbyssMineScene::create(); }
+cocos2d::Scene* MineScene::createScene() { return MineScene::create(); }
 
-bool AbyssMineScene::init() {
+bool MineScene::init() {
     // 深渊矿洞：不启用空格工具，启用左键工具；不显示 Craft 面板
     if (!initBase(/*worldScale*/3.0f, /*buildCraftPanel*/false, /*enableToolOnSpace*/false, /*enableToolOnLeftClick*/true)) return false;
     Managers::AudioManager::getInstance().playBackgroundFor(Managers::SceneZone::Abyss);
 
     // 组合矿洞模块
-    _map = static_cast<Controllers::AbyssMapController*>(_mapController);
+    _map = static_cast<Controllers::MineMapController*>(_mapController);
     // 入口楼层（零层）：加载 TMX 地图 Resources/Maps/mine/mine_0.tmx
     _map->loadEntrance();
     // 设置出生点到 Appear 对象层中心（若无则楼梯中心/fallback）
@@ -56,8 +56,8 @@ bool AbyssMineScene::init() {
             }
         }
     }
-    _monsters = new Controllers::AbyssMonsterController(_map, _worldNode);
-    _mining = new Controllers::AbyssMiningController(_map, _worldNode);
+    _monsters = new Controllers::MineMonsterController(_map, _worldNode);
+    _mining = new Controllers::MineMiningController(_map, _worldNode);
     // 镐子采掘回调：由 MapController 转发到 MiningController
     _map->setMineHitCallback([this](const Vec2& wp, int power){ return _mining ? _mining->hitNearestNode(wp, power) : false; });
     // 矿洞零层不刷怪、不生成矿点
@@ -65,9 +65,9 @@ bool AbyssMineScene::init() {
         _monsters->generateInitialWave();
         _mining->generateNodesForFloor();
     }
-    _combat = new Controllers::AbyssCombatController(_monsters, _mining, [this]() -> Vec2 { return _player ? _player->getPosition() : Vec2(); });
-    _interactor = new Controllers::AbyssInteractor(_map, [this]() -> Vec2 { return _player ? _player->getPosition() : Vec2(); });
-    _elevator = new Controllers::AbyssElevatorController(_map, _monsters, _mining, this);
+    _combat = new Controllers::MineCombatController(_monsters, _mining, [this]() -> Vec2 { return _player ? _player->getPosition() : Vec2(); });
+    _interactor = new Controllers::MineInteractor(_map, [this]() -> Vec2 { return _player ? _player->getPosition() : Vec2(); });
+    _elevator = new Controllers::MineElevatorController(_map, _monsters, _mining, this);
     _elevator->buildPanel();
     // 电梯面板打开时锁定移动；跳转后更新楼层标签并定位到该层出生点
     _elevator->setMovementLocker([this](bool locked){ if (_playerController) _playerController->setMovementLocked(locked); });
@@ -90,22 +90,22 @@ bool AbyssMineScene::init() {
     return true;
 }
 
-Controllers::IMapController* AbyssMineScene::createMapController(Node* worldNode) {
-    _map = new Controllers::AbyssMapController(worldNode);
+Controllers::IMapController* MineScene::createMapController(Node* worldNode) {
+    _map = new Controllers::MineMapController(worldNode);
     return _map;
 }
 
-void AbyssMineScene::positionPlayerInitial() {
+void MineScene::positionPlayerInitial() {
     // 初始放置在地图中部偏上
     auto size = _map->getContentSize();
     _player->setPosition(Vec2(size.width * 0.5f, size.height * 0.65f));
 }
 
-void AbyssMineScene::onSpacePressed() {
+void MineScene::onSpacePressed() {
     if (_inTransition) return;
     _inTransition = true;
-    auto act = _interactor ? _interactor->onSpacePressed() : Controllers::AbyssInteractor::SpaceAction::None;
-    if (act == Controllers::AbyssInteractor::SpaceAction::Descend) {
+    auto act = _interactor ? _interactor->onSpacePressed() : Controllers::MineInteractor::SpaceAction::None;
+    if (act == Controllers::MineInteractor::SpaceAction::Descend) {
         // 重置当层状态并根据 TMX 对象层生成
         if (_monsters) { _monsters->resetFloor(); _monsters->generateInitialWave(); }
         if (_mining) { _mining->generateNodesForFloor(); }
@@ -116,15 +116,15 @@ void AbyssMineScene::onSpacePressed() {
         if (_uiController && _player) {
             _uiController->popTextAt(_player->getPosition(), StringUtils::format("Floor %d", _map->currentFloor()), Color3B::YELLOW);
         }
-    } else if (act == Controllers::AbyssInteractor::SpaceAction::UseElevator) {
+    } else if (act == Controllers::MineInteractor::SpaceAction::UseElevator) {
         if (_elevator) _elevator->togglePanel();
-    } else if (act == Controllers::AbyssInteractor::SpaceAction::ReturnToFarm) {
+    } else if (act == Controllers::MineInteractor::SpaceAction::ReturnToFarm) {
         auto farm = FarmScene::create();
         // 在农场场景加载完成后，将出生点设置到 DoorToMine 对象层中心
         farm->setSpawnAtFarmMineDoor();
         auto trans = TransitionFade::create(0.6f, farm);
         Director::getInstance()->replaceScene(trans);
-    } else if (act == Controllers::AbyssInteractor::SpaceAction::ReturnToEntrance) {
+    } else if (act == Controllers::MineInteractor::SpaceAction::ReturnToEntrance) {
         // 返回入口（零层）
         _map->loadEntrance();
         if (_monsters) _monsters->resetFloor();
@@ -139,13 +139,13 @@ void AbyssMineScene::onSpacePressed() {
     _inTransition = false;
 }
 
-const char* AbyssMineScene::doorPromptText() const { return "Press Space to Descend"; }
+const char* MineScene::doorPromptText() const { return "Press Space to Descend"; }
 
-void AbyssMineScene::onMouseDown(EventMouse* e) {
+void MineScene::onMouseDown(EventMouse* e) {
     if (_combat) _combat->onMouseDown(e);
 }
 
-void AbyssMineScene::onKeyPressedHook(EventKeyboard::KeyCode code) {
+void MineScene::onKeyPressedHook(EventKeyboard::KeyCode code) {
     if (code == EventKeyboard::KeyCode::KEY_N) {
         // 调试：直接去下一层
         _map->descend(1);

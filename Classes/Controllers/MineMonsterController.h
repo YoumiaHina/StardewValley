@@ -1,19 +1,19 @@
 /**
- * AbyssMonsterController: 深渊矿洞刷怪系统（主题关联、难度梯度、刷新规则）。
+ * MineMonsterController: 矿洞刷怪系统（主题关联、难度梯度、刷新规则）。
  */
 #pragma once
 
 #include "cocos2d.h"
 #include <vector>
 #include <random>
-#include "Controllers/Map/AbyssMapController.h"
+#include "Controllers/Map/MineMapController.h"
 #include "Game/Item.h"
 #include "Game/WorldState.h"
 #include "cocos2d.h"
 
 namespace Controllers {
 
-class AbyssMonsterController {
+class MineMonsterController {
 public:
     struct Monster {
         enum class Type { RockSlime, BurrowBug, IceBat, IceMage, LavaCrab, LavaWarlock, BossGuardian };
@@ -24,7 +24,7 @@ public:
         bool elite = false;
     };
 
-    AbyssMonsterController(AbyssMapController* map, cocos2d::Node* worldNode)
+    MineMonsterController(MineMapController* map, cocos2d::Node* worldNode)
     : _map(map), _worldNode(worldNode) {}
 
     void generateInitialWave();
@@ -37,13 +37,13 @@ public:
     const std::vector<Monster>& monsters() const { return _monsters; }
 
 private:
-    AbyssMapController* _map = nullptr;
+    MineMapController* _map = nullptr;
     cocos2d::Node* _worldNode = nullptr;
     std::vector<Monster> _monsters;
     float _respawnAccum = 0.0f;
     cocos2d::DrawNode* _monsterDraw = nullptr;
 
-    Monster makeMonsterForTheme(AbyssMapController::Theme theme);
+    Monster makeMonsterForTheme(MineMapController::Theme theme);
 };
 
 } // namespace Controllers

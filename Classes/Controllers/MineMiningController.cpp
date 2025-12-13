@@ -1,4 +1,4 @@
-#include "Controllers/AbyssMiningController.h"
+#include "Controllers/MineMiningController.h"
 #include "cocos2d.h"
 #include <random>
 
@@ -6,7 +6,7 @@ using namespace cocos2d;
 
 namespace Controllers {
 
-void AbyssMiningController::resetFloor() {
+void MineMiningController::resetFloor() {
     // 移除所有已挂载的精灵
     for (auto &n : _nodes) {
         if (n.sprite) { n.sprite->removeFromParent(); n.sprite = nullptr; }
@@ -16,7 +16,7 @@ void AbyssMiningController::resetFloor() {
     refreshVisuals();
 }
 
-void AbyssMiningController::generateNodesForFloor() {
+void MineMiningController::generateNodesForFloor() {
     if (_map && _map->currentFloor() <= 0) { _nodes.clear(); refreshVisuals(); return; }
     // 清理旧节点的精灵，避免层切换时积累导致卡顿
     for (auto &n : _nodes) { if (n.sprite) { n.sprite->removeFromParent(); n.sprite = nullptr; } }
@@ -128,7 +128,7 @@ void AbyssMiningController::generateNodesForFloor() {
     refreshVisuals();
 }
 
-bool AbyssMiningController::hitNearestNode(const Vec2& worldPos, int power) {
+bool MineMiningController::hitNearestNode(const Vec2& worldPos, int power) {
     int idx = -1; float best = 1e9f;
     for (int i=0;i<(int)_nodes.size();++i) {
         float d = _nodes[i].pos.distance(worldPos);
@@ -168,7 +168,7 @@ bool AbyssMiningController::hitNearestNode(const Vec2& worldPos, int power) {
     return false;
 }
 
-void AbyssMiningController::refreshVisuals() {
+void MineMiningController::refreshVisuals() {
     // 使用精灵贴图显示矿石与石头，按格子大小缩放
     float s = static_cast<float>(GameConfig::TILE_SIZE);
     for (auto &n : _nodes) {
