@@ -26,6 +26,17 @@ FarmInteractor::SpaceAction FarmInteractor::onSpacePressed() {
 
     if (_inventory->selectedKind() == Game::SlotKind::Item) {
         const auto &slot = _inventory->selectedSlot();
+        if (_animals && slot.itemQty > 0) {
+            int consumed = 0;
+            bool fed = _animals->tryFeedAnimal(p, slot.itemType, consumed);
+            if (fed && consumed > 0) {
+                bool ok = _inventory->consumeSelectedItem(consumed);
+                if (ok) {
+                    _ui->refreshHotbar();
+                }
+                return SpaceAction::None;
+            }
+        }
         // 播种
         if (Game::isSeed(slot.itemType)) {
             auto lastDir = _getLastDir ? _getLastDir() : Vec2(0,-1);

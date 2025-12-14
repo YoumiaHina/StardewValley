@@ -8,6 +8,7 @@
 #include <vector>
 #include "Game/Tile.h"
 #include "Game/Chest.h"
+#include "Game/Inventory.h"
 
 namespace Controllers {
 
@@ -71,6 +72,7 @@ public:
     virtual void refreshCropsVisuals() {}
     virtual void refreshDropsVisuals() {}
     virtual void spawnDropAt(int c, int r, int itemType /*Game::ItemType*/ , int qty) {}
+    virtual void collectDropsNear(const cocos2d::Vec2& playerWorldPos, Game::Inventory* inv) {}
 
     // Chest 容器访问（Farm/Room 实现）
     virtual const std::vector<Game::Chest>& chests() const = 0;

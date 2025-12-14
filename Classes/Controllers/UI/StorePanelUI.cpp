@@ -140,11 +140,11 @@ void StorePanelUI::refreshStorePanel() {
         priceLabel->setColor(Color3B::YELLOW);
         _listNode->addChild(priceLabel);
         auto buyLabel = Label::createWithTTF("[Buy]", "fonts/arial.ttf", 20);
-        buyLabel->setPosition(Vec2(140, y));
+        buyLabel->setPosition(Vec2(120, y));
         buyLabel->setColor(Color3B::GREEN);
-        auto listener = EventListenerTouchOneByOne::create();
-        listener->setSwallowTouches(true);
-        listener->onTouchBegan = [buyLabel](Touch* t, Event* e){
+        auto buyListener = EventListenerTouchOneByOne::create();
+        buyListener->setSwallowTouches(true);
+        buyListener->onTouchBegan = [buyLabel](Touch* t, Event* e){
             auto target = static_cast<Label*>(e->getCurrentTarget());
             Vec2 p = target->convertToNodeSpace(t->getLocation());
             Size s = target->getContentSize();
@@ -152,7 +152,7 @@ void StorePanelUI::refreshStorePanel() {
             if (r.containsPoint(p)) { target->setScale(0.9f); return true; }
             return false;
         };
-        listener->onTouchEnded = [this, type, isSeed, buyLabel](Touch* t, Event* e){
+        buyListener->onTouchEnded = [this, type, isSeed, buyLabel](Touch* t, Event* e){
             buyLabel->setScale(1.0f);
             bool ok = false;
             if (_storeController) {
@@ -160,8 +160,38 @@ void StorePanelUI::refreshStorePanel() {
             }
             if (onPurchased) onPurchased(ok);
         };
-        _listNode->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, buyLabel);
+        _listNode->getEventDispatcher()->addEventListenerWithSceneGraphPriority(buyListener, buyLabel);
         _listNode->addChild(buyLabel);
+
+        bool canSell = !isSeed && Game::itemPrice(type) > 0;
+        if (canSell) {
+            auto sellLabel = Label::createWithTTF("[Sell]", "fonts/arial.ttf", 20);
+            sellLabel->setPosition(Vec2(200, y));
+            sellLabel->setColor(Color3B::RED);
+            auto sellListener = EventListenerTouchOneByOne::create();
+            sellListener->setSwallowTouches(true);
+            sellListener->onTouchBegan = [sellLabel](Touch* t, Event* e){
+                auto target = static_cast<Label*>(e->getCurrentTarget());
+                Vec2 p = target->convertToNodeSpace(t->getLocation());
+                Size s = target->getContentSize();
+                Rect r(0, 0, s.width, s.height);
+                if (r.containsPoint(p)) { target->setScale(0.9f); return true; }
+                return false;
+            };
+            sellListener->onTouchEnded = [this, type, sellLabel](Touch* t, Event* e){
+                sellLabel->setScale(1.0f);
+                bool ok = false;
+                if (_storeController && _inventory) {
+                    int have = _inventory->countItems(type);
+                    if (have > 0) {
+                        ok = _storeController->sellItem(type, have);
+                    }
+                }
+                if (onPurchased) onPurchased(ok);
+            };
+            _listNode->getEventDispatcher()->addEventListenerWithSceneGraphPriority(sellListener, sellLabel);
+            _listNode->addChild(sellLabel);
+        }
     }
 }
 

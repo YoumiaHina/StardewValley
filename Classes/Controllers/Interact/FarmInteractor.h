@@ -10,6 +10,7 @@
 #include "Controllers/IMapController.h"
 #include "Controllers/Systems/CropSystem.h"
 #include "Controllers/UI/UIController.h"
+#include "Controllers/Systems/AnimalSystem.h"
 #include <functional>
 
 namespace Controllers {
@@ -22,9 +23,10 @@ public:
                    Controllers::IMapController* map,
                    Controllers::UIController* ui,
                    Controllers::CropSystem* crop,
+                   Controllers::AnimalSystem* animals,
                    std::function<cocos2d::Vec2()> getPlayerPos,
                    std::function<cocos2d::Vec2()> getLastDir)
-    : _inventory(std::move(inventory)), _map(map), _ui(ui), _crop(crop), _getPlayerPos(std::move(getPlayerPos)), _getLastDir(std::move(getLastDir)) {}
+    : _inventory(std::move(inventory)), _map(map), _ui(ui), _crop(crop), _animals(animals), _getPlayerPos(std::move(getPlayerPos)), _getLastDir(std::move(getLastDir)) {}
 
     SpaceAction onSpacePressed();
     void onLeftClick();
@@ -34,6 +36,7 @@ private:
     Controllers::IMapController* _map = nullptr;
     Controllers::UIController* _ui = nullptr;
     Controllers::CropSystem* _crop = nullptr;
+    Controllers::AnimalSystem* _animals = nullptr;
     std::function<cocos2d::Vec2()> _getPlayerPos;
     std::function<cocos2d::Vec2()> _getLastDir;
 };

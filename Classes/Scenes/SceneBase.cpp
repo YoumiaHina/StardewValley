@@ -228,6 +228,9 @@ void SceneBase::update(float dt) {
     for (auto& cb : _extraUpdates) { cb(dt); }
     if (_player && _uiController && _mapController) {
         Vec2 p = _player->getPosition();
+        if (_inventory) {
+            _mapController->collectDropsNear(p, _inventory.get());
+        }
         bool nearDoor = _mapController->isNearDoor(p);
         bool nearChest = _mapController->isNearChest(p);
         _uiController->showDoorPrompt(nearDoor, p, doorPromptText());

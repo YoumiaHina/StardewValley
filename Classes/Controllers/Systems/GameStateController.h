@@ -9,6 +9,8 @@
 
 namespace Controllers {
 
+class AnimalSystem;
+
 class GameStateController {
 public:
     GameStateController(Controllers::IMapController* map, Controllers::UIController* ui, Controllers::CropSystem* crop)
@@ -20,7 +22,10 @@ private:
     Controllers::IMapController* _map = nullptr;
     Controllers::UIController* _ui = nullptr;
     Controllers::CropSystem* _crop = nullptr;
+    Controllers::AnimalSystem* _animals = nullptr;
+
+public:
+    void setAnimalSystem(Controllers::AnimalSystem* animals) { _animals = animals; }
 };
 
 }
-// namespace Controllers

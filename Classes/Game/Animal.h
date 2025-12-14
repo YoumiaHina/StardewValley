@@ -16,7 +16,9 @@ struct Animal {
     cocos2d::Vec2 target;
     float speed = 0.0f;
     float wanderRadius = 0.0f;
+    int ageDays = 0;
+    bool isAdult = false;
+    bool fedToday = false;
 };
 
 }
-
