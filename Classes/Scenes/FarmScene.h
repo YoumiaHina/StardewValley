@@ -17,6 +17,7 @@
 #include "Controllers/Systems/GameStateController.h"
 #include "Controllers/Interact/FarmInteractor.h"
 #include "Controllers/Systems/FishingController.h"
+#include "Controllers/Systems/AnimalSystem.h"
 #include "Scenes/SceneBase.h"
 
 class FarmScene : public SceneBase {
@@ -41,6 +42,7 @@ private:
     Controllers::FarmMapController* _farmMap = nullptr;
     Controllers::FarmInteractor* _interactor = nullptr;
     Controllers::FishingController* _fishing = nullptr;
+    Controllers::AnimalSystem* _animalSystem = nullptr;
 
     // SceneBase overrides
     Controllers::IMapController* createMapController(cocos2d::Node* worldNode) override;

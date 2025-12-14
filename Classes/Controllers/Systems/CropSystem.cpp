@@ -4,6 +4,7 @@
 // - 收获/加速等操作通过适配器委派给具体作物行为
 #include "Controllers/Systems/CropSystem.h"
 #include "Game/Crops/crop/CropBase.h"
+#include <cstdlib>
 // 行为实现由各作物派生在 *.cpp 中定义；此处仅声明获取入口
 namespace Game {
     const CropBase& parsnipCropBehavior();
@@ -81,6 +82,19 @@ void CropSystem::advanceCropsDaily(IMapController* map) {
         }
 
         bool watered = cp.wateredToday || (t == Game::TileType::Watered);
+
+        bool died = false;
+        if (!watered) {
+            double roll = static_cast<double>(std::rand()) / (static_cast<double>(RAND_MAX) + 1.0);
+            if (roll < 0.15) {
+                died = true;
+            }
+        }
+
+        if (died) {
+            cp.wateredToday = false;
+            continue;
+        }
 
         if (behaviorFor(cp.type).onDailyRegrow(cp)) {
         } else {

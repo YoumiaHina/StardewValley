@@ -5,6 +5,7 @@
 #pragma once
 
 #include "Game/Crop.h"
+#include <algorithm>
 
 namespace Game {
 
@@ -23,6 +24,16 @@ public:
     virtual bool accelerate(Game::Crop& cp) const = 0;
     // 收获是否产生成熟产物（用于背包添加/掉落），如“倒数阶段可采摘”
     virtual bool yieldsOnHarvest(const Game::Crop& cp) const = 0;
+};
+
+class RegrowCropBase : public CropBase {
+public:
+    bool canAccelerate(const Game::Crop& cp) const override;
+    bool canHarvest(const Game::Crop& cp) const override;
+    void onHarvest(Game::Crop& cp, bool& remove) const override;
+    bool onDailyRegrow(Game::Crop& cp) const override;
+    bool accelerate(Game::Crop& cp) const override;
+    bool yieldsOnHarvest(const Game::Crop& cp) const override;
 };
 
 }

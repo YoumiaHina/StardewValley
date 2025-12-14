@@ -212,12 +212,17 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClCompile Include="..\Classes\Controllers\Managers\AudioManager.cpp" />
     <ClCompile Include="..\Classes\Controllers\Systems\FishingController.cpp" />
     <ClCompile Include="..\Classes\Controllers\Systems\CropSystem.cpp" />
+    <ClCompile Include="..\Classes\Controllers\Systems\AnimalSystem.cpp" />
+    <ClCompile Include="..\Classes\Game\Animals\ChickenAnimal.cpp" />
+    <ClCompile Include="..\Classes\Game\Animals\CowAnimal.cpp" />
+    <ClCompile Include="..\Classes\Game\Animals\SheepAnimal.cpp" />
     <ClCompile Include="..\Classes\Game\Crop.cpp" />
     <ClCompile Include="..\Classes\Game\Crops\crop\ParsnipCrop.cpp" />
     <ClCompile Include="..\Classes\Game\Crops\crop\BlueberryCrop.cpp" />
     <ClCompile Include="..\Classes\Game\Crops\crop\EggplantCrop.cpp" />
     <ClCompile Include="..\Classes\Game\Crops\crop\CornCrop.cpp" />
     <ClCompile Include="..\Classes\Game\Crops\crop\StrawberryCrop.cpp" />
+    <ClCompile Include="..\Classes\Game\Crops\crop\RegrowCropBase.cpp" />
     <ClCompile Include="..\Classes\Game\Crops\seed\ParsnipSeed.cpp" />
     <ClCompile Include="..\Classes\Game\Crops\seed\BlueberrySeed.cpp" />
     <ClCompile Include="..\Classes\Game\Crops\seed\EggplantSeed.cpp" />
@@ -300,6 +305,8 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClInclude Include="..\Classes\Controllers\Managers\AudioManager.h" />
     <ClInclude Include="..\Classes\Controllers\Systems\FishingController.h" />
     <ClInclude Include="..\Classes\Controllers\Systems\CropSystem.h" />
+    <ClInclude Include="..\Classes\Controllers\Systems\AnimalSystem.h" />
+    <ClInclude Include="..\Classes\Game\Animals\AnimalBase.h" />
     <ClInclude Include="..\Classes\Game\Crops\crop\CropBase.h" />
     <ClInclude Include="..\Classes\Game\Crops\seed\SeedBase.h" />
     <ClInclude Include="..\Classes\Game\Crops\vegetable\VegetableBase.h" />
