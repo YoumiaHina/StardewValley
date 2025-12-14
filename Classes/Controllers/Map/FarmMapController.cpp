@@ -399,8 +399,7 @@ void FarmMapController::refreshMapVisuals() {
                 case Game::TileType::Tree:   base = Color4F(0.55f, 0.40f, 0.25f, 1.0f); break;
             }
             Vec2 rect[4] = { a, b, c2, d };
-            // Skip base fill for tilled to allow textured overlay to show clearly
-            if (getTile(c, r) != Game::TileType::Tilled) {
+            if (getTile(c, r) != Game::TileType::Tilled && getTile(c, r) != Game::TileType::Watered) {
                 _mapDraw->drawSolidPoly(rect, 4, base);
             }
             _mapDraw->drawLine(a,b, Color4F(0,0,0,0.25f));
@@ -412,35 +411,75 @@ void FarmMapController::refreshMapVisuals() {
                 default: break; // 不再为 Tree 绘制占位，避免出现“木桩”效果
             }
 
-            // Tilled soil textured overlay using spring_outdoors tileset (configurable row/col)
             if (getTile(c, r) == Game::TileType::Tilled || getTile(c, r) == Game::TileType::Watered) {
                 long long key = (static_cast<long long>(r) << 32) | static_cast<unsigned long long>(c);
                 alive.insert(key);
                 cocos2d::Sprite* spr = nullptr;
                 auto it = _tileSprites.find(key);
                 if (it == _tileSprites.end()) {
-                    spr = cocos2d::Sprite::create("Maps/spring_outdoors/spring_outdoors.png");
+                    spr = cocos2d::Sprite::create("hoeDirt.png");
                     spr->setAnchorPoint(cocos2d::Vec2(0.5f, 0.5f));
                     _tileRoot->addChild(spr, 0);
                     _tileSprites[key] = spr;
                 } else {
                     spr = it->second;
                 }
-                // Compute texture rect from config row/col (1-based)
                 int tw = 16, th = 16;
-                int columns = GameConfig::SPRING_OUTDOORS_COLUMNS;
-                int row1 = (getTile(c, r) == Game::TileType::Watered)
-                    ? GameConfig::FARM_WATERED_TILE_ROW
-                    : GameConfig::FARM_TILLED_TILE_ROW;
-                int col1 = (getTile(c, r) == Game::TileType::Watered)
-                    ? GameConfig::FARM_WATERED_TILE_COL
-                    : GameConfig::FARM_TILLED_TILE_COL;
-                int tileId = (row1 - 1) * columns + (col1 - 1);
-                int col = tileId % columns;
-                int row = tileId / columns;
+                bool up = false, down = false, left = false, right = false;
+                if (r + 1 < _rows) {
+                    auto t = getTile(c, r + 1);
+                    up = (t == Game::TileType::Tilled || t == Game::TileType::Watered);
+                }
+                if (r - 1 >= 0) {
+                    auto t = getTile(c, r - 1);
+                    down = (t == Game::TileType::Tilled || t == Game::TileType::Watered);
+                }
+                if (c - 1 >= 0) {
+                    auto t = getTile(c - 1, r);
+                    left = (t == Game::TileType::Tilled || t == Game::TileType::Watered);
+                }
+                if (c + 1 < _cols) {
+                    auto t = getTile(c + 1, r);
+                    right = (t == Game::TileType::Tilled || t == Game::TileType::Watered);
+                }
+                int mask = 0;
+                if (up) mask |= 1;
+                if (down) mask |= 2;
+                if (left) mask |= 4;
+                if (right) mask |= 8;
+                int rowBottom = 4;
+                int colLeft = 1;
+                switch (mask) {
+                    case 0:  rowBottom = 1; colLeft = 1; break;
+                    case 2:  rowBottom = 2; colLeft = 1; break;
+                    case 1:  rowBottom = 4; colLeft = 1; break;
+                    case 3:  rowBottom = 3; colLeft = 1; break;
+                    case 8:  rowBottom = 4; colLeft = 2; break;
+                    case 4:  rowBottom = 4; colLeft = 4; break;
+                    case 12: rowBottom = 4; colLeft = 3; break;
+                    case 10: rowBottom = 1; colLeft = 2; break;
+                    case 6:  rowBottom = 1; colLeft = 4; break;
+                    case 5:  rowBottom = 3; colLeft = 4; break;
+                    case 9:  rowBottom = 3; colLeft = 2; break;
+                    case 11: rowBottom = 2; colLeft = 2; break;
+                    case 13: rowBottom = 3; colLeft = 3; break;
+                    case 14: rowBottom = 1; colLeft = 3; break;
+                    case 7:  rowBottom = 2; colLeft = 4; break;
+                    case 15: rowBottom = 2; colLeft = 3; break;
+                    default: rowBottom = 1; colLeft = 1; break;
+                }
+                if (getTile(c, r) == Game::TileType::Watered) {
+                    colLeft += 4;
+                }
+                float texW = spr->getTexture() ? spr->getTexture()->getContentSize().width : 0.0f;
                 float texH = spr->getTexture() ? spr->getTexture()->getContentSize().height : 0.0f;
-                float x = static_cast<float>(col * tw);
-                float y = texH - static_cast<float>((row + 1) * th);
+                int columns = texW > 0 ? static_cast<int>(texW / tw) : 1;
+                int totalRows = texH > 0 ? static_cast<int>(texH / th) : 1;
+                int colIndex0 = colLeft - 1;
+                int rowIndexFromTop0 = totalRows - rowBottom;
+                if (rowIndexFromTop0 < 0) rowIndexFromTop0 = 0;
+                float x = static_cast<float>(colIndex0 * tw);
+                float y = texH - static_cast<float>((rowIndexFromTop0 + 1) * th);
                 spr->setTextureRect(cocos2d::Rect(x, y, static_cast<float>(tw), static_cast<float>(th)));
                 auto pos = tileToWorld(c, r);
                 spr->setPosition(pos);
