@@ -321,107 +321,27 @@ bool FarmMapController::inBounds(int c, int r) const {
 }
 
 std::pair<int,int> FarmMapController::targetTile(const Vec2& playerPos, const Vec2& lastDir) const {
-    int pc, pr;
-    worldToTileIndex(playerPos, pc, pr);
-    int dc = 0, dr = 0;
-    if (std::abs(lastDir.x) > std::abs(lastDir.y)) {
-        dc = (lastDir.x > 0.1f) ? 1 : ((lastDir.x < -0.1f) ? -1 : 0);
-    } else {
-        dr = (lastDir.y > 0.1f) ? 1 : ((lastDir.y < -0.1f) ? -1 : 0);
-    }
-    if (dc == 0 && dr == 0) {
-        dr = -1;
-    }
-    struct Cand { int c; int r; };
-    Cand cands[3];
-    int count = 0;
-    if (dr != 0) {
-        int fr = pr + dr;
-        Cand center{pc, fr};
-        Cand left{pc - 1, fr};
-        Cand right{pc + 1, fr};
-        Cand arr[3] = { center, left, right };
-        for (int i = 0; i < 3; ++i) {
-            if (inBounds(arr[i].c, arr[i].r)) cands[count++] = arr[i];
-        }
-    } else if (dc != 0) {
-        int fc = pc + dc;
-        Cand center{fc, pr};
-        Cand up{fc, pr + 1};
-        Cand down{fc, pr - 1};
-        Cand arr[3] = { center, up, down };
-        for (int i = 0; i < 3; ++i) {
-            if (inBounds(arr[i].c, arr[i].r)) cands[count++] = arr[i];
-        }
-    }
-    if (count == 0) return {pc, pr};
-    if (_hasLastClick) {
-        int clickC = 0, clickR = 0;
-        worldToTileIndex(_lastClickWorldPos, clickC, clickR);
-        float best = 1e9f;
-        int bestIdx = 0;
-        for (int i = 0; i < count; ++i) {
-            float dcTile = static_cast<float>(cands[i].c - clickC);
-            float drTile = static_cast<float>(cands[i].r - clickR);
-            float d2 = dcTile * dcTile + drTile * drTile;
-            if (d2 < best) { best = d2; bestIdx = i; }
-        }
-        return {cands[bestIdx].c, cands[bestIdx].r};
-    }
-    return {cands[0].c, cands[0].r};
+    return TileSelector::selectForwardTile(
+        playerPos,
+        lastDir,
+        [this](const Vec2& p, int& c, int& r){ worldToTileIndex(p, c, r); },
+        [this](int c, int r){ return inBounds(c, r); },
+        _hasLastClick,
+        _lastClickWorldPos,
+        [this](int c, int r){ return tileToWorld(c, r); });
 }
 
 
 void FarmMapController::updateCursor(const Vec2& playerPos, const Vec2& lastDir) {
     if (!_cursor) return;
-    _cursor->clear();
-    int pc, pr;
-    worldToTileIndex(playerPos, pc, pr);
-    int dc = 0, dr = 0;
-    if (std::abs(lastDir.x) > std::abs(lastDir.y)) {
-        dc = (lastDir.x > 0.1f) ? 1 : ((lastDir.x < -0.1f) ? -1 : 0);
-    } else {
-        dr = (lastDir.y > 0.1f) ? 1 : ((lastDir.y < -0.1f) ? -1 : 0);
-    }
-    if (dc == 0 && dr == 0) {
-        dr = -1;
-    }
-    float s = tileSize();
-    if (dr != 0) {
-        int fr = pr + dr;
-        int cols[3] = { pc, pc - 1, pc + 1 };
-        for (int i = 0; i < 3; ++i) {
-            int tc = cols[i];
-            int tr = fr;
-            if (!inBounds(tc, tr)) continue;
-            auto center = tileToWorld(tc, tr);
-            Vec2 a(center.x - s/2, center.y - s/2);
-            Vec2 b(center.x + s/2, center.y - s/2);
-            Vec2 c(center.x + s/2, center.y + s/2);
-            Vec2 d(center.x - s/2, center.y + s/2);
-            _cursor->drawLine(a,b, Color4F(1.f, 0.9f, 0.2f, 1.f));
-            _cursor->drawLine(b,c, Color4F(1.f, 0.9f, 0.2f, 1.f));
-            _cursor->drawLine(c,d, Color4F(1.f, 0.9f, 0.2f, 1.f));
-            _cursor->drawLine(d,a, Color4F(1.f, 0.9f, 0.2f, 1.f));
-        }
-    } else if (dc != 0) {
-        int fc = pc + dc;
-        int rows[3] = { pr, pr + 1, pr - 1 };
-        for (int i = 0; i < 3; ++i) {
-            int tc = fc;
-            int tr = rows[i];
-            if (!inBounds(tc, tr)) continue;
-            auto center = tileToWorld(tc, tr);
-            Vec2 a(center.x - s/2, center.y - s/2);
-            Vec2 b(center.x + s/2, center.y - s/2);
-            Vec2 c(center.x + s/2, center.y + s/2);
-            Vec2 d(center.x - s/2, center.y + s/2);
-            _cursor->drawLine(a,b, Color4F(1.f, 0.9f, 0.2f, 1.f));
-            _cursor->drawLine(b,c, Color4F(1.f, 0.9f, 0.2f, 1.f));
-            _cursor->drawLine(c,d, Color4F(1.f, 0.9f, 0.2f, 1.f));
-            _cursor->drawLine(d,a, Color4F(1.f, 0.9f, 0.2f, 1.f));
-        }
-    }
+    TileSelector::drawFanCursor(
+        _cursor,
+        playerPos,
+        lastDir,
+        [this](const Vec2& p, int& c, int& r) { worldToTileIndex(p, c, r); },
+        [this](int c, int r) { return inBounds(c, r); },
+        [this](int c, int r) { return tileToWorld(c, r); },
+        tileSize());
 }
 
 Game::TileType FarmMapController::getTile(int c, int r) const {

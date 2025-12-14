@@ -17,6 +17,7 @@
 #include "Game/WorldState.h"
 #include "Game/Tree.h"
 #include "Controllers/Environment/TreeSystem.h"
+#include "Controllers/TileSelector.h"
 
 namespace Controllers {
 

@@ -10,6 +10,7 @@
 #include "Controllers/IMapController.h"
 #include "Game/GameConfig.h"
 #include "Game/Map/MineMap.h"
+#include "Controllers/TileSelector.h"
 
 namespace Controllers {
 

@@ -334,6 +334,9 @@
     <ClCompile Include="..\Classes\Game\NPC\WillyNpc.cpp">
       <Filter>Classes\Game\NPC</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\TileSelector.cpp">
+      <Filter>Classes\Controllers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <!-- Header Files -->
@@ -581,6 +584,9 @@
     </ClInclude>
     <ClInclude Include="..\Classes\Game\NPC\WillyNpc.h">
       <Filter>Classes\Game\NPC</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\TileSelector.h">
+      <Filter>Classes\Controllers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

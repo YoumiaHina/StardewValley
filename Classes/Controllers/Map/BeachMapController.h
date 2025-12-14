@@ -47,7 +47,9 @@ public:
 
     Game::TileType getTile(int c, int r) const override { return Game::TileType::Soil; }
 
-    std::pair<int,int> targetTile(const cocos2d::Vec2& p, const cocos2d::Vec2& lastDir) const override { return {0,0}; }
+    std::pair<int,int> targetTile(const cocos2d::Vec2& p, const cocos2d::Vec2& lastDir) const override;
+    void updateCursor(const cocos2d::Vec2& playerPos,
+                      const cocos2d::Vec2& lastDir) override;
 
     void refreshMapVisuals() override {}
     void refreshCropsVisuals() override {}
@@ -58,13 +60,19 @@ public:
     std::vector<Game::Chest>& chests() override { return _chests; }
     const std::vector<Game::Chest>& chests() const override { return _chests; }
 
+    void setLastClickWorldPos(const cocos2d::Vec2& p) override { _lastClickWorldPos = p; _hasLastClick = true; }
+    void clearLastClickWorldPos() override { _hasLastClick = false; }
+
     Game::BeachMap* getBeachMap() const { return _map; }
 
 private:
     Game::BeachMap* _map = nullptr;
     cocos2d::Node* _worldNode = nullptr;
     cocos2d::Vec2 _origin = cocos2d::Vec2::ZERO;
+    cocos2d::DrawNode* _cursor = nullptr;
     std::vector<Game::Chest> _chests;
+    cocos2d::Vec2 _lastClickWorldPos = cocos2d::Vec2::ZERO;
+    bool _hasLastClick = false;
 };
 
 } // namespace Controllers

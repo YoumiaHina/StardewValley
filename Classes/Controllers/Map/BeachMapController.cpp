@@ -1,4 +1,5 @@
 #include "Controllers/Map/BeachMapController.h"
+#include "Controllers/TileSelector.h"
 #include "Game/GameConfig.h"
 
 using namespace cocos2d;
@@ -31,6 +32,37 @@ Vec2 BeachMapController::clampPosition(const Vec2& current, const Vec2& next, fl
         candidate.y = current.y;
     }
     return candidate;
+}
+
+std::pair<int,int> BeachMapController::targetTile(const Vec2& playerPos, const Vec2& lastDir) const {
+    return TileSelector::selectForwardTile(
+        playerPos,
+        lastDir,
+        [this](const Vec2& p, int& c, int& r){ worldToTileIndex(p, c, r); },
+        [this](int c, int r){ return inBounds(c, r); },
+        _hasLastClick,
+        _lastClickWorldPos,
+        [this](int c, int r){ return tileToWorld(c, r); });
+}
+
+void BeachMapController::updateCursor(const Vec2& playerPos, const Vec2& lastDir) {
+    if (!_cursor) {
+        _cursor = DrawNode::create();
+        if (_map && _map->getTMX()) {
+            _map->getTMX()->addChild(_cursor, 21);
+        } else if (_worldNode) {
+            _worldNode->addChild(_cursor, 21);
+        }
+    }
+    if (!_cursor) return;
+    TileSelector::drawFanCursor(
+        _cursor,
+        playerPos,
+        lastDir,
+        [this](const Vec2& p, int& c, int& r) { worldToTileIndex(p, c, r); },
+        [this](int c, int r) { return inBounds(c, r); },
+        [this](int c, int r) { return tileToWorld(c, r); },
+        tileSize());
 }
 
 } // namespace Controllers

@@ -162,6 +162,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClCompile Include="..\Classes\Controllers\NPC\NpcControllerBase.cpp" />
     <ClCompile Include="..\Classes\Controllers\NPC\WillyNpcController.cpp" />
     <ClCompile Include="..\Classes\Controllers\Store\StoreController.cpp" />
+    <ClCompile Include="..\Classes\Controllers\TileSelector.cpp" />
     <ClCompile Include="..\Classes\Controllers\UI\ChestPanelUI.cpp" />
     <ClCompile Include="..\Classes\Controllers\UI\CraftPanelUI.cpp" />
     <ClCompile Include="..\Classes\Controllers\UI\HotbarUI.cpp" />
@@ -251,6 +252,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClInclude Include="..\Classes\Controllers\NPC\NpcControllerBase.h" />
     <ClInclude Include="..\Classes\Controllers\NPC\WillyNpcController.h" />
     <ClInclude Include="..\Classes\Controllers\Store\StoreController.h" />
+    <ClInclude Include="..\Classes\Controllers\TileSelector.h" />
     <ClInclude Include="..\Classes\Controllers\UI\ChestPanelUI.h" />
     <ClInclude Include="..\Classes\Controllers\UI\CraftPanelUI.h" />
     <ClInclude Include="..\Classes\Controllers\UI\HotbarUI.h" />
