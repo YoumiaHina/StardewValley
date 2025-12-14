@@ -56,7 +56,7 @@ bool MineScene::init() {
             }
         }
     }
-    _monsters = new Controllers::MineMonsterController(_map, _worldNode);
+    _monsters = new Controllers::MineMonsterController(_map, _worldNode, [this]() -> Vec2 { return _player ? _player->getPosition() : Vec2(); });
     _mining = new Controllers::MineMiningController(_map, _worldNode);
     // 镐子采掘回调：由 MapController 转发到 MiningController
     _map->setMineHitCallback([this](const Vec2& wp, int power){ return _mining ? _mining->hitNearestNode(wp, power) : false; });
@@ -65,7 +65,11 @@ bool MineScene::init() {
         _monsters->generateInitialWave();
         _mining->generateNodesForFloor();
     }
-    _combat = new Controllers::MineCombatController(_monsters, _mining, [this]() -> Vec2 { return _player ? _player->getPosition() : Vec2(); });
+    _combat = new Controllers::MineCombatController(_map,
+                                                    _monsters,
+                                                    _mining,
+                                                    [this]() -> Vec2 { return _player ? _player->getPosition() : Vec2(); },
+                                                    [this]() -> Vec2 { return _playerController ? _playerController->lastDir() : Vec2(0,-1); });
     _interactor = new Controllers::MineInteractor(_map, [this]() -> Vec2 { return _player ? _player->getPosition() : Vec2(); });
     _elevator = new Controllers::MineElevatorController(_map, _monsters, _mining, this);
     _elevator->buildPanel();
@@ -86,6 +90,7 @@ bool MineScene::init() {
     addUpdateCallback([this](float dt){ if (_monsters) _monsters->update(dt); });
     addUpdateCallback([this](float dt){ if (_mining) _mining->update(dt); });
     addUpdateCallback([this](float dt){ if (_combat) _combat->update(dt); });
+    addUpdateCallback([this](float){ if (_uiController) _uiController->refreshHUD(); });
 
     return true;
 }

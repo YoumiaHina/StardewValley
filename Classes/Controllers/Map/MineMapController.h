@@ -45,6 +45,8 @@ public:
     void spawnDropAt(int, int, int, int) override {} // not used here
     bool applyPickaxeAt(const cocos2d::Vec2& worldPos, int power) override;
     void setDynamicColliders(const std::vector<cocos2d::Rect>& rects) { _dynamicColliders = rects; }
+    void setMonsterColliders(const std::vector<cocos2d::Rect>& rects) { _monsterColliders = rects; }
+    bool collidesWithoutMonsters(const cocos2d::Vec2& pos, float radius) const;
     const std::vector<Game::Chest>& chests() const override { return _emptyChests; }
     std::vector<Game::Chest>& chests() override { return _emptyChests; }
     void addActorToMap(cocos2d::Node* node, int zOrder) override;
@@ -94,6 +96,7 @@ private:
     cocos2d::Node* _mapNode = nullptr;
     std::function<bool(const cocos2d::Vec2&, int)> _mineHit;
     std::vector<cocos2d::Rect> _dynamicColliders; // 采矿节点临时碰撞
+    std::vector<cocos2d::Rect> _monsterColliders;
 };
 
 }

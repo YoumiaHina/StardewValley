@@ -1,6 +1,7 @@
 #include "Scenes/SceneBase.h"
 #include "cocos2d.h"
 #include "Game/Tool/ToolFactory.h"
+#include "Scenes/RoomScene.h"
 
 using namespace cocos2d;
 
@@ -176,12 +177,10 @@ void SceneBase::registerCommonInputHandlers(bool enableToolOnSpace, bool enableT
                     [this]() -> Vec2 { return _playerController ? _playerController->lastDir() : Vec2(0,-1); },
                     _uiController);
             }
-            return;
         }
         if (e->getMouseButton() == EventMouse::MouseButton::BUTTON_RIGHT) {
             _uiController->handleChestRightClick(e, _mapController->chests());
         }
-        // 允许子类进一步处理（例如战斗攻击）
         onMouseDown(e);
     };
     mouse->onMouseScroll = [this](EventMouse* e){
@@ -198,6 +197,15 @@ void SceneBase::registerCommonInputHandlers(bool enableToolOnSpace, bool enableT
 }
 
 void SceneBase::update(float dt) {
+    auto& ws = Game::globalState();
+    if (ws.hp <= 0) {
+        ws.gold = ws.gold > 0 ? ws.gold / 2 : 0;
+        ws.hp = ws.maxHp;
+        auto room = RoomScene::create();
+        auto trans = TransitionFade::create(0.6f, room);
+        Director::getInstance()->replaceScene(trans);
+        return;
+    }
     _stateController->update(dt);
     _playerController->update(dt);
     for (auto& cb : _extraUpdates) { cb(dt); }

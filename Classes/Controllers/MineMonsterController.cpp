@@ -1,10 +1,23 @@
 #include "Controllers/MineMonsterController.h"
 #include "cocos2d.h"
 #include <algorithm>
+#include <string>
 
 using namespace cocos2d;
 
 namespace Controllers {
+
+MineMonsterController::~MineMonsterController() {
+    for (auto& m : _monsters) {
+        if (m.sprite && m.sprite->getParent()) {
+            m.sprite->removeFromParent();
+        }
+        m.sprite = nullptr;
+    }
+    if (_monsterDraw && _monsterDraw->getParent()) {
+        _monsterDraw->removeFromParent();
+    }
+}
 
 void MineMonsterController::generateInitialWave() {
     _monsters.clear();
@@ -15,9 +28,11 @@ void MineMonsterController::generateInitialWave() {
         refreshVisuals();
         return;
     }
+    int variant = _map ? Game::slimeVariantForFloor(_map->currentFloor()) : 0;
     for (const auto& pt : spawns) {
-        Monster m = makeMonsterForTheme(_map->currentTheme());
+        Monster m = Game::makeMonsterForType(Monster::Type::RockSlime);
         m.pos = pt;
+        m.textureVariant = variant;
         _monsters.push_back(m);
     }
     refreshVisuals();
@@ -31,15 +46,107 @@ void MineMonsterController::update(float dt) {
     if (_respawnAccum >= 30.0f) {
         _respawnAccum = 0.0f;
         if (_monsters.size() < 8) {
-            _monsters.push_back(makeMonsterForTheme(_map->currentTheme()));
-            refreshVisuals();
+            Monster m = Game::makeMonsterForType(Monster::Type::RockSlime);
+            if (_map) {
+                m.textureVariant = Game::slimeVariantForFloor(_map->currentFloor());
+            }
+            _monsters.push_back(m);
         }
     }
+    float tileSize = static_cast<float>(GameConfig::TILE_SIZE);
+    Vec2 playerPos = _getPlayerPos ? _getPlayerPos() : Vec2::ZERO;
+    float monsterRadius = tileSize * 0.4f;
+    float playerRadius = tileSize * 0.4f;
+
+    for (auto& m : _monsters) {
+        if (m.attackCooldown > 0.0f) {
+            m.attackCooldown = std::max(0.0f, m.attackCooldown - dt);
+        }
+    }
+
+    // 怪物朝玩家移动，带基础碰撞：不能穿过墙体/矿石/玩家
+    for (auto& m : _monsters) {
+        if (_getPlayerPos) {
+            float range = m.searchRangeTiles * tileSize;
+            Vec2 delta = playerPos - m.pos;
+            float dist = delta.length();
+            if (dist > 0.001f && dist <= range) {
+                Vec2 dir = delta / dist;
+                Vec2 proposed = m.pos + dir * m.moveSpeed * dt;
+                bool blocked = false;
+                if (_map && _map->collidesWithoutMonsters(proposed, monsterRadius)) {
+                    blocked = true;
+                }
+                if (!blocked) {
+                    float toPlayer = proposed.distance(playerPos);
+                    if (toPlayer < monsterRadius + playerRadius) {
+                        blocked = true;
+                    }
+                }
+                if (!blocked) {
+                    m.velocity = dir * m.moveSpeed;
+                    m.pos = proposed;
+                } else {
+                    m.velocity = Vec2::ZERO;
+                }
+            } else {
+                m.velocity = Vec2::ZERO;
+            }
+        } else {
+            m.velocity = Vec2::ZERO;
+        }
+    }
+
+    // 怪物之间不允许重叠：简单的成对分离
+    for (size_t i = 0; i < _monsters.size(); ++i) {
+        for (size_t j = i + 1; j < _monsters.size(); ++j) {
+            Vec2 delta = _monsters[j].pos - _monsters[i].pos;
+            float dist = delta.length();
+            float minDist = monsterRadius * 2.0f * 0.9f;
+            if (dist > 0.0001f && dist < minDist) {
+                Vec2 dir = delta / dist;
+                float push = (minDist - dist) * 0.5f;
+                _monsters[i].pos -= dir * push;
+                _monsters[j].pos += dir * push;
+            }
+        }
+    }
+    if (_map) {
+        std::vector<Rect> colliders;
+        colliders.reserve(_monsters.size());
+        float ts = static_cast<float>(GameConfig::TILE_SIZE);
+        for (const auto& m : _monsters) {
+            float half = ts * 0.5f;
+            Rect rc(m.pos.x - half, m.pos.y - half, ts, ts);
+            colliders.push_back(rc);
+        }
+        _map->setMonsterColliders(colliders);
+    }
+    auto& ws = Game::globalState();
+    for (auto& m : _monsters) {
+        float dist = m.pos.distance(playerPos);
+        float attackRange = monsterRadius + playerRadius + 2.0f;
+        if (dist < attackRange && m.attackCooldown <= 0.0f && m.dmg > 0) {
+            ws.hp = std::max(0, ws.hp - m.dmg);
+            m.attackCooldown = 0.8f;
+        }
+    }
+    refreshVisuals();
 }
 
 void MineMonsterController::resetFloor() {
+    for (auto& m : _monsters) {
+        if (m.sprite && m.sprite->getParent()) {
+            m.sprite->removeFromParent();
+        }
+        m.sprite = nullptr;
+    }
     _monsters.clear();
     _respawnAccum = 0.0f;
+    if (_map) {
+        std::vector<Rect> colliders;
+        _map->setMonsterColliders(colliders);
+    }
     refreshVisuals();
 }
 
@@ -62,53 +169,71 @@ void MineMonsterController::applyDamageAt(const Vec2& worldPos, int baseDamage) 
             if (auto inv = Game::globalState().inventory) {
                 inv->addItems(drop, 1);
             }
+            auto& m = _monsters[idx];
+            if (m.sprite && m.sprite->getParent()) {
+                m.sprite->removeFromParent();
+            }
+            m.sprite = nullptr;
             _monsters.erase(_monsters.begin() + idx);
             refreshVisuals();
         }
     }
 }
 
-MineMonsterController::Monster MineMonsterController::makeMonsterForTheme(MineMapController::Theme theme) {
-    Monster m{};
-    switch (theme) {
-        case MineMapController::Theme::Rock:
-            m.type = Monster::Type::RockSlime; m.hp=80; m.maxHp=80; m.dmg=8; m.def=3; m.searchRangeTiles=4; break;
-        case MineMapController::Theme::Ice:
-            m.type = Monster::Type::IceBat; m.hp=60; m.maxHp=60; m.dmg=12; m.def=1; m.searchRangeTiles=6; break;
-        case MineMapController::Theme::Lava:
-            m.type = Monster::Type::LavaCrab; m.hp=200; m.maxHp=200; m.dmg=20; m.def=8; m.searchRangeTiles=3; break;
+void MineMonsterController::applyAreaDamage(const std::vector<std::pair<int,int>>& tiles, int baseDamage) {
+    if (!_map || tiles.empty()) return;
+    auto matches = [this,&tiles](const Monster& m) {
+        int c = 0, r = 0;
+        _map->worldToTileIndex(m.pos, c, r);
+        for (const auto& t : tiles) {
+            if (c == t.first && r == t.second) return true;
+        }
+        return false;
+    };
+    for (std::size_t i = 0; i < _monsters.size();) {
+        auto& m = _monsters[i];
+        if (!matches(m)) { ++i; continue; }
+        int dmg = std::max(0, baseDamage - m.def);
+        m.hp -= dmg;
+        if (m.hp <= 0) {
+            auto theme = _map->currentTheme();
+            Game::ItemType drop = Game::ItemType::Fiber;
+            if (theme == MineMapController::Theme::Ice) drop = Game::ItemType::ParsnipSeed;
+            if (auto inv = Game::globalState().inventory) {
+                inv->addItems(drop, 1);
+            }
+            if (m.sprite && m.sprite->getParent()) {
+                m.sprite->removeFromParent();
+            }
+            m.sprite = nullptr;
+            _monsters.erase(_monsters.begin() + static_cast<long>(i));
+            continue;
+        }
+        ++i;
     }
-    m.elite = false;
-    return m;
+    refreshVisuals();
 }
 
 void MineMonsterController::refreshVisuals() {
     if (!_monsterDraw) {
         _monsterDraw = DrawNode::create();
-        if (_worldNode) _worldNode->addChild(_monsterDraw, 3);
+        if (_worldNode) _worldNode->addChild(_monsterDraw, 4);
     }
     _monsterDraw->clear();
-    for (const auto& m : _monsters) {
-        Color4F bodyColor = Color4F(0.2f,0.75f,0.25f,1.0f);
-        switch (m.type) {
-            case Monster::Type::RockSlime: bodyColor = Color4F(0.2f,0.75f,0.25f,1.0f); break;
-            case Monster::Type::BurrowBug: bodyColor = Color4F(0.45f,0.35f,0.25f,1.0f); break;
-            case Monster::Type::IceBat:    bodyColor = Color4F(0.35f,0.55f,0.85f,1.0f); break;
-            case Monster::Type::IceMage:   bodyColor = Color4F(0.50f,0.70f,0.95f,1.0f); break;
-            case Monster::Type::LavaCrab:  bodyColor = Color4F(0.85f,0.35f,0.20f,1.0f); break;
-            case Monster::Type::LavaWarlock: bodyColor = Color4F(0.80f,0.20f,0.25f,1.0f); break;
-            case Monster::Type::BossGuardian: bodyColor = Color4F(0.90f,0.15f,0.15f,1.0f); break;
+    float s = static_cast<float>(GameConfig::TILE_SIZE);
+    for (auto& m : _monsters) {
+        if (!m.sprite && _worldNode) {
+            std::string path = Game::slimeTexturePathForVariant(m.textureVariant);
+            auto spr = Sprite::create(path);
+            if (spr) {
+                spr->setAnchorPoint(Vec2(0.5f, 0.0f));
+                spr->setPosition(m.pos);
+                _worldNode->addChild(spr, 3);
+                m.sprite = spr;
+            }
+        } else if (m.sprite) {
+            m.sprite->setPosition(m.pos);
         }
-        float s = static_cast<float>(GameConfig::TILE_SIZE);
-        _monsterDraw->drawSolidCircle(m.pos, s*0.35f, 0.0f, 18, bodyColor);
-        // HP bar
-        float pct = (m.maxHp > 0) ? (static_cast<float>(m.hp) / static_cast<float>(m.maxHp)) : 0.0f;
-        pct = std::max(0.0f, std::min(1.0f, pct));
-        Vec2 barOrigin = m.pos + Vec2(-s*0.35f, s*0.45f);
-        Vec2 barEnd    = m.pos + Vec2(s*0.35f,  s*0.45f);
-        _monsterDraw->drawLine(barOrigin, barEnd, Color4F(0,0,0,0.5f));
-        Vec2 barFillEnd = barOrigin + (barEnd - barOrigin) * pct;
-        _monsterDraw->drawLine(barOrigin, barFillEnd, Color4F(0.1f,0.9f,0.1f,1.0f));
     }
 }
 

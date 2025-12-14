@@ -29,6 +29,7 @@ cocos2d::Vec2 MineMapController::clampPosition(const Vec2& current, const Vec2& 
         else if (_floorMap) base = _floorMap->collides(p, r);
         if (base) return true;
         for (const auto& rc : _dynamicColliders) { if (rc.containsPoint(p)) return true; }
+        for (const auto& rc : _monsterColliders) { if (rc.containsPoint(p)) return true; }
         return false;
     };
     Vec2 foot(candidate.x, current.y);
@@ -389,6 +390,16 @@ const std::vector<std::vector<cocos2d::Vec2>>& MineMapController::rockAreaPolys(
     return empty;
 }
 bool MineMapController::collides(const Vec2& pos, float radius) const {
+    bool base = false;
+    if (_entrance) base = _entrance->collides(pos, radius);
+    else if (_floorMap) base = _floorMap->collides(pos, radius);
+    if (base) return true;
+    for (const auto& rc : _dynamicColliders) { if (rc.containsPoint(pos)) return true; }
+    for (const auto& rc : _monsterColliders) { if (rc.containsPoint(pos)) return true; }
+    return false;
+}
+
+bool MineMapController::collidesWithoutMonsters(const Vec2& pos, float radius) const {
     bool base = false;
     if (_entrance) base = _entrance->collides(pos, radius);
     else if (_floorMap) base = _floorMap->collides(pos, radius);
