@@ -1,111 +1,121 @@
 #include "Controllers/Systems/TownNpcController.h"
+
 #include "Controllers/Map/TownMapController.h"
 #include "Controllers/UI/UIController.h"
 #include "Game/Npc.h"
 #include "Game/WorldState.h"
 
-using namespace cocos2d;
-
 namespace Controllers {
 
 TownNpcController::TownNpcController(TownMapController* map,
-                                     Node* worldNode,
+                                     cocos2d::Node* world_node,
                                      UIController* ui,
                                      std::shared_ptr<Game::Inventory> inventory)
-    : _map(map), _worldNode(worldNode), _ui(ui), _inventory(std::move(inventory)) {
-    buildInitialNpcs();
+    : map_(map),
+      world_node_(world_node),
+      ui_(ui),
+      inventory_(std::move(inventory)) {
+  buildInitialNpcs();
 }
 
 void TownNpcController::buildInitialNpcs() {
-    if (!_map || !_worldNode) return;
-    Size size = _map->getContentSize();
-    float s = _map->tileSize();
-    Vec2 base(size.width * 0.5f, size.height * 0.5f);
-    const auto& defs = Game::allNpcDefinitions();
-    for (std::size_t i = 0; i < defs.size(); ++i) {
-        const auto& def = defs[i];
-        auto sprite = Sprite::create(def.texturePath);
-        if (!sprite) continue;
-        float offsetX = (i == 0) ? -2.0f * s : 2.0f * s;
-        Vec2 pos(base.x + offsetX, base.y);
-        sprite->setPosition(pos);
-        _map->addActorToMap(sprite, 22);
-        NpcInstance inst;
-        inst.id = def.id;
-        inst.sprite = sprite;
-        _npcs.push_back(inst);
-    }
+  if (!map_ || !world_node_) return;
+  cocos2d::Size size = map_->getContentSize();
+  float tile = map_->tileSize();
+  cocos2d::Vec2 center(size.width * 0.5f, size.height * 0.5f);
+  const auto& ids = Game::NpcRegistry::allIds();
+  for (std::size_t i = 0; i < ids.size(); ++i) {
+    Game::NpcId id = ids[i];
+    std::unique_ptr<Game::NpcBase> npc = Game::NpcRegistry::create(id);
+    if (!npc) continue;
+    auto sprite = cocos2d::Sprite::create(npc->texturePath());
+    if (!sprite) continue;
+    float offset_x = (i == 0) ? -2.0f * tile : 2.0f * tile;
+    cocos2d::Vec2 pos(center.x + offset_x, center.y);
+    sprite->setPosition(pos);
+    map_->addActorToMap(sprite, 22);
+    NpcInstance inst;
+    inst.id = id;
+    inst.npc = std::move(npc);
+    inst.sprite = sprite;
+    npcs_.push_back(std::move(inst));
+  }
 }
 
-bool TownNpcController::findNearestNpc(const Vec2& playerPos,
-                                       float maxDist,
-                                       Game::NpcId& outId,
-                                       Vec2& outPos) const {
-    float best = maxDist;
-    bool found = false;
-    for (const auto& n : _npcs) {
-        if (!n.sprite) continue;
-        Vec2 local = n.sprite->getPosition();
-        float d = playerPos.distance(local);
-        if (d < best) {
-            best = d;
-            outId = n.id;
-            Node* parent = n.sprite->getParent();
-            Vec2 world = parent ? parent->convertToWorldSpace(local) : local;
-            auto cs = n.sprite->getContentSize();
-            outPos = Vec2(world.x, world.y + cs.height * 0.5f);
-            found = true;
-        }
+bool TownNpcController::findNearestNpc(const cocos2d::Vec2& player_pos,
+                                       float max_dist,
+                                       int& out_index,
+                                       cocos2d::Vec2& out_pos) const {
+  float best = max_dist;
+  bool found = false;
+  out_index = -1;
+  for (int i = 0; i < static_cast<int>(npcs_.size()); ++i) {
+    const auto& n = npcs_[i];
+    if (!n.sprite) continue;
+    cocos2d::Vec2 local = n.sprite->getPosition();
+    float dist = player_pos.distance(local);
+    if (dist < best) {
+      best = dist;
+      out_index = i;
+      cocos2d::Node* parent = n.sprite->getParent();
+      cocos2d::Vec2 world =
+          parent ? parent->convertToWorldSpace(local) : local;
+      auto size = n.sprite->getContentSize();
+      out_pos = cocos2d::Vec2(world.x, world.y + size.height * 0.5f);
+      found = true;
     }
-    return found;
+  }
+  return found;
 }
 
-void TownNpcController::update(const Vec2& playerPos) {
-    if (!_ui || !_map) return;
-    float maxDist = _map->tileSize() * 1.5f;
-    Game::NpcId id;
-    Vec2 pos;
-    bool isNear = findNearestNpc(playerPos, maxDist, id, pos);
-    if (isNear) {
-        _ui->showNpcPrompt(true, pos, "Space to Talk / Give Gift");
-    } else {
-        _ui->showNpcPrompt(false, Vec2::ZERO, "");
-    }
+int TownNpcController::friendshipGainForGift(NpcInstance& inst) const {
+  int gained = 5;
+  if (!inventory_ || !inst.npc) return gained;
+  if (inventory_->size() <= 0) return gained;
+  if (inventory_->selectedKind() != Game::SlotKind::Item) return gained;
+  const auto& slot = inventory_->selectedSlot();
+  if (slot.itemQty <= 0) return gained;
+  gained = inst.npc->friendshipGainForGift(slot.itemType);
+  bool consumed = inventory_->consumeSelectedItem(1);
+  if (!consumed) gained = 5;
+  return gained;
 }
 
-void TownNpcController::handleTalkAt(const Vec2& playerPos) {
-    if (!_ui || !_map) return;
-    float maxDist = _map->tileSize() * 1.5f;
-    Game::NpcId id;
-    Vec2 pos;
-    bool isNear = findNearestNpc(playerPos, maxDist, id, pos);
-    if (!isNear) return;
-    const Game::NpcDefinition* def = Game::npcDefinitionById(id);
-    std::string name = def ? def->name : std::string("NPC");
-    auto& ws = Game::globalState();
-    int key = static_cast<int>(id);
-    int current = 0;
-    auto it = ws.npcFriendship.find(key);
-    if (it != ws.npcFriendship.end()) current = it->second;
-    int gained = 5;
-    bool usedGift = false;
-    if (_inventory && _inventory->size() > 0) {
-        if (_inventory->selectedKind() == Game::SlotKind::Item) {
-            const auto& slot = _inventory->selectedSlot();
-            if (slot.itemQty > 0) {
-                gained = Game::npcFriendshipGainForGift(id, slot.itemType);
-                bool consumed = _inventory->consumeSelectedItem(1);
-                if (consumed) {
-                    usedGift = true;
-                }
-            }
-        }
-    }
-    int next = current + gained;
-    if (next > 250) next = 250;
-    ws.npcFriendship[key] = next;
-    std::string text = name + ": Hello! Friendship " + std::to_string(next);
-    _ui->popTextAt(pos + Vec2(0, 24.0f), text, Color3B::WHITE);
+void TownNpcController::update(const cocos2d::Vec2& player_pos) {
+  if (!ui_ || !map_) return;
+  float max_dist = map_->tileSize() * 1.5f;
+  int index = -1;
+  cocos2d::Vec2 pos;
+  bool is_near = findNearestNpc(player_pos, max_dist, index, pos);
+  if (is_near) {
+    ui_->showNpcPrompt(true, pos, "Space to Talk / Give Gift");
+  } else {
+    ui_->showNpcPrompt(false, cocos2d::Vec2::ZERO, "");
+  }
 }
 
-} // namespace Controllers
+void TownNpcController::handleTalkAt(const cocos2d::Vec2& player_pos) {
+  if (!ui_ || !map_) return;
+  float max_dist = map_->tileSize() * 1.5f;
+  int index = -1;
+  cocos2d::Vec2 pos;
+  bool is_near = findNearestNpc(player_pos, max_dist, index, pos);
+  if (!is_near || index < 0 || index >= static_cast<int>(npcs_.size())) return;
+  auto& inst = npcs_[index];
+  auto& ws = Game::globalState();
+  int key = static_cast<int>(inst.id);
+  int current = 0;
+  auto it = ws.npcFriendship.find(key);
+  if (it != ws.npcFriendship.end()) current = it->second;
+  int gained = friendshipGainForGift(inst);
+  int next = current + gained;
+  if (next > 250) next = 250;
+  ws.npcFriendship[key] = next;
+  const char* npc_name = inst.npc ? inst.npc->name() : "NPC";
+  std::string text =
+      std::string(npc_name) + ": Friendship " + std::to_string(next);
+  ui_->popTextAt(pos + cocos2d::Vec2(0, 24.0f), text, cocos2d::Color3B::WHITE);
+}
+
+}  // namespace Controllers
+
