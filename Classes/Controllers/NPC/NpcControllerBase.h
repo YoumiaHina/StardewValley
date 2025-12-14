@@ -4,7 +4,6 @@
 #include <vector>
 #include <memory>
 #include "Game/Inventory.h"
-#include "Game/Npc.h"
 
 namespace Controllers {
 
@@ -25,34 +24,12 @@ class TownNpcController : public NpcControllerBase {
                     UIController* ui,
                     std::shared_ptr<Game::Inventory> inventory);
 
-  void setInventory(std::shared_ptr<Game::Inventory> inventory) {
-    inventory_ = std::move(inventory);
-  }
-
   void update(const cocos2d::Vec2& player_pos) override;
 
   void handleTalkAt(const cocos2d::Vec2& player_pos) override;
 
  private:
-  struct NpcInstance {
-    Game::NpcId id;
-    std::unique_ptr<Game::NpcBase> npc;
-    cocos2d::Sprite* sprite = nullptr;
-  };
-
-  TownMapController* map_ = nullptr;
-  cocos2d::Node* world_node_ = nullptr;
-  UIController* ui_ = nullptr;
-  std::shared_ptr<Game::Inventory> inventory_;
-  std::vector<NpcInstance> npcs_;
-
-  void buildInitialNpcs();
-  bool findNearestNpc(const cocos2d::Vec2& player_pos,
-                      float max_dist,
-                      int& out_index,
-                      cocos2d::Vec2& out_pos) const;
-  int friendshipGainForGift(NpcInstance& inst) const;
+  std::vector<std::unique_ptr<NpcControllerBase>> controllers_;
 };
 
 } // namespace Controllers
-

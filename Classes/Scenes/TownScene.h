@@ -3,7 +3,7 @@
 #include "Scenes/SceneBase.h"
 #include "Controllers/Map/TownMapController.h"
 #include "Controllers/Interact/TownInteractor.h"
-#include "Controllers/Systems/TownNpcController.h"
+#include "Controllers/NPC/NpcControllerBase.h"
 
 class TownScene : public SceneBase {
 public:

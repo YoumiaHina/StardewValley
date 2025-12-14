@@ -65,6 +65,12 @@
     <Filter Include="Classes\Controllers\Store">
       <UniqueIdentifier>{5de484e6-c459-41cc-9c5e-40d1a35bb643}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Classes\Controllers\NPC">
+      <UniqueIdentifier>{bdee579c-ac1c-4361-bab4-9723646692e9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Classes\Game\NPC">
+      <UniqueIdentifier>{a80b0a1b-bf87-472e-a314-5dbbf0b1f14f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <!-- Source Files -->
@@ -289,12 +295,6 @@
     <ClCompile Include="..\Classes\Controllers\Map\TownMapController.cpp">
       <Filter>Classes\Controllers\Map</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\Game\Npc.cpp">
-      <Filter>Classes\Game</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Classes\Controllers\Systems\TownNpcController.cpp">
-      <Filter>Classes\Controllers\Systems</Filter>
-    </ClCompile>
     <ClCompile Include="..\Classes\Controllers\Systems\AnimalSystem.cpp">
       <Filter>Classes\Game\Animals</Filter>
     </ClCompile>
@@ -315,6 +315,24 @@
     </ClCompile>
     <ClCompile Include="..\Classes\Controllers\Store\StoreController.cpp">
       <Filter>Classes\Controllers\Store</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\NPC\AbigailNpcController.cpp">
+      <Filter>Classes\Controllers\NPC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\NPC\NpcControllerBase.cpp">
+      <Filter>Classes\Controllers\NPC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\NPC\WillyNpcController.cpp">
+      <Filter>Classes\Controllers\NPC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\NPC\AbigailNpc.cpp">
+      <Filter>Classes\Game\NPC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\NPC\NpcBase.cpp">
+      <Filter>Classes\Game\NPC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\NPC\WillyNpc.cpp">
+      <Filter>Classes\Game\NPC</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -534,12 +552,6 @@
     <ClInclude Include="..\Classes\Controllers\Map\TownMapController.h">
       <Filter>Classes\Controllers\Map</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\Game\Npc.h">
-      <Filter>Classes\Game</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Classes\Controllers\Systems\TownNpcController.h">
-      <Filter>Classes\Controllers\Systems</Filter>
-    </ClInclude>
     <ClInclude Include="..\Classes\Game\Animals\AnimalBase.h">
       <Filter>Classes\Game\Animals</Filter>
     </ClInclude>
@@ -551,6 +563,24 @@
     </ClInclude>
     <ClInclude Include="..\Classes\Controllers\Store\StoreController.h">
       <Filter>Classes\Controllers\Store</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\NPC\AbigailNpcController.h">
+      <Filter>Classes\Controllers\NPC</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\NPC\NpcControllerBase.h">
+      <Filter>Classes\Controllers\NPC</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\NPC\WillyNpcController.h">
+      <Filter>Classes\Controllers\NPC</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\NPC\AbigailNpc.h">
+      <Filter>Classes\Game\NPC</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\NPC\NpcBase.h">
+      <Filter>Classes\Game\NPC</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\NPC\WillyNpc.h">
+      <Filter>Classes\Game\NPC</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

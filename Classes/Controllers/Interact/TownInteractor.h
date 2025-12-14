@@ -2,7 +2,7 @@
 
 #include "cocos2d.h"
 #include "Controllers/Map/TownMapController.h"
-#include "Controllers/Systems/TownNpcController.h"
+#include "Controllers/NPC/NpcControllerBase.h"
 #include <functional>
 
 namespace Controllers {

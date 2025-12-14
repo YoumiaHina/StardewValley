@@ -1,0 +1,40 @@
+#pragma once
+
+#include <memory>
+#include "cocos2d.h"
+#include "Controllers/NPC/NpcControllerBase.h"
+#include "Game/Inventory.h"
+#include "Game/NPC/NpcBase.h"
+
+namespace Controllers {
+
+class TownMapController;
+class UIController;
+
+class WillyNpcController : public NpcControllerBase {
+ public:
+  WillyNpcController(TownMapController* map,
+                     cocos2d::Node* world_node,
+                     UIController* ui,
+                     std::shared_ptr<Game::Inventory> inventory);
+
+  void update(const cocos2d::Vec2& player_pos) override;
+
+  void handleTalkAt(const cocos2d::Vec2& player_pos) override;
+
+ private:
+  TownMapController* map_ = nullptr;
+  cocos2d::Node* world_node_ = nullptr;
+  UIController* ui_ = nullptr;
+  std::shared_ptr<Game::Inventory> inventory_;
+  std::unique_ptr<Game::NpcBase> npc_;
+  cocos2d::Sprite* sprite_ = nullptr;
+  bool was_near_ = false;
+
+  bool isNear(const cocos2d::Vec2& player_pos,
+              float max_dist,
+              cocos2d::Vec2& out_pos) const;
+  int friendshipGainForGift() const;
+};
+
+}  // namespace Controllers
