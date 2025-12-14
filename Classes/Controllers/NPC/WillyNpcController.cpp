@@ -46,15 +46,15 @@ bool WillyNpcController::isNear(const cocos2d::Vec2& player_pos,
 }
 
 int WillyNpcController::friendshipGainForGift() const {
-  int gained = 5;
-  if (!inventory_ || !npc_) return gained;
-  if (inventory_->size() <= 0) return gained;
-  if (inventory_->selectedKind() != Game::SlotKind::Item) return gained;
+  if (!inventory_ || !npc_) return 0;
+  if (inventory_->size() <= 0) return 0;
+  if (inventory_->selectedKind() != Game::SlotKind::Item) return 0;
   const auto& slot = inventory_->selectedSlot();
-  if (slot.itemQty <= 0) return gained;
-  gained = npc_->friendshipGainForGift(slot.itemType);
+  if (slot.itemQty <= 0) return 0;
+  int gained = npc_->friendshipGainForGift(slot.itemType);
+  if (gained <= 0) return 0;
   bool consumed = inventory_->consumeSelectedItem(1);
-  if (!consumed) gained = 5;
+  if (!consumed) return 0;
   return gained;
 }
 
@@ -83,7 +83,22 @@ void WillyNpcController::handleTalkAt(const cocos2d::Vec2& player_pos) {
   int current = 0;
   auto it = ws.npcFriendship.find(key);
   if (it != ws.npcFriendship.end()) current = it->second;
+  int today = ws.seasonIndex * 30 + ws.dayOfSeason;
+  auto itDay = ws.npcLastGiftDay.find(key);
+  bool giftedToday = (itDay != ws.npcLastGiftDay.end() && itDay->second == today);
+  if (giftedToday) {
+    float tile = map_->tileSize();
+    if (ui_) {
+      ui_->popFriendshipTextAt(pos + cocos2d::Vec2(0, 0.5f * tile),
+                               "Already gifted today",
+                               cocos2d::Color3B::YELLOW);
+    }
+    return;
+  }
   int gained = friendshipGainForGift();
+  if (gained <= 0) return;
+  ws.npcLastGiftDay[key] = today;
+  if (ui_) ui_->refreshHotbar();
   int next = current + gained;
   if (next > 250) next = 250;
   ws.npcFriendship[key] = next;
