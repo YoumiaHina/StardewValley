@@ -29,7 +29,6 @@ cocos2d::Vec2 MineMapController::clampPosition(const Vec2& current, const Vec2& 
         else if (_floorMap) base = _floorMap->collides(p, r);
         if (base) return true;
         for (const auto& rc : _dynamicColliders) { if (rc.containsPoint(p)) return true; }
-        for (const auto& rc : _monsterColliders) { if (rc.containsPoint(p)) return true; }
         return false;
     };
     Vec2 foot(candidate.x, current.y);
@@ -213,16 +212,30 @@ void MineMapController::unlockElevatorIfNeeded() {
 }
 
 bool MineMapController::isNearStairs(const Vec2& p) const {
+    float s = static_cast<float>(GameConfig::TILE_SIZE);
+    float radius = s * 1.2f;
     if (_entrance) {
-        float s = static_cast<float>(GameConfig::TILE_SIZE);
-        return _entrance->nearStairs(p, s * 0.8f);
+        return _entrance->nearStairs(p, radius);
     }
     if (_floorMap) {
-        float s = static_cast<float>(GameConfig::TILE_SIZE);
-        return _floorMap->nearStairs(p, s * 0.8f);
+        if (_floorMap->nearStairs(p, radius)) {
+            return true;
+        }
+        for (const auto& stairPos : _extraStairs) {
+            if (p.distance(stairPos) <= radius) {
+                return true;
+            }
+        }
+        return false;
     }
-    float s = static_cast<float>(GameConfig::TILE_SIZE);
-    return p.distance(_stairsPos) <= s * 0.8f;
+    if (!_extraStairs.empty()) {
+        for (const auto& stairPos : _extraStairs) {
+            if (p.distance(stairPos) <= radius) {
+                return true;
+            }
+        }
+    }
+    return p.distance(_stairsPos) <= radius;
 }
 
 bool MineMapController::isNearFarmDoor(const Vec2& p) const {

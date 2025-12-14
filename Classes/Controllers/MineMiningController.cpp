@@ -7,20 +7,29 @@ using namespace cocos2d;
 namespace Controllers {
 
 void MineMiningController::resetFloor() {
-    // 移除所有已挂载的精灵
     for (auto &n : _nodes) {
         if (n.sprite) { n.sprite->removeFromParent(); n.sprite = nullptr; }
     }
     _nodes.clear();
-    if (_map) { std::vector<cocos2d::Rect> empty; _map->setDynamicColliders(empty); }
+    for (auto &s : _stairs) {
+        if (s.sprite) { s.sprite->removeFromParent(); s.sprite = nullptr; }
+    }
+    _stairs.clear();
+    if (_map) {
+        std::vector<cocos2d::Rect> empty;
+        _map->setDynamicColliders(empty);
+        std::vector<Vec2> noStairs;
+        _map->setExtraStairs(noStairs);
+    }
     refreshVisuals();
 }
 
 void MineMiningController::generateNodesForFloor() {
-    if (_map && _map->currentFloor() <= 0) { _nodes.clear(); refreshVisuals(); return; }
-    // 清理旧节点的精灵，避免层切换时积累导致卡顿
+    if (_map && _map->currentFloor() <= 0) { _nodes.clear(); _stairs.clear(); refreshVisuals(); return; }
     for (auto &n : _nodes) { if (n.sprite) { n.sprite->removeFromParent(); n.sprite = nullptr; } }
+    for (auto &s : _stairs) { if (s.sprite) { s.sprite->removeFromParent(); s.sprite = nullptr; } }
     _nodes.clear();
+    _stairs.clear();
     auto rects = _map->rockAreaRects();
     auto polys = _map->rockAreaPolys();
     std::vector<Vec2> candidates;
@@ -56,7 +65,6 @@ void MineMiningController::generateNodesForFloor() {
             Vec2 pt(distX(rng), distY(rng)); if (inside(pt)) candidates.push_back(pt);
         }
     }
-    // 先生成矿石，再填充石头类型
     std::mt19937 rng{ std::random_device{}() };
     int floor = _map->currentFloor();
     bool allowCopper = floor >= 1;
@@ -65,7 +73,6 @@ void MineMiningController::generateNodesForFloor() {
     std::uniform_real_distribution<float> prob(0.0f, 1.0f);
     std::uniform_real_distribution<float> sel(0.0f, 1.0f);
 
-    // 仅选择约 30% 的候选点参与生成，并设置总体上限以避免卡顿
     int targetCount = static_cast<int>(candidates.size() * 0.30f);
     targetCount = std::max(0, std::min(targetCount, 300));
     std::shuffle(candidates.begin(), candidates.end(), rng);
@@ -74,10 +81,53 @@ void MineMiningController::generateNodesForFloor() {
 
     std::vector<Vec2> remaining;
     remaining.reserve(selected.size());
-    // 对齐到格子中心
     auto alignToTileCenter = [this](const Vec2& wp){ int c=0,r=0; _map->worldToTileIndex(wp,c,r); return _map->tileToWorld(c,r); };
+
+    std::vector<Vec2> stairWorldPos;
+    if (!selected.empty()) {
+        int maxStairs = std::min<int>(5, static_cast<int>(selected.size()));
+        int minStairs = std::min<int>(2, maxStairs);
+        if (maxStairs > 0 && minStairs > 0) {
+            std::uniform_int_distribution<int> stairCountDist(minStairs, maxStairs);
+            int stairCount = stairCountDist(rng);
+            stairCount = std::max(0, std::min(stairCount, static_cast<int>(selected.size())));
+            for (int i = 0; i < stairCount; ++i) {
+                Vec2 p = alignToTileCenter(selected[i]);
+                stairWorldPos.push_back(p);
+            }
+        }
+    }
+
+    std::vector<std::pair<int,int>> stairTiles;
+    stairTiles.reserve(stairWorldPos.size());
+    for (const auto& p : stairWorldPos) {
+        int c = 0;
+        int r = 0;
+        _map->worldToTileIndex(p, c, r);
+        stairTiles.emplace_back(c, r);
+    }
+    auto isStairTile = [this,&stairTiles](const Vec2& wp){
+        int c = 0;
+        int r = 0;
+        _map->worldToTileIndex(wp, c, r);
+        for (const auto& t : stairTiles) {
+            if (t.first == c && t.second == r) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    for (const auto& p : stairWorldPos) {
+        Stair sNode;
+        sNode.pos = p;
+        _stairs.push_back(sNode);
+    }
     for (const auto& rawP : selected) {
         Vec2 p = alignToTileCenter(rawP);
+        if (isStairTile(p)) {
+            continue;
+        }
         bool placedOre = false;
         if (allowGold && prob(rng) < 0.06f) {
             Node n; n.type = NodeType::GoldOre; n.hp = 2; n.sizeTiles = 1; n.pos = p; n.tex = "Mineral/goldOre.png"; _nodes.push_back(n); placedOre = true;
@@ -94,6 +144,9 @@ void MineMiningController::generateNodesForFloor() {
     std::uniform_int_distribution<int> hardIdx(1,3);
     for (const auto& rawP : remaining) {
         Vec2 p = alignToTileCenter(rawP);
+        if (isStairTile(p)) {
+            continue;
+        }
         float r = probRock(rng);
         if (r < 0.08f) {
             // 巨石：2x2，5 次破坏
@@ -116,16 +169,32 @@ void MineMiningController::generateNodesForFloor() {
             _nodes.push_back(n);
         }
     }
-    // 同步碰撞箱到地图控制器
-    std::vector<Rect> colliders; colliders.reserve(_nodes.size());
+
+    // 为每个楼梯格强制生成一块普通石头，初始时阻塞下楼
+    for (const auto& p : stairWorldPos) {
+        Node n;
+        n.type = NodeType::Rock;
+        n.hp = 1;
+        n.sizeTiles = 1;
+        n.pos = p;
+        n.tex = "Rock/Rock1.png";
+        _nodes.push_back(n);
+    }
+    std::vector<Rect> colliders; colliders.reserve(_nodes.size() + _stairs.size());
     float ts = static_cast<float>(GameConfig::TILE_SIZE);
     for (const auto& n : _nodes) {
         float half = ts * 0.5f * n.sizeTiles;
         Rect rc(n.pos.x - half, n.pos.y - half, ts * n.sizeTiles, ts * n.sizeTiles);
         colliders.push_back(rc);
     }
+    for (const auto& s : _stairs) {
+        float half = ts * 0.5f;
+        Rect rc(s.pos.x - half, s.pos.y - half, ts, ts);
+        colliders.push_back(rc);
+    }
     _map->setDynamicColliders(colliders);
     refreshVisuals();
+    syncExtraStairsToMap();
 }
 
 bool MineMiningController::hitNearestNode(const Vec2& worldPos, int power) {
@@ -151,15 +220,21 @@ bool MineMiningController::hitNearestNode(const Vec2& worldPos, int power) {
             _nodes.erase(_nodes.begin() + idx);
             // 更新碰撞与可视
             if (_map) {
-                std::vector<Rect> colliders; colliders.reserve(_nodes.size());
+                std::vector<Rect> colliders; colliders.reserve(_nodes.size() + _stairs.size());
                 float ts = static_cast<float>(GameConfig::TILE_SIZE);
                 for (const auto& n2 : _nodes) {
                     float half2 = ts * 0.5f * n2.sizeTiles;
                     Rect rc2(n2.pos.x - half2, n2.pos.y - half2, ts * n2.sizeTiles, ts * n2.sizeTiles);
                     colliders.push_back(rc2);
                 }
+                for (const auto& s : _stairs) {
+                    float half = ts * 0.5f;
+                    Rect rc(s.pos.x - half, s.pos.y - half, ts, ts);
+                    colliders.push_back(rc);
+                }
                 _map->setDynamicColliders(colliders);
             }
+            syncExtraStairsToMap();
             refreshVisuals();
             return true; // destroyed
         }
@@ -168,9 +243,43 @@ bool MineMiningController::hitNearestNode(const Vec2& worldPos, int power) {
     return false;
 }
 
+void MineMiningController::syncExtraStairsToMap() {
+    if (!_map) return;
+    std::vector<Vec2> usable;
+    usable.reserve(_stairs.size());
+    for (auto& st : _stairs) {
+        int sc = 0;
+        int sr = 0;
+        _map->worldToTileIndex(st.pos, sc, sr);
+        bool covered = false;
+        for (const auto& n : _nodes) {
+            int nc = 0;
+            int nr = 0;
+            _map->worldToTileIndex(n.pos, nc, nr);
+            if (nc == sc && nr == sr) {
+                covered = true;
+                break;
+            }
+        }
+        if (st.sprite) {
+            st.sprite->setVisible(!covered);
+        }
+        if (!covered) {
+            usable.push_back(st.pos);
+        }
+    }
+    _map->setExtraStairs(usable);
+}
+
 void MineMiningController::refreshVisuals() {
-    // 使用精灵贴图显示矿石与石头，按格子大小缩放
     float s = static_cast<float>(GameConfig::TILE_SIZE);
+    if (!_miningDraw && _worldNode) {
+        _miningDraw = DrawNode::create();
+        _worldNode->addChild(_miningDraw, 50);
+    }
+    if (_miningDraw) {
+        _miningDraw->clear();
+    }
     for (auto &n : _nodes) {
         if (!n.sprite) {
             auto sp = Sprite::create();
@@ -183,10 +292,39 @@ void MineMiningController::refreshVisuals() {
             float sy = (cs.height > 0) ? (targetH / cs.height) : 1.0f;
             sp->setScale(std::min(sx, sy));
             sp->setPosition(n.pos);
-            if (_worldNode) _worldNode->addChild(sp, 2);
+            if (_worldNode) _worldNode->addChild(sp, 3);
             n.sprite = sp;
         } else {
             n.sprite->setPosition(n.pos);
+        }
+    }
+    for (auto &st : _stairs) {
+        if (!st.sprite) {
+            auto sp = Sprite::create("Maps/mine/stair.png");
+            if (!sp->getTexture()) continue;
+            auto cs = sp->getContentSize();
+            float targetW = s;
+            float targetH = s;
+            float sx = (cs.width > 0) ? (targetW / cs.width) : 1.0f;
+            float sy = (cs.height > 0) ? (targetH / cs.height) : 1.0f;
+            sp->setScale(std::min(sx, sy));
+            sp->setPosition(st.pos);
+            if (_worldNode) _worldNode->addChild(sp, 1);
+            st.sprite = sp;
+        } else {
+            st.sprite->setPosition(st.pos);
+        }
+        if (_miningDraw) {
+            float half = s * 0.5f;
+            Vec2 a(st.pos.x - half, st.pos.y - half);
+            Vec2 b(st.pos.x + half, st.pos.y - half);
+            Vec2 c(st.pos.x + half, st.pos.y + half);
+            Vec2 d(st.pos.x - half, st.pos.y + half);
+            Color4F col(0.0f, 1.0f, 0.0f, 0.4f);
+            _miningDraw->drawLine(a, b, col);
+            _miningDraw->drawLine(b, c, col);
+            _miningDraw->drawLine(c, d, col);
+            _miningDraw->drawLine(d, a, col);
         }
     }
 }

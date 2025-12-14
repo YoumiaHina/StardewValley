@@ -65,6 +65,7 @@ public:
     bool isNearBack0(const cocos2d::Vec2& p) const;
     bool isNearElestair(const cocos2d::Vec2& p) const;
     cocos2d::Vec2 stairsWorldPos() const { return _stairsPos; }
+    void setExtraStairs(const std::vector<cocos2d::Vec2>& stairs) { _extraStairs = stairs; }
     std::vector<int> getActivatedElevatorFloors() const;
     // Entrance (floor 0)
     void loadEntrance();
@@ -90,6 +91,7 @@ private:
     std::vector<Game::TileType> _tiles; // 简化：使用 TileType 渲染主题色块
     int _floor = 1;
     cocos2d::Vec2 _stairsPos;
+    std::vector<cocos2d::Vec2> _extraStairs;
     std::unordered_set<int> _elevatorFloors; // 已激活楼层（5的倍数）
     std::vector<Game::Chest> _emptyChests; // 深渊内无胸，返回空引用
     Game::MineMap* _entrance = nullptr;

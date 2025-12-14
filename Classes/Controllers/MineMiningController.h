@@ -19,9 +19,14 @@ public:
     struct Node {
         NodeType type;
         cocos2d::Vec2 pos;
-        int hp = 1;          // normal:1, hard:3, huge:5, ore:2
-        int sizeTiles = 1;   // 1 or 2 (huge)
-        std::string tex;     // texture path under Resources
+        int hp = 1;
+        int sizeTiles = 1;
+        std::string tex;
+        cocos2d::Sprite* sprite = nullptr;
+    };
+
+    struct Stair {
+        cocos2d::Vec2 pos;
         cocos2d::Sprite* sprite = nullptr;
     };
 
@@ -37,9 +42,12 @@ public:
     void refreshVisuals();
 
 private:
+    void syncExtraStairsToMap();
+
     MineMapController* _map = nullptr;
     cocos2d::Node* _worldNode = nullptr;
     std::vector<Node> _nodes;
+    std::vector<Stair> _stairs;
     cocos2d::DrawNode* _miningDraw = nullptr; // legacy, kept for cleanup
 };
 
