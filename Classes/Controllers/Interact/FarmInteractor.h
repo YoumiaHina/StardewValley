@@ -27,6 +27,7 @@ public:
     : _inventory(std::move(inventory)), _map(map), _ui(ui), _crop(crop), _getPlayerPos(std::move(getPlayerPos)), _getLastDir(std::move(getLastDir)) {}
 
     SpaceAction onSpacePressed();
+    void onLeftClick();
 
 private:
     std::shared_ptr<Game::Inventory> _inventory;

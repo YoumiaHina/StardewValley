@@ -169,6 +169,12 @@ void SceneBase::registerCommonInputHandlers(bool enableToolOnSpace, bool enableT
     auto mouse = EventListenerMouse::create();
     mouse->onMouseDown = [this, enableToolOnLeftClick](EventMouse* e){
         if (_uiController->handleHotbarMouseDown(e)) return;
+        if (_mapController && _player) {
+            Vec2 clickScene = e->getLocation();
+            auto parent = dynamic_cast<Node*>(_player)->getParent();
+            Vec2 mapPos = parent ? parent->convertToNodeSpace(clickScene) : clickScene;
+            _mapController->setLastClickWorldPos(mapPos);
+        }
         if (enableToolOnLeftClick && e->getMouseButton() == EventMouse::MouseButton::BUTTON_LEFT) {
             auto t = _inventory ? _inventory->selectedTool() : nullptr;
             if (t) {
@@ -182,6 +188,9 @@ void SceneBase::registerCommonInputHandlers(bool enableToolOnSpace, bool enableT
             _uiController->handleChestRightClick(e, _mapController->chests());
         }
         onMouseDown(e);
+        if (_mapController) {
+            _mapController->clearLastClickWorldPos();
+        }
     };
     mouse->onMouseScroll = [this](EventMouse* e){
         _uiController->handleHotbarScroll(e->getScrollY());

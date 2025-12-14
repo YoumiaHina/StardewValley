@@ -62,6 +62,10 @@ public:
     // 农场 DoorToTown 出生点（默认 Vec2::ZERO）
     virtual cocos2d::Vec2 farmTownDoorSpawnPos() const { return cocos2d::Vec2::ZERO; }
 
+    // 鼠标交互：记录最近一次点击的世界坐标（用于三格选择）
+    virtual void setLastClickWorldPos(const cocos2d::Vec2& /*p*/) {}
+    virtual void clearLastClickWorldPos() {}
+
     // Farm 专用：渲染与掉落
     virtual void refreshMapVisuals() {}
     virtual void refreshCropsVisuals() {}

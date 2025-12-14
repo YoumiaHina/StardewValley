@@ -97,6 +97,12 @@ private:
     std::function<bool(const cocos2d::Vec2&, int)> _mineHit;
     std::vector<cocos2d::Rect> _dynamicColliders; // 采矿节点临时碰撞
     std::vector<cocos2d::Rect> _monsterColliders;
+    cocos2d::Vec2 _lastClickWorldPos = cocos2d::Vec2::ZERO;
+    bool _hasLastClick = false;
+
+public:
+    void setLastClickWorldPos(const cocos2d::Vec2& p) override { _lastClickWorldPos = p; _hasLastClick = true; }
+    void clearLastClickWorldPos() override { _hasLastClick = false; }
 };
 
 }

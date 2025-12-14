@@ -84,5 +84,48 @@ FarmInteractor::SpaceAction FarmInteractor::onSpacePressed() {
     }
     return SpaceAction::None;
 }
-// namespace Controllers
+
+void FarmInteractor::onLeftClick() {
+    if (!_map || !_inventory || !_ui || !_getPlayerPos) return;
+    Vec2 p = _getPlayerPos();
+    if (_inventory->selectedKind() != Game::SlotKind::Item) return;
+    const auto &slot = _inventory->selectedSlot();
+    if (Game::isSeed(slot.itemType)) {
+        auto lastDir = _getLastDir ? _getLastDir() : Vec2(0,-1);
+        auto tgt = _map->targetTile(p, lastDir);
+        int tc = tgt.first, tr = tgt.second;
+        if (_map->inBounds(tc, tr) && !_map->isNearChest(_map->tileToWorld(tc,tr)) && (_crop ? _crop->findCropIndex(tc, tr) : -1) < 0) {
+            auto t = _map->getTile(tc, tr);
+            if (t == Game::TileType::Tilled || t == Game::TileType::Watered) {
+                int ct = static_cast<int>(Game::cropTypeFromSeed(slot.itemType));
+                auto type = static_cast<Game::CropType>(ct);
+                if (_crop) { _crop->plantCrop(type, tc, tr); }
+                bool ok = _inventory->consumeSelectedItem(1);
+                if (ok) { _ui->refreshHotbar(); }
+                _map->refreshCropsVisuals();
+                _ui->popTextAt(_map->tileToWorld(tc,tr), "Planted", Color3B::YELLOW);
+            }
+        }
+        return;
+    }
+    if (slot.itemType == Game::ItemType::Chest) {
+        auto lastDir = _getLastDir ? _getLastDir() : Vec2(0,-1);
+        auto tgt = _map->targetTile(p, lastDir);
+        int tc = tgt.first, tr = tgt.second;
+        if (_map->inBounds(tc, tr)) {
+            auto t = _map->getTile(tc, tr);
+            if (t != Game::TileType::Rock && t != Game::TileType::Tree) {
+                Game::Chest chest{ _map->tileToWorld(tc, tr), Game::Bag{} };
+                _map->chests().push_back(chest);
+                Game::globalState().farmChests = _map->chests();
+                _map->refreshMapVisuals();
+                _ui->refreshHotbar();
+                _inventory->removeItems(Game::ItemType::Chest, 1);
+                _ui->popTextAt(_map->tileToWorld(tc,tr), "Placed Chest", Color3B::YELLOW);
+            }
+        }
+        return;
+    }
 }
+
+} // namespace Controllers

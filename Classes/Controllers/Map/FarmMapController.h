@@ -99,6 +99,8 @@ private:
     std::unordered_map<long long, cocos2d::Sprite*> _tileSprites;
     cocos2d::Node* _actorsRoot = nullptr;
     Controllers::TreeSystem* _treeSystem = nullptr;
+    cocos2d::Vec2 _lastClickWorldPos = cocos2d::Vec2::ZERO;
+    bool _hasLastClick = false;
 
 
     // 接口扩展：湖边判定
@@ -108,6 +110,8 @@ public:
     bool damageTreeAt(int c, int r, int amount) override;
     Game::Tree* findTreeAt(int c, int r) const;
     bool isFarm() const override { return true; }
+    void setLastClickWorldPos(const cocos2d::Vec2& p) override { _lastClickWorldPos = p; _hasLastClick = true; }
+    void clearLastClickWorldPos() override { _hasLastClick = false; }
 };
 
 }
