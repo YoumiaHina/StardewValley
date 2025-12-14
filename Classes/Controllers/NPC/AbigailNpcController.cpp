@@ -37,24 +37,24 @@ bool AbigailNpcController::isNear(const cocos2d::Vec2& player_pos,
   cocos2d::Vec2 local = sprite_->getPosition();
   float dist = player_pos.distance(local);
   if (dist >= max_dist) return false;
-  cocos2d::Node* parent = sprite_->getParent();
-  cocos2d::Vec2 world =
-      parent ? parent->convertToWorldSpace(local) : local;
+  cocos2d::Vec2 origin = map_->getOrigin();
   auto size = sprite_->getContentSize();
-  out_pos = cocos2d::Vec2(world.x, world.y + size.height * 0.5f);
+  float x = origin.x + local.x;
+  float y = origin.y + local.y + size.height * 0.5f;
+  out_pos = cocos2d::Vec2(x, y);
   return true;
 }
 
 int AbigailNpcController::friendshipGainForGift() const {
-  int gained = 5;
-  if (!inventory_ || !npc_) return gained;
-  if (inventory_->size() <= 0) return gained;
-  if (inventory_->selectedKind() != Game::SlotKind::Item) return gained;
+  if (!inventory_ || !npc_) return 0;
+  if (inventory_->size() <= 0) return 0;
+  if (inventory_->selectedKind() != Game::SlotKind::Item) return 0;
   const auto& slot = inventory_->selectedSlot();
-  if (slot.itemQty <= 0) return gained;
-  gained = npc_->friendshipGainForGift(slot.itemType);
+  if (slot.itemQty <= 0) return 0;
+  int gained = npc_->friendshipGainForGift(slot.itemType);
+  if (gained <= 0) return 0;
   bool consumed = inventory_->consumeSelectedItem(1);
-  if (!consumed) gained = 5;
+  if (!consumed) return 0;
   return gained;
 }
 
@@ -83,14 +83,32 @@ void AbigailNpcController::handleTalkAt(const cocos2d::Vec2& player_pos) {
   int current = 0;
   auto it = ws.npcFriendship.find(key);
   if (it != ws.npcFriendship.end()) current = it->second;
+  int today = ws.seasonIndex * 30 + ws.dayOfSeason;
+  auto itDay = ws.npcLastGiftDay.find(key);
+  bool giftedToday = (itDay != ws.npcLastGiftDay.end() && itDay->second == today);
+  if (giftedToday) {
+    float tile = map_->tileSize();
+    if (ui_) {
+      ui_->popFriendshipTextAt(pos + cocos2d::Vec2(0, 0.5f * tile),
+                               "Already gifted today",
+                               cocos2d::Color3B::YELLOW);
+    }
+    return;
+  }
   int gained = friendshipGainForGift();
+  if (gained <= 0) return;
+  ws.npcLastGiftDay[key] = today;
+  if (ui_) ui_->refreshHotbar();
   int next = current + gained;
   if (next > 250) next = 250;
   ws.npcFriendship[key] = next;
   const char* npc_name = npc_ ? npc_->name() : "NPC";
   std::string text =
       std::string(npc_name) + ": Friendship " + std::to_string(next);
-  ui_->popTextAt(pos + cocos2d::Vec2(0, 24.0f), text, cocos2d::Color3B::WHITE);
+  float tile = map_->tileSize();
+  ui_->popFriendshipTextAt(pos + cocos2d::Vec2(0, 0.5f * tile),
+                           text,
+                           cocos2d::Color3B::WHITE);
 }
 
 }  // namespace Controllers

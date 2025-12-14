@@ -74,6 +74,7 @@ struct WorldState {
 
     std::unordered_map<int, int> npcFriendship;
     std::unordered_map<int, bool> npcRomanceUnlocked;
+    std::unordered_map<int, int> npcLastGiftDay;
 };
 
 // 获取全局状态（惰性初始化由调用方保证）

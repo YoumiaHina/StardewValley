@@ -62,6 +62,7 @@ public:
 
     // 弹出短文本
     void popTextAt(const cocos2d::Vec2& worldPos, const std::string& text, const cocos2d::Color3B& color);
+    void popFriendshipTextAt(const cocos2d::Vec2& worldPos, const std::string& text, const cocos2d::Color3B& color);
 
     // Chest 面板（简化为只显示/刷新列表）
     void buildChestPanel();
