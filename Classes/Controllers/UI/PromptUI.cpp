@@ -58,7 +58,9 @@ void PromptUI::showNpcPrompt(bool visible, const Vec2& worldPos, const std::stri
     _npcPrompt->setString(text);
     _npcPrompt->setVisible(visible);
     if (visible) {
-        _npcPrompt->setPosition(worldPos + Vec2(0, 10));
+        Vec2 p = worldPos;
+        if (_worldNode) p = _worldNode->convertToWorldSpace(worldPos);
+        _npcPrompt->setPosition(p + Vec2(0, 10));
     }
 }
 
@@ -69,6 +71,30 @@ void PromptUI::popTextAt(const Vec2& worldPos, const std::string& text, const Co
     if (_worldNode) p = _worldNode->convertToWorldSpace(p);
     label->setPosition(p);
     if (_scene) _scene->addChild(label, 4);
+    auto up = MoveBy::create(0.8f, Vec2(0, 24));
+    auto fade = FadeOut::create(0.8f);
+    auto rm = RemoveSelf::create();
+    label->runAction(Sequence::create(Spawn::create(up, fade, nullptr), rm, nullptr));
+}
+
+void PromptUI::popFriendshipTextAt(const Vec2& worldPos, const std::string& text, const Color3B& color) {
+    auto label = Label::createWithTTF(text, "fonts/Marker Felt.ttf", 16);
+    label->setColor(color);
+    Vec2 p = worldPos;
+    if (_worldNode) p = _worldNode->convertToWorldSpace(p);
+    label->setPosition(p);
+    if (_scene) _scene->addChild(label, 4);
+    Sprite* icon = Sprite::create("NPC/Friendship.png");
+    if (icon && icon->getTexture()) {
+        auto size = label->getContentSize();
+        float offsetX = size.width * 0.5f + 8.0f;
+        icon->setPosition(p + Vec2(offsetX, 0));
+        if (_scene) _scene->addChild(icon, 4);
+        auto upIcon = MoveBy::create(0.8f, Vec2(0, 24));
+        auto fadeIcon = FadeOut::create(0.8f);
+        auto rmIcon = RemoveSelf::create();
+        icon->runAction(Sequence::create(Spawn::create(upIcon, fadeIcon, nullptr), rmIcon, nullptr));
+    }
     auto up = MoveBy::create(0.8f, Vec2(0, 24));
     auto fade = FadeOut::create(0.8f);
     auto rm = RemoveSelf::create();

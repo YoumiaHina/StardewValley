@@ -102,6 +102,11 @@ void UIController::popTextAt(const Vec2& worldPos, const std::string& text, cons
     _prompts->popTextAt(worldPos, text, color);
 }
 
+void UIController::popFriendshipTextAt(const Vec2& worldPos, const std::string& text, const Color3B& color) {
+    if (!_prompts) _prompts = new PromptUI(_scene, _worldNode);
+    _prompts->popFriendshipTextAt(worldPos, text, color);
+}
+
 void UIController::buildChestPanel() {
     if (!_chestPanel) _chestPanel = new ChestPanelUI(_scene, _inventory);
     _chestPanel->buildChestPanel();

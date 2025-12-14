@@ -37,11 +37,11 @@ bool WillyNpcController::isNear(const cocos2d::Vec2& player_pos,
   cocos2d::Vec2 local = sprite_->getPosition();
   float dist = player_pos.distance(local);
   if (dist >= max_dist) return false;
-  cocos2d::Node* parent = sprite_->getParent();
-  cocos2d::Vec2 world =
-      parent ? parent->convertToWorldSpace(local) : local;
+  cocos2d::Vec2 origin = map_->getOrigin();
   auto size = sprite_->getContentSize();
-  out_pos = cocos2d::Vec2(world.x, world.y + size.height * 0.5f);
+  float x = origin.x + local.x;
+  float y = origin.y + local.y + size.height * 0.5f;
+  out_pos = cocos2d::Vec2(x, y);
   return true;
 }
 
@@ -90,7 +90,10 @@ void WillyNpcController::handleTalkAt(const cocos2d::Vec2& player_pos) {
   const char* npc_name = npc_ ? npc_->name() : "NPC";
   std::string text =
       std::string(npc_name) + ": Friendship " + std::to_string(next);
-  ui_->popTextAt(pos + cocos2d::Vec2(0, 24.0f), text, cocos2d::Color3B::WHITE);
+  float tile = map_->tileSize();
+  ui_->popFriendshipTextAt(pos + cocos2d::Vec2(0, 0.5f * tile),
+                           text,
+                           cocos2d::Color3B::WHITE);
 }
 
 }  // namespace Controllers
