@@ -1,14 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{A7B6051E-6D3E-4E1C-A69E-5CE2A8D49651}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{5B6373A6-9D52-4B4B-8C62-927B21F21D34}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
-    </Filter>
     <Filter Include="Resource Files">
       <UniqueIdentifier>{E3C7C0C9-4B15-4E5C-8F55-BA0C6C4E9AC8}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
@@ -66,6 +58,12 @@
     </Filter>
     <Filter Include="Classes\Game\Animals">
       <UniqueIdentifier>{25582af3-0273-4778-93a4-46599db44ab8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Classes\Controllers\Audio">
+      <UniqueIdentifier>{97173fcc-cfa9-4362-b4c6-ace5890cf9e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Classes\Controllers\Store">
+      <UniqueIdentifier>{5de484e6-c459-41cc-9c5e-40d1a35bb643}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -167,9 +165,6 @@
     </ClCompile>
     <ClCompile Include="..\Classes\Game\View\PlayerView.cpp">
       <Filter>Classes\Game\View</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Classes\Controllers\Store\StoreController.cpp">
-      <Filter>Classes</Filter>
     </ClCompile>
     <ClCompile Include="..\Classes\Game\Tool\Axe.cpp">
       <Filter>Classes\Game\Tool</Filter>
@@ -282,9 +277,6 @@
     <ClCompile Include="..\Classes\Controllers\Interact\BeachInteractor.cpp">
       <Filter>Classes\Controllers\Interact</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\Controllers\Managers\AudioManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\Classes\Scenes\TownScene.cpp">
       <Filter>Classes\Scenes</Filter>
     </ClCompile>
@@ -317,6 +309,12 @@
     </ClCompile>
     <ClCompile Include="..\Classes\Game\Crops\crop\RegrowCropBase.cpp">
       <Filter>Classes\Game\Crop</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\Managers\AudioManager.cpp">
+      <Filter>Classes\Controllers\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\Store\StoreController.cpp">
+      <Filter>Classes\Controllers\Store</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -524,9 +522,6 @@
     <ClInclude Include="..\Classes\Controllers\Interact\BeachInteractor.h">
       <Filter>Classes\Controllers\Interact</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\Controllers\Managers\AudioManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\Classes\Scenes\TownScene.h">
       <Filter>Classes\Scenes</Filter>
     </ClInclude>
@@ -550,6 +545,12 @@
     </ClInclude>
     <ClInclude Include="..\Classes\Controllers\Systems\AnimalSystem.h">
       <Filter>Classes\Game\Animals</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\Managers\AudioManager.h">
+      <Filter>Classes\Controllers\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\Store\StoreController.h">
+      <Filter>Classes\Controllers\Store</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
