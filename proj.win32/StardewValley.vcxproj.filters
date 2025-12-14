@@ -64,6 +64,9 @@
     <Filter Include="Classes\Game\Map">
       <UniqueIdentifier>{580f6630-072e-4d6a-8c93-f93c37bdbb37}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Classes\Game\Animals">
+      <UniqueIdentifier>{25582af3-0273-4778-93a4-46599db44ab8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <!-- Source Files -->
@@ -300,6 +303,21 @@
     <ClCompile Include="..\Classes\Controllers\Systems\TownNpcController.cpp">
       <Filter>Classes\Controllers\Systems</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\Systems\AnimalSystem.cpp">
+      <Filter>Classes\Game\Animals</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\Animals\ChickenAnimal.cpp">
+      <Filter>Classes\Game\Animals</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\Animals\CowAnimal.cpp">
+      <Filter>Classes\Game\Animals</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\Animals\SheepAnimal.cpp">
+      <Filter>Classes\Game\Animals</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\Crops\crop\RegrowCropBase.cpp">
+      <Filter>Classes\Game\Crop</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <!-- Header Files -->
@@ -526,6 +544,12 @@
     </ClInclude>
     <ClInclude Include="..\Classes\Controllers\Systems\TownNpcController.h">
       <Filter>Classes\Controllers\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\Animals\AnimalBase.h">
+      <Filter>Classes\Game\Animals</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\Systems\AnimalSystem.h">
+      <Filter>Classes\Game\Animals</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -17,6 +17,7 @@
 #include "Controllers/Systems/FishingController.h"
 #include "Game/Cheat.h"
 #include "Controllers/Input/PlayerController.h"
+#include "Controllers/Systems/AnimalSystem.h"
 #include "Controllers/Map/FarmMapController.h"
 #include "Controllers/UI/UIController.h"
 #include "Controllers/Systems/GameStateController.h"
@@ -34,6 +35,8 @@ bool FarmScene::init() {
         [this]() -> Vec2 { return _playerController ? _playerController->lastDir() : Vec2(0,-1); });
     _fishing = new Controllers::FishingController(_mapController, _inventory, _uiController, this, _worldNode);
     addUpdateCallback([this](float dt){ if (_fishing) _fishing->update(dt); });
+    _animalSystem = new Controllers::AnimalSystem(_mapController, _worldNode);
+    addUpdateCallback([this](float dt){ if (_animalSystem) _animalSystem->update(dt); });
     if (_inventory && _fishing) {
         for (std::size_t i = 0; i < _inventory->size(); ++i) {
             auto tb = _inventory->toolAtMutable(i);
@@ -130,5 +133,20 @@ void FarmScene::onKeyPressedHook(EventKeyboard::KeyCode code) {
         auto mine = MineScene::create();
         auto trans = TransitionFade::create(0.6f, mine);
         Director::getInstance()->replaceScene(trans);
+    } else if (code == EventKeyboard::KeyCode::KEY_G) {
+        if (!_player || !_mapController || !_animalSystem) return;
+        float s = static_cast<float>(GameConfig::TILE_SIZE);
+        Vec2 pos = _player->getPosition();
+        Vec2 dir = _playerController ? _playerController->lastDir() : Vec2(0, -1);
+        if (dir.lengthSquared() < 1e-3f) dir = Vec2(0, -1);
+        dir.normalize();
+        Vec2 left(-dir.y, dir.x);
+        Vec2 right(dir.y, -dir.x);
+        Vec2 front = pos + dir * s;
+        Vec2 leftFront = front + left * s;
+        Vec2 rightFront = front + right * s;
+        _animalSystem->spawnAnimal(Game::AnimalType::Chicken, leftFront);
+        _animalSystem->spawnAnimal(Game::AnimalType::Cow, front);
+        _animalSystem->spawnAnimal(Game::AnimalType::Sheep, rightFront);
     }
 }
