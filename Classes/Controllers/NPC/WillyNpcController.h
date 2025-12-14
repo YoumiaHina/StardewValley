@@ -16,11 +16,13 @@ class WillyNpcController : public NpcControllerBase {
   WillyNpcController(TownMapController* map,
                      cocos2d::Node* world_node,
                      UIController* ui,
-                     std::shared_ptr<Game::Inventory> inventory);
+                     std::shared_ptr<Game::Inventory> inventory,
+                     NpcDialogueManager* dialogue);
 
   void update(const cocos2d::Vec2& player_pos) override;
 
   void handleTalkAt(const cocos2d::Vec2& player_pos) override;
+  bool handleRightClick(cocos2d::EventMouse* e) override;
 
  private:
   TownMapController* map_ = nullptr;
@@ -30,6 +32,7 @@ class WillyNpcController : public NpcControllerBase {
   std::unique_ptr<Game::NpcBase> npc_;
   cocos2d::Sprite* sprite_ = nullptr;
   bool was_near_ = false;
+  NpcDialogueManager* dialogue_ = nullptr;
 
   bool isNear(const cocos2d::Vec2& player_pos,
               float max_dist,

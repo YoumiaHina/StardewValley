@@ -75,6 +75,9 @@ void SceneBase::registerCommonInputHandlers(bool enableToolOnSpace, bool enableT
     // 键盘
     auto kb = EventListenerKeyboard::create();
     kb->onKeyPressed = [this, enableToolOnSpace](EventKeyboard::KeyCode code, Event*) {
+        if (_uiController && _uiController->isNpcSocialVisible()) {
+            return;
+        }
         _playerController->onKeyPressed(code);
         switch (code) {
             case EventKeyboard::KeyCode::KEY_1: _uiController->selectHotbarIndex(0); break;
@@ -168,6 +171,9 @@ void SceneBase::registerCommonInputHandlers(bool enableToolOnSpace, bool enableT
     // 鼠标
     auto mouse = EventListenerMouse::create();
     mouse->onMouseDown = [this, enableToolOnLeftClick](EventMouse* e){
+        if (_uiController && _uiController->isNpcSocialVisible()) {
+            return;
+        }
         if (_uiController->handleHotbarMouseDown(e)) return;
         if (_mapController && _player) {
             Vec2 clickScene = e->getLocation();
@@ -216,7 +222,9 @@ void SceneBase::update(float dt) {
         return;
     }
     _stateController->update(dt);
-    _playerController->update(dt);
+    if (!_uiController || !_uiController->isNpcSocialVisible()) {
+        _playerController->update(dt);
+    }
     for (auto& cb : _extraUpdates) { cb(dt); }
     if (_player && _uiController && _mapController) {
         Vec2 p = _player->getPosition();

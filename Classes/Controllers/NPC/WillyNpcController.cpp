@@ -10,11 +10,13 @@ WillyNpcController::WillyNpcController(
     TownMapController* map,
     cocos2d::Node* world_node,
     UIController* ui,
-    std::shared_ptr<Game::Inventory> inventory)
+    std::shared_ptr<Game::Inventory> inventory,
+    NpcDialogueManager* dialogue)
     : map_(map),
       world_node_(world_node),
       ui_(ui),
-      inventory_(std::move(inventory)) {
+      inventory_(std::move(inventory)),
+      dialogue_(dialogue) {
   if (!map_ || !world_node_) return;
   cocos2d::Size size = map_->getContentSize();
   float tile = map_->tileSize();
@@ -78,8 +80,16 @@ void WillyNpcController::handleTalkAt(const cocos2d::Vec2& player_pos) {
   cocos2d::Vec2 pos;
   bool is_near = isNear(player_pos, max_dist, pos);
   if (!is_near || !npc_) return;
-  auto& ws = Game::globalState();
   int key = 2;
+  const char* npc_name = npc_ ? npc_->name() : "NPC";
+  bool hasItem = inventory_ && inventory_->size() > 0 &&
+                 inventory_->selectedKind() == Game::SlotKind::Item &&
+                 inventory_->selectedSlot().itemQty > 0;
+  if (!hasItem) {
+    if (dialogue_) dialogue_->startDialogue(key, npc_name);
+    return;
+  }
+  auto& ws = Game::globalState();
   int current = 0;
   auto it = ws.npcFriendship.find(key);
   if (it != ws.npcFriendship.end()) current = it->second;
@@ -102,13 +112,28 @@ void WillyNpcController::handleTalkAt(const cocos2d::Vec2& player_pos) {
   int next = current + gained;
   if (next > 250) next = 250;
   ws.npcFriendship[key] = next;
-  const char* npc_name = npc_ ? npc_->name() : "NPC";
   std::string text =
       std::string(npc_name) + ": Friendship " + std::to_string(next);
   float tile = map_->tileSize();
   ui_->popFriendshipTextAt(pos + cocos2d::Vec2(0, 0.5f * tile),
                            text,
                            cocos2d::Color3B::WHITE);
+}
+
+bool WillyNpcController::handleRightClick(cocos2d::EventMouse* e) {
+  if (!ui_ || !sprite_) return false;
+  if (e->getMouseButton() != cocos2d::EventMouse::MouseButton::BUTTON_RIGHT)
+    return false;
+  cocos2d::Vec2 click = e->getLocation();
+  cocos2d::Node* parent = sprite_->getParent();
+  if (!parent) return false;
+  cocos2d::Vec2 local = parent->convertToNodeSpace(click);
+  cocos2d::Rect box = sprite_->getBoundingBox();
+  if (!box.containsPoint(local)) return false;
+  int key = 2;
+  const char* npc_name = npc_ ? npc_->name() : "NPC";
+  ui_->showNpcSocial(key, npc_name);
+  return true;
 }
 
 }  // namespace Controllers

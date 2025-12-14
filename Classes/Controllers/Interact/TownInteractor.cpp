@@ -11,6 +11,9 @@ TownInteractor::SpaceAction TownInteractor::onSpacePressed() {
         return SpaceAction::EnterFarm;
     }
     if (_npc) {
+        if (_npc->advanceDialogueIfActive()) {
+            return SpaceAction::None;
+        }
         _npc->handleTalkAt(p);
     }
     return SpaceAction::None;

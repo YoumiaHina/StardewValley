@@ -7,6 +7,7 @@
 #include <vector>
 #include <unordered_set>
 #include <unordered_map>
+#include <string>
 #include "Game/Inventory.h"
 #include "Game/Tile.h"
 #include "Game/Drop.h"
@@ -16,6 +17,11 @@
 #include "Game/Tree.h"
 
 namespace Game {
+
+struct NpcQuest {
+    std::string title;
+    std::string description;
+};
 
 struct WorldState {
     // 共享背包实例（室内外一致）
@@ -75,6 +81,7 @@ struct WorldState {
     std::unordered_map<int, int> npcFriendship;
     std::unordered_map<int, bool> npcRomanceUnlocked;
     std::unordered_map<int, int> npcLastGiftDay;
+    std::unordered_map<int, std::vector<NpcQuest>> npcQuests;
 };
 
 // 获取全局状态（惰性初始化由调用方保证）

@@ -4,6 +4,7 @@
 #include <vector>
 #include <memory>
 #include "Game/Inventory.h"
+#include "Controllers/NPC/NpcDialogueManager.h"
 
 namespace Controllers {
 
@@ -15,6 +16,7 @@ class NpcControllerBase {
   virtual ~NpcControllerBase() = default;
   virtual void update(const cocos2d::Vec2& player_pos) = 0;
   virtual void handleTalkAt(const cocos2d::Vec2& player_pos) = 0;
+  virtual bool handleRightClick(cocos2d::EventMouse* e) { return false; }
 };
 
 class TownNpcController : public NpcControllerBase {
@@ -30,6 +32,12 @@ class TownNpcController : public NpcControllerBase {
 
  private:
   std::vector<std::unique_ptr<NpcControllerBase>> controllers_;
+  NpcDialogueManager dialogue_;
+
+ public:
+  bool advanceDialogueIfActive();
+  void startDialogueFor(int npcKey, const std::string& npcName);
+  bool handleRightClick(cocos2d::EventMouse* e);
 };
 
 } // namespace Controllers

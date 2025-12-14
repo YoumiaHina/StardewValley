@@ -337,6 +337,15 @@
     <ClCompile Include="..\Classes\Controllers\TileSelector.cpp">
       <Filter>Classes\Controllers</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\NPC\NpcDialogueManager.cpp">
+      <Filter>Classes\Controllers\NPC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\UI\DialogueUI.cpp">
+      <Filter>Classes\Game\NPC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\UI\NpcSocialPanelUI.cpp">
+      <Filter>Classes\Controllers\UI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <!-- Header Files -->
@@ -587,6 +596,15 @@
     </ClInclude>
     <ClInclude Include="..\Classes\Controllers\TileSelector.h">
       <Filter>Classes\Controllers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\NPC\NpcDialogueManager.h">
+      <Filter>Classes\Controllers\NPC</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\UI\DialogueUI.h">
+      <Filter>Classes\Game\NPC</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\UI\NpcSocialPanelUI.h">
+      <Filter>Classes\Controllers\UI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

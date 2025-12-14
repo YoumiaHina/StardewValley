@@ -6,6 +6,7 @@
 #include "cocos2d.h"
 #include <vector>
 #include <memory>
+#include <functional>
 #include "Game/Inventory.h"
 #include "Game/Chest.h"
 #include "Controllers/UI/HUDUI.h"
@@ -14,6 +15,8 @@
 #include "Controllers/UI/ChestPanelUI.h"
 #include "Controllers/UI/CraftPanelUI.h"
 #include "Controllers/UI/StorePanelUI.h"
+#include "Controllers/UI/DialogueUI.h"
+#include "Controllers/UI/NpcSocialPanelUI.h"
 #include "ui/CocosGUI.h"
 
 namespace Controllers {
@@ -31,6 +34,8 @@ public:
         delete _chestPanel; _chestPanel = nullptr;
         delete _craftPanel; _craftPanel = nullptr;
         delete _storePanel; _storePanel = nullptr;
+        delete _dialogueUI; _dialogueUI = nullptr;
+        delete _socialPanel; _socialPanel = nullptr;
     }
 
     void buildHUD();
@@ -64,6 +69,18 @@ public:
     void popTextAt(const cocos2d::Vec2& worldPos, const std::string& text, const cocos2d::Color3B& color);
     void popFriendshipTextAt(const cocos2d::Vec2& worldPos, const std::string& text, const cocos2d::Color3B& color);
 
+    void showDialogue(const std::string& npcName,
+                      const std::string& text,
+                      const std::vector<std::string>& options,
+                      std::function<void(int)> onOption,
+                      std::function<void()> onAdvance);
+    void hideDialogue();
+    bool isDialogueVisible() const;
+
+    void showNpcSocial(int npcKey, const std::string& npcName);
+    void hideNpcSocial();
+    bool isNpcSocialVisible() const;
+
     // Chest 面板（简化为只显示/刷新列表）
     void buildChestPanel();
     void refreshChestPanel(const Game::Chest& chest);
@@ -89,6 +106,8 @@ private:
     ChestPanelUI* _chestPanel = nullptr;
     CraftPanelUI* _craftPanel = nullptr;
     StorePanelUI* _storePanel = nullptr;
+    DialogueUI* _dialogueUI = nullptr;
+    NpcSocialPanelUI* _socialPanel = nullptr;
 };
 
 }

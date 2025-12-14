@@ -107,6 +107,46 @@ void UIController::popFriendshipTextAt(const Vec2& worldPos, const std::string& 
     _prompts->popFriendshipTextAt(worldPos, text, color);
 }
 
+void UIController::showNpcSocial(int npcKey, const std::string& npcName) {
+    if (!_socialPanel) _socialPanel = new NpcSocialPanelUI(_scene);
+    auto& ws = Game::globalState();
+    int friendship = 0;
+    auto it = ws.npcFriendship.find(npcKey);
+    if (it != ws.npcFriendship.end()) friendship = it->second;
+    bool romance = false;
+    auto itR = ws.npcRomanceUnlocked.find(npcKey);
+    if (itR != ws.npcRomanceUnlocked.end()) romance = itR->second;
+    const std::vector<Game::NpcQuest>* quests = nullptr;
+    auto itQ = ws.npcQuests.find(npcKey);
+    if (itQ != ws.npcQuests.end()) quests = &itQ->second;
+    _socialPanel->show(npcName, friendship, romance, quests);
+}
+
+void UIController::hideNpcSocial() {
+    if (_socialPanel) _socialPanel->hide();
+}
+
+bool UIController::isNpcSocialVisible() const {
+    return _socialPanel && _socialPanel->isVisible();
+}
+
+void UIController::showDialogue(const std::string& npcName,
+                                const std::string& text,
+                                const std::vector<std::string>& options,
+                                std::function<void(int)> onOption,
+                                std::function<void()> onAdvance) {
+    if (!_dialogueUI) _dialogueUI = new DialogueUI(_scene);
+    _dialogueUI->show(npcName, text, options, std::move(onOption), std::move(onAdvance));
+}
+
+void UIController::hideDialogue() {
+    if (_dialogueUI) _dialogueUI->hide();
+}
+
+bool UIController::isDialogueVisible() const {
+    return _dialogueUI && _dialogueUI->isVisible();
+}
+
 void UIController::buildChestPanel() {
     if (!_chestPanel) _chestPanel = new ChestPanelUI(_scene, _inventory);
     _chestPanel->buildChestPanel();

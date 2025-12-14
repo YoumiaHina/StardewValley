@@ -21,6 +21,14 @@ bool TownScene::init() {
     _interactor.setNpcController(_npcController);
     _interactor.setUI(_uiController);
     _interactor.setInventory(_inventory);
+    auto mouseNpc = EventListenerMouse::create();
+    mouseNpc->onMouseDown = [this](EventMouse* e) {
+        if (!_npcController) return;
+        if (e->getMouseButton() != EventMouse::MouseButton::BUTTON_RIGHT) return;
+        _npcController->handleRightClick(e);
+    };
+    Director::getInstance()->getEventDispatcher()
+        ->addEventListenerWithSceneGraphPriority(mouseNpc, this);
     return true;
 }
 
