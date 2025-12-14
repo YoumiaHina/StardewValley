@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Game/Tool/Weapon.h"
+#include <vector>
+#include <utility>
 
 namespace Game {
 
@@ -13,6 +15,13 @@ public:
                     std::function<cocos2d::Vec2()> getPlayerPos,
                     std::function<cocos2d::Vec2()> getLastDir,
                     Controllers::UIController* ui) override;
+
+    static int baseDamage();
+    static void buildHitTiles(Controllers::IMapController* map,
+                              const cocos2d::Vec2& playerPos,
+                              const cocos2d::Vec2& lastDir,
+                              std::vector<std::pair<int,int>>& outTiles,
+                              bool includeSelf);
 };
 
 }

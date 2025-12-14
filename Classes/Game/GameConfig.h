@@ -26,7 +26,7 @@ namespace GameConfig {
     static const float DROP_PICK_RADIUS = 20.0f;  // 玩家拾取距离阈值
 
     // 能量系统（基础与消耗/回复）
-    static const int ENERGY_MAX = 100;
+    static const int ENERGY_MAX = 1000;
     static const int ENERGY_COST_AXE = 8;
     static const int ENERGY_COST_PICKAXE = 8;
     static const int ENERGY_COST_HOE = 4;
@@ -56,7 +56,7 @@ namespace GameConfig {
     static const int FARM_LAKE_TILE_COL = 10; // 第 10 列
 
     // 水壶机制
-    static const int WATERING_CAN_MAX = 40;          // 水壶最大水量（格数/次）
+    static const int WATERING_CAN_MAX = 20;          // 水壶最大水量（格数/次）
     static const int WATERING_CAN_CONSUME = 1;       // 每次浇水消耗的水量
     static const float LAKE_REFILL_RADIUS_TILES = 1.5f; // 到湖边补水的判定半径（单位：格）
 }

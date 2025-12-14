@@ -2,6 +2,7 @@
 #include "cocos2d.h"
 #include "Game/WorldState.h"
 #include "Game/Tool/ToolBase.h"
+#include "Game/Tool/Sword.h"
 
 using namespace cocos2d;
 
@@ -14,27 +15,12 @@ void MineCombatController::onMouseDown(EventMouse* e) {
     bool swordSelected = inv && inv->selectedTool() && inv->selectedTool()->kind() == Game::ToolKind::Sword;
     int baseDamage = 0;
     if (swordSelected) {
-        baseDamage = 8;
+        baseDamage = Game::Sword::baseDamage();
     }
     if (swordSelected && _monsters && _map) {
         Vec2 dir = _getLastDir ? _getLastDir() : Vec2(0, -1);
-        if (dir.lengthSquared() < 0.001f) dir = Vec2(0, -1);
-        int pc = 0, pr = 0;
-        _map->worldToTileIndex(pos, pc, pr);
-        int dc = 0, dr = 0;
-        if (std::abs(dir.x) > std::abs(dir.y)) {
-            dc = (dir.x > 0) ? 1 : -1;
-        } else {
-            dr = (dir.y > 0) ? 1 : -1;
-        }
         std::vector<std::pair<int,int>> tiles;
-        for (int k = 1; k <= 3; ++k) {
-            int tc = pc + dc * k;
-            int tr = pr + dr * k;
-            if (_map->inBounds(tc, tr)) {
-                tiles.emplace_back(tc, tr);
-            }
-        }
+        Game::Sword::buildHitTiles(_map, pos, dir, tiles, true);
         if (!tiles.empty()) {
             _monsters->applyAreaDamage(tiles, baseDamage);
         }

@@ -63,8 +63,8 @@ struct WorldState {
     long long gold = 500;
 
     // 生命值系统（矿洞 HUD 专属显示）
-    int hp = 100;
-    int maxHp = 100;
+    int hp = 1000;
+    int maxHp = 1000;
 
     // 入口赠剑标记：仅在第一次进入矿洞0层时赠送一次
     bool grantedSwordAtEntrance = false;
