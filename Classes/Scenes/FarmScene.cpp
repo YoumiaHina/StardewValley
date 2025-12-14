@@ -30,12 +30,15 @@ Scene* FarmScene::createScene() { return FarmScene::create(); }
 bool FarmScene::init() {
     if (!initBase(/*worldScale*/3.0f, /*buildCraftPanel*/true, /*enableToolOnSpace*/false, /*enableToolOnLeftClick*/true)) return false;
     Managers::AudioManager::getInstance().playBackgroundFor(Managers::SceneZone::Farm);
-    _interactor = new Controllers::FarmInteractor(_inventory, _mapController, _uiController, _cropSystem,
+    _animalSystem = new Controllers::AnimalSystem(_mapController, _worldNode);
+    if (_stateController) {
+        _stateController->setAnimalSystem(_animalSystem);
+    }
+    _interactor = new Controllers::FarmInteractor(_inventory, _mapController, _uiController, _cropSystem, _animalSystem,
         [this]() -> Vec2 { return _player ? _player->getPosition() : Vec2(); },
         [this]() -> Vec2 { return _playerController ? _playerController->lastDir() : Vec2(0,-1); });
     _fishing = new Controllers::FishingController(_mapController, _inventory, _uiController, this, _worldNode);
     addUpdateCallback([this](float dt){ if (_fishing) _fishing->update(dt); });
-    _animalSystem = new Controllers::AnimalSystem(_mapController, _worldNode);
     addUpdateCallback([this](float dt){ if (_animalSystem) _animalSystem->update(dt); });
     if (_inventory && _fishing) {
         for (std::size_t i = 0; i < _inventory->size(); ++i) {

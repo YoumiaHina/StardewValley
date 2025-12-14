@@ -21,6 +21,8 @@ public:
     bool buyItem(Game::ItemType type);
     int getItemPrice(Game::ItemType type) const;
 
+    bool sellItem(Game::ItemType type, int qty);
+
 private:
     std::shared_ptr<Game::Inventory> _inventory;
 };

@@ -594,6 +594,29 @@ void FarmMapController::spawnDropAt(int c, int r, int itemType, int qty) {
     Game::globalState().farmDrops = _drops;
 }
 
+void FarmMapController::collectDropsNear(const cocos2d::Vec2& playerWorldPos, Game::Inventory* inv) {
+    if (!inv) return;
+    float radius = GameConfig::DROP_PICK_RADIUS;
+    float r2 = radius * radius;
+    std::vector<Game::Drop> kept;
+    for (auto& d : _drops) {
+        float dist2 = playerWorldPos.distanceSquared(d.pos);
+        if (dist2 <= r2) {
+            int leftover = inv->addItems(d.type, d.qty);
+            if (leftover > 0) {
+                Game::Drop nd = d;
+                nd.qty = leftover;
+                kept.push_back(nd);
+            }
+        } else {
+            kept.push_back(d);
+        }
+    }
+    _drops.swap(kept);
+    Game::globalState().farmDrops = _drops;
+    refreshDropsVisuals();
+}
+
  
 
 void FarmMapController::addActorToMap(cocos2d::Node* node, int /*zOrder*/) {

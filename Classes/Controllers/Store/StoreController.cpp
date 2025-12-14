@@ -46,4 +46,16 @@ int StoreController::getItemPrice(Game::ItemType type) const {
     return Game::itemPrice(type);
 }
 
+bool StoreController::sellItem(Game::ItemType type, int qty) {
+    if (qty <= 0) return false;
+    auto& ws = Game::globalState();
+    int price = getItemPrice(type);
+    if (price <= 0) return false;
+    if (!_inventory) return false;
+    bool removed = _inventory->removeItems(type, qty);
+    if (!removed) return false;
+    ws.gold += static_cast<long long>(price) * qty;
+    return true;
+}
+
 }

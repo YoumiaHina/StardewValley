@@ -7,6 +7,7 @@
 #include "Game/Crop.h"
 #include "Game/Item.h"
 #include "cocos2d.h"
+#include <random>
 
 using namespace cocos2d;
 
@@ -40,15 +41,30 @@ std::string Hoe::use(Controllers::IMapController* map,
         int idx = crop ? crop->findCropIndex(tc, tr) : -1;
         if (idx >= 0) {
             const auto& cp = crop->crops()[idx];
-            // 可收获由具体作物行为判定（成熟/倒数阶段等）
             bool canHarvest = crop->canHarvestAt(tc, tr);
             if (canHarvest) {
-                // 是否产出（如倒数阶段采摘）由行为判定
                 bool yields = crop->yieldsOnHarvestAt(tc, tr);
                 if (yields) {
-                    // 产物类型由作物类型映射决定
                     auto produce = Game::produceItemFor(cp.type);
-                    int leftover = ws.inventory ? ws.inventory->addItems(produce, 1) : 0;
+                    int minQty = 1;
+                    int maxQty = 1;
+                    if (produce == Game::ItemType::Parsnip) {
+                        minQty = 3;
+                        maxQty = 8;
+                    } else {
+                        minQty = 1;
+                        maxQty = 5;
+                    }
+                    int qty = minQty;
+                    if (maxQty > minQty) {
+                        std::uniform_int_distribution<int> dist(minQty, maxQty);
+                        static std::mt19937 eng{ std::random_device{}() };
+                        qty = dist(eng);
+                    }
+                    int leftover = 0;
+                    if (ws.inventory) {
+                        leftover = ws.inventory->addItems(produce, qty);
+                    }
                     if (leftover > 0) {
                         map->spawnDropAt(tc, tr, static_cast<int>(produce), leftover);
                         map->refreshDropsVisuals();

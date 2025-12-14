@@ -1,4 +1,5 @@
 #include "Controllers/Systems/GameStateController.h"
+#include "Controllers/Systems/AnimalSystem.h"
 #include "Game/GameConfig.h"
 #include "Game/WorldState.h"
 
@@ -27,9 +28,10 @@ void GameStateController::update(float dt) {
     if (timeChanged && _ui) _ui->refreshHUD();
     if (dayChanged && _map) {
         if (_crop) { _crop->advanceCropsDaily(_map); }
+        if (_animals) { _animals->advanceAnimalsDaily(); }
         _map->refreshMapVisuals();
         _map->refreshCropsVisuals();
     }
 }
-// namespace Controllers
+
 }

@@ -13,6 +13,10 @@ public:
 
     void update(float dt);
 
+    void advanceAnimalsDaily();
+
+    bool tryFeedAnimal(const cocos2d::Vec2& playerPos, Game::ItemType feedType, int& consumedQty);
+
     void spawnAnimal(Game::AnimalType type, const cocos2d::Vec2& pos);
 
 private:
@@ -30,4 +34,3 @@ private:
 };
 
 }
-

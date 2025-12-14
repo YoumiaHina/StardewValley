@@ -14,6 +14,7 @@
 #include "Game/GameConfig.h"
 #include "Game/Crop.h"
 #include "Game/Tree.h"
+#include "Game/Animal.h"
 
 namespace Game {
 
@@ -36,6 +37,8 @@ struct WorldState {
     std::vector<Crop> farmCrops;
 
     std::vector<TreePos> farmTrees;
+
+    std::vector<Animal> farmAnimals;
 
 
     // 室内箱子（房屋内放置的储物箱）

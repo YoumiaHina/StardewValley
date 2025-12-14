@@ -27,7 +27,10 @@ enum class ItemType {
     IronGrain   = 104,
     IronIngot   = 105,
     GoldGrain   = 106,
-    GoldIngot   = 107
+    GoldIngot   = 107,
+    Egg         = 200,
+    Milk        = 201,
+    Wool        = 202
 };
 
 // 英文名称（内部使用）
@@ -55,6 +58,9 @@ inline const char* itemName(ItemType t) {
         case ItemType::IronIngot:   return "Iron Ingot";
         case ItemType::GoldGrain:   return "Gold Grain";
         case ItemType::GoldIngot:   return "Gold Ingot";
+        case ItemType::Egg: return "Egg";
+        case ItemType::Milk: return "Milk";
+        case ItemType::Wool: return "Wool";
         default: return "Unknown";
     }
 }
@@ -84,6 +90,9 @@ inline const char* itemNameZH(ItemType t) {
         case ItemType::IronIngot:   return "铁锭";
         case ItemType::GoldGrain:   return "金矿粒";
         case ItemType::GoldIngot:   return "金锭";
+        case ItemType::Egg: return "鸡蛋";
+        case ItemType::Milk: return "牛奶";
+        case ItemType::Wool: return "羊毛";
         default: return "未知";
     }
 }
@@ -114,13 +123,16 @@ inline cocos2d::Color4F itemColor(ItemType t) {
         case ItemType::IronIngot:   return Color4F(0.70f, 0.70f, 0.75f, 1.0f);
         case ItemType::GoldGrain:   return Color4F(0.95f, 0.80f, 0.20f, 1.0f);
         case ItemType::GoldIngot:   return Color4F(0.98f, 0.85f, 0.25f, 1.0f);
+        case ItemType::Egg: return Color4F(0.98f, 0.98f, 0.90f, 1.0f);
+        case ItemType::Milk: return Color4F(0.95f, 0.95f, 0.85f, 1.0f);
+        case ItemType::Wool: return Color4F(0.90f, 0.90f, 0.95f, 1.0f);
         default: return Color4F(1,1,1,1);
     }
 }
 
 // 是否可食用（占位规则：纤维可食用，用于演示）
 inline bool itemEdible(ItemType t) {
-    return t == ItemType::Fiber || t == ItemType::Parsnip || t == ItemType::Blueberry || t == ItemType::Eggplant || t == ItemType::Corn || t == ItemType::Strawberry || t == ItemType::Fish;
+    return t == ItemType::Fiber || t == ItemType::Parsnip || t == ItemType::Blueberry || t == ItemType::Eggplant || t == ItemType::Corn || t == ItemType::Strawberry || t == ItemType::Fish || t == ItemType::Egg || t == ItemType::Milk;
 }
 
 inline int itemEnergyRestore(ItemType t) {
@@ -132,6 +144,8 @@ inline int itemEnergyRestore(ItemType t) {
         case ItemType::Corn: return 25;
         case ItemType::Strawberry: return 50;
         case ItemType::Fish: return 15;
+        case ItemType::Egg: return 15;
+        case ItemType::Milk: return 20;
         default: return 0;
     }
 }
@@ -152,6 +166,9 @@ inline int itemPrice(ItemType t) {
         case ItemType::IronIngot:   return 110;
         case ItemType::GoldGrain:   return 40;
         case ItemType::GoldIngot:   return 180;
+        case ItemType::Egg: return 50;
+        case ItemType::Milk: return 125;
+        case ItemType::Wool: return 340;
         // 种子本身也可以有售价，通常低于买入价，或者不可卖出。
         // 这里暂时定义种子售价为 0 或者一半？用户只说了买入25。
         // 假设卖出价格：

@@ -113,6 +113,8 @@ public:
     bool isFarm() const override { return true; }
     void setLastClickWorldPos(const cocos2d::Vec2& p) override { _lastClickWorldPos = p; _hasLastClick = true; }
     void clearLastClickWorldPos() override { _hasLastClick = false; }
+
+    void collectDropsNear(const cocos2d::Vec2& playerWorldPos, Game::Inventory* inv) override;
 };
 
 }
