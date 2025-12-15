@@ -1,6 +1,7 @@
 #pragma once
 
 #include "cocos2d.h"
+#include <string>
 
 namespace Game {
 
@@ -127,6 +128,25 @@ inline cocos2d::Color4F itemColor(ItemType t) {
         case ItemType::Milk: return Color4F(0.95f, 0.95f, 0.85f, 1.0f);
         case ItemType::Wool: return Color4F(0.90f, 0.90f, 0.95f, 1.0f);
         default: return Color4F(1,1,1,1);
+    }
+}
+
+inline std::string itemIconPath(ItemType t) {
+    switch (t) {
+        case ItemType::Parsnip: return "DropsAndInventory/Vegetable/Parsnip.png";
+        case ItemType::Blueberry: return "DropsAndInventory/Vegetable/Blueberry.png";
+        case ItemType::Eggplant: return "DropsAndInventory/Vegetable/Eggplant.png";
+        case ItemType::Corn: return "DropsAndInventory/Vegetable/Corn.png";
+        case ItemType::Strawberry: return "DropsAndInventory/Vegetable/Strawberry.png";
+        case ItemType::ParsnipSeed: return "DropsAndInventory/Seeds/Parsnip_Seeds.png";
+        case ItemType::BlueberrySeed: return "DropsAndInventory/Seeds/Blueberry_Seeds.png";
+        case ItemType::EggplantSeed: return "DropsAndInventory/Seeds/Eggplant_Seeds.png";
+        case ItemType::CornSeed: return "DropsAndInventory/Seeds/Corn_Seeds.png";
+        case ItemType::StrawberrySeed: return "DropsAndInventory/Seeds/Strawberry_Seeds.png";
+        case ItemType::Egg: return "DropsAndInventory/Animal_Products/Egg.png";
+        case ItemType::Milk: return "DropsAndInventory/Animal_Products/Milk.png";
+        case ItemType::Wool: return "DropsAndInventory/Animal_Products/Wool.png";
+        default: return std::string();
     }
 }
 

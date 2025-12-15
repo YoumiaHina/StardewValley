@@ -88,6 +88,7 @@ private:
     // Drops / Chests / Crops
     std::vector<Game::Drop> _drops;
     cocos2d::DrawNode* _dropsDraw = nullptr;
+    cocos2d::Node* _dropsRoot = nullptr;
     std::vector<Game::Chest> _chests;
     cocos2d::DrawNode* _chestDraw = nullptr;
     cocos2d::DrawNode* _cropsDraw = nullptr;

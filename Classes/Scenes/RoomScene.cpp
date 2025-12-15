@@ -24,7 +24,7 @@ Scene* RoomScene::createScene() { return RoomScene::create(); }
 bool RoomScene::init() {
     if (!initBase(/*worldScale*/3.0f, /*buildCraftPanel*/false, /*enableToolOnSpace*/false, /*enableToolOnLeftClick*/false)) return false;
     Managers::AudioManager::getInstance().playBackgroundFor(Managers::SceneZone::Room);
-    _interactor = new Controllers::RoomInteractor(_inventory, _mapController, _uiController, _cropSystem,
+    _interactor = new Controllers::RoomInteractor(_inventory, _mapController, _uiController, _cropSystem, _stateController,
         [this]() -> Vec2 { return _player ? _player->getPosition() : Vec2(); });
     return true;
 }

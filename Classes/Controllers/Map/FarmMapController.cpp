@@ -85,6 +85,12 @@ void FarmMapController::init() {
     } else {
         _worldNode->addChild(_dropsDraw, 1);
     }
+    _dropsRoot = Node::create();
+    if (_farmMap && _farmMap->getTMX()) {
+        _farmMap->getTMX()->addChild(_dropsRoot, 19);
+    } else {
+        _worldNode->addChild(_dropsRoot, 1);
+    }
     _chestDraw = DrawNode::create();
     _worldNode->addChild(_chestDraw, 1);
     _cropsDraw = DrawNode::create();
@@ -578,12 +584,38 @@ void FarmMapController::refreshCropsVisuals() {
 void FarmMapController::refreshDropsVisuals() {
     if (!_dropsDraw) return;
     _dropsDraw->clear();
+    if (_dropsRoot) {
+        _dropsRoot->removeAllChildren();
+    }
     for (const auto& d : _drops) {
         if (d.type == Game::ItemType::Wood) {
-            continue; // 砍树掉落的木材不再绘制棕色圆形
+            continue;
         }
-        _dropsDraw->drawSolidCircle(d.pos, GameConfig::DROP_DRAW_RADIUS, 0.0f, 12, Game::itemColor(d.type));
-        _dropsDraw->drawCircle(d.pos, GameConfig::DROP_DRAW_RADIUS, 0.0f, 12, false, Color4F(0,0,0,0.4f));
+        bool usedSprite = false;
+        if (_dropsRoot) {
+            std::string path = Game::itemIconPath(d.type);
+            if (!path.empty()) {
+                auto spr = Sprite::create(path);
+                if (spr && spr->getTexture()) {
+                    float radius = GameConfig::DROP_DRAW_RADIUS;
+                    auto cs = spr->getContentSize();
+                    if (cs.width > 0 && cs.height > 0) {
+                        float targetSize = radius * 2.0f;
+                        float sx = targetSize / cs.width;
+                        float sy = targetSize / cs.height;
+                        float scale = std::min(sx, sy);
+                        spr->setScale(scale);
+                    }
+                    spr->setPosition(d.pos);
+                    _dropsRoot->addChild(spr);
+                    usedSprite = true;
+                }
+            }
+        }
+        if (!usedSprite) {
+            _dropsDraw->drawSolidCircle(d.pos, GameConfig::DROP_DRAW_RADIUS, 0.0f, 12, Game::itemColor(d.type));
+            _dropsDraw->drawCircle(d.pos, GameConfig::DROP_DRAW_RADIUS, 0.0f, 12, false, Color4F(0,0,0,0.4f));
+        }
     }
 }
 

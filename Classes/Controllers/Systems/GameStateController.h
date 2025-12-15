@@ -17,6 +17,7 @@ public:
     : _map(map), _ui(ui), _crop(crop) {}
 
     void update(float dt);
+    void sleepToNextMorning();
 
 private:
     Controllers::IMapController* _map = nullptr;

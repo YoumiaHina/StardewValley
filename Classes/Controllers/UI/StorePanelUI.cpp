@@ -6,6 +6,7 @@ using namespace cocos2d;
 
 namespace Controllers {
 
+// 构建商店面板节点：背景、标题、关闭按钮与翻页按钮
 void StorePanelUI::buildStorePanel() {
     if (_panelNode) return;
     _panelNode = Node::create();
@@ -65,6 +66,7 @@ void StorePanelUI::buildStorePanel() {
     _panelNode->addChild(nextBtn);
 }
 
+// 刷新商店物品列表：根据分页在面板中绘制图标、名称、价格与购买/出售操作
 void StorePanelUI::refreshStorePanel() {
     if (!_listNode || !_storeController) return;
     _listNode->removeAllChildren();
@@ -76,6 +78,16 @@ void StorePanelUI::refreshStorePanel() {
             Game::ItemType::CornSeed,
             Game::ItemType::StrawberrySeed
         };
+        std::vector<Game::ItemType> produce = {
+            Game::ItemType::Parsnip,
+            Game::ItemType::Blueberry,
+            Game::ItemType::Eggplant,
+            Game::ItemType::Corn,
+            Game::ItemType::Strawberry,
+            Game::ItemType::Egg,
+            Game::ItemType::Milk,
+            Game::ItemType::Wool
+        };
         std::vector<Game::ItemType> minerals = {
             Game::ItemType::Coal,
             Game::ItemType::CopperGrain,
@@ -85,8 +97,9 @@ void StorePanelUI::refreshStorePanel() {
             Game::ItemType::GoldGrain,
             Game::ItemType::GoldIngot
         };
-        _items.reserve(seeds.size() + minerals.size());
+        _items.reserve(seeds.size() + produce.size() + minerals.size());
         _items.insert(_items.end(), seeds.begin(), seeds.end());
+        _items.insert(_items.end(), produce.begin(), produce.end());
         _items.insert(_items.end(), minerals.begin(), minerals.end());
     }
 
@@ -104,16 +117,18 @@ void StorePanelUI::refreshStorePanel() {
     for (int row = 0, i = startIdx; i < endIdx; ++i, ++row) {
         auto type = _items[i];
         float y = startY - row * gapY;
-        std::string iconPath;
-        switch (type) {
-            case Game::ItemType::Coal:         iconPath = "Mineral/Coal.png"; break;
-            case Game::ItemType::CopperGrain: iconPath = "Mineral/copperGrain.png"; break;
-            case Game::ItemType::CopperIngot: iconPath = "Mineral/copperIngot.png"; break;
-            case Game::ItemType::IronGrain:   iconPath = "Mineral/ironGrain.png"; break;
-            case Game::ItemType::IronIngot:   iconPath = "Mineral/ironIngot.png"; break;
-            case Game::ItemType::GoldGrain:   iconPath = "Mineral/goldGrain.png"; break;
-            case Game::ItemType::GoldIngot:   iconPath = "Mineral/goldIngot.png"; break;
-            default: break;
+        std::string iconPath = Game::itemIconPath(type);
+        if (iconPath.empty()) {
+            switch (type) {
+                case Game::ItemType::Coal:         iconPath = "Mineral/Coal.png"; break;
+                case Game::ItemType::CopperGrain: iconPath = "Mineral/copperGrain.png"; break;
+                case Game::ItemType::CopperIngot: iconPath = "Mineral/copperIngot.png"; break;
+                case Game::ItemType::IronGrain:   iconPath = "Mineral/ironGrain.png"; break;
+                case Game::ItemType::IronIngot:   iconPath = "Mineral/ironIngot.png"; break;
+                case Game::ItemType::GoldGrain:   iconPath = "Mineral/goldGrain.png"; break;
+                case Game::ItemType::GoldIngot:   iconPath = "Mineral/goldIngot.png"; break;
+                default: break;
+            }
         }
         if (!iconPath.empty()) {
             auto icon = Sprite::create();

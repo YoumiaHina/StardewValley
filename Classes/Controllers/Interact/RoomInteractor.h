@@ -13,6 +13,8 @@
 
 namespace Controllers {
 
+class GameStateController;
+
 class RoomInteractor {
 public:
     enum class SpaceAction { None, ExitHouse, Slept };
@@ -21,8 +23,9 @@ public:
                    Controllers::IMapController* map,
                    Controllers::UIController* ui,
                    Controllers::CropSystem* crop,
+                   Controllers::GameStateController* state,
                    std::function<cocos2d::Vec2()> getPlayerPos)
-    : _inventory(std::move(inventory)), _map(map), _ui(ui), _crop(crop), _getPlayerPos(std::move(getPlayerPos)) {}
+    : _inventory(std::move(inventory)), _map(map), _ui(ui), _crop(crop), _state(state), _getPlayerPos(std::move(getPlayerPos)) {}
 
     SpaceAction onSpacePressed();
 
@@ -31,6 +34,7 @@ private:
     Controllers::IMapController* _map = nullptr;
     Controllers::UIController* _ui = nullptr;
     Controllers::CropSystem* _crop = nullptr;
+    Controllers::GameStateController* _state = nullptr;
     std::function<cocos2d::Vec2()> _getPlayerPos;
 };
 

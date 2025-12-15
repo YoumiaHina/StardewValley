@@ -1,5 +1,6 @@
 #include "Controllers/Interact/RoomInteractor.h"
 #include "Controllers/Map/RoomMapController.h"
+#include "Controllers/Systems/GameStateController.h"
 #include "Game/WorldState.h"
 
 using namespace cocos2d;
@@ -18,13 +19,9 @@ RoomInteractor::SpaceAction RoomInteractor::onSpacePressed() {
 
     // 睡觉
     if (room->bedRect().containsPoint(p)) {
-        auto &ws = Game::globalState();
-        ws.energy = ws.maxEnergy;
-        ws.dayOfSeason += 1;
-        if (ws.dayOfSeason > 30) { ws.dayOfSeason = 1; ws.seasonIndex = (ws.seasonIndex + 1) % 4; }
-        ws.timeHour = 6; ws.timeMinute = 0; ws.timeAccum = 0.0f;
-        if (_crop) { _crop->advanceCropsDaily(_map); }
-        _ui->refreshHUD();
+        if (_state) {
+            _state->sleepToNextMorning();
+        }
         _ui->popTextAt(p, "New Day", Color3B::WHITE);
         return SpaceAction::Slept;
     }

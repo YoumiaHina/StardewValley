@@ -33,6 +33,7 @@ private:
     cocos2d::DrawNode* _hotbarHighlight = nullptr;
     std::vector<cocos2d::Label*> _hotbarLabels;
     std::vector<cocos2d::Sprite*> _hotbarIcons;
+    cocos2d::Label* _selectedHintLabel = nullptr;
     cocos2d::Sprite* _hotbarBgSprite = nullptr;
     std::string _inventoryBgPath;
     float _hotbarScale = 1.0f;

@@ -24,6 +24,8 @@ private:
         Game::Animal animal;
         cocos2d::Sprite* sprite = nullptr;
         cocos2d::Vec2 velocity;
+        cocos2d::Label* growthLabel = nullptr;
+        float idleTimer = 0.0f;
     };
 
     Controllers::IMapController* _map = nullptr;
@@ -31,6 +33,10 @@ private:
     std::vector<Instance> _animals;
 
     void ensureSprite(Instance& inst);
+    void updateGrowthLabel(Instance& inst);
 };
+
+// 离线每日推进：仅基于 WorldState，同步动物成长与产物到全局
+void advanceAnimalsDailyWorldOnly();
 
 }

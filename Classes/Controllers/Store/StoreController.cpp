@@ -4,6 +4,7 @@
 
 namespace Controllers {
 
+// 构造：持有共享背包指针，用于买入/卖出时直接修改玩家物品
 StoreController::StoreController(std::shared_ptr<Game::Inventory> inventory)
     : _inventory(inventory) {}
 
@@ -29,8 +30,8 @@ int StoreController::getSeedPrice(Game::ItemType seedType) const {
     return 25;
 }
 
+// 购买一般物品（矿物/农产品/动物产物等）：使用 Game::itemPrice 作为单价
 bool StoreController::buyItem(Game::ItemType type) {
-    // 非种子物品：使用物品自身价格；不消耗能量
     int price = getItemPrice(type);
     auto& ws = Game::globalState();
     if (ws.gold >= price) {

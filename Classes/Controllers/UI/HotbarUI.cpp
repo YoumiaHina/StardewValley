@@ -131,6 +131,16 @@ void HotbarUI::buildHotbar() {
         float adjustY = (cellHScaled - cellHBase) * 0.5f;
         _hotbarNode->setPosition(Vec2(origin.x + visibleSize.width / 2, baseY + adjustY));
     }
+
+    if (!_selectedHintLabel) {
+        _selectedHintLabel = Label::createWithTTF("", "fonts/arial.ttf", 18);
+        if (_selectedHintLabel) {
+            _selectedHintLabel->setAnchorPoint(Vec2(0.5f, 0.0f));
+            _selectedHintLabel->setColor(Color3B::WHITE);
+            _hotbarNode->addChild(_selectedHintLabel, 3);
+        }
+    }
+
     refreshHotbar();
 }
 
@@ -159,6 +169,10 @@ void HotbarUI::refreshHotbar() {
     _hotbarHighlight->drawLine(b, c, Color4F(1.f, 0.9f, 0.2f, 1.f));
     _hotbarHighlight->drawLine(c, d, Color4F(1.f, 0.9f, 0.2f, 1.f));
     _hotbarHighlight->drawLine(d, a, Color4F(1.f, 0.9f, 0.2f, 1.f));
+
+    std::string selectedHint;
+    float hintY = cellH * 0.5f + 10.0f;
+
     for (int i = 0; i < slots && i < static_cast<int>(_hotbarLabels.size()); ++i) {
         auto label = _hotbarLabels[i];
         auto icon = (i < static_cast<int>(_hotbarIcons.size())) ? _hotbarIcons[i] : nullptr;
@@ -215,31 +229,38 @@ void HotbarUI::refreshHotbar() {
         } else if (_inventory->isItem(i)) {
             auto st = _inventory->itemAt(i);
             std::string text = StringUtils::format("%s x%d", Game::itemName(st.type), st.quantity);
+            bool hasIconTexture = !Game::itemIconPath(st.type).empty();
             if (label) {
-                label->setString(text);
-                label->setPosition(Vec2(cx, 0));
-                label->setVisible(true);
-                if (st.type == Game::ItemType::Fish) {
-                    label->setColor(Color3B(64, 200, 255));
+                if (hasIconTexture) {
+                    label->setVisible(false);
                 } else {
-                    label->setColor(Color3B::WHITE);
+                    label->setString(text);
+                    label->setPosition(Vec2(cx, 0));
+                    label->setVisible(true);
+                    if (st.type == Game::ItemType::Fish) {
+                        label->setColor(Color3B(64, 200, 255));
+                    } else {
+                        label->setColor(Color3B::WHITE);
+                    }
                 }
             }
             if (icon) {
                 if (st.quantity > 0) {
-                    std::string path;
-                    if (st.type == Game::ItemType::Fish) {
-                        path = "fish/globefish.png";
-                    } else {
-                        switch (st.type) {
-                            case Game::ItemType::Coal:         path = "Mineral/Coal.png"; break;
-                            case Game::ItemType::CopperGrain: path = "Mineral/copperGrain.png"; break;
-                            case Game::ItemType::CopperIngot: path = "Mineral/copperIngot.png"; break;
-                            case Game::ItemType::IronGrain:   path = "Mineral/ironGrain.png"; break;
-                            case Game::ItemType::IronIngot:   path = "Mineral/ironIngot.png"; break;
-                            case Game::ItemType::GoldGrain:   path = "Mineral/goldGrain.png"; break;
-                            case Game::ItemType::GoldIngot:   path = "Mineral/goldIngot.png"; break;
-                            default: break;
+                    std::string path = Game::itemIconPath(st.type);
+                    if (path.empty()) {
+                        if (st.type == Game::ItemType::Fish) {
+                            path = "fish/globefish.png";
+                        } else {
+                            switch (st.type) {
+                                case Game::ItemType::Coal:         path = "Mineral/Coal.png"; break;
+                                case Game::ItemType::CopperGrain: path = "Mineral/copperGrain.png"; break;
+                                case Game::ItemType::CopperIngot: path = "Mineral/copperIngot.png"; break;
+                                case Game::ItemType::IronGrain:   path = "Mineral/ironGrain.png"; break;
+                                case Game::ItemType::IronIngot:   path = "Mineral/ironIngot.png"; break;
+                                case Game::ItemType::GoldGrain:   path = "Mineral/goldGrain.png"; break;
+                                case Game::ItemType::GoldIngot:   path = "Mineral/goldIngot.png"; break;
+                                default: break;
+                            }
                         }
                     }
                     if (!path.empty()) {
@@ -264,6 +285,10 @@ void HotbarUI::refreshHotbar() {
                     icon->setVisible(false);
                 }
             }
+
+            if (i == sel) {
+                selectedHint = StringUtils::format("%s x%d", Game::itemName(st.type), st.quantity);
+            }
         } else {
             if (label) {
                 label->setString("-");
@@ -272,6 +297,16 @@ void HotbarUI::refreshHotbar() {
                 label->setColor(Color3B::WHITE);
             }
             if (icon) icon->setVisible(false);
+        }
+    }
+
+    if (_selectedHintLabel) {
+        if (!selectedHint.empty()) {
+            _selectedHintLabel->setString(selectedHint);
+            _selectedHintLabel->setPosition(Vec2(0.0f, hintY));
+            _selectedHintLabel->setVisible(true);
+        } else {
+            _selectedHintLabel->setVisible(false);
         }
     }
 }

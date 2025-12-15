@@ -34,4 +34,22 @@ void GameStateController::update(float dt) {
     }
 }
 
+void GameStateController::sleepToNextMorning() {
+    auto &ws = Game::globalState();
+    ws.energy = ws.maxEnergy;
+    ws.dayOfSeason += 1;
+    if (ws.dayOfSeason > 30) {
+        ws.dayOfSeason = 1;
+        ws.seasonIndex = (ws.seasonIndex + 1) % 4;
+    }
+    ws.timeHour = 6;
+    ws.timeMinute = 0;
+    ws.timeAccum = 0.0f;
+    if (_crop) {
+        _crop->advanceCropsDaily(nullptr);
+    }
+    advanceAnimalsDailyWorldOnly();
+    if (_ui) _ui->refreshHUD();
+}
+
 }
