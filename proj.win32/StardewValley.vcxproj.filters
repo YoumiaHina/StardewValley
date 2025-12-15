@@ -346,6 +346,9 @@
     <ClCompile Include="..\Classes\Controllers\UI\NpcSocialPanelUI.cpp">
       <Filter>Classes\Controllers\UI</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\Game\Chest.cpp">
+      <Filter>Classes\Game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <!-- Header Files -->

@@ -56,21 +56,26 @@ bool UIController::handleHotbarAtPoint(const Vec2& screenPoint) { return _hotbar
 
 void UIController::handleHotbarScroll(float dy) { if (_hotbar) _hotbar->handleHotbarScroll(dy); }
 
-bool UIController::handleChestRightClick(EventMouse* e, const std::vector<Game::Chest>& chests) {
+bool UIController::handleChestRightClick(EventMouse* e, std::vector<Game::Chest>& chests) {
     if (e->getMouseButton() != EventMouse::MouseButton::BUTTON_RIGHT) return false;
     if (chests.empty()) return false;
-    // 打开最近箱子的面板（若靠近）
-    // 场景应预先根据地图检测靠近箱子；这里简化直接打开最近者
-    // 查找最近的箱子
     Vec2 p = e->getLocation();
-    int idx = -1; float best = 1e9f;
+    int idx = -1;
+    float best = 1e9f;
     for (int i=0;i<(int)chests.size();++i) {
-        float d = p.distance(chests[i].pos);
-        if (d < best) { best = d; idx = i; }
+        Vec2 center = chests[i].pos;
+        Rect clickRect = Game::chestRect(chests[i]);
+        if (clickRect.containsPoint(p)) {
+            float d = p.distance(center);
+            if (d < best) {
+                best = d;
+                idx = i;
+            }
+        }
     }
     if (idx >= 0) {
         buildChestPanel();
-        refreshChestPanel(chests[idx]);
+        refreshChestPanel(&chests[idx]);
         toggleChestPanel(true);
         return true;
     }
@@ -152,9 +157,15 @@ void UIController::buildChestPanel() {
     _chestPanel->buildChestPanel();
 }
 
-void UIController::refreshChestPanel(const Game::Chest& chest) { if (_chestPanel) _chestPanel->refreshChestPanel(chest); }
+void UIController::refreshChestPanel(Game::Chest* chest) {
+    if (_chestPanel) _chestPanel->refreshChestPanel(chest);
+}
 
 void UIController::toggleChestPanel(bool visible) { if (_chestPanel) _chestPanel->toggleChestPanel(visible); }
+
+bool UIController::isChestPanelVisible() const {
+    return _chestPanel && _chestPanel->isVisible();
+}
 
 void UIController::buildCraftPanel() { if (!_craftPanel) _craftPanel = new CraftPanelUI(_scene); _craftPanel->buildCraftPanel(); }
 

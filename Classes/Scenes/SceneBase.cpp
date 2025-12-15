@@ -222,7 +222,8 @@ void SceneBase::update(float dt) {
         return;
     }
     _stateController->update(dt);
-    if (!_uiController || !_uiController->isNpcSocialVisible()) {
+    bool blockMove = _uiController && (_uiController->isNpcSocialVisible() || _uiController->isChestPanelVisible());
+    if (!blockMove) {
         _playerController->update(dt);
     }
     for (auto& cb : _extraUpdates) { cb(dt); }

@@ -92,7 +92,11 @@ void FarmMapController::init() {
         _worldNode->addChild(_dropsRoot, 1);
     }
     _chestDraw = DrawNode::create();
-    _worldNode->addChild(_chestDraw, 1);
+    if (_farmMap && _farmMap->getTMX()) {
+        _farmMap->getTMX()->addChild(_chestDraw, 19);
+    } else if (_worldNode) {
+        _worldNode->addChild(_chestDraw, 1);
+    }
     _cropsDraw = DrawNode::create();
     _worldNode->addChild(_cropsDraw, 1);
     _cropsRoot = Node::create();
@@ -124,6 +128,7 @@ void FarmMapController::init() {
     refreshMapVisuals();
     refreshDropsVisuals();
     refreshCropsVisuals();
+    refreshChestsVisuals();
 
     if (_treeSystem && _treeSystem->isEmpty()) {
         if (!ws.farmTrees.empty()) {
@@ -223,12 +228,20 @@ Vec2 FarmMapController::clampPosition(const Vec2& current, const Vec2& next, flo
             tryY.y = current.y;
         }
     }
+    for (const auto& ch : _chests) {
+        if (Game::chestRect(ch).containsPoint(Vec2(tryX.x, tryY.y))) {
+            return current;
+        }
+    }
     return Vec2(tryX.x, tryY.y);
 }
 
 bool FarmMapController::collides(const Vec2& pos, float radius) const {
     if (_farmMap && _farmMap->collides(pos, radius)) return true;
     if (_treeSystem && _treeSystem->collides(pos, radius, GameConfig::TILE_SIZE)) return true;
+    for (const auto& ch : _chests) {
+        if (Game::chestRect(ch).containsPoint(pos)) return true;
+    }
     return false;
 }
 
@@ -252,11 +265,7 @@ bool FarmMapController::isNearTownDoor(const Vec2& playerWorldPos) const {
 }
 
 bool FarmMapController::isNearChest(const Vec2& playerWorldPos) const {
-    float maxDist = GameConfig::TILE_SIZE * 0.8f;
-    for (const auto& ch : _chests) {
-        if (playerWorldPos.distance(ch.pos) <= maxDist) return true;
-    }
-    return false;
+    return Game::isNearAnyChest(playerWorldPos, _chests);
 }
 
 bool FarmMapController::isNearLake(const Vec2& playerWorldPos, float radius) const {
@@ -500,7 +509,37 @@ void FarmMapController::refreshMapVisuals() {
             _tileSprites.erase(k);
         }
     }
+    refreshChestsVisuals();
     
+}
+
+void FarmMapController::refreshChestsVisuals() {
+    if (!_chestDraw) return;
+    _chestDraw->clear();
+    _chestDraw->removeAllChildren();
+    for (const auto& ch : _chests) {
+        auto r = Game::chestRect(ch);
+        cocos2d::Vec2 center(r.getMidX(), r.getMidY());
+        auto spr = cocos2d::Sprite::create("Chest.png");
+        if (spr && spr->getTexture()) {
+            auto cs = spr->getContentSize();
+            if (cs.width > 0 && cs.height > 0) {
+                float sx = r.size.width / cs.width;
+                float sy = r.size.height / cs.height;
+                float scale = std::min(sx, sy);
+                spr->setScale(scale);
+            }
+            spr->setPosition(center);
+            _chestDraw->addChild(spr);
+        } else {
+            cocos2d::Vec2 a(r.getMinX(), r.getMinY());
+            cocos2d::Vec2 b(r.getMaxX(), r.getMinY());
+            cocos2d::Vec2 c(r.getMaxX(), r.getMaxY());
+            cocos2d::Vec2 d(r.getMinX(), r.getMaxY());
+            cocos2d::Vec2 v[4] = { a, b, c, d };
+            _chestDraw->drawSolidPoly(v, 4, cocos2d::Color4F(0.6f,0.4f,0.2f,0.9f));
+        }
+    }
 }
 
 void FarmMapController::refreshCropsVisuals() {
