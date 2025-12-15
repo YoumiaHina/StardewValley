@@ -61,6 +61,8 @@ public:
     ToolBase* selectedTool() { return toolAtMutable(static_cast<std::size_t>(_selected)); }
     SlotKind selectedKind() const { return _slots.empty() ? SlotKind::Empty : _slots[_selected].kind; }
     Slot const& selectedSlot() const { return _slots[_selected]; }
+    bool addOneItemToSlot(std::size_t index, ItemType type);
+    bool removeOneItemFromSlot(std::size_t index);
 
 private:
     std::vector<Slot> _slots;

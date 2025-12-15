@@ -86,7 +86,7 @@ Vec2 RoomMapController::clampPosition(const Vec2& current, const Vec2& next, flo
         }
     }
     for (const auto& ch : _chests) {
-        if (Game::chestRect(ch).containsPoint(Vec2(candidate.x, candidate.y))) {
+        if (Game::chestCollisionRect(ch).containsPoint(Vec2(candidate.x, candidate.y))) {
             return current;
         }
     }
@@ -115,7 +115,7 @@ void RoomMapController::addActorToMap(cocos2d::Node* node, int zOrder) {
 bool RoomMapController::collides(const Vec2& pos, float radius) const {
     if (_roomMap && _roomMap->collides(pos, radius)) return true;
     for (const auto& ch : _chests) {
-        if (Game::chestRect(ch).containsPoint(pos)) return true;
+        if (Game::chestCollisionRect(ch).containsPoint(pos)) return true;
     }
     return false;
 }

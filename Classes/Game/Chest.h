@@ -29,6 +29,7 @@ struct Chest {
 };
 
 cocos2d::Rect chestRect(const Chest& chest);
+cocos2d::Rect chestCollisionRect(const Chest& chest);
 bool isNearAnyChest(const cocos2d::Vec2& playerWorldPos, const std::vector<Chest>& chests);
 
 bool openChestNearPlayer(Controllers::IMapController* map,

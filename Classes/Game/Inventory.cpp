@@ -120,6 +120,35 @@ bool Inventory::consumeSelectedItem(int qty) {
     return consume > 0;
 }
 
+bool Inventory::addOneItemToSlot(std::size_t index, ItemType type) {
+    if (index >= _slots.size()) return false;
+    auto& s = _slots[index];
+    if (s.kind == SlotKind::Empty) {
+        s.kind = SlotKind::Item;
+        s.itemType = type;
+        s.itemQty = 1;
+        return true;
+    }
+    if (s.kind == SlotKind::Item && s.itemType == type && s.itemQty < ItemStack::MAX_STACK) {
+        s.itemQty += 1;
+        return true;
+    }
+    return false;
+}
+
+bool Inventory::removeOneItemFromSlot(std::size_t index) {
+    if (index >= _slots.size()) return false;
+    auto& s = _slots[index];
+    if (s.kind != SlotKind::Item || s.itemQty <= 0) return false;
+    s.itemQty -= 1;
+    if (s.itemQty <= 0) {
+        s.kind = SlotKind::Empty;
+        s.itemType = ItemType::Wood;
+        s.itemQty = 0;
+    }
+    return true;
+}
+
 void Inventory::selectIndex(int index) {
     if (_slots.empty()) { _selected = 0; return; }
     if (index < 0) index = 0;

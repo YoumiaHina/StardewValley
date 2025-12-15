@@ -75,6 +75,7 @@ void SceneBase::registerCommonInputHandlers(bool enableToolOnSpace, bool enableT
     // 键盘
     auto kb = EventListenerKeyboard::create();
     kb->onKeyPressed = [this, enableToolOnSpace](EventKeyboard::KeyCode code, Event*) {
+        bool chestOpen = _uiController && _uiController->isChestPanelVisible();
         if (_uiController && _uiController->isNpcSocialVisible()) {
             return;
         }
@@ -91,18 +92,22 @@ void SceneBase::registerCommonInputHandlers(bool enableToolOnSpace, bool enableT
             case EventKeyboard::KeyCode::KEY_9: _uiController->selectHotbarIndex(8); break;
             case EventKeyboard::KeyCode::KEY_0: _uiController->selectHotbarIndex(9); break;
             case EventKeyboard::KeyCode::KEY_Z: {
+                if (chestOpen) break;
                 Game::Cheat::grantBasic(_inventory);
                 _uiController->refreshHotbar();
             } break;
             case EventKeyboard::KeyCode::KEY_F6: {
+                if (chestOpen) break;
                 Game::Cheat::grantProduce(_inventory, Game::CropType::Eggplant, 5);
                 _uiController->refreshHotbar();
                 if (_player) _uiController->popTextAt(_player->getPosition(), "Eggplant x5", Color3B::YELLOW);
             } break;
             case EventKeyboard::KeyCode::KEY_B: {
+                if (chestOpen) break;
                 _uiController->toggleStorePanel(true);
             } break;
             case EventKeyboard::KeyCode::KEY_X: {
+                if (chestOpen) break;
                 // 仅让当前目标格子的作物提升一个阶段
                 int tc = 0, tr = 0;
                 if (_player && _mapController) {
@@ -118,6 +123,7 @@ void SceneBase::registerCommonInputHandlers(bool enableToolOnSpace, bool enableT
                 }
             } break;
             case EventKeyboard::KeyCode::KEY_F: {
+                if (chestOpen) break;
                 auto &ws = Game::globalState();
                 if (_inventory && _inventory->selectedKind() == Game::SlotKind::Item) {
                     auto slot = _inventory->selectedSlot();
@@ -136,6 +142,7 @@ void SceneBase::registerCommonInputHandlers(bool enableToolOnSpace, bool enableT
                 }
             } break;
             case EventKeyboard::KeyCode::KEY_SPACE: {
+                if (chestOpen) break;
                 if (enableToolOnSpace) {
                     bool nearDoor = false;
                     if (_player && _mapController) {
@@ -171,10 +178,12 @@ void SceneBase::registerCommonInputHandlers(bool enableToolOnSpace, bool enableT
     // 鼠标
     auto mouse = EventListenerMouse::create();
     mouse->onMouseDown = [this, enableToolOnLeftClick](EventMouse* e){
+        bool chestOpen = _uiController && _uiController->isChestPanelVisible();
         if (_uiController && _uiController->isNpcSocialVisible()) {
             return;
         }
-        if (_uiController->handleHotbarMouseDown(e)) return;
+        if (_uiController && _uiController->handleHotbarMouseDown(e)) return;
+        if (chestOpen) return;
         if (_mapController && _player) {
             Vec2 clickScene = e->getLocation();
             auto parent = dynamic_cast<Node*>(_player)->getParent();

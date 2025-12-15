@@ -20,6 +20,16 @@ Rect chestRect(const Chest& chest) {
     return Rect(minX, minY, w, h);
 }
 
+Rect chestCollisionRect(const Chest& chest) {
+    float s = static_cast<float>(GameConfig::TILE_SIZE);
+    Vec2 center = chest.pos;
+    float w = s;
+    float h = s * 2.0f;
+    float minX = center.x - w * 0.5f;
+    float midY = center.y;
+    return Rect(minX, midY, w, h * 0.5f);
+}
+
 bool isNearAnyChest(const Vec2& playerWorldPos, const std::vector<Chest>& chests) {
     float s = static_cast<float>(GameConfig::TILE_SIZE);
     float margin = s * 0.4f;
@@ -157,36 +167,45 @@ void transferChestCell(Game::Chest& chest,
     }
     if (flatIndex >= static_cast<int>(chest.slots.size())) return;
     Slot& cs = chest.slots[static_cast<std::size_t>(flatIndex)];
+    int invIndex = inventory.selectedIndex();
+    if (invIndex < 0 || invIndex >= static_cast<int>(inventory.size())) return;
+    bool invIsItem = inventory.isItem(static_cast<std::size_t>(invIndex));
+    bool invEmpty = inventory.isEmpty(static_cast<std::size_t>(invIndex));
+    ItemStack invStack = inventory.itemAt(static_cast<std::size_t>(invIndex));
+    bool chestHasItem = (cs.kind == SlotKind::Item && cs.itemQty > 0);
 
-    if (cs.kind == SlotKind::Item && cs.itemQty > 0) {
+    // 1) 物品栏当前选中槽位里有物品时：执行「物品栏 → 箱子」
+    if (invIsItem && invStack.quantity > 0) {
+        if (chestHasItem && cs.itemType != invStack.type) return;
+        if (!chestHasItem) {
+            cs.kind = SlotKind::Item;
+            cs.itemType = invStack.type;
+            cs.itemQty = 0;
+            chestHasItem = true;
+        }
+        if (cs.itemQty >= ItemStack::MAX_STACK) return;
+        bool ok = inventory.consumeSelectedItem(1);
+        if (!ok) return;
+        cs.itemQty += 1;
+    } else {
+        // 2) 物品栏当前选中槽位为空（或非物品）时：执行「箱子 → 物品栏」
+        if (!chestHasItem) return;
         ItemType type = cs.itemType;
-        int qty = cs.itemQty;
-        int remaining = inventory.addItems(type, qty);
-        int moved = qty - remaining;
-        if (moved <= 0) return;
-        cs.itemQty -= moved;
+        bool canReceive = false;
+        if (invEmpty) {
+            canReceive = true;
+        } else if (invIsItem && invStack.type == type && invStack.quantity < ItemStack::MAX_STACK) {
+            canReceive = true;
+        }
+        if (!canReceive) return;
+        bool okAdd = inventory.addOneItemToSlot(static_cast<std::size_t>(invIndex), type);
+        if (!okAdd) return;
+        if (cs.itemQty <= 0) return;
+        cs.itemQty -= 1;
         if (cs.itemQty <= 0) {
             cs.kind = SlotKind::Empty;
             cs.itemQty = 0;
         }
-    } else {
-        if (inventory.selectedKind() != SlotKind::Item) return;
-        auto const& sel = inventory.selectedSlot();
-        if (sel.itemQty <= 0) return;
-        ItemType type = sel.itemType;
-        int qty = sel.itemQty;
-
-        if (cs.kind == SlotKind::Empty) {
-            cs.kind = SlotKind::Item;
-            cs.itemType = type;
-            cs.itemQty = 0;
-        } else if (!(cs.kind == SlotKind::Item && cs.itemType == type)) {
-            return;
-        }
-
-        bool ok = inventory.consumeSelectedItem(qty);
-        if (!ok) return;
-        cs.itemQty += qty;
     }
 
     auto& ws = Game::globalState();

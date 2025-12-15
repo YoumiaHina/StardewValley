@@ -229,7 +229,7 @@ Vec2 FarmMapController::clampPosition(const Vec2& current, const Vec2& next, flo
         }
     }
     for (const auto& ch : _chests) {
-        if (Game::chestRect(ch).containsPoint(Vec2(tryX.x, tryY.y))) {
+        if (Game::chestCollisionRect(ch).containsPoint(Vec2(tryX.x, tryY.y))) {
             return current;
         }
     }
@@ -240,7 +240,7 @@ bool FarmMapController::collides(const Vec2& pos, float radius) const {
     if (_farmMap && _farmMap->collides(pos, radius)) return true;
     if (_treeSystem && _treeSystem->collides(pos, radius, GameConfig::TILE_SIZE)) return true;
     for (const auto& ch : _chests) {
-        if (Game::chestRect(ch).containsPoint(pos)) return true;
+        if (Game::chestCollisionRect(ch).containsPoint(pos)) return true;
     }
     return false;
 }

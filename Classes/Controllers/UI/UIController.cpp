@@ -50,9 +50,27 @@ void UIController::refreshHotbar() { if (_hotbar) _hotbar->refreshHotbar(); }
 
 void UIController::selectHotbarIndex(int idx) { if (_hotbar) _hotbar->selectHotbarIndex(idx); }
 
-bool UIController::handleHotbarMouseDown(EventMouse* e) { return _hotbar ? _hotbar->handleHotbarMouseDown(e) : false; }
+bool UIController::handleHotbarMouseDown(EventMouse* e) {
+    if (!_hotbar || !_inventory) return false;
+    bool handled = _hotbar->handleHotbarMouseDown(e);
+    if (!handled) return false;
+    if (_chestPanel && _chestPanel->isVisible()) {
+        int idx = _inventory->selectedIndex();
+        _chestPanel->onInventorySlotClicked(idx);
+    }
+    return true;
+}
 
-bool UIController::handleHotbarAtPoint(const Vec2& screenPoint) { return _hotbar ? _hotbar->handleHotbarAtPoint(screenPoint) : false; }
+bool UIController::handleHotbarAtPoint(const Vec2& screenPoint) {
+    if (!_hotbar || !_inventory) return false;
+    bool handled = _hotbar->handleHotbarAtPoint(screenPoint);
+    if (!handled) return false;
+    if (_chestPanel && _chestPanel->isVisible()) {
+        int idx = _inventory->selectedIndex();
+        _chestPanel->onInventorySlotClicked(idx);
+    }
+    return true;
+}
 
 void UIController::handleHotbarScroll(float dy) { if (_hotbar) _hotbar->handleHotbarScroll(dy); }
 
@@ -153,7 +171,12 @@ bool UIController::isDialogueVisible() const {
 }
 
 void UIController::buildChestPanel() {
-    if (!_chestPanel) _chestPanel = new ChestPanelUI(_scene, _inventory);
+    if (!_chestPanel) {
+        _chestPanel = new ChestPanelUI(_scene, _inventory);
+        _chestPanel->setOnInventoryChanged([this](){
+            refreshHotbar();
+        });
+    }
     _chestPanel->buildChestPanel();
 }
 

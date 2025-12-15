@@ -28,6 +28,10 @@ void ChestPanelUI::refreshChestPanel(Game::Chest* chest) {
     _panelNode->removeAllChildren();
     _slotsRoot = nullptr;
     _highlightNode = nullptr;
+    _cellIcons.clear();
+    _cellCountLabels.clear();
+    _cellNameLabels.clear();
+    _selectedIndex = -1;
     auto visibleSize = Director::getInstance()->getVisibleSize();
     float panelW = visibleSize.width * 0.8f;
     float panelH = visibleSize.height * 0.5f;
@@ -109,15 +113,18 @@ void ChestPanelUI::refreshChestPanel(Game::Chest* chest) {
     _panelNode->addChild(_slotsRoot, 2);
     _highlightNode = DrawNode::create();
     _slotsRoot->addChild(_highlightNode, 11);
-    auto allSlotsDebug = DrawNode::create();
-    _slotsRoot->addChild(allSlotsDebug, 10);
+    int capacity = rows * cols;
+    _cellIcons.assign(capacity, nullptr);
+    _cellCountLabels.assign(capacity, nullptr);
+    _cellNameLabels.assign(capacity, nullptr);
+    float offsetYVisual = cellH * 2.0f;
     for (int r = 0; r < rows; ++r) {
         for (int c = 0; c < cols; ++c) {
             float cx = startX + c * cellW;
             float cy = firstRowY - r * rowGap;
             cocos2d::Rect cellRect(cx - cellW * 0.5f, cy - cellH * 0.5f, cellW, cellH);
             auto cellNode = Node::create();
-            cellNode->setPosition(Vec2(cx, cy));
+            cellNode->setPosition(Vec2(cx, cy + offsetYVisual));
             _slotsRoot->addChild(cellNode);
             int flatIndex = r * cols + c;
             auto icon = Sprite::create();
@@ -129,11 +136,22 @@ void ChestPanelUI::refreshChestPanel(Game::Chest* chest) {
             countLabel->setPosition(Vec2(cellW * 0.5f - 6.f, -cellH * 0.5f + 4.f));
             countLabel->setVisible(false);
             cellNode->addChild(countLabel);
+            auto nameLabel = Label::createWithTTF("", "fonts/arial.ttf", 14);
+            nameLabel->setAnchorPoint(Vec2(0.5f, 0.f));
+            nameLabel->setPosition(Vec2(0.f, -cellH * 0.5f + 20.f));
+            nameLabel->setVisible(false);
+            cellNode->addChild(nameLabel);
+            if (flatIndex >= 0 && flatIndex < capacity) {
+                _cellIcons[flatIndex] = icon;
+                _cellCountLabels[flatIndex] = countLabel;
+                _cellNameLabels[flatIndex] = nameLabel;
+            }
             Game::Chest* chestPtr = chest;
-            auto updateCell = [icon, countLabel, chestPtr, flatIndex, cellW, cellH]() {
+            auto updateCell = [icon, countLabel, nameLabel, chestPtr, flatIndex, cellW, cellH]() {
                 if (!chestPtr || flatIndex < 0 || flatIndex >= static_cast<int>(chestPtr->slots.size())) {
                     icon->setVisible(false);
                     countLabel->setVisible(false);
+                    nameLabel->setVisible(false);
                     return;
                 }
                 const auto& slot = chestPtr->slots[static_cast<std::size_t>(flatIndex)];
@@ -168,25 +186,16 @@ void ChestPanelUI::refreshChestPanel(Game::Chest* chest) {
                     }
                     countLabel->setString(StringUtils::format("%d", slot.itemQty));
                     countLabel->setVisible(true);
+                    std::string name = Game::itemName(slot.itemType);
+                    nameLabel->setString(name);
+                    nameLabel->setVisible(true);
                 } else {
                     icon->setVisible(false);
                     countLabel->setVisible(false);
+                    nameLabel->setVisible(false);
                 }
             };
             updateCell();
-            float offsetY = cellH * 2.0f;
-            float hwDebug = cellW * 0.5f;
-            float hhDebug = cellH * 0.5f;
-            float cyDebug = cy + offsetY;
-            Vec2 da(cx - hwDebug, cyDebug - hhDebug);
-            Vec2 db(cx + hwDebug, cyDebug - hhDebug);
-            Vec2 dc(cx + hwDebug, cyDebug + hhDebug);
-            Vec2 dd(cx - hwDebug, cyDebug + hhDebug);
-            Color4F dbgColor(1.f, 1.f, 1.f, 1.f);
-            allSlotsDebug->drawLine(da, db, dbgColor);
-            allSlotsDebug->drawLine(db, dc, dbgColor);
-            allSlotsDebug->drawLine(dc, dd, dbgColor);
-            allSlotsDebug->drawLine(dd, da, dbgColor);
         }
     }
     auto slotsListener = EventListenerTouchOneByOne::create();
@@ -231,6 +240,58 @@ void ChestPanelUI::refreshChestPanel(Game::Chest* chest) {
             if (hitIndex >= 0) break;
         }
         if (hitIndex < 0) return;
+        _selectedIndex = hitIndex;
+        Game::transferChestCell(*_currentChest, hitIndex, *_inventory);
+        if (hitIndex >= 0 && hitIndex < static_cast<int>(_cellIcons.size())) {
+            auto icon = _cellIcons[hitIndex];
+            auto countLabel = _cellCountLabels[hitIndex];
+            auto nameLabel = _cellNameLabels[hitIndex];
+            if (icon && countLabel && nameLabel) {
+                const auto& slot = _currentChest->slots[static_cast<std::size_t>(hitIndex)];
+                if (slot.kind == Game::SlotKind::Item && slot.itemQty > 0) {
+                    std::string path = Game::itemIconPath(slot.itemType);
+                    if (path.empty()) {
+                        switch (slot.itemType) {
+                            case Game::ItemType::Coal:         path = "Mineral/Coal.png"; break;
+                            case Game::ItemType::CopperGrain: path = "Mineral/copperGrain.png"; break;
+                            case Game::ItemType::CopperIngot: path = "Mineral/copperIngot.png"; break;
+                            case Game::ItemType::IronGrain:   path = "Mineral/ironGrain.png"; break;
+                            case Game::ItemType::IronIngot:   path = "Mineral/ironIngot.png"; break;
+                            case Game::ItemType::GoldGrain:   path = "Mineral/goldGrain.png"; break;
+                            case Game::ItemType::GoldIngot:   path = "Mineral/goldIngot.png"; break;
+                            default: break;
+                        }
+                    }
+                    if (!path.empty()) {
+                        icon->setTexture(path);
+                    }
+                    if (icon->getTexture()) {
+                        auto cs = icon->getContentSize();
+                        float targetW = cellW - 8.f;
+                        float targetH = cellH - 8.f;
+                        float sx = cs.width > 0 ? targetW / cs.width : 1.0f;
+                        float sy = cs.height > 0 ? targetH / cs.height : 1.0f;
+                        float s = std::min(sx, sy);
+                        icon->setScale(s);
+                        icon->setVisible(true);
+                    } else {
+                        icon->setVisible(false);
+                    }
+                    countLabel->setString(StringUtils::format("%d", slot.itemQty));
+                    countLabel->setVisible(true);
+                    std::string name = Game::itemName(slot.itemType);
+                    nameLabel->setString(name);
+                    nameLabel->setVisible(true);
+                } else {
+                    icon->setVisible(false);
+                    countLabel->setVisible(false);
+                    nameLabel->setVisible(false);
+                }
+            }
+        }
+        if (_onInventoryChanged) {
+            _onInventoryChanged();
+        }
         if (!_highlightNode && _slotsRoot) {
             _highlightNode = DrawNode::create();
             _slotsRoot->addChild(_highlightNode, 10);
@@ -250,6 +311,77 @@ void ChestPanelUI::refreshChestPanel(Game::Chest* chest) {
         _highlightNode->drawLine(d, a, color);
     };
     _panelNode->getEventDispatcher()->addEventListenerWithSceneGraphPriority(slotsListener, _slotsRoot);
+}
+
+void ChestPanelUI::setOnInventoryChanged(const std::function<void()>& cb) {
+    _onInventoryChanged = cb;
+}
+
+void ChestPanelUI::onInventorySlotClicked(int invIndex) {
+    if (!_currentChest || !_inventory) return;
+    if (_selectedIndex < 0) return;
+    if (invIndex < 0 || invIndex >= _inventory->size()) return;
+    if (_selectedIndex < 0 || _selectedIndex >= static_cast<int>(_currentChest->slots.size())) return;
+    auto& slotChest = _currentChest->slots[static_cast<std::size_t>(_selectedIndex)];
+    if (!(slotChest.kind == Game::SlotKind::Item && slotChest.itemQty > 0)) return;
+    Game::ItemType type = slotChest.itemType;
+    bool invEmpty = _inventory->isEmpty(static_cast<std::size_t>(invIndex));
+    bool invIsItem = _inventory->isItem(static_cast<std::size_t>(invIndex));
+    Game::ItemStack st = _inventory->itemAt(static_cast<std::size_t>(invIndex));
+    bool sameType = invIsItem && st.type == type;
+    bool canReceive = (invEmpty || sameType) && (!invIsItem || st.quantity < Game::ItemStack::MAX_STACK);
+    if (!canReceive) return;
+    bool okAdd = _inventory->addOneItemToSlot(static_cast<std::size_t>(invIndex), type);
+    if (!okAdd) return;
+    if (slotChest.itemQty <= 0) return;
+    slotChest.itemQty -= 1;
+    if (slotChest.itemQty <= 0) {
+        slotChest.kind = Game::SlotKind::Empty;
+        slotChest.itemQty = 0;
+    }
+    if (_selectedIndex >= 0 && _selectedIndex < static_cast<int>(_cellIcons.size())) {
+        auto icon = _cellIcons[_selectedIndex];
+        auto countLabel = _cellCountLabels[_selectedIndex];
+        auto nameLabel = _cellNameLabels[_selectedIndex];
+        if (icon && countLabel && nameLabel) {
+            const auto& slot = _currentChest->slots[static_cast<std::size_t>(_selectedIndex)];
+            if (slot.kind == Game::SlotKind::Item && slot.itemQty > 0) {
+                std::string path = Game::itemIconPath(slot.itemType);
+                if (path.empty()) {
+                    switch (slot.itemType) {
+                        case Game::ItemType::Coal:         path = "Mineral/Coal.png"; break;
+                        case Game::ItemType::CopperGrain: path = "Mineral/copperGrain.png"; break;
+                        case Game::ItemType::CopperIngot: path = "Mineral/copperIngot.png"; break;
+                        case Game::ItemType::IronGrain:   path = "Mineral/ironGrain.png"; break;
+                        case Game::ItemType::IronIngot:   path = "Mineral/ironIngot.png"; break;
+                        case Game::ItemType::GoldGrain:   path = "Mineral/goldGrain.png"; break;
+                        case Game::ItemType::GoldIngot:   path = "Mineral/goldIngot.png"; break;
+                        default: break;
+                    }
+                }
+                if (!path.empty()) {
+                    icon->setTexture(path);
+                }
+                if (icon->getTexture()) {
+                    icon->setVisible(true);
+                } else {
+                    icon->setVisible(false);
+                }
+                countLabel->setString(StringUtils::format("%d", slot.itemQty));
+                countLabel->setVisible(true);
+                std::string name = Game::itemName(slot.itemType);
+                nameLabel->setString(name);
+                nameLabel->setVisible(true);
+            } else {
+                icon->setVisible(false);
+                countLabel->setVisible(false);
+                nameLabel->setVisible(false);
+            }
+        }
+    }
+    if (_onInventoryChanged) {
+        _onInventoryChanged();
+    }
 }
 
 void ChestPanelUI::toggleChestPanel(bool show) {
