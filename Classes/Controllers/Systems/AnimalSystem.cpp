@@ -112,13 +112,13 @@ void AnimalSystem::ensureSprite(Instance& inst) {
         inst.sprite = sp;
     }
     if (inst.sprite && !inst.growthLabel) {
-        auto label = Label::createWithTTF("", "fonts/arial.ttf", 24);
+        auto label = Label::createWithTTF("", "fonts/arial.ttf", 12);
         if (!label) return;
         label->setColor(Color3B::BLACK);
         label->setAnchorPoint(Vec2(0.5f, 0.0f));
         float spriteScale = inst.sprite->getScale();
         if (spriteScale > 0.0f) {
-            label->setScale(1.0f / spriteScale);
+            label->setScale(0.6f / spriteScale);
         }
         inst.sprite->addChild(label, 1);
         inst.growthLabel = label;
@@ -145,7 +145,7 @@ void AnimalSystem::updateGrowthLabel(Instance& inst) {
     inst.growthLabel->setString(text);
     auto cs = inst.sprite->getContentSize();
     float h = cs.height * inst.sprite->getScaleY();
-    Vec2 pos(8.0f, h + 12.0f);
+    Vec2 pos(8.0f, h + 28.0f);
     inst.growthLabel->setPosition(pos);
 }
 
