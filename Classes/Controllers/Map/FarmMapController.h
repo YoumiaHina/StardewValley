@@ -116,6 +116,8 @@ public:
     void clearLastClickWorldPos() override { _hasLastClick = false; }
 
     void collectDropsNear(const cocos2d::Vec2& playerWorldPos, Game::Inventory* inv) override;
+    void refreshChestsVisuals();
+
 };
 
 }

@@ -48,9 +48,8 @@ public:
     void setInventoryBackground(const std::string& path);
 
 
-    // 事件转发：处理热键栏点击选择与右键打开箱子面板
     bool handleHotbarMouseDown(cocos2d::EventMouse* e);
-    bool handleChestRightClick(cocos2d::EventMouse* e, const std::vector<Game::Chest>& chests);
+    bool handleChestRightClick(cocos2d::EventMouse* e, std::vector<Game::Chest>& chests);
     bool handleHotbarAtPoint(const cocos2d::Vec2& screenPoint);
     void handleHotbarScroll(float dy);
     // 矿洞专属：在能量条正上方绘制血条（红色）。
@@ -81,10 +80,10 @@ public:
     void hideNpcSocial();
     bool isNpcSocialVisible() const;
 
-    // Chest 面板（简化为只显示/刷新列表）
     void buildChestPanel();
-    void refreshChestPanel(const Game::Chest& chest);
+    void refreshChestPanel(Game::Chest* chest);
     void toggleChestPanel(bool visible);
+    bool isChestPanelVisible() const;
 
     // Craft 面板（简化：显示按钮与可用状态）
     void buildCraftPanel();
