@@ -2,6 +2,8 @@
 #include "Scenes/FarmScene.h"
 #include "Game/Map/BeachMap.h"
 #include "Game/GameConfig.h"
+#include "Controllers/Systems/FishingController.h"
+#include "Game/Tool/FishingRod.h"
 
 using namespace cocos2d;
 using namespace Controllers;
@@ -14,6 +16,35 @@ bool BeachScene::init() {
     _interactor.setInventory(_inventory.get());
     _interactor.setUI(_uiController);
     _interactor.setGetPlayerPos([this]() { return _player ? _player->getPosition() : Vec2::ZERO; });
+    _fishing = new Controllers::FishingController(_mapController,
+                                                  _inventory,
+                                                  _uiController,
+                                                  this,
+                                                  _worldNode);
+    addUpdateCallback([this](float dt) {
+        if (_fishing) _fishing->update(dt);
+    });
+    if (_inventory && _fishing) {
+        for (std::size_t i = 0; i < _inventory->size(); ++i) {
+            auto tb = _inventory->toolAtMutable(i);
+            if (tb && tb->kind() == Game::ToolKind::FishingRod) {
+                auto rod = dynamic_cast<Game::FishingRod*>(tb);
+                if (rod) {
+                    rod->setFishingStarter(
+                        [this](const Vec2& pos) {
+                            if (_fishing) _fishing->startAt(pos);
+                        });
+                }
+                break;
+            }
+        }
+    }
+    if (_fishing && _playerController) {
+        _fishing->setMovementLocker(
+            [this](bool locked) {
+                if (_playerController) _playerController->setMovementLocked(locked);
+            });
+    }
     return true;
 }
 

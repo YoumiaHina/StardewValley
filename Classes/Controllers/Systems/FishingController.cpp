@@ -1,6 +1,7 @@
 #include "Controllers/Systems/FishingController.h"
 #include "Game/GameConfig.h"
 #include "Game/Item.h"
+#include "Game/WorldState.h"
 
 using namespace cocos2d;
 
@@ -10,8 +11,9 @@ void FishingController::buildOverlayAt(const Vec2& worldPos) {
     if (_overlay) destroyOverlay();
     if (!_scene) return;
     _overlay = Node::create();
-    Vec2 pos = worldPos; if (_worldNode) pos = _worldNode->convertToWorldSpace(worldPos);
-    _overlay->setPosition(pos + Vec2(140.0f, 40.0f));
+    Vec2 pos = worldPos;
+    if (_worldNode) pos = _worldNode->convertToWorldSpace(worldPos);
+    _overlay->setPosition(pos + Vec2(220.0f, 20.0f));
     _scene->addChild(_overlay, 5);
 
     // Expand catch bar vertical range by 3 tiles up and down (total +6 tiles)
@@ -81,25 +83,20 @@ void FishingController::destroyOverlay() {
 
 void FishingController::startAt(const Vec2& worldPos) {
     if (_active) return;
+    if (_cooldown > 0.0f) {
+        if (_ui) {
+            float s = _map ? _map->tileSize() : static_cast<float>(GameConfig::TILE_SIZE);
+            Vec2 origin = _map ? _map->getOrigin() : Vec2::ZERO;
+            Vec2 head = origin + worldPos + Vec2(0, s);
+            _ui->popTextAt(head, "Need a short break", Color3B::YELLOW);
+        }
+        return;
+    }
     float s = _map ? _map->tileSize() : static_cast<float>(GameConfig::TILE_SIZE);
     float radius = s * GameConfig::LAKE_REFILL_RADIUS_TILES;
     if (_map && !_map->isNearLake(worldPos, radius)) {
-        if (_ui) _ui->popTextAt(worldPos, "Need water", Color3B::RED);
         return;
     }
-    _active = true; _progress = 0.0f; _timeLeft = 12.0f; _barCatchPos = 80.0f; _barCatchVel = 0.0f; _fishPos = 140.0f; _fishVel = 0.0f; _hold = false;
-    buildOverlayAt(worldPos);
-    if (_overlay && _scene) {
-        auto vs = cocos2d::Director::getInstance()->getVisibleSize();
-        auto org = cocos2d::Director::getInstance()->getVisibleOrigin();
-        _overlay->setPosition(org + cocos2d::Vec2(vs.width * 0.5f, vs.height * 0.5f));
-    }
-    if (_setMovementLocked) { _setMovementLocked(true); }
-    if (_ui) _ui->popTextAt(worldPos, "Fishing...", Color3B::YELLOW);
-}
-
-void FishingController::startAnywhere(const Vec2& worldPos) {
-    if (_active) return;
     _active = true;
     _progress = 0.0f;
     _timeLeft = 12.0f;
@@ -112,13 +109,46 @@ void FishingController::startAnywhere(const Vec2& worldPos) {
     if (_overlay && _scene) {
         auto vs = cocos2d::Director::getInstance()->getVisibleSize();
         auto org = cocos2d::Director::getInstance()->getVisibleOrigin();
-        _overlay->setPosition(org + cocos2d::Vec2(vs.width * 0.5f, vs.height * 0.5f));
+        _overlay->setPosition(org + cocos2d::Vec2(vs.width * 0.68f, vs.height * 0.55f));
     }
     if (_setMovementLocked) { _setMovementLocked(true); }
-    if (_ui) _ui->popTextAt(worldPos, "Fishing...", Color3B::YELLOW);
+    Game::globalState().fishingActive = true;
+}
+
+void FishingController::startAnywhere(const Vec2& worldPos) {
+    if (_active) return;
+    if (_cooldown > 0.0f) {
+        if (_ui) {
+            float s = _map ? _map->tileSize() : static_cast<float>(GameConfig::TILE_SIZE);
+            Vec2 origin = _map ? _map->getOrigin() : Vec2::ZERO;
+            Vec2 head = origin + worldPos + Vec2(0, s);
+            _ui->popTextAt(head, "Need a short break", Color3B::YELLOW);
+        }
+        return;
+    }
+    _active = true;
+    _progress = 0.0f;
+    _timeLeft = 12.0f;
+    _barCatchPos = 80.0f;
+    _barCatchVel = 0.0f;
+    _fishPos = 140.0f;
+    _fishVel = 0.0f;
+    _hold = false;
+    buildOverlayAt(worldPos);
+    if (_overlay && _scene) {
+        auto vs = cocos2d::Director::getInstance()->getVisibleSize();
+        auto org = cocos2d::Director::getInstance()->getVisibleOrigin();
+        _overlay->setPosition(org + cocos2d::Vec2(vs.width * 0.68f, vs.height * 0.55f));
+    }
+    if (_setMovementLocked) { _setMovementLocked(true); }
+    Game::globalState().fishingActive = true;
 }
 
 void FishingController::update(float dt) {
+    if (_cooldown > 0.0f) {
+        _cooldown -= dt;
+        if (_cooldown < 0.0f) _cooldown = 0.0f;
+    }
     if (!_active) return;
     // physics for catch bar
     float accelUp = 240.0f; float gravity = 280.0f; float damping = 0.98f;
@@ -192,6 +222,8 @@ void FishingController::onSuccess(const Vec2& worldPos) {
     if (_inventory) {
         _inventory->addItems(Game::ItemType::Fish, 1);
     }
+    Game::globalState().fishingActive = false;
+    _cooldown = 2.0f;
     if (_ui) {
         _ui->refreshHotbar();
         _ui->popTextAt(worldPos, "Caught a fish!", Color3B::GREEN);
@@ -202,6 +234,8 @@ void FishingController::onFail(const Vec2& worldPos) {
     _active = false;
     destroyOverlay();
     if (_setMovementLocked) { _setMovementLocked(false); }
+    _cooldown = 2.0f;
+    Game::globalState().fishingActive = false;
     if (_ui) {
         _ui->popTextAt(worldPos, "Fish escaped", Color3B::RED);
     }
@@ -212,6 +246,8 @@ void FishingController::cancel() {
     _active = false;
     destroyOverlay();
     if (_setMovementLocked) { _setMovementLocked(false); }
+    _cooldown = 1.0f;
+    Game::globalState().fishingActive = false;
 }
 // namespace Controllers
 }

@@ -49,6 +49,8 @@ private:
     float _timeLeft = 12.0f; // seconds
     bool _hold = false; // input hold
 
+    float _cooldown = 0.0f;
+
     cocos2d::EventListenerKeyboard* _kb = nullptr;
     cocos2d::EventListenerMouse* _mouse = nullptr;
     std::function<void(bool)> _setMovementLocked;

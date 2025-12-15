@@ -21,9 +21,9 @@ std::string FishingRod::use(Controllers::IMapController* map,
                             std::function<Vec2()> /*getLastDir*/,
                             Controllers::UIController* ui) {
     Vec2 playerPos = getPlayerPos ? getPlayerPos() : Vec2();
-    float s = map->tileSize();
+    float s = map ? map->tileSize() : static_cast<float>(GameConfig::TILE_SIZE);
     float radius = s * GameConfig::LAKE_REFILL_RADIUS_TILES;
-    bool nearLake = map->isNearLake(playerPos, radius);
+    bool nearLake = map && map->isNearLake(playerPos, radius);
     std::string msg;
     if (nearLake) {
         msg = std::string("Fishing...");
@@ -32,7 +32,12 @@ std::string FishingRod::use(Controllers::IMapController* map,
         msg = std::string("Need water");
     }
     if (ui) {
-        ui->popTextAt(playerPos, msg, Color3B::YELLOW);
+        Vec2 headPos = playerPos;
+        if (map) {
+            Vec2 origin = map->getOrigin();
+            headPos = origin + playerPos + Vec2(0, s);
+        }
+        ui->popTextAt(headPos, msg, Color3B::YELLOW);
     }
     return msg;
 }

@@ -28,7 +28,7 @@ USING_NS_CC;
 Scene* FarmScene::createScene() { return FarmScene::create(); }
 
 bool FarmScene::init() {
-    if (!initBase(/*worldScale*/3.0f, /*buildCraftPanel*/true, /*enableToolOnSpace*/false, /*enableToolOnLeftClick*/true)) return false;
+    if (!initBase(/*worldScale*/3.0f, /*buildCraftPanel*/true, /*enableToolOnSpace*/true, /*enableToolOnLeftClick*/true)) return false;
     Managers::AudioManager::getInstance().playBackgroundFor(Managers::SceneZone::Farm);
     _animalSystem = new Controllers::AnimalSystem(_mapController, _worldNode);
     if (_stateController) {

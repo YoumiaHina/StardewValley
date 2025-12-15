@@ -45,7 +45,7 @@ void PromptUI::showFishPrompt(bool visible, const Vec2& worldPos, const std::str
     if (visible) {
         Vec2 p = worldPos;
         if (_worldNode) p = _worldNode->convertToWorldSpace(worldPos);
-        _fishPrompt->setPosition(p + Vec2(0, 26));
+        _fishPrompt->setPosition(p + Vec2(0, 42));
     }
 }
 

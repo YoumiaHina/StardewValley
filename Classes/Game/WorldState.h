@@ -85,6 +85,7 @@ struct WorldState {
     std::unordered_map<int, bool> npcRomanceUnlocked;
     std::unordered_map<int, int> npcLastGiftDay;
     std::unordered_map<int, std::vector<NpcQuest>> npcQuests;
+    bool fishingActive = false;
 };
 
 // 获取全局状态（惰性初始化由调用方保证）

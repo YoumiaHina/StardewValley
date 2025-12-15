@@ -237,7 +237,14 @@ void SceneBase::update(float dt) {
         _uiController->showChestPrompt(nearChest, p, "Right-click to Open / Space to Deposit");
         bool nearLake = _mapController->isNearLake(p, _mapController->tileSize() * (GameConfig::LAKE_REFILL_RADIUS_TILES + 0.5f));
         bool rodSelected = (_inventory && _inventory->selectedTool() && _inventory->selectedTool()->kind() == Game::ToolKind::FishingRod);
-        _uiController->showFishPrompt(nearLake && rodSelected, p, "Space/Left-click to Fish");
+        bool canShowFishPrompt = nearLake && rodSelected && !ws.fishingActive;
+        cocos2d::Vec2 fishPos = p;
+        auto parent = _player->getParent();
+        if (parent && _worldNode) {
+            cocos2d::Vec2 world = parent->convertToWorldSpace(p);
+            fishPos = _worldNode->convertToNodeSpace(world);
+        }
+        _uiController->showFishPrompt(canShowFishPrompt, fishPos, "Space/Left-click to Fish");
     }
 }
 

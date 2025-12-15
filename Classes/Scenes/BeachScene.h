@@ -3,6 +3,7 @@
 #include "Scenes/SceneBase.h"
 #include "Controllers/Map/BeachMapController.h"
 #include "Controllers/Interact/BeachInteractor.h"
+namespace Controllers { class FishingController; }
 
 class BeachScene : public SceneBase {
 public:
@@ -19,4 +20,5 @@ protected:
 private:
     Controllers::BeachMapController* _beachMap = nullptr;
     Controllers::BeachInteractor _interactor;
+    Controllers::FishingController* _fishing = nullptr;
 };
