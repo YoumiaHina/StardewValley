@@ -1,4 +1,5 @@
 #include "Controllers/Environment/MineralSystem.h"
+#include "Controllers/Map/MineMapController.h"
 #include "Game/GameConfig.h"
 #include "Game/Mineral.h"
 #include <random>
@@ -164,13 +165,13 @@ bool MineralSystem::hitNearestNode(std::vector<Game::MineralData>& nodes,
 }
 
 bool MineralSystem::spawnFromTile(int, int, const Vec2&,
-                                  Game::FarmMap*, int) {
+                                  Game::IMapBase*, int) {
     return false;
 }
 
 void MineralSystem::spawnRandom(int, int, int,
                                 const std::function<Vec2(int,int)>&,
-                                Game::FarmMap*, int,
+                                Game::IMapBase*, int,
                                 const std::function<bool(int,int)>&) {
 }
 

@@ -368,7 +368,7 @@ void MineMapController::loadEntrance() {
             for (int f : ws.abyssElevatorFloors) _elevatorFloors.insert(f);
         }
     }
-    _entrance = Game::MineMap::create("Maps/mine/mine_0.tmx");
+    _entrance = Game::MineMap::createEntrance();
     if (_entrance) {
         _floor = 0; // 标记为零层入口
         _entrance->setAnchorPoint(Vec2(0,0));
@@ -409,16 +409,7 @@ void MineMapController::loadEntrance() {
 void MineMapController::loadFloorTMX(int floorIndex) {
     if (!_worldNode) return;
     if (!_mapNode) { _mapNode = Node::create(); _worldNode->addChild(_mapNode, 0); }
-    std::string path;
-    if (floorIndex % 5 == 0) {
-        path = "Maps/mine/mine_bonusroom.tmx";
-    } else {
-        // 随机选择普通层地图
-        std::mt19937 rng{ std::random_device{}() };
-        std::uniform_int_distribution<int> dist(0,1);
-        path = dist(rng) == 0 ? "Maps/mine/mine_corridor.tmx" : "Maps/mine/mine_room.tmx";
-    }
-    _floorMap = Game::MineMap::create(path);
+    _floorMap = Game::MineMap::createFloor(floorIndex);
     if (_floorMap) {
         _floorMap->setAnchorPoint(Vec2(0,0));
         _floorMap->setPosition(Vec2(0,0));

@@ -12,6 +12,7 @@
 #include "Game/Map/MineMap.h"
 #include "Game/Drop.h"
 #include "Controllers/TileSelector.h"
+#include "Controllers/Environment/MineralSystem.h"
 
 namespace Controllers {
 
@@ -20,7 +21,10 @@ public:
     enum class Theme { Rock, Ice, Lava };
 
     MineMapController(cocos2d::Node* worldNode)
-    : _worldNode(worldNode) {}
+    : _worldNode(worldNode), _mineralSystem(this) {}
+
+    Controllers::MineralSystem* mineralSystem() { return &_mineralSystem; }
+    const Controllers::MineralSystem* mineralSystem() const { return &_mineralSystem; }
 
     // IMapController overrides
     cocos2d::Vec2 getPlayerPosition(const cocos2d::Vec2& playerMapLocalPos) const override;
@@ -103,6 +107,7 @@ private:
     Game::MineMap* _entrance = nullptr;
     Game::MineMap* _floorMap = nullptr;
     cocos2d::Node* _mapNode = nullptr;
+    Controllers::MineralSystem _mineralSystem;
     std::function<bool(const cocos2d::Vec2&, int)> _mineHit;
     std::vector<cocos2d::Rect> _dynamicColliders; // 采矿节点临时碰撞
     std::vector<cocos2d::Rect> _monsterColliders;

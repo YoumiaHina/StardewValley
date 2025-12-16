@@ -14,6 +14,8 @@ namespace Game {
 class MineMap : public MapBase {
 public:
     static MineMap* create(const std::string& tmxFile);
+    static MineMap* createEntrance();
+    static MineMap* createFloor(int floorIndex);
     bool initWithFile(const std::string& tmxFile);
 
     // Coordinate conversions
