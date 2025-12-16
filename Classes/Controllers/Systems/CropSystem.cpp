@@ -108,18 +108,35 @@ void CropSystem::advanceCropsDaily(IMapController* map) {
         }
 
         cp.wateredToday = false;
-
-        if (t == Game::TileType::Watered) {
-            if (map && map->isFarm()) {
-                map->setTile(cp.c, cp.r, Game::TileType::Tilled);
-            } else if (tileIdx >= 0) {
-                ws.farmTiles[tileIdx] = Game::TileType::Tilled;
-            }
-        }
         kept.push_back(cp);
     }
     _crops.swap(kept);
     syncSave();
+
+    if (map && map->isFarm()) {
+        if (cols > 0 && rows > 0) {
+            for (int r = 0; r < rows; ++r) {
+                for (int c = 0; c < cols; ++c) {
+                    if (!map->inBounds(c, r)) continue;
+                    auto t = map->getTile(c, r);
+                    if (t == Game::TileType::Watered) {
+                        map->setTile(c, r, Game::TileType::Tilled);
+                    }
+                }
+            }
+        }
+    } else if (canCheckTiles) {
+        for (int r = 0; r < rows; ++r) {
+            for (int c = 0; c < cols; ++c) {
+                int idx = r * cols + c;
+                if (idx >= 0 && idx < static_cast<int>(ws.farmTiles.size())) {
+                    if (ws.farmTiles[static_cast<std::size_t>(idx)] == Game::TileType::Watered) {
+                        ws.farmTiles[static_cast<std::size_t>(idx)] = Game::TileType::Tilled;
+                    }
+                }
+            }
+        }
+    }
 }
 
 // 收获：由行为决定是否移除作物（remove=true）
