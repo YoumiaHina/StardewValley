@@ -246,6 +246,14 @@ void FarmMapController::applyStaticNotSoilMask() {
     }
 }
 
+Vec2 FarmMapController::getPlayerPosition(const Vec2& playerMapLocalPos) const {
+    if (!_worldNode) return playerMapLocalPos;
+    Node* ref = _actorsRoot ? _actorsRoot : (_farmMap && _farmMap->getTMX() ? _farmMap->getTMX() : _worldNode);
+    if (!ref) return playerMapLocalPos;
+    Vec2 world = ref->convertToWorldSpace(playerMapLocalPos);
+    return _worldNode->convertToNodeSpace(world);
+}
+
 Size FarmMapController::getContentSize() const {
     if (_farmMap) return _farmMap->getContentSize();
     return Size(_cols * GameConfig::TILE_SIZE, _rows * GameConfig::TILE_SIZE);

@@ -81,7 +81,10 @@ bool placeChestCommon(const Vec2& center,
     if (isNearAnyChest(center, chs)) return false;
 
     if (chs.size() >= static_cast<std::size_t>(Chest::MAX_PER_AREA)) {
-        ui->popTextAt(center, "Too many chests", Color3B::RED);
+        Vec2 uiPos = center;
+        if (map) uiPos = map->getPlayerPosition(center);
+        else if (room) uiPos = room->getPlayerPosition(center);
+        ui->popTextAt(uiPos, "Too many chests", Color3B::RED);
         return false;
     }
 
@@ -104,7 +107,11 @@ bool placeChestCommon(const Vec2& center,
 
     inventory->removeItems(Game::ItemType::Chest, 1);
     ui->refreshHotbar();
-    ui->popTextAt(center, "Placed Chest", Color3B::YELLOW);
+
+    Vec2 uiPos = center;
+    if (map) uiPos = map->getPlayerPosition(center);
+    else if (room) uiPos = room->getPlayerPosition(center);
+    ui->popTextAt(uiPos, "Placed Chest", Color3B::YELLOW);
     return true;
 }
 

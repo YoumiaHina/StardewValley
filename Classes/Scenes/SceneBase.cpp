@@ -129,7 +129,7 @@ void SceneBase::registerCommonInputHandlers(bool enableToolOnSpace, bool enableT
                 if (chestOpen || storeOpen) break;
                 Game::Cheat::grantProduce(_inventory, Game::CropType::Eggplant, 5);
                 _uiController->refreshHotbar();
-                if (_player) _uiController->popTextAt(_player->getPosition(), "Eggplant x5", Color3B::YELLOW);
+                if (_player && _mapController) _uiController->popTextAt(_mapController->getPlayerPosition(_player->getPosition()), "Eggplant x5", Color3B::YELLOW);
             } break;
             case EventKeyboard::KeyCode::KEY_E: {
                 if (chestOpen || storeOpen) break;
@@ -148,7 +148,7 @@ void SceneBase::registerCommonInputHandlers(bool enableToolOnSpace, bool enableT
                 }
                 if (_uiController && _player) {
                     _mapController->refreshCropsVisuals();
-                    _uiController->popTextAt(_player->getPosition(), "Grow +1", Color3B::YELLOW);
+                    if (_mapController) _uiController->popTextAt(_mapController->getPlayerPosition(_player->getPosition()), "Grow +1", Color3B::YELLOW);
                 }
             } break;
             case EventKeyboard::KeyCode::KEY_F: {
@@ -165,7 +165,7 @@ void SceneBase::registerCommonInputHandlers(bool enableToolOnSpace, bool enableT
                             ws.hp = std::min(ws.maxHp, h);
                             _uiController->refreshHotbar();
                             _uiController->refreshHUD();
-                            if (_player) _uiController->popTextAt(_player->getPosition(), "Ate", Color3B::GREEN);
+                            if (_player && _mapController) _uiController->popTextAt(_mapController->getPlayerPosition(_player->getPosition()), "Ate", Color3B::GREEN);
                         }
                     }
                 }
@@ -281,17 +281,11 @@ void SceneBase::update(float dt) {
             _mapController->collectDropsNear(p, _inventory.get());
         }
         bool nearDoor = _mapController->isNearDoor(p);
-        _uiController->showDoorPrompt(nearDoor, p, doorPromptText());
+        _uiController->showDoorPrompt(nearDoor, _mapController->getPlayerPosition(p), doorPromptText());
         bool nearLake = _mapController->isNearLake(p, _mapController->tileSize() * (GameConfig::LAKE_REFILL_RADIUS_TILES + 0.5f));
         bool rodSelected = (_inventory && _inventory->selectedTool() && _inventory->selectedTool()->kind() == Game::ToolKind::FishingRod);
         bool canShowFishPrompt = nearLake && rodSelected && !ws.fishingActive;
-        cocos2d::Vec2 fishPos = p;
-        auto parent = _player->getParent();
-        if (parent && _worldNode) {
-            cocos2d::Vec2 world = parent->convertToWorldSpace(p);
-            fishPos = _worldNode->convertToNodeSpace(world);
-        }
-        _uiController->showFishPrompt(canShowFishPrompt, fishPos, "Space/Left-click to Fish");
+        _uiController->showFishPrompt(canShowFishPrompt, _mapController->getPlayerPosition(p), "Space/Left-click to Fish");
     }
 }
 

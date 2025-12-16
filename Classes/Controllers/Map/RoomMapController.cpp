@@ -71,6 +71,14 @@ void RoomMapController::init() {
     }
 }
 
+Vec2 RoomMapController::getPlayerPosition(const Vec2& playerMapLocalPos) const {
+    if (!_worldNode) return playerMapLocalPos;
+    Node* ref = (_roomMap && _roomMap->getTMX()) ? _roomMap->getTMX() : _worldNode;
+    if (!ref) return playerMapLocalPos;
+    Vec2 world = ref->convertToWorldSpace(playerMapLocalPos);
+    return _worldNode->convertToNodeSpace(world);
+}
+
 Size RoomMapController::getContentSize() const {
     if (_roomMap) return _roomMap->getContentSize();
     return Size(_roomRect.size.width, _roomRect.size.height);

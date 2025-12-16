@@ -21,7 +21,11 @@ std::string Axe::use(Controllers::IMapController* map,
     auto& ws = Game::globalState();
     int need = GameConfig::ENERGY_COST_AXE;
     if (ws.energy < need) {
-        if (getPlayerPos && ui) { ui->popTextAt(getPlayerPos(), std::string("Not enough energy"), Color3B::RED); }
+        if (getPlayerPos && ui) {
+            Vec2 p = getPlayerPos();
+            if (map) p = map->getPlayerPosition(p);
+            ui->popTextAt(p, std::string("Not enough energy"), Color3B::RED);
+        }
         return std::string("");
     }
     Vec2 playerPos = getPlayerPos ? getPlayerPos() : Vec2();
@@ -37,7 +41,7 @@ std::string Axe::use(Controllers::IMapController* map,
         ui->refreshHotbar();
         map->refreshMapVisuals();
         map->refreshDropsVisuals();
-        ui->popTextAt(playerPos, msg, Color3B::YELLOW);
+        ui->popTextAt(map ? map->getPlayerPosition(playerPos) : playerPos, msg, Color3B::YELLOW);
     }
     return msg;
 }

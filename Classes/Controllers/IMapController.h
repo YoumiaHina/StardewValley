@@ -16,6 +16,8 @@ class IMapController {
 public:
     virtual ~IMapController() = default;
 
+    virtual cocos2d::Vec2 getPlayerPosition(const cocos2d::Vec2& playerMapLocalPos) const = 0;
+
     // 地图尺寸与原点（用于相机计算）
     virtual cocos2d::Size getContentSize() const = 0;
     virtual cocos2d::Vec2 getOrigin() const = 0;

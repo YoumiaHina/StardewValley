@@ -33,6 +33,7 @@ public:
     void init();
 
     // IMapController overrides
+    cocos2d::Vec2 getPlayerPosition(const cocos2d::Vec2& playerMapLocalPos) const override;
     cocos2d::Size getContentSize() const override;
     cocos2d::Vec2 getOrigin() const override { return _mapOrigin; }
     cocos2d::Vec2 clampPosition(const cocos2d::Vec2& current,

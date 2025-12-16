@@ -7,6 +7,20 @@ using namespace cocos2d;
 
 namespace Controllers {
 
+Vec2 MineMapController::getPlayerPosition(const Vec2& playerMapLocalPos) const {
+    if (!_worldNode) return playerMapLocalPos;
+    Node* ref = nullptr;
+    if (_entrance) {
+        ref = _worldNode;
+    } else if (_floorMap && _floorMap->getTMX()) {
+        ref = _floorMap->getTMX();
+    } else {
+        ref = _worldNode;
+    }
+    Vec2 world = ref ? ref->convertToWorldSpace(playerMapLocalPos) : playerMapLocalPos;
+    return _worldNode->convertToNodeSpace(world);
+}
+
 cocos2d::Size MineMapController::getContentSize() const {
     if (_entrance) return _entrance->getContentSize();
     if (_floorMap) return _floorMap->getContentSize();
