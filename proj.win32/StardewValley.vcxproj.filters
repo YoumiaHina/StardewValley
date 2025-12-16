@@ -388,6 +388,9 @@
     <ClCompile Include="..\Classes\Game\Stair.cpp">
       <Filter>Classes\Game</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\Game\Drop.cpp">
+      <Filter>Classes\Game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <!-- Header Files -->

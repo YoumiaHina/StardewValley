@@ -129,8 +129,17 @@ void MineMiningController::generateNodesForFloor() {
     colliders.reserve(_nodes.size() + _stairs.size());
     float ts = static_cast<float>(GameConfig::TILE_SIZE);
     for (const auto& n : _nodes) {
-        float half = ts * 0.5f * n.mineral.sizeTiles;
-        Rect rc(n.mineral.pos.x - half, n.mineral.pos.y - half, ts * n.mineral.sizeTiles, ts * n.mineral.sizeTiles);
+        Vec2 footCenter = n.mineral.pos + Vec2(0, -ts * 0.5f);
+        if (n.mineral.sizeTiles >= 2) {
+            float w = 24.0f;
+            float h = 24.0f;
+            Rect rc(footCenter.x - w * 0.5f, footCenter.y, w, h);
+            colliders.push_back(rc);
+            continue;
+        }
+        float w = 12.0f;
+        float h = 12.0f;
+        Rect rc(footCenter.x - w * 0.5f, footCenter.y, w, h);
         colliders.push_back(rc);
     }
     for (const auto& s : _stairs) {
@@ -211,8 +220,17 @@ bool MineMiningController::hitNearestNode(const Vec2& worldPos, int power) {
         std::vector<Rect> colliders;
         colliders.reserve(_nodes.size() + _stairs.size());
         for (const auto& n2 : _nodes) {
-            float half2 = ts * 0.5f * n2.mineral.sizeTiles;
-            Rect rc2(n2.mineral.pos.x - half2, n2.mineral.pos.y - half2, ts * n2.mineral.sizeTiles, ts * n2.mineral.sizeTiles);
+            Vec2 footCenter2 = n2.mineral.pos + Vec2(0, -ts * 0.5f);
+            if (n2.mineral.sizeTiles >= 2) {
+                float w = 24.0f;
+                float h = 24.0f;
+                Rect rc2(footCenter2.x - w * 0.5f, footCenter2.y, w, h);
+                colliders.push_back(rc2);
+                continue;
+            }
+            float w = 12.0f;
+            float h = 12.0f;
+            Rect rc2(footCenter2.x - w * 0.5f, footCenter2.y, w, h);
             colliders.push_back(rc2);
         }
         for (const auto& s : _stairs) {

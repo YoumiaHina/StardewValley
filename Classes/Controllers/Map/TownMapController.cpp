@@ -181,7 +181,7 @@ void TownMapController::refreshDropsVisuals() {
             parent->addChild(_dropsRoot, 19);
         }
     }
-    DropHelper::renderDrops(_drops, _dropsRoot, _dropsDraw);
+    Game::Drop::renderDrops(_drops, _dropsRoot, _dropsDraw);
 }
 
 void TownMapController::spawnDropAt(int c, int r, int itemType, int qty) {
@@ -193,7 +193,7 @@ void TownMapController::spawnDropAt(int c, int r, int itemType, int qty) {
 
 void TownMapController::collectDropsNear(const cocos2d::Vec2& playerWorldPos, Game::Inventory* inv) {
     if (!inv) return;
-    DropHelper::collectDropsNear(playerWorldPos, _drops, inv);
+    Game::Drop::collectDropsNear(playerWorldPos, _drops, inv);
     refreshDropsVisuals();
 }
 

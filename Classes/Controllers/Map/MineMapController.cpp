@@ -7,6 +7,15 @@ using namespace cocos2d;
 
 namespace Controllers {
 
+static bool circleIntersectsRect(const Vec2& p, float radius, const Rect& rect) {
+    float r2 = radius * radius;
+    float cx = std::max(rect.getMinX(), std::min(p.x, rect.getMaxX()));
+    float cy = std::max(rect.getMinY(), std::min(p.y, rect.getMaxY()));
+    float dx = p.x - cx;
+    float dy = p.y - cy;
+    return dx * dx + dy * dy <= r2;
+}
+
 Vec2 MineMapController::getPlayerPosition(const Vec2& playerMapLocalPos) const {
     if (!_worldNode) return playerMapLocalPos;
     Node* ref = nullptr;
@@ -44,7 +53,7 @@ cocos2d::Vec2 MineMapController::clampPosition(const Vec2& current, const Vec2& 
         else if (_floorMap) base = _floorMap->collides(p, r);
         if (base) return true;
         for (const auto& rc : _dynamicColliders) {
-            if (rc.containsPoint(p)) return true;
+            if (circleIntersectsRect(p, r, rc)) return true;
         }
         return false;
     };
@@ -219,7 +228,7 @@ void MineMapController::refreshDropsVisuals() {
             parent->addChild(_dropsRoot, 19);
         }
     }
-    DropHelper::renderDrops(_drops, _dropsRoot, _dropsDraw);
+    Game::Drop::renderDrops(_drops, _dropsRoot, _dropsDraw);
 }
 
 void MineMapController::spawnDropAt(int c, int r, int itemType, int qty) {
@@ -230,7 +239,7 @@ void MineMapController::spawnDropAt(int c, int r, int itemType, int qty) {
 
 void MineMapController::collectDropsNear(const cocos2d::Vec2& playerWorldPos, Game::Inventory* inv) {
     if (!inv) return;
-    DropHelper::collectDropsNear(playerWorldPos, _drops, inv);
+    Game::Drop::collectDropsNear(playerWorldPos, _drops, inv);
     refreshDropsVisuals();
 }
 
@@ -478,8 +487,8 @@ bool MineMapController::collides(const Vec2& pos, float radius) const {
     if (_entrance) base = _entrance->collides(pos, radius);
     else if (_floorMap) base = _floorMap->collides(pos, radius);
     if (base) return true;
-    for (const auto& rc : _dynamicColliders) { if (rc.containsPoint(pos)) return true; }
-    for (const auto& rc : _monsterColliders) { if (rc.containsPoint(pos)) return true; }
+    for (const auto& rc : _dynamicColliders) { if (circleIntersectsRect(pos, radius, rc)) return true; }
+    for (const auto& rc : _monsterColliders) { if (circleIntersectsRect(pos, radius, rc)) return true; }
     return false;
 }
 
@@ -488,7 +497,7 @@ bool MineMapController::collidesWithoutMonsters(const Vec2& pos, float radius) c
     if (_entrance) base = _entrance->collides(pos, radius);
     else if (_floorMap) base = _floorMap->collides(pos, radius);
     if (base) return true;
-    for (const auto& rc : _dynamicColliders) { if (rc.containsPoint(pos)) return true; }
+    for (const auto& rc : _dynamicColliders) { if (circleIntersectsRect(pos, radius, rc)) return true; }
     return false;
 }
 // namespace Controllers

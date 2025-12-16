@@ -1,4 +1,5 @@
 #include "Game/Mineral.h"
+#include "Game/GameConfig.h"
 #include <algorithm>
 
 using namespace cocos2d;
@@ -35,9 +36,22 @@ void Mineral::applyDamage(int amount) {
 }
 
 Rect Mineral::footRect() const {
+    Vec2 base = getPosition();
+    float ts = static_cast<float>(GameConfig::TILE_SIZE);
+    if (_sprite) {
+        auto cs = _sprite->getContentSize();
+        float sx = std::abs(_sprite->getScaleX());
+        float sy = std::abs(_sprite->getScaleY());
+        float wWorld = cs.width * sx;
+        float hWorld = cs.height * sy;
+        if (wWorld >= ts * 1.5f && hWorld >= ts * 1.5f) {
+            float w = 24.0f;
+            float h = 24.0f;
+            return Rect(base.x - w * 0.5f, base.y, w, h);
+        }
+    }
     float w = 12.0f;
     float h = 12.0f;
-    Vec2 base = getPosition();
     return Rect(base.x - w * 0.5f, base.y, w, h);
 }
 
