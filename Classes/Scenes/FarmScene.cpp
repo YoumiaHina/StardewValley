@@ -53,6 +53,19 @@ bool FarmScene::init() {
     if (_fishing) {
         _fishing->setMovementLocker([this](bool locked){ if (_playerController) _playerController->setMovementLocked(locked); });
     }
+    if (_uiController && _animalSystem) {
+        _uiController->setAnimalStoreHandler([this](Game::AnimalType type) -> bool {
+            if (!_animalSystem || !_player || !_mapController) return false;
+            float s = static_cast<float>(GameConfig::TILE_SIZE);
+            Vec2 pos = _player->getPosition();
+            Vec2 dir = _playerController ? _playerController->lastDir() : Vec2(0, -1);
+            if (dir.lengthSquared() < 1e-3f) dir = Vec2(0, -1);
+            dir.normalize();
+            Vec2 spawnPos = pos + dir * s;
+            long long price = Game::animalPrice(type);
+            return _animalSystem->buyAnimal(type, spawnPos, price);
+        });
+    }
     return true;
 }
 
@@ -151,6 +164,10 @@ void FarmScene::onKeyPressedHook(EventKeyboard::KeyCode code) {
         _animalSystem->spawnAnimal(Game::AnimalType::Chicken, leftFront);
         _animalSystem->spawnAnimal(Game::AnimalType::Cow, front);
         _animalSystem->spawnAnimal(Game::AnimalType::Sheep, rightFront);
+    } else if (code == EventKeyboard::KeyCode::KEY_H) {
+        if (_uiController) {
+            _uiController->toggleAnimalStorePanel(true);
+        }
     }
 }
 

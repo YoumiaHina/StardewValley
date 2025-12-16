@@ -228,4 +228,42 @@ void UIController::toggleStorePanel(bool visible) {
     }
 }
 
+void UIController::buildAnimalStorePanel() {
+    if (!_animalStorePanel) _animalStorePanel = new AnimalStorePanelUI(_scene);
+    _animalStorePanel->buildAnimalStorePanel();
+    _animalStorePanel->onPurchased = [this](bool ok){
+        if (ok) {
+            refreshHUD();
+            refreshHotbar();
+            popTextAt(_scene->convertToWorldSpace(Vec2(0,0)), "Bought!", Color3B::GREEN);
+        } else {
+            popTextAt(_scene->convertToWorldSpace(Vec2(0,0)), "Failed", Color3B::RED);
+        }
+    };
+    _animalStorePanel->onBuyAnimal = [this](Game::AnimalType type) -> bool {
+        if (_animalStoreHandler) {
+            return _animalStoreHandler(type);
+        }
+        return false;
+    };
+}
+
+void UIController::refreshAnimalStorePanel() {
+    if (_animalStorePanel) _animalStorePanel->refreshAnimalStorePanel();
+}
+
+void UIController::toggleAnimalStorePanel(bool visible) {
+    if (visible) {
+        buildAnimalStorePanel();
+        refreshAnimalStorePanel();
+        if (_animalStorePanel) _animalStorePanel->toggleAnimalStorePanel(true);
+    } else {
+        if (_animalStorePanel) _animalStorePanel->toggleAnimalStorePanel(false);
+    }
+}
+
+void UIController::setAnimalStoreHandler(const std::function<bool(Game::AnimalType)>& handler) {
+    _animalStoreHandler = handler;
+}
+
 }

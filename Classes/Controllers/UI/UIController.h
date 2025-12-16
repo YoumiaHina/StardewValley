@@ -95,6 +95,11 @@ public:
     void refreshStorePanel();
     void toggleStorePanel(bool visible);
 
+    void buildAnimalStorePanel();
+    void refreshAnimalStorePanel();
+    void toggleAnimalStorePanel(bool visible);
+    void setAnimalStoreHandler(const std::function<bool(Game::AnimalType)>& handler);
+
 private:
     cocos2d::Scene* _scene = nullptr;
     cocos2d::Node* _worldNode = nullptr;
@@ -105,8 +110,10 @@ private:
     ChestPanelUI* _chestPanel = nullptr;
     CraftPanelUI* _craftPanel = nullptr;
     StorePanelUI* _storePanel = nullptr;
+    AnimalStorePanelUI* _animalStorePanel = nullptr;
     DialogueUI* _dialogueUI = nullptr;
     NpcSocialPanelUI* _socialPanel = nullptr;
+    std::function<bool(Game::AnimalType)> _animalStoreHandler;
 };
 
 }

@@ -19,6 +19,8 @@ public:
 
     void spawnAnimal(Game::AnimalType type, const cocos2d::Vec2& pos);
 
+    bool buyAnimal(Game::AnimalType type, const cocos2d::Vec2& pos, long long price);
+
 private:
     struct Instance {
         Game::Animal animal;

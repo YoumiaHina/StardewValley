@@ -83,8 +83,9 @@ void CropSystem::advanceCropsDaily(IMapController* map) {
 
         bool watered = cp.wateredToday || (t == Game::TileType::Watered);
 
-        bool died = false;
-        if (!watered) {
+        bool outOfSeason = !Game::CropDefs::isSeasonAllowed(cp.type, ws.seasonIndex);
+        bool died = outOfSeason;
+        if (!died && !watered) {
             double roll = static_cast<double>(std::rand()) / (static_cast<double>(RAND_MAX) + 1.0);
             if (roll < 0.15) {
                 died = true;

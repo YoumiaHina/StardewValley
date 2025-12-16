@@ -21,4 +21,13 @@ struct Animal {
     bool fedToday = false;
 };
 
+inline long long animalPrice(AnimalType t) {
+    switch (t) {
+        case AnimalType::Chicken: return 800;
+        case AnimalType::Cow: return 1500;
+        case AnimalType::Sheep: return 2000;
+    }
+    return 0;
+}
+
 }

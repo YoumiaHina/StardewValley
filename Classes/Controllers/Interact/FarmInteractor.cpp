@@ -49,6 +49,11 @@ FarmInteractor::SpaceAction FarmInteractor::onSpacePressed() {
                 if (t == Game::TileType::Tilled || t == Game::TileType::Watered) {
                     int ct = static_cast<int>(Game::cropTypeFromSeed(slot.itemType));
                     auto type = static_cast<Game::CropType>(ct);
+                    auto& ws = Game::globalState();
+                    if (!Game::CropDefs::isSeasonAllowed(type, ws.seasonIndex)) {
+                        _ui->popTextAt(_map->tileToWorld(tc,tr), "Out of season", Color3B::RED);
+                        return SpaceAction::None;
+                    }
                     if (_crop) { _crop->plantCrop(type, tc, tr); }
                     bool ok = _inventory->consumeSelectedItem(1);
                     if (ok) { _ui->refreshHotbar(); }
@@ -77,6 +82,11 @@ void FarmInteractor::onLeftClick() {
             if (t == Game::TileType::Tilled || t == Game::TileType::Watered) {
                 int ct = static_cast<int>(Game::cropTypeFromSeed(slot.itemType));
                 auto type = static_cast<Game::CropType>(ct);
+                auto& ws = Game::globalState();
+                if (!Game::CropDefs::isSeasonAllowed(type, ws.seasonIndex)) {
+                    _ui->popTextAt(_map->tileToWorld(tc,tr), "Out of season", Color3B::RED);
+                    return;
+                }
                 if (_crop) { _crop->plantCrop(type, tc, tr); }
                 bool ok = _inventory->consumeSelectedItem(1);
                 if (ok) { _ui->refreshHotbar(); }

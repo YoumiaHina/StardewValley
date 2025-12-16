@@ -172,6 +172,16 @@ void AnimalSystem::spawnAnimal(Game::AnimalType type, const cocos2d::Vec2& pos) 
     }
 }
 
+bool AnimalSystem::buyAnimal(Game::AnimalType type, const cocos2d::Vec2& pos, long long price) {
+    if (!_map || !_worldNode) return false;
+    if (price < 0) price = 0;
+    auto& ws = Game::globalState();
+    if (ws.gold < price) return false;
+    spawnAnimal(type, pos);
+    ws.gold -= price;
+    return true;
+}
+
 void AnimalSystem::update(float dt) {
     if (!_map) return;
     float s = _map->tileSize();
@@ -306,6 +316,7 @@ bool AnimalSystem::tryFeedAnimal(const cocos2d::Vec2& playerPos, Game::ItemType 
     Instance* best = nullptr;
     float bestDist = 1e9f;
     for (auto& inst : _animals) {
+        if (inst.animal.fedToday) continue;
         if (!acceptsFeed(inst.animal.type, feedType)) continue;
         float d = playerPos.distance(inst.animal.pos);
         if (d <= maxDist && d < bestDist) {
