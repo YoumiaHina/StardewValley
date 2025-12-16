@@ -1,4 +1,5 @@
 #include "Game/View/PlayerView.h"
+#include <string>
 
 namespace Game {
 
@@ -70,7 +71,13 @@ void PlayerView::setHairColor(const cocos2d::Color3B& color) {
 }
 
 void PlayerView::setDirection(Direction dir) {
-    if (_currentDir != dir) { _currentDir = dir; updateSprites(); }
+    if (_currentDir != dir) {
+        _currentDir = dir;
+        updateSprites();
+        if (_isUsingTool) {
+            updateToolSprite();
+        }
+    }
 }
 
 void PlayerView::setMoving(bool moving) {
@@ -81,6 +88,29 @@ void PlayerView::setMoving(bool moving) {
 }
 
 void PlayerView::updateAnimation(float dt) {
+    if (_isUsingTool) {
+        _toolAnimTimer += dt;
+        if (_toolAnimTimer > 0.08f) {
+            _toolAnimTimer = 0.0f;
+            _toolAnimFrame += 1;
+            int maxFrames = toolFramesForDirection(_currentDir);
+            if (_toolAnimFrame >= maxFrames) {
+                _isUsingTool = false;
+                _toolAnimFrame = 0;
+                if (_toolSprite) {
+                    _toolSprite->setVisible(false);
+                    _toolSprite->setRotation(0.0f);
+                }
+                if (_armSprite) {
+                    _armSprite->setVisible(true);
+                }
+            } else {
+                updateToolSprite();
+            }
+        }
+        return;
+    }
+
     if (_isMoving) {
         _animTimer += dt;
         if (_animTimer > 0.15f) {
@@ -132,6 +162,129 @@ void PlayerView::updateSprites() {
     _hairSprite->setPosition(0, -1 + bobY);
     _armSprite->setPosition(0, 0);
     _pantsSprite->setPosition(0, 0);
+    if (_isUsingTool) {
+        updateToolSprite();
+    }
+}
+
+void PlayerView::playToolAnimation(Game::ToolKind kind) {
+    _currentTool = kind;
+    _isUsingTool = true;
+    _toolAnimTimer = 0.0f;
+    _toolAnimFrame = 0;
+    if (_armSprite) {
+        _armSprite->setVisible(false);
+    }
+    if (!_toolSprite) {
+        _toolSprite = cocos2d::Sprite::create();
+        if (_toolSprite) {
+            this->addChild(_toolSprite, 5);
+        }
+    }
+    if (!_toolSprite) return;
+
+    std::string path;
+    switch (kind) {
+        case Game::ToolKind::Axe: path = "Tool/AxeAction.png"; break;
+        case Game::ToolKind::Hoe: path = "Tool/HoeAction.png"; break;
+        case Game::ToolKind::Pickaxe: path = "Tool/PickaxeAction.png"; break;
+        case Game::ToolKind::WaterCan: path = "Tool/WaterCanAction.png"; break;
+        default: break;
+    }
+    if (path.empty()) {
+        _isUsingTool = false;
+        _toolSprite->setVisible(false);
+        if (_armSprite) {
+            _armSprite->setVisible(true);
+        }
+        return;
+    }
+    _toolSprite->setTexture(path);
+    if (_toolSprite->getTexture()) {
+        _toolSprite->getTexture()->setAliasTexParameters();
+        _toolSprite->setVisible(true);
+        _toolSprite->setFlippedX(false);
+        _toolSprite->setRotation(0.0f);
+        updateToolSprite();
+    } else {
+        _isUsingTool = false;
+        _toolSprite->setVisible(false);
+        if (_armSprite) {
+            _armSprite->setVisible(true);
+        }
+    }
+}
+
+void PlayerView::updateToolSprite() {
+    if (!_toolSprite || !_toolSprite->getTexture()) return;
+    if (!_isUsingTool) {
+        _toolSprite->setVisible(false);
+        return;
+    }
+
+    int col = toolColumnFor(_currentDir, _toolAnimFrame);
+    int w = 16;
+    int h = 32;
+    float x = static_cast<float>(col * w);
+    float y = 0.0f;
+    cocos2d::Rect r(x, y, static_cast<float>(w), static_cast<float>(h));
+    _toolSprite->setTextureRect(r);
+
+    bool flipX = (_currentDir == Direction::LEFT);
+    _toolSprite->setFlippedX(flipX);
+
+    float rotation = 0.0f;
+    if (_currentDir == Direction::RIGHT) {
+        if (_toolAnimFrame == 1) {
+            rotation = 90.0f;
+        }
+    } else if (_currentDir == Direction::LEFT) {
+        if (_toolAnimFrame == 1) {
+            rotation = -90.0f;
+        }
+    }
+    float offsetX = 0.0f;
+    float offsetY = (_toolAnimFrame == 0) ? 16.0f : 0.0f;
+    if (_toolAnimFrame == 1) {
+        if (_currentDir == Direction::RIGHT) {
+            offsetX = 16.0f;
+        } else if (_currentDir == Direction::LEFT) {
+            offsetX = -16.0f;
+        }
+    }
+    _toolSprite->setRotation(rotation);
+    _toolSprite->setPosition(offsetX, offsetY);
+    int z = 5;
+    if (_currentDir == Direction::UP) {
+        z = -1;
+    }
+    _toolSprite->setLocalZOrder(z);
+    _toolSprite->setVisible(true);
+}
+
+int PlayerView::toolFramesForDirection(Direction dir) const {
+    switch (dir) {
+        case Direction::DOWN: return 2;
+        case Direction::UP: return 2;
+        case Direction::RIGHT: return 2;
+        case Direction::LEFT: return 2;
+        default: return 2;
+    }
+}
+
+int PlayerView::toolColumnFor(Direction dir, int frame) const {
+    switch (dir) {
+        case Direction::DOWN:
+            return frame % 2;
+        case Direction::RIGHT:
+            return 2;
+        case Direction::LEFT:
+            return 2;
+        case Direction::UP:
+            return 3 + (frame % 2);
+        default:
+            return 0;
+    }
 }
 
 cocos2d::Rect PlayerView::getBodyRect(Direction dir, int frame) {

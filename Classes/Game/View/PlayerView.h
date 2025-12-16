@@ -17,6 +17,7 @@ public:
     void setDirection(Direction dir) override;
     void setMoving(bool moving) override;
     void updateAnimation(float dt) override;
+    void playToolAnimation(Game::ToolKind kind) override;
 
     int getShirtStyle() const { return _shirtIndex; }
     int getPantsStyle() const { return _pantsIndex; }
@@ -44,10 +45,19 @@ private:
     float _animTimer = 0.0f;
     int _animFrame = 0;
 
+    cocos2d::Sprite* _toolSprite = nullptr;
+    bool _isUsingTool = false;
+    Game::ToolKind _currentTool = Game::ToolKind::Axe;
+    float _toolAnimTimer = 0.0f;
+    int _toolAnimFrame = 0;
+
     void updateSprites();
     cocos2d::Rect getBodyRect(Direction dir, int frame);
     cocos2d::Rect getShirtRect(int index, Direction dir, int frame);
     cocos2d::Rect getPantsRect(int index, Direction dir, int frame);
     cocos2d::Rect getHairRect(int index, Direction dir, int frame);
+    void updateToolSprite();
+    int toolFramesForDirection(Direction dir) const;
+    int toolColumnFor(Direction dir, int frame) const;
 };
 }

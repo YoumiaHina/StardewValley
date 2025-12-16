@@ -1,6 +1,7 @@
 #include "Scenes/SceneBase.h"
 #include "cocos2d.h"
 #include "Game/Tool/ToolFactory.h"
+#include <string>
 #include "Scenes/RoomScene.h"
 #include "Game/Chest.h"
 
@@ -158,10 +159,13 @@ void SceneBase::registerCommonInputHandlers(bool enableToolOnSpace, bool enableT
                     if (!nearDoor) {
                         auto t = _inventory ? _inventory->selectedTool() : nullptr;
                         if (t) {
-                            t->use(_mapController, _cropSystem,
+                            std::string msg = t->use(_mapController, _cropSystem,
                                 [this]() -> Vec2 { return _player ? _player->getPosition() : Vec2(); },
                                 [this]() -> Vec2 { return _playerController ? _playerController->lastDir() : Vec2(0,-1); },
                                 _uiController);
+                            if (_player && !msg.empty()) {
+                                _player->playToolAnimation(t->kind());
+                            }
                         }
                     }
                 }
@@ -196,10 +200,13 @@ void SceneBase::registerCommonInputHandlers(bool enableToolOnSpace, bool enableT
         if (enableToolOnLeftClick && e->getMouseButton() == EventMouse::MouseButton::BUTTON_LEFT) {
             auto t = _inventory ? _inventory->selectedTool() : nullptr;
             if (t) {
-                t->use(_mapController, _cropSystem,
+                std::string msg = t->use(_mapController, _cropSystem,
                     [this]() -> Vec2 { return _player ? _player->getPosition() : Vec2(); },
                     [this]() -> Vec2 { return _playerController ? _playerController->lastDir() : Vec2(0,-1); },
                     _uiController);
+                if (_player && !msg.empty()) {
+                    _player->playToolAnimation(t->kind());
+                }
             }
         }
         if (e->getMouseButton() == EventMouse::MouseButton::BUTTON_RIGHT) {
