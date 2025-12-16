@@ -94,10 +94,12 @@ public:
     void buildStorePanel();
     void refreshStorePanel();
     void toggleStorePanel(bool visible);
+    bool isStorePanelVisible() const;
 
     void buildAnimalStorePanel();
     void refreshAnimalStorePanel();
     void toggleAnimalStorePanel(bool visible);
+    bool isAnimalStorePanelVisible() const;
     void setAnimalStoreHandler(const std::function<bool(Game::AnimalType)>& handler);
 
 private:

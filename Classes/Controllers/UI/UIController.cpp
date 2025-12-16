@@ -228,6 +228,10 @@ void UIController::toggleStorePanel(bool visible) {
     }
 }
 
+bool UIController::isStorePanelVisible() const {
+    return _storePanel && _storePanel->isVisible();
+}
+
 void UIController::buildAnimalStorePanel() {
     if (!_animalStorePanel) _animalStorePanel = new AnimalStorePanelUI(_scene);
     _animalStorePanel->buildAnimalStorePanel();
@@ -260,6 +264,10 @@ void UIController::toggleAnimalStorePanel(bool visible) {
     } else {
         if (_animalStorePanel) _animalStorePanel->toggleAnimalStorePanel(false);
     }
+}
+
+bool UIController::isAnimalStorePanelVisible() const {
+    return _animalStorePanel && _animalStorePanel->isVisible();
 }
 
 void UIController::setAnimalStoreHandler(const std::function<bool(Game::AnimalType)>& handler) {
