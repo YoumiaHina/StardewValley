@@ -104,10 +104,6 @@ void SceneBase::registerCommonInputHandlers(bool enableToolOnSpace, bool enableT
                 _uiController->refreshHotbar();
                 if (_player) _uiController->popTextAt(_player->getPosition(), "Eggplant x5", Color3B::YELLOW);
             } break;
-            case EventKeyboard::KeyCode::KEY_B: {
-                if (chestOpen || storeOpen) break;
-                _uiController->toggleStorePanel(true);
-            } break;
             case EventKeyboard::KeyCode::KEY_E: {
                 if (chestOpen || storeOpen) break;
                 Game::openGlobalChest(_uiController);

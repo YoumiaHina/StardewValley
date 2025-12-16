@@ -161,7 +161,10 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClCompile Include="..\Classes\Controllers\Map\TownMapController.cpp" />
     <ClCompile Include="..\Classes\Controllers\NPC\AbigailNpcController.cpp" />
     <ClCompile Include="..\Classes\Controllers\NPC\NpcControllerBase.cpp" />
-    <ClCompile Include="..\Classes\Controllers\NPC\NpcDialogueManager.cpp" />
+    <ClCompile Include="..\Classes\Controllers\NPC\NpcDialogueAbigail.cpp" />
+    <ClCompile Include="..\Classes\Controllers\NPC\NpcDialogueWilly.cpp" />
+    <ClCompile Include="..\Classes\Controllers\NPC\PierreNpcController.cpp" />
+    <ClCompile Include="..\Classes\Controllers\NPC\RobinNpcController.cpp" />
     <ClCompile Include="..\Classes\Controllers\NPC\WillyNpcController.cpp" />
     <ClCompile Include="..\Classes\Controllers\Store\StoreController.cpp" />
     <ClCompile Include="..\Classes\Controllers\Systems\ChestController.cpp" />
@@ -183,6 +186,8 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClCompile Include="..\Classes\Game\Map\TownMap.cpp" />
     <ClCompile Include="..\Classes\Game\NPC\AbigailNpc.cpp" />
     <ClCompile Include="..\Classes\Game\NPC\NpcBase.cpp" />
+    <ClCompile Include="..\Classes\Game\NPC\PierreNpc.cpp" />
+    <ClCompile Include="..\Classes\Game\NPC\RobinNpc.cpp" />
     <ClCompile Include="..\Classes\Game\NPC\WillyNpc.cpp" />
     <ClCompile Include="..\Classes\Game\Tool\Axe.cpp" />
     <ClCompile Include="..\Classes\Game\Tool\FishingRod.cpp" />
@@ -282,6 +287,8 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClInclude Include="..\Classes\Game\Map\TownMap.h" />
     <ClInclude Include="..\Classes\Game\NPC\AbigailNpc.h" />
     <ClInclude Include="..\Classes\Game\NPC\NpcBase.h" />
+    <ClInclude Include="..\Classes\Game\NPC\PierreNpc.h" />
+    <ClInclude Include="..\Classes\Game\NPC\RobinNpc.h" />
     <ClInclude Include="..\Classes\Game\NPC\WillyNpc.h" />
     <ClInclude Include="..\Classes\Game\Tool\Axe.h" />
     <ClInclude Include="..\Classes\Game\Tool\FishingRod.h" />

@@ -17,6 +17,7 @@ class NpcControllerBase {
   virtual void update(const cocos2d::Vec2& player_pos) = 0;
   virtual void handleTalkAt(const cocos2d::Vec2& player_pos) = 0;
   virtual bool handleRightClick(cocos2d::EventMouse* e) { return false; }
+  virtual bool advanceDialogueIfActive() { return false; }
 };
 
 class TownNpcController : public NpcControllerBase {

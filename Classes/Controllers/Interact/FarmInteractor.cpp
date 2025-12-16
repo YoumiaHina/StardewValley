@@ -1,5 +1,6 @@
 #include "Controllers/Interact/FarmInteractor.h"
 #include "Controllers/Map/FarmMapController.h"
+#include "Controllers/NPC/NpcControllerBase.h"
 #include "Game/Crop.h"
 #include "Game/WorldState.h"
 #include "Game/GameConfig.h"
@@ -24,6 +25,15 @@ FarmInteractor::SpaceAction FarmInteractor::onSpacePressed() {
     }
     if (_map->isNearTownDoor(p)) {
         return SpaceAction::EnterTown;
+    }
+
+    if (_npc) {
+        // 若已有对话在进行，则优先推进对话
+        if (_npc->advanceDialogueIfActive()) {
+            return SpaceAction::None;
+        }
+        _npc->handleTalkAt(p);
+        return SpaceAction::None;
     }
 
     if (_inventory->selectedKind() == Game::SlotKind::Item) {

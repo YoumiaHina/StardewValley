@@ -37,9 +37,14 @@ bool FarmScene::init() {
     _interactor = new Controllers::FarmInteractor(_inventory, _mapController, _uiController, _cropSystem, _animalSystem,
         [this]() -> Vec2 { return _player ? _player->getPosition() : Vec2(); },
         [this]() -> Vec2 { return _playerController ? _playerController->lastDir() : Vec2(0,-1); });
+    _robinNpc = new Controllers::RobinNpcController(_farmMap, _worldNode, _uiController, _inventory, _animalSystem);
+    if (_interactor && _robinNpc) {
+        _interactor->setNpcController(_robinNpc);
+    }
     _fishing = new Controllers::FishingController(_mapController, _inventory, _uiController, this, _worldNode);
     addUpdateCallback([this](float dt){ if (_fishing) _fishing->update(dt); });
     addUpdateCallback([this](float dt){ if (_animalSystem) _animalSystem->update(dt); });
+    addUpdateCallback([this](float){ if (_robinNpc && _player) _robinNpc->update(_player->getPosition()); });
     if (_inventory && _fishing) {
         for (std::size_t i = 0; i < _inventory->size(); ++i) {
             auto tb = _inventory->toolAtMutable(i);
@@ -164,10 +169,6 @@ void FarmScene::onKeyPressedHook(EventKeyboard::KeyCode code) {
         _animalSystem->spawnAnimal(Game::AnimalType::Chicken, leftFront);
         _animalSystem->spawnAnimal(Game::AnimalType::Cow, front);
         _animalSystem->spawnAnimal(Game::AnimalType::Sheep, rightFront);
-    } else if (code == EventKeyboard::KeyCode::KEY_H) {
-        if (_uiController) {
-            _uiController->toggleAnimalStorePanel(true);
-        }
     }
 }
 

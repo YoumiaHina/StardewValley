@@ -1,6 +1,7 @@
 #include "Controllers/NPC/NpcControllerBase.h"
 #include "Controllers/NPC/AbigailNpcController.h"
 #include "Controllers/NPC/WillyNpcController.h"
+#include "Controllers/NPC/PierreNpcController.h"
 
 namespace Controllers {
 
@@ -13,6 +14,8 @@ TownNpcController::TownNpcController(TownMapController* map,
       std::make_unique<AbigailNpcController>(map, world_node, ui, inventory, &dialogue_));
   controllers_.push_back(
       std::make_unique<WillyNpcController>(map, world_node, ui, inventory, &dialogue_));
+  controllers_.push_back(
+      std::make_unique<PierreNpcController>(map, world_node, ui, inventory));
 }
 
 void TownNpcController::update(const cocos2d::Vec2& player_pos) {

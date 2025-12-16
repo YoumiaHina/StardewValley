@@ -322,6 +322,18 @@
     <ClCompile Include="..\Classes\Controllers\NPC\NpcControllerBase.cpp">
       <Filter>Classes\Controllers\NPC</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\NPC\NpcDialogueAbigail.cpp">
+      <Filter>Classes\Controllers\NPC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\NPC\NpcDialogueWilly.cpp">
+      <Filter>Classes\Controllers\NPC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\NPC\PierreNpcController.cpp">
+      <Filter>Classes\Controllers\NPC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\NPC\RobinNpcController.cpp">
+      <Filter>Classes\Controllers\NPC</Filter>
+    </ClCompile>
     <ClCompile Include="..\Classes\Controllers\NPC\WillyNpcController.cpp">
       <Filter>Classes\Controllers\NPC</Filter>
     </ClCompile>
@@ -331,14 +343,17 @@
     <ClCompile Include="..\Classes\Game\NPC\NpcBase.cpp">
       <Filter>Classes\Game\NPC</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\Game\NPC\PierreNpc.cpp">
+      <Filter>Classes\Game\NPC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\NPC\RobinNpc.cpp">
+      <Filter>Classes\Game\NPC</Filter>
+    </ClCompile>
     <ClCompile Include="..\Classes\Game\NPC\WillyNpc.cpp">
       <Filter>Classes\Game\NPC</Filter>
     </ClCompile>
     <ClCompile Include="..\Classes\Controllers\TileSelector.cpp">
       <Filter>Classes\Controllers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Classes\Controllers\NPC\NpcDialogueManager.cpp">
-      <Filter>Classes\Controllers\NPC</Filter>
     </ClCompile>
     <ClCompile Include="..\Classes\Controllers\UI\DialogueUI.cpp">
       <Filter>Classes\Game\NPC</Filter>

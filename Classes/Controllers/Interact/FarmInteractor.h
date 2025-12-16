@@ -16,6 +16,8 @@
 
 namespace Controllers {
 
+class NpcControllerBase;
+
 class FarmInteractor {
 public:
     enum class SpaceAction { None, EnterHouse, EnterMine, EnterBeach, EnterTown };
@@ -29,6 +31,8 @@ public:
                    std::function<cocos2d::Vec2()> getLastDir)
     : _inventory(std::move(inventory)), _map(map), _ui(ui), _crop(crop), _animals(animals), _getPlayerPos(std::move(getPlayerPos)), _getLastDir(std::move(getLastDir)) {}
 
+    void setNpcController(NpcControllerBase* npc) { _npc = npc; }
+
     SpaceAction onSpacePressed();
     void onLeftClick();
 
@@ -41,6 +45,7 @@ private:
     std::function<cocos2d::Vec2()> _getPlayerPos;
     std::function<cocos2d::Vec2()> _getLastDir;
     Controllers::ChestInteractor* _chestInteractor = nullptr;
+    NpcControllerBase* _npc = nullptr;
 };
 
 }
