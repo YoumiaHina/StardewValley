@@ -4,6 +4,8 @@
 #include <string>
 #include "Scenes/RoomScene.h"
 #include "Game/Chest.h"
+#include "Controllers/Systems/FishingController.h"
+#include "Game/Tool/FishingRod.h"
 
 using namespace cocos2d;
 
@@ -65,7 +67,31 @@ bool SceneBase::initBase(float worldScale, bool buildCraftPanel, bool enableTool
     _cropSystem = new Controllers::CropSystem();
     _stateController = new Controllers::GameStateController(_mapController, _uiController, _cropSystem);
 
-    // 工具使用由具体工具类处理
+    _fishingController = new Controllers::FishingController(_mapController, _inventory, _uiController, this, _worldNode);
+    addUpdateCallback([this](float dt) {
+        if (_fishingController) _fishingController->update(dt);
+    });
+    if (_inventory && _fishingController) {
+        for (std::size_t i = 0; i < _inventory->size(); ++i) {
+            auto tb = _inventory->toolAtMutable(i);
+            if (tb && tb->kind() == Game::ToolKind::FishingRod) {
+                auto rod = dynamic_cast<Game::FishingRod*>(tb);
+                if (rod) {
+                    rod->setFishingStarter(
+                        [this](const Vec2& pos) {
+                            if (_fishingController) _fishingController->startAt(pos);
+                        });
+                }
+                break;
+            }
+        }
+    }
+    if (_fishingController && _playerController) {
+        _fishingController->setMovementLocker(
+            [this](bool locked) {
+                if (_playerController) _playerController->setMovementLocked(locked);
+            });
+    }
 
     // 事件监听
     registerCommonInputHandlers(enableToolOnSpace, enableToolOnLeftClick, buildCraftPanel);

@@ -25,6 +25,8 @@
 #include <functional>
 #include <vector>
 
+namespace Controllers { class FishingController; }
+
 class SceneBase : public cocos2d::Scene {
 public:
     virtual ~SceneBase() = default;
@@ -54,6 +56,7 @@ protected:
     Controllers::PlayerController* _playerController = nullptr;
     Controllers::GameStateController* _stateController = nullptr;
     Controllers::CropSystem* _cropSystem = nullptr;
+    Controllers::FishingController* _fishingController = nullptr;
 
 protected:
     // 允许子类注册额外的更新回调（用于 Monster/Mining/Combat 等控制器调度）。

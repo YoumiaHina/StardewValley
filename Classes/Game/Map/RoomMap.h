@@ -1,3 +1,7 @@
+// 室内房间 TMX 地图封装：
+// - 基于 MapBase 提供卧室/室内场景的尺寸与碰撞查询
+// - 解析床铺区域与房门矩形供睡觉/出门等交互使用
+// - 仅负责 TMX 几何与对象解析，不直接包含业务逻辑
 #pragma once
 
 #include "cocos2d.h"
@@ -47,4 +51,3 @@ private:
 };
 
 } // namespace Game
-

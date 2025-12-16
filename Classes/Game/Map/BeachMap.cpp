@@ -1,3 +1,7 @@
+// 海滩 TMX 解析实现：
+// - 加载海滩 TMX 并解析墙体/水域/返回农场入口
+// - 提供 collides/nearWater/nearDoorToFarm 等几何查询
+// - 调试模式下以 DrawNode 可视化对象组区域
 #include "Game/Map/BeachMap.h"
 #include "Game/GameConfig.h"
 
@@ -136,4 +140,3 @@ void BeachMap::parseDoorToFarm() {
 }
 
 } // namespace Game
-

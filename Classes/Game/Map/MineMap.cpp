@@ -1,3 +1,7 @@
+// 矿洞入口层 TMX 解析实现：
+// - 加载矿洞入口 TMX 并解析碰撞/楼梯/回农场门等对象
+// - 提供 nearStairs/nearDoorToFarm/nearBack0 等几何查询
+// - 解析矿石区域与怪物刷新点供上层系统生成内容
 #include "Game/Map/MineMap.h"
 
 using namespace cocos2d;

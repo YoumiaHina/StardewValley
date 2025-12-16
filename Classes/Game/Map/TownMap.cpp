@@ -1,3 +1,7 @@
+// 小镇 TMX 解析实现：
+// - 加载小镇 TMX 并解析墙体与回农场入口
+// - 提供 collides/nearDoorToFarm/doorToFarmCenter 等几何查询
+// - 调试模式下以 DrawNode 可视化碰撞与门口区域
 #include "Game/Map/TownMap.h"
 #include "Game/GameConfig.h"
 

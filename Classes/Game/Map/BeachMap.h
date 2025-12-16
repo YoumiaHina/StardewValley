@@ -1,3 +1,7 @@
+// 海滩 TMX 地图封装：
+// - 基于 MapBase 提供海滩场景的碰撞与水域查询
+// - 解析回农场传送门几何数据，供场景切换判定使用
+// - 仅负责 TMX 几何与调试绘制，不参与业务流程
 #pragma once
 
 #include "cocos2d.h"
@@ -38,4 +42,3 @@ private:
 };
 
 } // namespace Game
-

@@ -1,3 +1,7 @@
+// 矿洞入口层 TMX 地图封装：
+// - 封装矿洞入口（零层）地图的坐标与碰撞查询
+// - 解析楼梯/返回入口/回农场门/电梯触发等对象组
+// - 暴露矿石区域与怪物刷新点给 Mine 系统与控制器使用
 #pragma once
 
 #include "cocos2d.h"
@@ -7,7 +11,6 @@
 
 namespace Game {
 
-// MineMap: TMX wrapper for mine entrance (floor 0)
 class MineMap : public MapBase {
 public:
     static MineMap* create(const std::string& tmxFile);

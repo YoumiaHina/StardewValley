@@ -1,3 +1,7 @@
+// 室内房间 TMX 解析实现：
+// - 加载室内 TMX 并解析床铺/房门/碰撞/回农场门等对象
+// - 提供 collides/nearDoorToFarm/doorToFarmCenter 等几何查询
+// - 仅承担几何与调试绘制，具体交互由上层控制器完成
 #include "Game/Map/RoomMap.h"
 
 using namespace cocos2d;

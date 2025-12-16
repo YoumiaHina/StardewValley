@@ -1,3 +1,7 @@
+// 农场 TMX 解析实现：
+// - 在 initWithFile 中挂载 TMX 并解析各类对象组
+// - 提供水域/门/禁树区域等几何数据的查询与调试绘制
+// - 为 FarmMapController 等上层控制器提供纯几何服务
 #include "FarmMap.h"
 
 namespace Game {
