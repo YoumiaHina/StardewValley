@@ -156,4 +156,45 @@ void TownMapController::refreshMapVisuals() {
     }
 }
 
+void TownMapController::refreshDropsVisuals() {
+    cocos2d::Node* parent = nullptr;
+    if (_map && _map->getTMX()) {
+        parent = _map->getTMX();
+    } else if (_worldNode) {
+        parent = _worldNode;
+    }
+    if (parent) {
+        if (!_dropsDraw) {
+            _dropsDraw = DrawNode::create();
+            parent->addChild(_dropsDraw, 19);
+        } else if (!_dropsDraw->getParent()) {
+            _dropsDraw->removeFromParent();
+            _dropsDraw = DrawNode::create();
+            parent->addChild(_dropsDraw, 19);
+        }
+        if (!_dropsRoot) {
+            _dropsRoot = Node::create();
+            parent->addChild(_dropsRoot, 19);
+        } else if (!_dropsRoot->getParent()) {
+            _dropsRoot->removeFromParent();
+            _dropsRoot = Node::create();
+            parent->addChild(_dropsRoot, 19);
+        }
+    }
+    DropHelper::renderDrops(_drops, _dropsRoot, _dropsDraw);
+}
+
+void TownMapController::spawnDropAt(int c, int r, int itemType, int qty) {
+    if (!_map || qty <= 0) return;
+    if (!inBounds(c, r)) return;
+    Game::Drop d{ static_cast<Game::ItemType>(itemType), tileToWorld(c, r), qty };
+    _drops.push_back(d);
+}
+
+void TownMapController::collectDropsNear(const cocos2d::Vec2& playerWorldPos, Game::Inventory* inv) {
+    if (!inv) return;
+    DropHelper::collectDropsNear(playerWorldPos, _drops, inv);
+    refreshDropsVisuals();
+}
+
 } // namespace Controllers

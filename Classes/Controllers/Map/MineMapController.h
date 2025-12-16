@@ -10,6 +10,7 @@
 #include "Controllers/IMapController.h"
 #include "Game/GameConfig.h"
 #include "Game/Map/MineMap.h"
+#include "Game/Drop.h"
 #include "Controllers/TileSelector.h"
 #include "Controllers/Environment/MineralSystem.h"
 
@@ -47,8 +48,9 @@ public:
     void worldToTileIndex(const cocos2d::Vec2& p, int& c, int& r) const override;
     void refreshMapVisuals() override;
     void refreshCropsVisuals() override {} // not used
-    void refreshDropsVisuals() override {} // not used
-    void spawnDropAt(int, int, int, int) override {} // not used here
+    void refreshDropsVisuals() override;
+    void spawnDropAt(int c, int r, int itemType, int qty) override;
+    void collectDropsNear(const cocos2d::Vec2& playerWorldPos, Game::Inventory* inv) override;
     bool applyPickaxeAt(const cocos2d::Vec2& worldPos, int power) override;
     void setDynamicColliders(const std::vector<cocos2d::Rect>& rects) { _dynamicColliders = rects; }
     void setMonsterColliders(const std::vector<cocos2d::Rect>& rects) { _monsterColliders = rects; }
@@ -99,6 +101,9 @@ private:
     std::vector<cocos2d::Vec2> _extraStairs;
     std::unordered_set<int> _elevatorFloors; // 已激活楼层（5的倍数）
     std::vector<Game::Chest> _emptyChests; // 深渊内无胸，返回空引用
+    std::vector<Game::Drop> _drops;
+    cocos2d::DrawNode* _dropsDraw = nullptr;
+    cocos2d::Node* _dropsRoot = nullptr;
     Game::MineMap* _entrance = nullptr;
     Game::MineMap* _floorMap = nullptr;
     cocos2d::Node* _mapNode = nullptr;

@@ -192,6 +192,48 @@ bool MineMapController::applyPickaxeAt(const Vec2& worldPos, int power) {
     return false;
 }
 
+void MineMapController::refreshDropsVisuals() {
+    cocos2d::Node* parent = nullptr;
+    if (_entrance && _entrance->getTMX()) {
+        parent = _entrance->getTMX();
+    } else if (_floorMap && _floorMap->getTMX()) {
+        parent = _floorMap->getTMX();
+    } else if (_worldNode) {
+        parent = _worldNode;
+    }
+    if (parent) {
+        if (!_dropsDraw) {
+            _dropsDraw = DrawNode::create();
+            parent->addChild(_dropsDraw, 19);
+        } else if (!_dropsDraw->getParent()) {
+            _dropsDraw->removeFromParent();
+            _dropsDraw = DrawNode::create();
+            parent->addChild(_dropsDraw, 19);
+        }
+        if (!_dropsRoot) {
+            _dropsRoot = Node::create();
+            parent->addChild(_dropsRoot, 19);
+        } else if (!_dropsRoot->getParent()) {
+            _dropsRoot->removeFromParent();
+            _dropsRoot = Node::create();
+            parent->addChild(_dropsRoot, 19);
+        }
+    }
+    DropHelper::renderDrops(_drops, _dropsRoot, _dropsDraw);
+}
+
+void MineMapController::spawnDropAt(int c, int r, int itemType, int qty) {
+    if (!inBounds(c, r) || qty <= 0) return;
+    Game::Drop d{ static_cast<Game::ItemType>(itemType), tileToWorld(c, r), qty };
+    _drops.push_back(d);
+}
+
+void MineMapController::collectDropsNear(const cocos2d::Vec2& playerWorldPos, Game::Inventory* inv) {
+    if (!inv) return;
+    DropHelper::collectDropsNear(playerWorldPos, _drops, inv);
+    refreshDropsVisuals();
+}
+
 void MineMapController::addActorToMap(cocos2d::Node* node, int zOrder) {
     if (_entrance && _worldNode) {
         // 入口层：人物置于世界节点最上层，避免被 TMX 图层遮挡且在卸载入口时不被移除
@@ -205,10 +247,19 @@ void MineMapController::addActorToMap(cocos2d::Node* node, int zOrder) {
 
 void MineMapController::generateFloor(int floorIndex) {
     _floor = std::max(1, std::min(120, floorIndex));
+    // 旧 TMX 被移除前，先清理依附其上的运行时节点和指针
+    _cursor = nullptr;
+    _drops.clear();
+    if (_dropsDraw) {
+        _dropsDraw->removeFromParent();
+        _dropsDraw = nullptr;
+    }
+    if (_dropsRoot) {
+        _dropsRoot->removeFromParent();
+        _dropsRoot = nullptr;
+    }
     if (_entrance) { _entrance->removeFromParent(); _entrance = nullptr; }
     if (_floorMap) { _floorMap->removeFromParent(); _floorMap = nullptr; }
-    // 旧 TMX 被移除时，伴随挂载的光标节点也不再有效，重置指针避免野引用
-    _cursor = nullptr;
     loadFloorTMX(_floor);
 }
 
@@ -296,11 +347,19 @@ std::vector<int> MineMapController::getActivatedElevatorFloors() const {
 void MineMapController::loadEntrance() {
     if (!_worldNode) return;
     if (!_mapNode) { _mapNode = Node::create(); _worldNode->addChild(_mapNode, 0); }
-    // 清理当前楼层 TMX，切换到入口
+    // 切换到入口前，先清理当前楼层 TMX 及其挂载节点
+    _cursor = nullptr;
+    _drops.clear();
+    if (_dropsDraw) {
+        _dropsDraw->removeFromParent();
+        _dropsDraw = nullptr;
+    }
+    if (_dropsRoot) {
+        _dropsRoot->removeFromParent();
+        _dropsRoot = nullptr;
+    }
     if (_floorMap) { _floorMap->removeFromParent(); _floorMap = nullptr; }
     if (_entrance) { _entrance->removeFromParent(); _entrance = nullptr; }
-    // 切换地图时重置光标节点，避免指向已被移除的父节点
-    _cursor = nullptr;
     // 同步电梯楼层（持久化）到控制器
     {
         auto &ws = Game::globalState();
