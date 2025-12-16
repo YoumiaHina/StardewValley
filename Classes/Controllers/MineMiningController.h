@@ -10,6 +10,9 @@
 #include "Game/WorldState.h"
 #include "Game/Item.h"
 #include "Game/Mineral.h"
+#include "Controllers/Environment/MineralSystem.h"
+#include "Game/Stair.h"
+#include "Controllers/Environment/StairSystem.h"
 
 namespace Controllers {
 
@@ -22,11 +25,11 @@ public:
 
     struct Stair {
         cocos2d::Vec2 pos;
-        cocos2d::Sprite* sprite = nullptr;
+        Game::Stair* node = nullptr;
     };
 
     MineMiningController(MineMapController* map, cocos2d::Node* worldNode)
-    : _map(map), _worldNode(worldNode) {}
+    : _map(map), _worldNode(worldNode), _mineralSystem(map), _stairSystem(map) {}
 
     void generateNodesForFloor();
     void update(float dt) {}
@@ -41,6 +44,9 @@ private:
 
     MineMapController* _map = nullptr;
     cocos2d::Node* _worldNode = nullptr;
+    Controllers::MineralSystem _mineralSystem;
+    Controllers::StairSystem _stairSystem;
+    std::vector<Game::MineralData> _minerals;
     std::vector<Node> _nodes;
     std::vector<Stair> _stairs;
     cocos2d::DrawNode* _miningDraw = nullptr; // legacy, kept for cleanup

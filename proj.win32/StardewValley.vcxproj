@@ -155,6 +155,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClCompile Include="..\Classes\AppDelegate.cpp" />
     <ClCompile Include="..\Classes\Controllers\Environment\MineralSystem.cpp" />
     <ClCompile Include="..\Classes\Controllers\Environment\RockSystem.cpp" />
+    <ClCompile Include="..\Classes\Controllers\Environment\StairSystem.cpp" />
     <ClCompile Include="..\Classes\Controllers\Environment\TreeSystem.cpp" />
     <ClCompile Include="..\Classes\Controllers\Interact\BeachInteractor.cpp" />
     <ClCompile Include="..\Classes\Controllers\Interact\ChestInteractor.cpp" />
@@ -193,6 +194,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClCompile Include="..\Classes\Game\NPC\RobinNpc.cpp" />
     <ClCompile Include="..\Classes\Game\NPC\WillyNpc.cpp" />
     <ClCompile Include="..\Classes\Game\Rock.cpp" />
+    <ClCompile Include="..\Classes\Game\Stair.cpp" />
     <ClCompile Include="..\Classes\Game\Tool\Axe.cpp" />
     <ClCompile Include="..\Classes\Game\Tool\FishingRod.cpp" />
     <ClCompile Include="..\Classes\Game\Tool\Hoe.cpp" />
@@ -260,6 +262,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClInclude Include="..\Classes\Controllers\Environment\EnvironmentObstacleSystemBase.h" />
     <ClInclude Include="..\Classes\Controllers\Environment\MineralSystem.h" />
     <ClInclude Include="..\Classes\Controllers\Environment\RockSystem.h" />
+    <ClInclude Include="..\Classes\Controllers\Environment\StairSystem.h" />
     <ClInclude Include="..\Classes\Controllers\Environment\TreeSystem.h" />
     <ClInclude Include="..\Classes\Controllers\Interact\BeachInteractor.h" />
     <ClInclude Include="..\Classes\Controllers\Interact\ChestInteractor.h" />
@@ -300,6 +303,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClInclude Include="..\Classes\Game\NPC\RobinNpc.h" />
     <ClInclude Include="..\Classes\Game\NPC\WillyNpc.h" />
     <ClInclude Include="..\Classes\Game\Rock.h" />
+    <ClInclude Include="..\Classes\Game\Stair.h" />
     <ClInclude Include="..\Classes\Game\Tool\Axe.h" />
     <ClInclude Include="..\Classes\Game\Tool\FishingRod.h" />
     <ClInclude Include="..\Classes\Game\Tool\Hoe.h" />

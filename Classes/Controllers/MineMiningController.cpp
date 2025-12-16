@@ -11,8 +11,9 @@ void MineMiningController::resetFloor() {
         if (n.node) { n.node->removeFromParent(); n.node = nullptr; }
     }
     _nodes.clear();
+    _minerals.clear();
     for (auto &s : _stairs) {
-        if (s.sprite) { s.sprite->removeFromParent(); s.sprite = nullptr; }
+        if (s.node) { s.node->removeFromParent(); s.node = nullptr; }
     }
     _stairs.clear();
     if (_map) {
@@ -25,11 +26,13 @@ void MineMiningController::resetFloor() {
 }
 
 void MineMiningController::generateNodesForFloor() {
-    if (_map && _map->currentFloor() <= 0) { _nodes.clear(); _stairs.clear(); refreshVisuals(); return; }
+    if (_map && _map->currentFloor() <= 0) { _nodes.clear(); _stairs.clear(); _minerals.clear(); refreshVisuals(); return; }
     for (auto &n : _nodes) { if (n.node) { n.node->removeFromParent(); n.node = nullptr; } }
-    for (auto &s : _stairs) { if (s.sprite) { s.sprite->removeFromParent(); s.sprite = nullptr; } }
+    for (auto &s : _stairs) { if (s.node) { s.node->removeFromParent(); s.node = nullptr; } }
     _nodes.clear();
     _stairs.clear();
+    _minerals.clear();
+    _mineralSystem.bindRuntimeStorage(&_minerals);
     auto rects = _map->rockAreaRects();
     auto polys = _map->rockAreaPolys();
     std::vector<Vec2> candidates;
@@ -75,19 +78,7 @@ void MineMiningController::generateNodesForFloor() {
     auto alignToTileCenter = [this](const Vec2& wp){ int c=0,r=0; _map->worldToTileIndex(wp,c,r); return _map->tileToWorld(c,r); };
 
     std::vector<Vec2> stairWorldPos;
-    if (!selected.empty()) {
-        int maxStairs = std::min<int>(5, static_cast<int>(selected.size()));
-        int minStairs = std::min<int>(2, maxStairs);
-        if (maxStairs > 0 && minStairs > 0) {
-            std::uniform_int_distribution<int> stairCountDist(minStairs, maxStairs);
-            int stairCount = stairCountDist(rng);
-            stairCount = std::max(0, std::min(stairCount, static_cast<int>(selected.size())));
-            for (int i = 0; i < stairCount; ++i) {
-                Vec2 p = alignToTileCenter(selected[i]);
-                stairWorldPos.push_back(p);
-            }
-        }
-    }
+    _stairSystem.generateStairs(selected, 2, 5, stairWorldPos);
 
     std::vector<std::pair<int,int>> stairTiles;
     stairTiles.reserve(stairWorldPos.size());
@@ -115,10 +106,8 @@ void MineMiningController::generateNodesForFloor() {
         _stairs.push_back(sNode);
     }
 
-    MineralSystem mineralSystem(_map);
-    std::vector<Game::MineralData> minerals;
-    mineralSystem.generateNodesForFloor(minerals, selected, stairWorldPos);
-    for (const auto& m : minerals) {
+    _mineralSystem.generateNodesForFloor(_minerals, selected, stairWorldPos);
+    for (const auto& m : _minerals) {
         Node n;
         n.mineral = m;
         _nodes.push_back(n);
@@ -131,6 +120,7 @@ void MineMiningController::generateNodesForFloor() {
         m.sizeTiles = 1;
         m.pos = p;
         m.texture = "Rock/Rock1.png";
+        _minerals.push_back(m);
         Node n;
         n.mineral = m;
         _nodes.push_back(n);
@@ -154,10 +144,12 @@ void MineMiningController::generateNodesForFloor() {
 }
 
 bool MineMiningController::hitNearestNode(const Vec2& worldPos, int power) {
+    if (!_map) return false;
+    _mineralSystem.bindRuntimeStorage(&_minerals);
     int idx = -1;
     float best = 1e9f;
-    for (int i = 0; i < static_cast<int>(_nodes.size()); ++i) {
-        float d = _nodes[i].mineral.pos.distance(worldPos);
+    for (int i = 0; i < static_cast<int>(_minerals.size()); ++i) {
+        float d = _minerals[i].pos.distance(worldPos);
         if (d < best) {
             best = d;
             idx = i;
@@ -167,21 +159,46 @@ bool MineMiningController::hitNearestNode(const Vec2& worldPos, int power) {
     if (idx < 0 || best > ts * 0.6f) {
         return false;
     }
-    _nodes[idx].mineral.hp -= power;
-        if (_nodes[idx].node) {
-            _nodes[idx].node->applyDamage(power);
+
+    int tc = 0;
+    int tr = 0;
+    _map->worldToTileIndex(_minerals[idx].pos, tc, tr);
+    int hpBefore = _minerals[idx].hp;
+
+    auto spawnDrop = [](int, int, int item) {
+        auto inv = Game::globalState().inventory;
+        if (inv) {
+            inv->addItems(static_cast<Game::ItemType>(item), 1);
         }
-    if (_nodes[idx].mineral.hp > 0) {
+    };
+
+    auto setTileNoop = [](int, int, Game::TileType) {};
+
+    bool hit = _mineralSystem.damageAt(tc, tr, power, spawnDrop, setTileNoop);
+    if (!hit) {
+        return false;
+    }
+
+    bool destroyed = (hpBefore - power) <= 0;
+
+    if (!destroyed) {
+        if (idx >= 0 && idx < static_cast<int>(_nodes.size())) {
+            _nodes[idx].mineral.hp = hpBefore - power;
+            if (_nodes[idx].node) {
+                _nodes[idx].node->applyDamage(power);
+            }
+        }
         return true;
     }
 
-    Game::Mineral* deadNode = _nodes[idx].node;
-
-    if (auto inv = Game::globalState().inventory) {
-        Game::ItemType drop = Game::mineralDropItem(_nodes[idx].mineral.type);
-        inv->addItems(drop, 1);
+    Game::Mineral* deadNode = nullptr;
+    if (idx >= 0 && idx < static_cast<int>(_nodes.size())) {
+        deadNode = _nodes[idx].node;
+        _nodes.erase(_nodes.begin() + idx);
     }
-    _nodes.erase(_nodes.begin() + idx);
+    if (idx >= 0 && idx < static_cast<int>(_minerals.size())) {
+        _minerals.erase(_minerals.begin() + idx);
+    }
 
     if (_map) {
         std::vector<Rect> colliders;
@@ -226,8 +243,8 @@ void MineMiningController::syncExtraStairsToMap() {
                 break;
             }
         }
-        if (st.sprite) {
-            st.sprite->setVisible(!covered);
+        if (st.node) {
+            st.node->setVisible(!covered);
         }
         if (!covered) {
             usable.push_back(st.pos);
@@ -239,6 +256,10 @@ void MineMiningController::syncExtraStairsToMap() {
 void MineMiningController::refreshVisuals() {
     float s = static_cast<float>(GameConfig::TILE_SIZE);
     if (!_miningDraw && _worldNode) {
+        _miningDraw = DrawNode::create();
+        _worldNode->addChild(_miningDraw, 50);
+    } else if (_miningDraw && !_miningDraw->getParent() && _worldNode) {
+        _miningDraw->removeFromParent();
         _miningDraw = DrawNode::create();
         _worldNode->addChild(_miningDraw, 50);
     }
@@ -263,20 +284,20 @@ void MineMiningController::refreshVisuals() {
         }
     }
     for (auto &st : _stairs) {
-        if (!st.sprite) {
-            auto sp = Sprite::create("Maps/mine/stair.png");
-            if (!sp->getTexture()) continue;
-            auto cs = sp->getContentSize();
+        if (!st.node) {
+            auto stairNode = Game::Stair::create("Maps/mine/stair.png");
+            if (!stairNode) continue;
+            auto spriteSize = stairNode->spriteContentSize();
             float targetW = s;
             float targetH = s;
-            float sx = (cs.width > 0) ? (targetW / cs.width) : 1.0f;
-            float sy = (cs.height > 0) ? (targetH / cs.height) : 1.0f;
-            sp->setScale(std::min(sx, sy));
-            sp->setPosition(st.pos);
-            if (_worldNode) _worldNode->addChild(sp, 1);
-            st.sprite = sp;
+            float sx = (spriteSize.width > 0) ? (targetW / spriteSize.width) : 1.0f;
+            float sy = (spriteSize.height > 0) ? (targetH / spriteSize.height) : 1.0f;
+            stairNode->setScale(std::min(sx, sy));
+            stairNode->setPosition(st.pos);
+            if (_worldNode) _worldNode->addChild(stairNode, 1);
+            st.node = stairNode;
         } else {
-            st.sprite->setPosition(st.pos);
+            st.node->setPosition(st.pos);
         }
         if (_miningDraw) {
             float half = s * 0.5f;

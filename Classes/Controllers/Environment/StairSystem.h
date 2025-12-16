@@ -2,28 +2,16 @@
 
 #include "cocos2d.h"
 #include <vector>
-#include <unordered_map>
-#include "Controllers/Map/MineMapController.h"
-#include "Game/Mineral.h"
+#include <functional>
 #include "Controllers/Environment/EnvironmentObstacleSystemBase.h"
-#include "Game/GameConfig.h"
+#include "Controllers/Map/MineMapController.h"
 
 namespace Controllers {
 
-class MineralSystem : public EnvironmentObstacleSystemBase {
+class StairSystem : public EnvironmentObstacleSystemBase {
 public:
-    MineralSystem(MineMapController* map)
+    StairSystem(MineMapController* map)
     : _map(map) {}
-
-    void bindRuntimeStorage(std::vector<Game::MineralData>* minerals) { _runtime = minerals; }
-
-    void generateNodesForFloor(std::vector<Game::MineralData>& outNodes,
-                               const std::vector<cocos2d::Vec2>& candidates,
-                               const std::vector<cocos2d::Vec2>& stairWorldPos) const;
-
-    bool hitNearestNode(std::vector<Game::MineralData>& nodes,
-                        const cocos2d::Vec2& worldPos,
-                        int power) const;
 
     void attachTo(cocos2d::Node* root) override;
 
@@ -43,11 +31,15 @@ public:
 
     bool isEmpty() const override;
 
+    void generateStairs(const std::vector<cocos2d::Vec2>& candidates,
+                        int minCount,
+                        int maxCount,
+                        std::vector<cocos2d::Vec2>& outWorldPos) const;
+
 private:
     MineMapController* _map = nullptr;
     cocos2d::Node* _root = nullptr;
-    std::vector<Game::MineralData>* _runtime = nullptr;
-    std::unordered_map<long long, Game::Mineral*> _obstacles;
 };
 
 }
+

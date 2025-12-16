@@ -8,6 +8,10 @@ using namespace cocos2d;
 
 namespace Controllers {
 
+void MineralSystem::attachTo(Node* root) {
+    _root = root;
+}
+
 void MineralSystem::generateNodesForFloor(std::vector<Game::MineralData>& outNodes,
                                           const std::vector<Vec2>& candidates,
                                           const std::vector<Vec2>& stairWorldPos) const {
@@ -157,6 +161,52 @@ bool MineralSystem::hitNearestNode(std::vector<Game::MineralData>& nodes,
         return true;
     }
     return false;
+}
+
+bool MineralSystem::spawnFromTile(int, int, const Vec2&,
+                                  Game::FarmMap*, int) {
+    return false;
+}
+
+void MineralSystem::spawnRandom(int, int, int,
+                                const std::function<Vec2(int,int)>&,
+                                Game::FarmMap*, int,
+                                const std::function<bool(int,int)>&) {
+}
+
+bool MineralSystem::collides(const Vec2&, float, int) const {
+    return false;
+}
+
+bool MineralSystem::damageAt(int c, int r, int amount,
+                             const std::function<void(int,int,int)>& spawnDrop,
+                             const std::function<void(int,int, Game::TileType)>&) {
+    if (!_map || !_runtime || _runtime->empty()) return false;
+    Vec2 center = _map->tileToWorld(c, r);
+    int idx = -1;
+    float best = 1e9f;
+    for (int i = 0; i < static_cast<int>(_runtime->size()); ++i) {
+        float d = (*_runtime)[i].pos.distance(center);
+        if (d < best) {
+            best = d;
+            idx = i;
+        }
+    }
+    float ts = static_cast<float>(GameConfig::TILE_SIZE);
+    if (idx < 0 || best > ts * 0.6f) {
+        return false;
+    }
+    auto& m = (*_runtime)[idx];
+    m.hp -= amount;
+    if (m.hp <= 0 && spawnDrop) {
+        Game::ItemType drop = Game::mineralDropItem(m.type);
+        spawnDrop(c, r, static_cast<int>(drop));
+    }
+    return true;
+}
+
+bool MineralSystem::isEmpty() const {
+    return true;
 }
 
 }

@@ -382,6 +382,12 @@
     <ClCompile Include="..\Classes\Controllers\Environment\MineralSystem.cpp">
       <Filter>Classes\Controllers\Environment</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\Environment\StairSystem.cpp">
+      <Filter>Classes\Controllers\Environment</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\Stair.cpp">
+      <Filter>Classes\Game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <!-- Header Files -->
@@ -667,6 +673,12 @@
     </ClInclude>
     <ClInclude Include="..\Classes\Controllers\Environment\MineralSystem.h">
       <Filter>Classes\Controllers\Environment</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\Environment\StairSystem.h">
+      <Filter>Classes\Controllers\Environment</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\Stair.h">
+      <Filter>Classes\Game</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
