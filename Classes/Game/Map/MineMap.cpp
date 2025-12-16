@@ -4,6 +4,8 @@
 // - 解析矿石区域与怪物刷新点供上层系统生成内容
 #include "Game/Map/MineMap.h"
 
+#include <random>
+
 using namespace cocos2d;
 
 namespace Game {
@@ -12,6 +14,22 @@ MineMap* MineMap::create(const std::string& tmxFile) {
     MineMap* ret = new (std::nothrow) MineMap();
     if (ret && ret->initWithFile(tmxFile)) { ret->autorelease(); return ret; }
     CC_SAFE_DELETE(ret); return nullptr;
+}
+
+MineMap* MineMap::createEntrance() {
+    return MineMap::create("Maps/mine/mine_0.tmx");
+}
+
+MineMap* MineMap::createFloor(int floorIndex) {
+    std::string path;
+    if (floorIndex % 5 == 0) {
+        path = "Maps/mine/mine_bonusroom.tmx";
+    } else {
+        std::mt19937 rng{ std::random_device{}() };
+        std::uniform_int_distribution<int> dist(0, 1);
+        path = dist(rng) == 0 ? "Maps/mine/mine_corridor.tmx" : "Maps/mine/mine_room.tmx";
+    }
+    return MineMap::create(path);
 }
 
 bool MineMap::initWithFile(const std::string& tmxFile) {

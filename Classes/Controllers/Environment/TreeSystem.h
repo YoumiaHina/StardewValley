@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include <functional>
 #include "Game/Tree.h"
-#include "Game/Map/FarmMap.h"
+#include "Game/Map/IMapBase.h"
 #include "Game/Tile.h"
 #include "Controllers/Environment/EnvironmentObstacleSystemBase.h"
 
@@ -15,11 +15,11 @@ public:
     void attachTo(cocos2d::Node* root) override;
 
     bool spawnFromTile(int c, int r, const cocos2d::Vec2& tileCenter,
-                       Game::FarmMap* map, int tileSize) override;
+                       Game::IMapBase* map, int tileSize) override;
 
     void spawnRandom(int count, int cols, int rows,
                      const std::function<cocos2d::Vec2(int,int)>& tileToWorld,
-                     Game::FarmMap* map, int tileSize,
+                     Game::IMapBase* map, int tileSize,
                      const std::function<bool(int,int)>& isSafe) override;
 
     Game::Tree* findTreeAt(int c, int r) const;

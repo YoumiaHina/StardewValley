@@ -2,7 +2,7 @@
 
 #include "cocos2d.h"
 #include <functional>
-#include "Game/Map/FarmMap.h"
+#include "Game/Map/IMapBase.h"
 #include "Game/Tile.h"
 
 namespace Controllers {
@@ -14,11 +14,11 @@ public:
     virtual void attachTo(cocos2d::Node* root) = 0;
 
     virtual bool spawnFromTile(int c, int r, const cocos2d::Vec2& tileCenter,
-                               Game::FarmMap* map, int tileSize) = 0;
+                               Game::IMapBase* map, int tileSize) = 0;
 
     virtual void spawnRandom(int count, int cols, int rows,
                              const std::function<cocos2d::Vec2(int,int)>& tileToWorld,
-                             Game::FarmMap* map, int tileSize,
+                             Game::IMapBase* map, int tileSize,
                              const std::function<bool(int,int)>& isSafe) = 0;
 
     virtual bool collides(const cocos2d::Vec2& point, float radius, int tileSize) const = 0;
@@ -31,4 +31,3 @@ public:
 };
 
 }
-

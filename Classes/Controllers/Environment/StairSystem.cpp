@@ -1,4 +1,5 @@
 #include "Controllers/Environment/StairSystem.h"
+#include "Controllers/Map/MineMapController.h"
 #include "Game/GameConfig.h"
 #include <random>
 #include <algorithm>
@@ -12,13 +13,13 @@ void StairSystem::attachTo(Node* root) {
 }
 
 bool StairSystem::spawnFromTile(int, int, const Vec2&,
-                               Game::FarmMap*, int) {
+                               Game::IMapBase*, int) {
     return false;
 }
 
 void StairSystem::spawnRandom(int, int, int,
                               const std::function<Vec2(int,int)>&,
-                              Game::FarmMap*, int,
+                              Game::IMapBase*, int,
                               const std::function<bool(int,int)>&) {
 }
 

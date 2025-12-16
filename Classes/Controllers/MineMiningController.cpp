@@ -1,5 +1,4 @@
 #include "Controllers/MineMiningController.h"
-#include "Controllers/Environment/MineralSystem.h"
 #include "cocos2d.h"
 #include <random>
 using namespace cocos2d;
@@ -32,7 +31,8 @@ void MineMiningController::generateNodesForFloor() {
     _nodes.clear();
     _stairs.clear();
     _minerals.clear();
-    _mineralSystem.bindRuntimeStorage(&_minerals);
+    auto* mineralSystem = _map ? _map->mineralSystem() : nullptr;
+    if (mineralSystem) mineralSystem->bindRuntimeStorage(&_minerals);
     auto rects = _map->rockAreaRects();
     auto polys = _map->rockAreaPolys();
     std::vector<Vec2> candidates;
@@ -106,7 +106,7 @@ void MineMiningController::generateNodesForFloor() {
         _stairs.push_back(sNode);
     }
 
-    _mineralSystem.generateNodesForFloor(_minerals, selected, stairWorldPos);
+    if (mineralSystem) mineralSystem->generateNodesForFloor(_minerals, selected, stairWorldPos);
     for (const auto& m : _minerals) {
         Node n;
         n.mineral = m;
@@ -145,7 +145,9 @@ void MineMiningController::generateNodesForFloor() {
 
 bool MineMiningController::hitNearestNode(const Vec2& worldPos, int power) {
     if (!_map) return false;
-    _mineralSystem.bindRuntimeStorage(&_minerals);
+    auto* mineralSystem = _map->mineralSystem();
+    if (!mineralSystem) return false;
+    mineralSystem->bindRuntimeStorage(&_minerals);
     int idx = -1;
     float best = 1e9f;
     for (int i = 0; i < static_cast<int>(_minerals.size()); ++i) {
@@ -174,7 +176,7 @@ bool MineMiningController::hitNearestNode(const Vec2& worldPos, int power) {
 
     auto setTileNoop = [](int, int, Game::TileType) {};
 
-    bool hit = _mineralSystem.damageAt(tc, tr, power, spawnDrop, setTileNoop);
+    bool hit = mineralSystem->damageAt(tc, tr, power, spawnDrop, setTileNoop);
     if (!hit) {
         return false;
     }
