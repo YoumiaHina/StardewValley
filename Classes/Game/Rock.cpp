@@ -55,4 +55,8 @@ void Rock::playBreakAnimation(const std::function<void()>& onComplete) {
     _sprite->runAction(seq);
 }
 
+void Rock::playDestructionAnimation(const std::function<void()>& onComplete) {
+    playBreakAnimation(onComplete);
+}
+
 }

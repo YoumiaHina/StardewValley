@@ -2,20 +2,22 @@
 
 #include "cocos2d.h"
 #include <functional>
+#include "Game/EnvironmentObstacleBase.h"
 
 namespace Game {
 
-class Rock : public cocos2d::Node {
+class Rock : public EnvironmentObstacleBase {
 public:
     static Rock* create(const std::string& texture);
     bool initWithTexture(const std::string& texture);
 
-    void applyDamage(int amount);
-    int hp() const { return _hp; }
-    bool dead() const { return _hp <= 0; }
+    void applyDamage(int amount) override;
+    int hp() const override { return _hp; }
+    bool dead() const override { return _hp <= 0; }
 
-    cocos2d::Rect footRect() const;
+    cocos2d::Rect footRect() const override;
     void playBreakAnimation(const std::function<void()>& onComplete);
+    void playDestructionAnimation(const std::function<void()>& onComplete) override;
 
 private:
     cocos2d::Sprite* _sprite = nullptr;
@@ -29,4 +31,3 @@ struct RockPos {
 };
 
 }
-

@@ -184,7 +184,10 @@ void FarmMapController::init() {
                     _farmMap, GameConfig::TILE_SIZE,
                     [safe](int c, int r){ return safe(c, r); }
                 );
-                saved = _treeSystem->getAllTreeTiles();
+                auto treeSystemConcrete = static_cast<Controllers::TreeSystem*>(_treeSystem);
+                if (treeSystemConcrete) {
+                    saved = treeSystemConcrete->getAllTreeTiles();
+                }
             }
             ws.farmTrees = saved;
         }
@@ -342,21 +345,25 @@ void FarmMapController::sortActorWithEnvironment(cocos2d::Node* actor) {
     float s = tileSize();
     float footY = actor->getPositionY() - s * 0.5f; // player node is at tile center; use foot for sorting
     actor->setLocalZOrder(static_cast<int>(-footY));
-    if (_treeSystem) _treeSystem->sortTrees();
-    if (_rockSystem) _rockSystem->sortRocks();
+    auto treeSystemConcrete = static_cast<Controllers::TreeSystem*>(_treeSystem);
+    if (treeSystemConcrete) treeSystemConcrete->sortTrees();
+    auto rockSystemConcrete = static_cast<Controllers::RockSystem*>(_rockSystem);
+    if (rockSystemConcrete) rockSystemConcrete->sortRocks();
 }
 
 Game::Tree* FarmMapController::findTreeAt(int c, int r) const {
-    return _treeSystem ? _treeSystem->findTreeAt(c, r) : nullptr;
+    auto treeSystemConcrete = static_cast<Controllers::TreeSystem*>(_treeSystem);
+    return treeSystemConcrete ? treeSystemConcrete->findTreeAt(c, r) : nullptr;
 }
 
 bool FarmMapController::damageTreeAt(int c, int r, int amount) {
     if (!_treeSystem) return false;
-    bool ok = _treeSystem->damageTreeAt(c, r, amount,
-        [this](int c,int r,int item){ this->spawnDropAt(c, r, item, 3); this->refreshDropsVisuals(); },
-        [this](int c,int r, Game::TileType t){ this->setTile(c, r, t); }
+    bool ok = _treeSystem->damageAt(c, r, amount,
+        [this](int c2,int r2,int item){ this->spawnDropAt(c2, r2, item, 3); this->refreshDropsVisuals(); },
+        [this](int c2,int r2, Game::TileType t){ this->setTile(c2, r2, t); }
     );
-    if (ok && !_treeSystem->findTreeAt(c, r)) {
+    auto treeSystemConcrete = static_cast<Controllers::TreeSystem*>(_treeSystem);
+    if (ok && treeSystemConcrete && !treeSystemConcrete->findTreeAt(c, r)) {
         auto& ws = Game::globalState();
         std::vector<Game::TreePos> v;
         v.reserve(ws.farmTrees.size());
@@ -369,16 +376,18 @@ bool FarmMapController::damageTreeAt(int c, int r, int amount) {
 }
 
 Game::Rock* FarmMapController::findRockAt(int c, int r) const {
-    return _rockSystem ? _rockSystem->findRockAt(c, r) : nullptr;
+    auto rockSystemConcrete = static_cast<Controllers::RockSystem*>(_rockSystem);
+    return rockSystemConcrete ? rockSystemConcrete->findRockAt(c, r) : nullptr;
 }
 
 bool FarmMapController::damageRockAt(int c, int r, int amount) {
     if (!_rockSystem) return false;
-    bool ok = _rockSystem->damageRockAt(c, r, amount,
-        [this](int c,int r,int item){ this->spawnDropAt(c, r, item, 1); this->refreshDropsVisuals(); },
-        [this](int c,int r, Game::TileType t){ this->setTile(c, r, t); }
+    bool ok = _rockSystem->damageAt(c, r, amount,
+        [this](int c2,int r2,int item){ this->spawnDropAt(c2, r2, item, 1); this->refreshDropsVisuals(); },
+        [this](int c2,int r2, Game::TileType t){ this->setTile(c2, r2, t); }
     );
-    if (ok && !_rockSystem->findRockAt(c, r)) {
+    auto rockSystemConcrete = static_cast<Controllers::RockSystem*>(_rockSystem);
+    if (ok && rockSystemConcrete && !rockSystemConcrete->findRockAt(c, r)) {
         auto& ws = Game::globalState();
         std::vector<Game::RockPos> v;
         v.reserve(ws.farmRocks.size());

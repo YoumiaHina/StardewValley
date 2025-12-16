@@ -44,4 +44,8 @@ void Tree::playFallAnimation(const std::function<void()>& onComplete) {
     _sprite->runAction(seq);
 }
 
+void Tree::playDestructionAnimation(const std::function<void()>& onComplete) {
+    playFallAnimation(onComplete);
+}
+
 }

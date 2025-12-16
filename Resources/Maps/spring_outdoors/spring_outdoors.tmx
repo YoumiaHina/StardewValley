@@ -364,7 +364,7 @@
   <object id="22" x="784" y="176" width="16" height="159.333"/>
   <object id="24" x="480" y="144" width="320.667" height="30.6667"/>
   <object id="25" x="799.333" y="0" width="17.3333" height="175.333"/>
-  <object id="26" x="-1.33333" y="-0.666667" width="415.333" height="157.333"/>
+  <object id="26" x="-1.33333" y="-0.666667" width="415.333" height="160"/>
   <object id="27" x="463.333" y="-0.666667" width="6.66667" height="143.333"/>
   <object id="28" x="470" y="74.6667" width="44.6667" height="68"/>
   <object id="29" x="515.333" y="84.6667" width="12.6667" height="59.3333"/>
@@ -380,9 +380,9 @@
   <object id="42" x="936.667" y="934" width="342.667" height="17.3333"/>
   <object id="43" x="1002" y="917.333" width="277.333" height="13.3333"/>
   <object id="44" x="1066" y="901.333" width="214.667" height="12.6667"/>
-  <object id="45" x="816.667" y="147.333" width="416.667" height="26.6667"/>
+  <object id="45" x="816.667" y="147.333" width="416.667" height="28.6667"/>
   <object id="46" x="1232" y="146.667" width="14" height="144.667"/>
-  <object id="47" x="1230" y="290.667" width="51.3333" height="27.3333"/>
+  <object id="47" x="1230" y="290.667" width="51.3333" height="29.3333"/>
   <object id="48" x="1214.67" y="370.667" width="65.3333" height="26.6667"/>
  </objectgroup>
  <objectgroup id="14" name="Building">

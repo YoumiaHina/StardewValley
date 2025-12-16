@@ -98,6 +98,12 @@ bool RockSystem::damageRockAt(int c, int r, int amount,
     return true;
 }
 
+bool RockSystem::damageAt(int c, int r, int amount,
+                          const std::function<void(int,int,int)>& spawnDrop,
+                          const std::function<void(int,int, Game::TileType)>& setTile) {
+    return damageRockAt(c, r, amount, spawnDrop, setTile);
+}
+
 void RockSystem::sortRocks() {
     for (auto& kv : _rocks) {
         if (kv.second) kv.second->setLocalZOrder(static_cast<int>(-kv.second->getPositionY()));

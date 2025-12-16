@@ -100,6 +100,12 @@ bool TreeSystem::damageTreeAt(int c, int r, int amount,
     return true;
 }
 
+bool TreeSystem::damageAt(int c, int r, int amount,
+                          const std::function<void(int,int,int)>& spawnDrop,
+                          const std::function<void(int,int, Game::TileType)>& setTile) {
+    return damageTreeAt(c, r, amount, spawnDrop, setTile);
+}
+
 void TreeSystem::sortTrees() {
     for (auto& kv : _trees) {
         if (kv.second) kv.second->setLocalZOrder(static_cast<int>(-kv.second->getPositionY()));

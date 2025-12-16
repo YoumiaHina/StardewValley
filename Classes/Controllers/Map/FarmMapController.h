@@ -19,6 +19,7 @@
 #include "Game/Rock.h"
 #include "Controllers/Environment/TreeSystem.h"
 #include "Controllers/Environment/RockSystem.h"
+#include "Controllers/Environment/EnvironmentObstacleSystemBase.h"
 #include "Controllers/TileSelector.h"
 #include "Controllers/Systems/ChestController.h"
 
@@ -108,8 +109,8 @@ private:
     std::unordered_map<long long, cocos2d::Sprite*> _tileSprites;
     std::unordered_map<long long, cocos2d::Sprite*> _waterSprites;
     cocos2d::Node* _actorsRoot = nullptr;
-    Controllers::TreeSystem* _treeSystem = nullptr;
-    Controllers::RockSystem* _rockSystem = nullptr;
+    Controllers::EnvironmentObstacleSystemBase* _treeSystem = nullptr;
+    Controllers::EnvironmentObstacleSystemBase* _rockSystem = nullptr;
     cocos2d::Vec2 _lastClickWorldPos = cocos2d::Vec2::ZERO;
     bool _hasLastClick = false;
 
