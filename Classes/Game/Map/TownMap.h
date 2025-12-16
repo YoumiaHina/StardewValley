@@ -18,6 +18,10 @@ public:
     cocos2d::Vec2 doorToFarmCenter() const;
 
 private:
+    cocos2d::TMXLayer* _bgLayer = nullptr;
+    cocos2d::TMXLayer* _houseBodyLayer = nullptr;
+    cocos2d::TMXLayer* _houseTopLayer = nullptr;
+
     std::vector<cocos2d::Rect> _wallRects;
     std::vector<std::vector<cocos2d::Vec2>> _wallPolys;
     cocos2d::DrawNode* _wallDebug = nullptr;
@@ -28,6 +32,7 @@ private:
 
     void parseWalls();
     void parseDoorToFarm();
+    void setupLayerOrder();
 };
 
 } // namespace Game

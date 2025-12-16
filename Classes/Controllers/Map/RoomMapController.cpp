@@ -77,25 +77,34 @@ Size RoomMapController::getContentSize() const {
 }
 
 Vec2 RoomMapController::clampPosition(const Vec2& current, const Vec2& next, float radius) const {
-    float pad = 16.0f;
+    float s = static_cast<float>(GameConfig::TILE_SIZE);
     Vec2 candidate = next;
-    candidate.x = std::max(_roomRect.getMinX() + pad, std::min(_roomRect.getMaxX() - pad, candidate.x));
-    candidate.y = std::max(_roomRect.getMinY() + pad, std::min(_roomRect.getMaxY() - pad, candidate.y));
-    // 基于对象层碰撞采样（脚下）
+    candidate.x = std::max(_roomRect.getMinX() + s * 0.5f,
+                           std::min(_roomRect.getMaxX() - s * 0.5f, candidate.x));
+    candidate.y = std::max(_roomRect.getMinY() + s * 0.5f,
+                           std::min(_roomRect.getMaxY() - s * 0.5f, candidate.y));
+
+    Vec2 tryX(candidate.x, current.y);
     if (_roomMap) {
-        Vec2 footX(candidate.x, current.y);
-        if (_roomMap->collides(footX + Vec2(0, -pad * 0.5f), radius)) {
-            candidate.x = current.x;
-        }
-        Vec2 footY(current.x, candidate.y);
-        if (_roomMap->collides(footY + Vec2(0, -pad * 0.5f), radius)) {
-            candidate.y = current.y;
+        Vec2 footX = tryX + Vec2(0, -s * 0.5f);
+        if (_roomMap->collides(footX, radius)) {
+            tryX.x = current.x;
         }
     }
-    if (_chestController && _chestController->collides(Vec2(candidate.x, candidate.y))) {
+
+    Vec2 tryY(current.x, candidate.y);
+    if (_roomMap) {
+        Vec2 footY = tryY + Vec2(0, -s * 0.5f);
+        if (_roomMap->collides(footY, radius)) {
+            tryY.y = current.y;
+        }
+    }
+
+    Vec2 finalPos(tryX.x, tryY.y);
+    if (_chestController && _chestController->collides(finalPos)) {
         return current;
     }
-    return candidate;
+    return finalPos;
 }
 
 bool RoomMapController::isNearDoor(const Vec2& playerWorldPos) const {

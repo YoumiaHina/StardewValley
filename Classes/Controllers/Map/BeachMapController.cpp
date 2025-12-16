@@ -34,23 +34,36 @@ void BeachMapController::addActorToMap(Node* node, int zOrder) {
 }
 
 Vec2 BeachMapController::clampPosition(const Vec2& current, const Vec2& next, float radius) const {
+    if (!_map) return next;
     float s = tileSize();
     Size ms = _map->getContentSize();
     float minX = s * 0.5f;
     float minY = s * 0.5f;
     float maxX = ms.width - s * 0.5f;
     float maxY = ms.height - s * 0.5f;
-    Vec2 candidate(std::max(minX, std::min(next.x, maxX)),
-                   std::max(minY, std::min(next.y, maxY)));
-    Vec2 footX(candidate.x, current.y);
-    if (collides(footX, radius)) {
-        candidate.x = current.x;
+    Vec2 candidate(
+        std::max(minX, std::min(maxX, next.x)),
+        std::max(minY, std::min(maxY, next.y)));
+
+    Vec2 tryX(candidate.x, current.y);
+    Vec2 footX = tryX + Vec2(0, -s * 0.5f);
+    if (_map->collides(footX, radius)) {
+        tryX.x = current.x;
     }
-    Vec2 footY(current.x, candidate.y);
-    if (collides(footY, radius)) {
-        candidate.y = current.y;
+
+    Vec2 tryY(current.x, candidate.y);
+    Vec2 footY = tryY + Vec2(0, -s * 0.5f);
+    if (_map->collides(footY, radius)) {
+        tryY.y = current.y;
     }
-    return candidate;
+
+    Vec2 finalPos(tryX.x, tryY.y);
+    for (const auto& ch : _chests) {
+        if (Game::chestCollisionRect(ch).containsPoint(finalPos)) {
+            return current;
+        }
+    }
+    return finalPos;
 }
 
 std::pair<int,int> BeachMapController::targetTile(const Vec2& playerPos, const Vec2& lastDir) const {

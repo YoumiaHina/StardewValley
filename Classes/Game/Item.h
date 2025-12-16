@@ -66,38 +66,6 @@ inline const char* itemName(ItemType t) {
     }
 }
 
-// 中文名称（UI显示）
-inline const char* itemNameZH(ItemType t) {
-    switch (t) {
-        case ItemType::Wood:  return "木材";
-        case ItemType::Stone: return "石头";
-        case ItemType::Fiber: return "纤维";
-        case ItemType::Chest: return "箱子";
-        case ItemType::Parsnip: return "防风草";
-        case ItemType::ParsnipSeed: return "防风草种子";
-        case ItemType::Blueberry: return "蓝莓";
-        case ItemType::BlueberrySeed: return "蓝莓种子";
-        case ItemType::Eggplant: return "茄子";
-        case ItemType::EggplantSeed: return "茄子种子";
-        case ItemType::Corn: return "玉米";
-        case ItemType::CornSeed: return "玉米种子";
-        case ItemType::Strawberry: return "草莓";
-        case ItemType::StrawberrySeed: return "草莓种子";
-        case ItemType::Fish: return "鱼";
-        case ItemType::Coal: return "煤炭";
-        case ItemType::CopperGrain: return "铜矿粒";
-        case ItemType::CopperIngot: return "铜锭";
-        case ItemType::IronGrain:   return "铁矿粒";
-        case ItemType::IronIngot:   return "铁锭";
-        case ItemType::GoldGrain:   return "金矿粒";
-        case ItemType::GoldIngot:   return "金锭";
-        case ItemType::Egg: return "鸡蛋";
-        case ItemType::Milk: return "牛奶";
-        case ItemType::Wool: return "羊毛";
-        default: return "未知";
-    }
-}
-
 // 物品代表颜色（用于掉落渲染）
 inline cocos2d::Color4F itemColor(ItemType t) {
     using cocos2d::Color4F;

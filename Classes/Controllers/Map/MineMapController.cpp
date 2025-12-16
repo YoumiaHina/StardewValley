@@ -23,19 +23,31 @@ cocos2d::Vec2 MineMapController::clampPosition(const Vec2& current, const Vec2& 
     float maxY = content.height - s * 0.5f;
     candidate.x = std::max(minX, std::min(maxX, candidate.x));
     candidate.y = std::max(minY, std::min(maxY, candidate.y));
-    auto collidesFn = [this](const Vec2& p, float r){
+
+    auto collidesBase = [this](const Vec2& p, float r) {
         bool base = false;
         if (_entrance) base = _entrance->collides(p, r);
         else if (_floorMap) base = _floorMap->collides(p, r);
         if (base) return true;
-        for (const auto& rc : _dynamicColliders) { if (rc.containsPoint(p)) return true; }
+        for (const auto& rc : _dynamicColliders) {
+            if (rc.containsPoint(p)) return true;
+        }
         return false;
     };
-    Vec2 foot(candidate.x, current.y);
-    if (collidesFn(foot + Vec2(0, -s * 0.5f), radius)) candidate.x = current.x;
-    foot = Vec2(current.x, candidate.y);
-    if (collidesFn(foot + Vec2(0, -s * 0.5f), radius)) candidate.y = current.y;
-    return candidate;
+
+    Vec2 tryX(candidate.x, current.y);
+    Vec2 footX = tryX + Vec2(0, -s * 0.5f);
+    if (collidesBase(footX, radius)) {
+        tryX.x = current.x;
+    }
+
+    Vec2 tryY(current.x, candidate.y);
+    Vec2 footY = tryY + Vec2(0, -s * 0.5f);
+    if (collidesBase(footY, radius)) {
+        tryY.y = current.y;
+    }
+
+    return Vec2(tryX.x, tryY.y);
 }
 
 bool MineMapController::isNearDoor(const Vec2& playerWorldPos) const {

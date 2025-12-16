@@ -17,6 +17,7 @@ TownMap* TownMap::create(const std::string& tmxFile) {
 
 bool TownMap::initWithFile(const std::string& tmxFile) {
     if (!MapBase::initWithFile(tmxFile)) return false;
+    setupLayerOrder();
     parseWalls();
     parseDoorToFarm();
     return true;
@@ -68,6 +69,17 @@ void TownMap::parseDoorToFarm() {
             _doorDebug->drawDot(Vec2(x, y), 3.0f, Color4F(1, 1, 0, 0.8f));
         }
     }
+}
+
+void TownMap::setupLayerOrder() {
+    if (!_tmx) return;
+    _bgLayer = _tmx->getLayer("Background");
+    _houseBodyLayer = _tmx->getLayer("HouseBody");
+    _houseTopLayer = _tmx->getLayer("HouseTop");
+
+    if (_bgLayer) _tmx->reorderChild(_bgLayer, 0);
+    if (_houseBodyLayer) _tmx->reorderChild(_houseBodyLayer, 10);
+    if (_houseTopLayer) _tmx->reorderChild(_houseTopLayer, 30);
 }
 
 } // namespace Game
