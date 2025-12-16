@@ -1,4 +1,4 @@
-#include "Controllers/Environment/TreeSystem.h"
+#include "Controllers/Environment/RockSystem.h"
 #include "Game/GameConfig.h"
 #include "Game/Item.h"
 #include <random>
@@ -10,27 +10,27 @@ using namespace Game;
 
 namespace Controllers {
 
-void TreeSystem::attachTo(Node* root) {
+void RockSystem::attachTo(Node* root) {
     _root = root;
 }
 
-bool TreeSystem::spawnFromTile(int c, int r, const Vec2& tileCenter,
+bool RockSystem::spawnFromTile(int c, int r, const Vec2& tileCenter,
                                FarmMap* map, int tileSize) {
     if (!_root) return false;
     float s = static_cast<float>(tileSize);
     Vec2 footCenter = tileCenter + Vec2(0, -s * 0.5f);
     bool blocked = map && map->collides(footCenter, 8.0f);
     if (blocked) return false;
-    auto tree = Tree::create("Tree/tree.png");
-    if (!tree) return false;
-    tree->setPosition(footCenter);
-    _root->addChild(tree, 0);
+    auto rock = Rock::create("FarmEnvironment/rock.png");
+    if (!rock) return false;
+    rock->setPosition(footCenter);
+    _root->addChild(rock, 0);
     long long key = (static_cast<long long>(r) << 32) | static_cast<unsigned long long>(c);
-    _trees[key] = tree;
+    _rocks[key] = rock;
     return true;
 }
 
-void TreeSystem::spawnRandom(int count, int cols, int rows,
+void RockSystem::spawnRandom(int count, int cols, int rows,
                              const std::function<Vec2(int,int)>& tileToWorld,
                              FarmMap* map, int tileSize,
                              const std::function<bool(int,int)>& isSafe) {
@@ -46,32 +46,30 @@ void TreeSystem::spawnRandom(int count, int cols, int rows,
         Vec2 center = tileToWorld ? tileToWorld(c, r) : Vec2::ZERO;
         float s = static_cast<float>(tileSize);
         Vec2 footCenter = center + Vec2(0, -s * 0.5f);
-        if (map && map->inBuildingArea(footCenter)) continue;
         bool blocked = map && map->collides(footCenter, 8.0f);
         if (blocked) continue;
-        auto tree = Tree::create("Tree/tree.png");
-        if (!tree) continue;
-        tree->setPosition(footCenter);
-        _root->addChild(tree, 0);
+        auto rock = Rock::create("FarmEnvironment/rock.png");
+        if (!rock) continue;
+        rock->setPosition(footCenter);
+        _root->addChild(rock, 0);
         long long key = (static_cast<long long>(r) << 32) | static_cast<unsigned long long>(c);
-        _trees[key] = tree;
+        _rocks[key] = rock;
     }
 }
 
-Game::Tree* TreeSystem::findTreeAt(int c, int r) const {
+Game::Rock* RockSystem::findRockAt(int c, int r) const {
     long long k = (static_cast<long long>(r) << 32) | static_cast<unsigned long long>(c);
-    auto it = _trees.find(k);
-    if (it != _trees.end()) return it->second;
+    auto it = _rocks.find(k);
+    if (it != _rocks.end()) return it->second;
     return nullptr;
 }
 
-bool TreeSystem::collides(const Vec2& p, float radius, int /*tileSize*/) const {
+bool RockSystem::collides(const Vec2& p, float radius, int) const {
     float r2 = radius * radius;
-    for (const auto& pair : _trees) {
-        Game::Tree* tree = pair.second;
-        if (!tree) continue;
-        
-        Rect rect = tree->footRect();
+    for (const auto& pair : _rocks) {
+        Game::Rock* rock = pair.second;
+        if (!rock) continue;
+        Rect rect = rock->footRect();
         float cx = std::max(rect.getMinX(), std::min(p.x, rect.getMaxX()));
         float cy = std::max(rect.getMinY(), std::min(p.y, rect.getMaxY()));
         float dx = p.x - cx;
@@ -81,43 +79,43 @@ bool TreeSystem::collides(const Vec2& p, float radius, int /*tileSize*/) const {
     return false;
 }
 
-bool TreeSystem::damageTreeAt(int c, int r, int amount,
+bool RockSystem::damageRockAt(int c, int r, int amount,
                               const std::function<void(int,int,int)>& spawnDrop,
                               const std::function<void(int,int, Game::TileType)>& setTile) {
-    auto t = findTreeAt(c, r);
-    if (!t) return false;
-    t->applyDamage(amount);
-    if (t->dead()) {
+    auto rock = findRockAt(c, r);
+    if (!rock) return false;
+    rock->applyDamage(amount);
+    if (rock->dead()) {
         long long k = (static_cast<long long>(r) << 32) | static_cast<unsigned long long>(c);
-        _trees.erase(k);
+        _rocks.erase(k);
         if (setTile) setTile(c, r, Game::TileType::Soil);
-        t->playFallAnimation([t, c, r, spawnDrop]{
-            t->removeFromParent();
-            if (spawnDrop) spawnDrop(c, r, static_cast<int>(Game::ItemType::Wood));
+        rock->playBreakAnimation([rock, c, r, spawnDrop]{
+            if (spawnDrop) spawnDrop(c, r, static_cast<int>(Game::ItemType::Stone));
+            rock->removeFromParent();
         });
         return true;
     }
     return true;
 }
 
-void TreeSystem::sortTrees() {
-    for (auto& kv : _trees) {
+void RockSystem::sortRocks() {
+    for (auto& kv : _rocks) {
         if (kv.second) kv.second->setLocalZOrder(static_cast<int>(-kv.second->getPositionY()));
     }
 }
 
-bool TreeSystem::isEmpty() const {
-    return _trees.empty();
+bool RockSystem::isEmpty() const {
+    return _rocks.empty();
 }
 
-std::vector<Game::TreePos> TreeSystem::getAllTreeTiles() const {
-    std::vector<Game::TreePos> out;
-    out.reserve(_trees.size());
-    for (const auto& kv : _trees) {
+std::vector<Game::RockPos> RockSystem::getAllRockTiles() const {
+    std::vector<Game::RockPos> out;
+    out.reserve(_rocks.size());
+    for (const auto& kv : _rocks) {
         long long k = kv.first;
         int r = static_cast<int>(k >> 32);
         int c = static_cast<int>(k & 0xFFFFFFFF);
-        out.push_back(Game::TreePos{c, r});
+        out.push_back(Game::RockPos{c, r});
     }
     return out;
 }

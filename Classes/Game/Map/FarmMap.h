@@ -37,7 +37,8 @@ public:
     cocos2d::Vec2 doorToRoomCenter() const;
     cocos2d::Vec2 doorToBeachCenter() const;
     cocos2d::Vec2 doorToTownCenter() const;
-    bool inNoTreeArea(const cocos2d::Vec2& p) const;
+    bool inBuildingArea(const cocos2d::Vec2& p) const;
+    bool inWallArea(const cocos2d::Vec2& p) const;
 
 private:
     cocos2d::TMXLayer* _bgLayer = nullptr;
@@ -56,8 +57,8 @@ private:
     std::vector<cocos2d::Rect> _doorToBeachRects;
     std::vector<cocos2d::Rect> _doorToTownRects;
     cocos2d::DrawNode* _doorDebugNode = nullptr;
-    std::vector<cocos2d::Rect> _noTreeRects;
-    std::vector<std::vector<cocos2d::Vec2>> _noTreePolygons;
+    std::vector<cocos2d::Rect> _buildingRects;
+    std::vector<std::vector<cocos2d::Vec2>> _buildingPolygons;
 
     void setupLayerOrder();
     void parseWalls();
@@ -66,7 +67,7 @@ private:
     void parseDoorToMine();
     void parseDoorToBeach();
     void parseDoorToTown();
-    void parseNoTree();
+    void parseBuilding();
 };
 
 } // namespace Game

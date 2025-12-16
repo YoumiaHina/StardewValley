@@ -15,6 +15,7 @@
 #include "Game/GameConfig.h"
 #include "Game/Crop.h"
 #include "Game/Tree.h"
+#include "Game/Rock.h"
 #include "Game/Animal.h"
 
 namespace Game {
@@ -46,6 +47,7 @@ struct WorldState {
     std::vector<Crop> farmCrops;
 
     std::vector<TreePos> farmTrees;
+    std::vector<RockPos> farmRocks;
 
     std::vector<Animal> farmAnimals;
 

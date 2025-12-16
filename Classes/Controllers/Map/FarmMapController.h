@@ -16,7 +16,9 @@
 #include "Game/Crop.h"
 #include "Game/WorldState.h"
 #include "Game/Tree.h"
+#include "Game/Rock.h"
 #include "Controllers/Environment/TreeSystem.h"
+#include "Controllers/Environment/RockSystem.h"
 #include "Controllers/TileSelector.h"
 #include "Controllers/Systems/ChestController.h"
 
@@ -107,8 +109,11 @@ private:
     std::unordered_map<long long, cocos2d::Sprite*> _waterSprites;
     cocos2d::Node* _actorsRoot = nullptr;
     Controllers::TreeSystem* _treeSystem = nullptr;
+    Controllers::RockSystem* _rockSystem = nullptr;
     cocos2d::Vec2 _lastClickWorldPos = cocos2d::Vec2::ZERO;
     bool _hasLastClick = false;
+
+    void applyStaticNotSoilMask();
 
 
     // 接口扩展：湖边判定
@@ -116,7 +121,9 @@ public:
     bool isNearLake(const cocos2d::Vec2& playerWorldPos, float radius) const override;
     void sortActorWithEnvironment(cocos2d::Node* actor) override;
     bool damageTreeAt(int c, int r, int amount) override;
+    bool damageRockAt(int c, int r, int amount) override;
     Game::Tree* findTreeAt(int c, int r) const;
+    Game::Rock* findRockAt(int c, int r) const;
     bool isFarm() const override { return true; }
     void setLastClickWorldPos(const cocos2d::Vec2& p) override { _lastClickWorldPos = p; _hasLastClick = true; }
     void clearLastClickWorldPos() override { _hasLastClick = false; }

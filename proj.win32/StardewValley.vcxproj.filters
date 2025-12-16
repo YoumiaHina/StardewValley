@@ -370,6 +370,12 @@
     <ClCompile Include="..\Classes\Controllers\Systems\ChestController.cpp">
       <Filter>Classes\Controllers\Systems</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\Game\Rock.cpp">
+      <Filter>Classes\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\Environment\RockSystem.cpp">
+      <Filter>Classes\Controllers\Environment</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <!-- Header Files -->
@@ -446,9 +452,6 @@
       <Filter>Classes\Game</Filter>
     </ClInclude>
     <!-- Controllers headers -->
-    <ClInclude Include="..\Classes\Controllers\IMapController.h">
-      <Filter>Classes\Controllers</Filter>
-    </ClInclude>
     <ClInclude Include="..\Classes\Controllers\Input\PlayerController.h">
       <Filter>Classes\Controllers\Input</Filter>
     </ClInclude>
@@ -635,6 +638,17 @@
     </ClInclude>
     <ClInclude Include="..\Classes\Controllers\Systems\ChestController.h">
       <Filter>Classes\Controllers\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\NPC\PierreNpc.h" />
+    <ClInclude Include="..\Classes\Game\NPC\RobinNpc.h" />
+    <ClInclude Include="..\Classes\Game\Rock.h">
+      <Filter>Classes\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\Environment\RockSystem.h">
+      <Filter>Classes\Controllers\Environment</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\IMapController.h">
+      <Filter>Classes\Controllers\Map</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -10,7 +10,8 @@ enum class TileType {
     Tilled,    // hoed soil
     Watered,   // watered tilled soil
     Rock,      // obstacle removable by pickaxe
-    Tree       // obstacle removable by axe
+    Tree,      // obstacle removable by axe
+    NotSoil    // non-tillable, no Rock/Tree generation
 };
 
 } // namespace Game

@@ -33,9 +33,10 @@ std::string Pickaxe::use(Controllers::IMapController* map,
     if (!map->inBounds(tc, tr)) return std::string("");
     Vec2 targetWorld = map->tileToWorld(tc, tr);
     std::string msg;
-    // 优先走矿洞采掘接口；农场则走原有瓦片逻辑
     if (map->applyPickaxeAt(targetWorld, 1)) {
         msg = std::string("Hit!");
+    } else if (map->damageRockAt(tc, tr, 1)) {
+        msg = std::string("Mine!");
     } else if (map->isFarm()) {
         auto current = map->getTile(tc, tr);
         if (current == Game::TileType::Rock) {

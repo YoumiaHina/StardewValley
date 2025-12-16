@@ -34,6 +34,7 @@ void FarmMapController::init() {
     auto &ws = Game::globalState();
     if (ws.farmTiles.empty()) {
         _tiles.assign(_cols * _rows, Game::TileType::Soil);
+        applyStaticNotSoilMask();
         int cx = _cols / 2;
         int cy = _rows / 2;
         auto safe = [cx, cy](int c, int r){ return std::abs(c - cx) <= 4 && std::abs(r - cy) <= 4; };
@@ -47,7 +48,7 @@ void FarmMapController::init() {
             if (t == Game::TileType::Tree && _farmMap) {
                 auto center = this->tileToWorld(c, r);
                 cocos2d::Vec2 footCenter = center + cocos2d::Vec2(0, -static_cast<float>(GameConfig::TILE_SIZE) * 0.5f);
-                if (_farmMap->inNoTreeArea(footCenter)) return;
+                if (_farmMap->inBuildingArea(footCenter)) return;
             }
             setTile(c, r, t);
         };
@@ -64,6 +65,7 @@ void FarmMapController::init() {
         // 如果 WorldState 中未保存尺寸（旧存档兼容），则补全
         if (ws.farmCols == 0) ws.farmCols = _cols;
         if (ws.farmRows == 0) ws.farmRows = _rows;
+        applyStaticNotSoilMask();
     }
 
     _mapDraw = DrawNode::create();
@@ -130,6 +132,8 @@ void FarmMapController::init() {
 
     _treeSystem = new Controllers::TreeSystem();
     _treeSystem->attachTo(_actorsRoot);
+    _rockSystem = new Controllers::RockSystem();
+    _rockSystem->attachTo(_actorsRoot);
 
     refreshMapVisuals();
     refreshDropsVisuals();
@@ -149,7 +153,7 @@ void FarmMapController::init() {
                     if (getTile(c, r) == Game::TileType::Tree) {
                         auto center = tileToWorld(c, r);
                         Vec2 footCenter = center + Vec2(0, -static_cast<float>(GameConfig::TILE_SIZE) * 0.5f);
-                        bool skip = _farmMap && _farmMap->inNoTreeArea(footCenter);
+                        bool skip = _farmMap && _farmMap->inBuildingArea(footCenter);
                         if (skip) continue;
                         if (_treeSystem->spawnFromTile(c, r, center, _farmMap, GameConfig::TILE_SIZE)) {
                             setTile(c, r, Game::TileType::Soil);
@@ -164,10 +168,13 @@ void FarmMapController::init() {
                 int cy = _rows / 2;
                 auto safe = [this, cx, cy](int c, int r){
                     if (std::abs(c - cx) <= 4 && std::abs(r - cy) <= 4) return true;
+                    if (!inBounds(c, r)) return true;
+                    auto t = getTile(c, r);
+                    if (t == Game::TileType::NotSoil) return true;
                     if (_farmMap) {
                         auto center = this->tileToWorld(c, r);
                         Vec2 footCenter = center + Vec2(0, -static_cast<float>(GameConfig::TILE_SIZE) * 0.5f);
-                        if (_farmMap->inNoTreeArea(footCenter)) return true;
+                        if (_farmMap->inBuildingArea(footCenter)) return true;
                     }
                     return false;
                 };
@@ -183,6 +190,29 @@ void FarmMapController::init() {
         }
     }
 
+    if (_rockSystem && _rockSystem->isEmpty()) {
+        if (!ws.farmRocks.empty()) {
+            for (const auto& rp : ws.farmRocks) {
+                auto center = tileToWorld(rp.c, rp.r);
+                _rockSystem->spawnFromTile(rp.c, rp.r, center, _farmMap, GameConfig::TILE_SIZE);
+            }
+        } else {
+            std::vector<Game::RockPos> savedRocks;
+            for (int r = 0; r < _rows; ++r) {
+                for (int c = 0; c < _cols; ++c) {
+                    if (getTile(c, r) == Game::TileType::Rock) {
+                        auto center = tileToWorld(c, r);
+                        if (_rockSystem->spawnFromTile(c, r, center, _farmMap, GameConfig::TILE_SIZE)) {
+                            setTile(c, r, Game::TileType::Soil);
+                            savedRocks.push_back(Game::RockPos{c, r});
+                        }
+                    }
+                }
+            }
+            ws.farmRocks = savedRocks;
+        }
+    }
+
     // 门口区域
     float s = static_cast<float>(GameConfig::TILE_SIZE);
     float doorW = s * 2.0f;
@@ -190,6 +220,31 @@ void FarmMapController::init() {
     float dx = (_cols * s) * 0.5f - doorW * 0.5f;
     float dy = s * 0.5f - doorH * 0.5f;
     _farmDoorRect = Rect(dx, dy, doorW, doorH);
+}
+
+void FarmMapController::applyStaticNotSoilMask() {
+    if (!_farmMap) return;
+    float s = tileSize();
+    bool changed = false;
+    for (int r = 0; r < _rows; ++r) {
+        for (int c = 0; c < _cols; ++c) {
+            auto current = _tiles[r * _cols + c];
+            if (current != Game::TileType::Soil &&
+                current != Game::TileType::Tilled &&
+                current != Game::TileType::Watered) {
+                continue;
+            }
+            auto center = tileToWorld(c, r);
+            Vec2 footCenter = center + Vec2(0, -s * 0.5f);
+            if (_farmMap->inBuildingArea(footCenter) || _farmMap->inWallArea(footCenter)) {
+                _tiles[r * _cols + c] = Game::TileType::NotSoil;
+                changed = true;
+            }
+        }
+    }
+    if (changed) {
+        Game::globalState().farmTiles = _tiles;
+    }
 }
 
 Size FarmMapController::getContentSize() const {
@@ -214,10 +269,14 @@ Vec2 FarmMapController::clampPosition(const Vec2& current, const Vec2& next, flo
         Vec2 footX = tryX + Vec2(0, -s * 0.5f);
         bool baseBlockedX = _farmMap->collides(footX, radius);
         bool treeBlockedX = false;
+        bool rockBlockedX = false;
         if (_treeSystem) {
             treeBlockedX = _treeSystem->collides(footX, radius * 0.75f, GameConfig::TILE_SIZE);
         }
-        if (baseBlockedX || treeBlockedX) {
+        if (_rockSystem) {
+            rockBlockedX = _rockSystem->collides(footX, radius * 0.75f, GameConfig::TILE_SIZE);
+        }
+        if (baseBlockedX || treeBlockedX || rockBlockedX) {
             tryX.x = current.x;
         }
     }
@@ -226,10 +285,14 @@ Vec2 FarmMapController::clampPosition(const Vec2& current, const Vec2& next, flo
         Vec2 footY = tryY + Vec2(0, -s * 0.5f);
         bool baseBlockedY = _farmMap->collides(footY, radius);
         bool treeBlockedY = false;
+        bool rockBlockedY = false;
         if (_treeSystem) {
             treeBlockedY = _treeSystem->collides(footY, radius * 0.75f, GameConfig::TILE_SIZE);
         }
-        if (baseBlockedY || treeBlockedY) {
+        if (_rockSystem) {
+            rockBlockedY = _rockSystem->collides(footY, radius * 0.75f, GameConfig::TILE_SIZE);
+        }
+        if (baseBlockedY || treeBlockedY || rockBlockedY) {
             tryY.y = current.y;
         }
     }
@@ -242,6 +305,7 @@ Vec2 FarmMapController::clampPosition(const Vec2& current, const Vec2& next, flo
 bool FarmMapController::collides(const Vec2& pos, float radius) const {
     if (_farmMap && _farmMap->collides(pos, radius)) return true;
     if (_treeSystem && _treeSystem->collides(pos, radius, GameConfig::TILE_SIZE)) return true;
+    if (_rockSystem && _rockSystem->collides(pos, radius, GameConfig::TILE_SIZE)) return true;
     if (_chestController && _chestController->collides(pos)) return true;
     return false;
 }
@@ -279,6 +343,7 @@ void FarmMapController::sortActorWithEnvironment(cocos2d::Node* actor) {
     float footY = actor->getPositionY() - s * 0.5f; // player node is at tile center; use foot for sorting
     actor->setLocalZOrder(static_cast<int>(-footY));
     if (_treeSystem) _treeSystem->sortTrees();
+    if (_rockSystem) _rockSystem->sortRocks();
 }
 
 Game::Tree* FarmMapController::findTreeAt(int c, int r) const {
@@ -299,6 +364,28 @@ bool FarmMapController::damageTreeAt(int c, int r, int amount) {
             if (!(tp.c == c && tp.r == r)) v.push_back(tp);
         }
         ws.farmTrees = v;
+    }
+    return ok;
+}
+
+Game::Rock* FarmMapController::findRockAt(int c, int r) const {
+    return _rockSystem ? _rockSystem->findRockAt(c, r) : nullptr;
+}
+
+bool FarmMapController::damageRockAt(int c, int r, int amount) {
+    if (!_rockSystem) return false;
+    bool ok = _rockSystem->damageRockAt(c, r, amount,
+        [this](int c,int r,int item){ this->spawnDropAt(c, r, item, 1); this->refreshDropsVisuals(); },
+        [this](int c,int r, Game::TileType t){ this->setTile(c, r, t); }
+    );
+    if (ok && !_rockSystem->findRockAt(c, r)) {
+        auto& ws = Game::globalState();
+        std::vector<Game::RockPos> v;
+        v.reserve(ws.farmRocks.size());
+        for (const auto& rp : ws.farmRocks) {
+            if (!(rp.c == c && rp.r == r)) v.push_back(rp);
+        }
+        ws.farmRocks = v;
     }
     return ok;
 }
@@ -406,6 +493,7 @@ void FarmMapController::refreshMapVisuals() {
                 case Game::TileType::Watered:base = Color4F(0.40f, 0.28f, 0.16f, 1.0f); break;
                 case Game::TileType::Rock:   base = Color4F(0.55f, 0.40f, 0.25f, 1.0f); break;
                 case Game::TileType::Tree:   base = Color4F(0.55f, 0.40f, 0.25f, 1.0f); break;
+                case Game::TileType::NotSoil:base = Color4F(0.35f, 0.30f, 0.25f, 1.0f); break;
             }
             Vec2 rect[4] = { a, b, c2, d };
             if (getTile(c, r) != Game::TileType::Tilled && getTile(c, r) != Game::TileType::Watered) {
@@ -682,9 +770,6 @@ void FarmMapController::refreshDropsVisuals() {
         _dropsRoot->removeAllChildren();
     }
     for (const auto& d : _drops) {
-        if (d.type == Game::ItemType::Wood) {
-            continue;
-        }
         bool usedSprite = false;
         if (_dropsRoot) {
             std::string path = Game::itemIconPath(d.type);

@@ -26,7 +26,7 @@ bool FarmMap::initWithFile(const std::string& tmxFile) {
     parseDoorToMine();
     parseDoorToBeach();
     parseDoorToTown();
-    parseNoTree();
+    parseBuilding();
     
     return true;
 }
@@ -314,12 +314,12 @@ cocos2d::Vec2 FarmMap::doorToTownCenter() const {
     return cocos2d::Vec2::ZERO;
 }
 
-void FarmMap::parseNoTree() {
-    _noTreeRects.clear();
-    _noTreePolygons.clear();
+void FarmMap::parseBuilding() {
+    _buildingRects.clear();
+    _buildingPolygons.clear();
     if (!_tmx) return;
-    auto group = _tmx->getObjectGroup("NoTree");
-    if (!group) group = _tmx->getObjectGroup("noTree");
+    auto group = _tmx->getObjectGroup("Building");
+    if (!group) group = _tmx->getObjectGroup("Building");
     if (!group) return;
     auto objects = group->getObjects();
     for (auto &val : objects) {
@@ -341,22 +341,22 @@ void FarmMap::parseNoTree() {
                 pts.emplace_back(finalX, finalY);
             }
             if (!pts.empty()) {
-                _noTreePolygons.push_back(pts);
+                _buildingPolygons.push_back(pts);
             }
         } else if (dict.find("width") != dict.end() && dict.find("height") != dict.end()) {
             float w = dict.at("width").asFloat();
             float h = dict.at("height").asFloat();
             cocos2d::Rect r(x, y, w, h);
-            _noTreeRects.push_back(r);
+            _buildingRects.push_back(r);
         }
     }
 }
 
-bool FarmMap::inNoTreeArea(const cocos2d::Vec2& p) const {
-    for (const auto& r : _noTreeRects) {
+bool FarmMap::inBuildingArea(const cocos2d::Vec2& p) const {
+    for (const auto& r : _buildingRects) {
         if (r.containsPoint(p)) return true;
     }
-    for (const auto& poly : _noTreePolygons) {
+    for (const auto& poly : _buildingPolygons) {
         if (poly.size() < 3) continue;
         bool inside = false; size_t j = poly.size() - 1;
         for (size_t i = 0; i < poly.size(); ++i) {
@@ -373,6 +373,29 @@ bool FarmMap::inNoTreeArea(const cocos2d::Vec2& p) const {
             if (d.lengthSquared() > 0) {
                 float t = (p - p1).dot(d) / d.lengthSquared(); t = std::max(0.0f, std::min(1.0f, t));
                 cocos2d::Vec2 closest = p1 + d * t; if (p.distanceSquared(closest) <= 1.0f) return true;
+            }
+            j = i;
+        }
+    }
+    return false;
+}
+
+bool FarmMap::inWallArea(const cocos2d::Vec2& p) const {
+    for (const auto& r : _wallRects) {
+        if (r.containsPoint(p)) return true;
+    }
+    for (const auto& poly : _wallPolygons) {
+        if (poly.size() < 2) continue;
+        size_t j = poly.size() - 1;
+        for (size_t i = 0; i < poly.size(); ++i) {
+            cocos2d::Vec2 p1 = poly[j];
+            cocos2d::Vec2 p2 = poly[i];
+            cocos2d::Vec2 d = p2 - p1;
+            if (d.lengthSquared() > 0) {
+                float t = (p - p1).dot(d) / d.lengthSquared();
+                t = std::max(0.0f, std::min(1.0f, t));
+                cocos2d::Vec2 closest = p1 + d * t;
+                if (p.distanceSquared(closest) <= 1.0f) return true;
             }
             j = i;
         }
