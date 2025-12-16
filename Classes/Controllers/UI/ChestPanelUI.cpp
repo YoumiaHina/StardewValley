@@ -249,7 +249,7 @@ void ChestPanelUI::refreshChestPanel(Game::Chest* chest) {
     auto slotsListener = EventListenerTouchOneByOne::create();
     slotsListener->setSwallowTouches(false);
     slotsListener->onTouchBegan = [this, cols, rows, cellW, cellH, startX, firstRowY, rowGap](Touch* t, Event*){
-        if (!_slotsRoot) return false;
+        if (!_slotsRoot || !_panelNode || !_panelNode->isVisible()) return false;
         float offsetY = cellH * 2.0f;
         Vec2 p = _slotsRoot->convertToNodeSpace(t->getLocation());
         for (int r = 0; r < rows; ++r) {
@@ -266,7 +266,7 @@ void ChestPanelUI::refreshChestPanel(Game::Chest* chest) {
         return false;
     };
     slotsListener->onTouchEnded = [this, cols, rows, cellW, cellH, startX, firstRowY, rowGap](Touch* t, Event*){
-        if (!_currentChest || !_inventory || !_slotsRoot) return;
+        if (!_currentChest || !_inventory || !_slotsRoot || !_panelNode || !_panelNode->isVisible()) return;
         float offsetY = cellH * 2.0f;
         Vec2 p = _slotsRoot->convertToNodeSpace(t->getLocation());
         int hitIndex = -1;

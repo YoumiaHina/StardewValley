@@ -105,6 +105,13 @@ inline std::string itemIconPath(ItemType t) {
         case ItemType::Stone: return "item/Stone.png";
         case ItemType::Fiber: return "item/Fiber.png";
         case ItemType::Chest: return "Chest.png";
+        case ItemType::Coal: return "Mineral/Coal.png";
+        case ItemType::CopperGrain: return "Mineral/copperGrain.png";
+        case ItemType::CopperIngot: return "Mineral/copperIngot.png";
+        case ItemType::IronGrain:   return "Mineral/ironGrain.png";
+        case ItemType::IronIngot:   return "Mineral/ironIngot.png";
+        case ItemType::GoldGrain:   return "Mineral/goldGrain.png";
+        case ItemType::GoldIngot:   return "Mineral/goldIngot.png";
         case ItemType::Parsnip: return "DropsAndInventory/Vegetable/Parsnip.png";
         case ItemType::Blueberry: return "DropsAndInventory/Vegetable/Blueberry.png";
         case ItemType::Eggplant: return "DropsAndInventory/Vegetable/Eggplant.png";
