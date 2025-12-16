@@ -61,14 +61,16 @@ FarmInteractor::SpaceAction FarmInteractor::onSpacePressed() {
                     auto type = static_cast<Game::CropType>(ct);
                     auto& ws = Game::globalState();
                     if (!Game::CropDefs::isSeasonAllowed(type, ws.seasonIndex)) {
-                        _ui->popTextAt(_map->tileToWorld(tc,tr), "Out of season", Color3B::RED);
+                        Vec2 pos = _map->tileToWorld(tc, tr);
+                        _ui->popTextAt(_map->getPlayerPosition(pos), "Out of season", Color3B::RED);
                         return SpaceAction::None;
                     }
                     if (_crop) { _crop->plantCrop(type, tc, tr); }
                     bool ok = _inventory->consumeSelectedItem(1);
                     if (ok) { _ui->refreshHotbar(); }
                     _map->refreshCropsVisuals();
-                    _ui->popTextAt(_map->tileToWorld(tc,tr), "Planted", Color3B::YELLOW);
+                    Vec2 pos = _map->tileToWorld(tc, tr);
+                    _ui->popTextAt(_map->getPlayerPosition(pos), "Planted", Color3B::YELLOW);
                 }
             }
             return SpaceAction::None;
@@ -97,14 +99,16 @@ void FarmInteractor::onLeftClick() {
                 auto type = static_cast<Game::CropType>(ct);
                 auto& ws = Game::globalState();
                 if (!Game::CropDefs::isSeasonAllowed(type, ws.seasonIndex)) {
-                    _ui->popTextAt(_map->tileToWorld(tc,tr), "Out of season", Color3B::RED);
+                    Vec2 pos = _map->tileToWorld(tc, tr);
+                    _ui->popTextAt(_map->getPlayerPosition(pos), "Out of season", Color3B::RED);
                     return;
                 }
                 if (_crop) { _crop->plantCrop(type, tc, tr); }
                 bool ok = _inventory->consumeSelectedItem(1);
                 if (ok) { _ui->refreshHotbar(); }
                 _map->refreshCropsVisuals();
-                _ui->popTextAt(_map->tileToWorld(tc,tr), "Planted", Color3B::YELLOW);
+                Vec2 pos = _map->tileToWorld(tc, tr);
+                _ui->popTextAt(_map->getPlayerPosition(pos), "Planted", Color3B::YELLOW);
             }
         }
         return;

@@ -43,12 +43,12 @@ bool MineScene::init() {
                         ws.inventory->setTool(i, Game::makeTool(Game::ToolKind::Sword));
                         inserted = true;
                         if (_uiController) _uiController->refreshHotbar();
-                        if (_player) _uiController->popTextAt(_player->getPosition(), "Got Sword!", cocos2d::Color3B::GREEN);
+                        if (_player && _mapController) _uiController->popTextAt(_mapController->getPlayerPosition(_player->getPosition()), "Got Sword!", cocos2d::Color3B::GREEN);
                         break;
                     }
                 }
                 if (!inserted && _player && _uiController) {
-                    _uiController->popTextAt(_player->getPosition(), "Inventory Full", cocos2d::Color3B::RED);
+                    if (_mapController) _uiController->popTextAt(_mapController->getPlayerPosition(_player->getPosition()), "Inventory Full", cocos2d::Color3B::RED);
                 }
             }
             // 仅在成功放入或已拥有剑时标记为已赠送，避免“未实际获得却阻断后续赠送”
@@ -120,7 +120,7 @@ void MineScene::onSpacePressed() {
         if (_uiController) _uiController->setMineFloorNumber(_map->currentFloor());
         // UI 提示：显示当前楼层
         if (_uiController && _player) {
-            _uiController->popTextAt(_player->getPosition(), StringUtils::format("Floor %d", _map->currentFloor()), Color3B::YELLOW);
+            if (_mapController) _uiController->popTextAt(_mapController->getPlayerPosition(_player->getPosition()), StringUtils::format("Floor %d", _map->currentFloor()), Color3B::YELLOW);
         }
     } else if (act == Controllers::MineInteractor::SpaceAction::UseElevator) {
         if (_elevator) _elevator->togglePanel();
@@ -139,7 +139,7 @@ void MineScene::onSpacePressed() {
         if (_uiController) _uiController->setMineFloorNumber(_map->currentFloor());
         // UI 提示：返回入口
         if (_uiController && _player) {
-            _uiController->popTextAt(_player->getPosition(), "Returned to Entrance", Color3B::YELLOW);
+            if (_mapController) _uiController->popTextAt(_mapController->getPlayerPosition(_player->getPosition()), "Returned to Entrance", Color3B::YELLOW);
         }
     }
     _inTransition = false;
@@ -182,7 +182,7 @@ void MineScene::onKeyPressedHook(EventKeyboard::KeyCode code) {
         if (_player) _player->setPosition(_map->floorSpawnPos());
         if (_uiController) _uiController->setMineFloorNumber(_map->currentFloor());
         if (_uiController && _player) {
-            _uiController->popTextAt(_player->getPosition(), StringUtils::format("Floor %d", _map->currentFloor()), Color3B::YELLOW);
+            if (_mapController) _uiController->popTextAt(_mapController->getPlayerPosition(_player->getPosition()), StringUtils::format("Floor %d", _map->currentFloor()), Color3B::YELLOW);
         }
     }
 }

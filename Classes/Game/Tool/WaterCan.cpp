@@ -34,13 +34,17 @@ std::string WaterCan::use(Controllers::IMapController* map,
             ui->refreshHotbar();
             map->refreshMapVisuals();
             map->refreshDropsVisuals();
-            ui->popTextAt(playerPos, msg, Color3B::YELLOW);
+            ui->popTextAt(map ? map->getPlayerPosition(playerPos) : playerPos, msg, Color3B::YELLOW);
         }
         refreshHotbarOverlay();
         return msg;
     }
     if (ws.energy < need) {
-        if (getPlayerPos && ui) { ui->popTextAt(getPlayerPos(), std::string("Not enough energy"), Color3B::RED); }
+        if (getPlayerPos && ui) {
+            Vec2 p = getPlayerPos();
+            if (map) p = map->getPlayerPosition(p);
+            ui->popTextAt(p, std::string("Not enough energy"), Color3B::RED);
+        }
         return std::string("");
     }
     Vec2 lastDir = getLastDir ? getLastDir() : Vec2(0,-1);
@@ -67,7 +71,7 @@ std::string WaterCan::use(Controllers::IMapController* map,
         ui->refreshHotbar();
         map->refreshMapVisuals();
         map->refreshDropsVisuals();
-        ui->popTextAt(playerPos, msg, Color3B::YELLOW);
+        ui->popTextAt(map ? map->getPlayerPosition(playerPos) : playerPos, msg, Color3B::YELLOW);
     }
     refreshHotbarOverlay();
     return msg;

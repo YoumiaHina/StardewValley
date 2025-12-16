@@ -9,6 +9,8 @@ class BeachMapController : public IMapController {
 public:
     explicit BeachMapController(Game::BeachMap* map, cocos2d::Node* worldNode);
 
+    cocos2d::Vec2 getPlayerPosition(const cocos2d::Vec2& playerMapLocalPos) const override;
+
     void addActorToMap(cocos2d::Node* node, int zOrder) override;
 
     cocos2d::Size getContentSize() const override { return _map ? _map->getContentSize() : cocos2d::Size::ZERO; }

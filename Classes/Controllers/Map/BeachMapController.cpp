@@ -25,6 +25,14 @@ BeachMapController::BeachMapController(Game::BeachMap* map, cocos2d::Node* world
     refreshMapVisuals();
 }
 
+Vec2 BeachMapController::getPlayerPosition(const Vec2& playerMapLocalPos) const {
+    if (!_worldNode) return playerMapLocalPos;
+    Node* ref = (_map && _map->getTMX()) ? _map->getTMX() : _worldNode;
+    if (!ref) return playerMapLocalPos;
+    Vec2 world = ref->convertToWorldSpace(playerMapLocalPos);
+    return _worldNode->convertToNodeSpace(world);
+}
+
 void BeachMapController::addActorToMap(Node* node, int zOrder) {
     if (_map && _map->getTMX()) {
         _map->getTMX()->addChild(node, 20);

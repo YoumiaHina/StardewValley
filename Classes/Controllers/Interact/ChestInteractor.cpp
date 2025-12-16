@@ -27,7 +27,7 @@ void ChestInteractor::onLeftClick() {
             } else {
                 auto& chs = _map->chests();
                 if (chs.size() >= static_cast<std::size_t>(Game::Chest::MAX_PER_AREA)) {
-                    _ui->popTextAt(p, "Too many chests", Color3B::RED);
+                    _ui->popTextAt(_map->getPlayerPosition(p), "Too many chests", Color3B::RED);
                     return;
                 }
                 if (Game::isNearAnyChest(p, chs)) return;
@@ -42,7 +42,7 @@ void ChestInteractor::onLeftClick() {
                 }
                 _inventory->removeItems(Game::ItemType::Chest, 1);
                 _ui->refreshHotbar();
-                _ui->popTextAt(p, "Placed Chest", Color3B::YELLOW);
+                _ui->popTextAt(_map->getPlayerPosition(p), "Placed Chest", Color3B::YELLOW);
                 _map->refreshMapVisuals();
             }
         }

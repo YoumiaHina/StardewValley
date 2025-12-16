@@ -22,7 +22,11 @@ std::string Sword::use(Controllers::IMapController* map,
     auto& ws = Game::globalState();
     int need = GameConfig::ENERGY_COST_SWORD;
     if (ws.energy < need) {
-        if (getPlayerPos && ui) { ui->popTextAt(getPlayerPos(), std::string("Not enough energy"), Color3B::RED); }
+        if (getPlayerPos && ui) {
+            Vec2 p = getPlayerPos();
+            if (map) p = map->getPlayerPosition(p);
+            ui->popTextAt(p, std::string("Not enough energy"), Color3B::RED);
+        }
         return std::string("");
     }
     Vec2 playerPos = getPlayerPos ? getPlayerPos() : Vec2();
@@ -31,7 +35,7 @@ std::string Sword::use(Controllers::IMapController* map,
     if (ui) {
         ui->refreshHUD();
         ui->refreshHotbar();
-        ui->popTextAt(playerPos, msg, Color3B::YELLOW);
+        ui->popTextAt(map ? map->getPlayerPosition(playerPos) : playerPos, msg, Color3B::YELLOW);
     }
     // 地图可视无需变化，保持与镐子的调用风格一致
     if (map) { map->refreshMapVisuals(); }

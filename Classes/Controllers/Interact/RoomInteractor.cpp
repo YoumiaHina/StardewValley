@@ -23,7 +23,7 @@ RoomInteractor::SpaceAction RoomInteractor::onSpacePressed() {
         if (_state) {
             _state->sleepToNextMorning();
         }
-        _ui->popTextAt(p, "New Day", Color3B::WHITE);
+        _ui->popTextAt(_map->getPlayerPosition(p), "New Day", Color3B::WHITE);
         return SpaceAction::Slept;
     }
 

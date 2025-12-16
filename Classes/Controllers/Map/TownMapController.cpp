@@ -25,6 +25,14 @@ TownMapController::TownMapController(Game::TownMap* map, cocos2d::Node* worldNod
     refreshMapVisuals();
 }
 
+Vec2 TownMapController::getPlayerPosition(const Vec2& playerMapLocalPos) const {
+    if (!_worldNode) return playerMapLocalPos;
+    Node* ref = (_map && _map->getTMX()) ? _map->getTMX() : _worldNode;
+    if (!ref) return playerMapLocalPos;
+    Vec2 world = ref->convertToWorldSpace(playerMapLocalPos);
+    return _worldNode->convertToNodeSpace(world);
+}
+
 void TownMapController::addActorToMap(Node* node, int zOrder) {
     if (_map && _map->getTMX()) {
         _map->getTMX()->addChild(node, 20);

@@ -32,11 +32,7 @@ std::string FishingRod::use(Controllers::IMapController* map,
         msg = std::string("Need water");
     }
     if (ui) {
-        Vec2 headPos = playerPos;
-        if (map) {
-            Vec2 origin = map->getOrigin();
-            headPos = origin + playerPos + Vec2(0, s);
-        }
+        Vec2 headPos = map ? map->getPlayerPosition(playerPos + Vec2(0, s)) : (playerPos + Vec2(0, s));
         ui->popTextAt(headPos, msg, Color3B::YELLOW);
     }
     return msg;
