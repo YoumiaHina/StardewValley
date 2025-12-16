@@ -349,6 +349,12 @@
     <ClCompile Include="..\Classes\Game\Chest.cpp">
       <Filter>Classes\Game</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\Interact\ChestInteractor.cpp">
+      <Filter>Classes\Controllers\Interact</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\Systems\ChestController.cpp">
+      <Filter>Classes\Controllers\Systems</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <!-- Header Files -->
@@ -608,6 +614,12 @@
     </ClInclude>
     <ClInclude Include="..\Classes\Controllers\UI\NpcSocialPanelUI.h">
       <Filter>Classes\Controllers\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\Interact\ChestInteractor.h">
+      <Filter>Classes\Controllers\Interact</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\Systems\ChestController.h">
+      <Filter>Classes\Controllers\Systems</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

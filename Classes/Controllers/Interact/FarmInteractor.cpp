@@ -70,9 +70,12 @@ FarmInteractor::SpaceAction FarmInteractor::onSpacePressed() {
 
 void FarmInteractor::onLeftClick() {
     if (!_map || !_inventory || !_ui || !_getPlayerPos) return;
+    if (!_chestInteractor) {
+        _chestInteractor = new Controllers::ChestInteractor(_inventory, _map, _ui, _getPlayerPos, _getLastDir);
+    }
+    _chestInteractor->onLeftClick();
     Vec2 p = _getPlayerPos();
     auto lastDir = _getLastDir ? _getLastDir() : Vec2(0,-1);
-    Game::openChestNearPlayer(_map, _ui, p, lastDir);
     const auto &slot = _inventory->selectedSlot();
     if (Game::isSeed(slot.itemType)) {
         auto tgt = _map->targetTile(p, lastDir);
@@ -94,11 +97,6 @@ void FarmInteractor::onLeftClick() {
                 _ui->popTextAt(_map->tileToWorld(tc,tr), "Planted", Color3B::YELLOW);
             }
         }
-        return;
-    }
-    if (_inventory->selectedKind() == Game::SlotKind::Item &&
-        slot.itemType == Game::ItemType::Chest) {
-        Game::placeChestOnFarm(_map, _ui, _inventory, p, lastDir);
         return;
     }
 }

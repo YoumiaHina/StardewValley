@@ -1,5 +1,5 @@
 /**
- * RoomInteractor: 处理室内场景的空格键交互（出屋、睡觉、箱子操作）。
+ * RoomInteractor: 处理室内场景的空格键交互（出屋、睡觉）。
  */
 #pragma once
 
@@ -9,6 +9,7 @@
 #include "Controllers/IMapController.h"
 #include "Controllers/UI/UIController.h"
 #include "Controllers/Systems/CropSystem.h"
+#include "Controllers/Interact/ChestInteractor.h"
 #include <functional>
 
 namespace Controllers {
@@ -28,6 +29,7 @@ public:
     : _inventory(std::move(inventory)), _map(map), _ui(ui), _crop(crop), _state(state), _getPlayerPos(std::move(getPlayerPos)) {}
 
     SpaceAction onSpacePressed();
+    void onLeftClick();
 
 private:
     std::shared_ptr<Game::Inventory> _inventory;
@@ -36,6 +38,7 @@ private:
     Controllers::CropSystem* _crop = nullptr;
     Controllers::GameStateController* _state = nullptr;
     std::function<cocos2d::Vec2()> _getPlayerPos;
+    Controllers::ChestInteractor* _chestInteractor = nullptr;
 };
 
 }

@@ -133,6 +133,10 @@ inline cocos2d::Color4F itemColor(ItemType t) {
 
 inline std::string itemIconPath(ItemType t) {
     switch (t) {
+        case ItemType::Wood: return "item/Wood.png";
+        case ItemType::Stone: return "item/Stone.png";
+        case ItemType::Fiber: return "item/Fiber.png";
+        case ItemType::Chest: return "Chest.png";
         case ItemType::Parsnip: return "DropsAndInventory/Vegetable/Parsnip.png";
         case ItemType::Blueberry: return "DropsAndInventory/Vegetable/Blueberry.png";
         case ItemType::Eggplant: return "DropsAndInventory/Vegetable/Eggplant.png";

@@ -28,6 +28,9 @@ struct WorldState {
     // 共享背包实例（室内外一致）
     std::shared_ptr<Inventory> inventory;
 
+    // 全局箱子（相当于扩展背包）
+    Chest globalChest;
+
     // 农场地图（按行主序 r*_cols + c）
     std::vector<TileType> farmTiles;
     int farmCols = 0;
@@ -49,6 +52,12 @@ struct WorldState {
 
     // 室内箱子（房屋内放置的储物箱）
     std::vector<Chest> houseChests;
+
+    // 城镇箱子
+    std::vector<Chest> townChests;
+
+    // 沙滩箱子
+    std::vector<Chest> beachChests;
 
     // 热键选中槽位索引
     int selectedIndex = 0;

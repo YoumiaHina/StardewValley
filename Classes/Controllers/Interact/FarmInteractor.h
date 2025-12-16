@@ -11,6 +11,7 @@
 #include "Controllers/Systems/CropSystem.h"
 #include "Controllers/UI/UIController.h"
 #include "Controllers/Systems/AnimalSystem.h"
+#include "Controllers/Interact/ChestInteractor.h"
 #include <functional>
 
 namespace Controllers {
@@ -39,6 +40,7 @@ private:
     Controllers::AnimalSystem* _animals = nullptr;
     std::function<cocos2d::Vec2()> _getPlayerPos;
     std::function<cocos2d::Vec2()> _getLastDir;
+    Controllers::ChestInteractor* _chestInteractor = nullptr;
 };
 
 }

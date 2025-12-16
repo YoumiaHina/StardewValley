@@ -7,19 +7,7 @@ namespace Controllers {
 
 class TownMapController : public IMapController {
 public:
-    explicit TownMapController(Game::TownMap* map, cocos2d::Node* worldNode)
-        : _map(map), _worldNode(worldNode) {
-        if (_worldNode && _map) {
-            cocos2d::Size content = _map->getContentSize();
-            auto visibleSize = cocos2d::Director::getInstance()->getVisibleSize();
-            auto origin = cocos2d::Director::getInstance()->getVisibleOrigin();
-            _origin = cocos2d::Vec2(origin.x + (visibleSize.width - content.width) * 0.5f,
-                                    origin.y + (visibleSize.height - content.height) * 0.5f);
-            _map->setAnchorPoint(cocos2d::Vec2(0,0));
-            _map->setPosition(_origin);
-            _worldNode->addChild(_map, 0);
-        }
-    }
+    explicit TownMapController(Game::TownMap* map, cocos2d::Node* worldNode);
 
     void addActorToMap(cocos2d::Node* node, int zOrder) override;
 
@@ -38,11 +26,11 @@ public:
     cocos2d::Vec2 clampPosition(const cocos2d::Vec2& current,
                                 const cocos2d::Vec2& next,
                                 float radius) const override;
-    bool collides(const cocos2d::Vec2& p, float radius) const override { return _map ? _map->collides(p, radius) : false; }
+    bool collides(const cocos2d::Vec2& p, float radius) const override;
 
     bool isNearDoor(const cocos2d::Vec2& p) const override { return _map ? _map->nearDoorToFarm(p) : false; }
     bool isNearMineDoor(const cocos2d::Vec2& p) const override { return false; }
-    bool isNearChest(const cocos2d::Vec2& p) const override { return false; }
+    bool isNearChest(const cocos2d::Vec2& p) const override;
     bool isNearLake(const cocos2d::Vec2& p, float radius) const override { return false; }
 
     Game::TileType getTile(int c, int r) const override { return Game::TileType::Soil; }
@@ -51,7 +39,7 @@ public:
     void updateCursor(const cocos2d::Vec2& playerPos,
                       const cocos2d::Vec2& lastDir) override;
 
-    void refreshMapVisuals() override {}
+    void refreshMapVisuals() override;
     void refreshCropsVisuals() override {}
 
     cocos2d::Vec2 farmRoomDoorSpawnPos() const override { return cocos2d::Vec2::ZERO; }
@@ -71,9 +59,9 @@ private:
     cocos2d::Vec2 _origin = cocos2d::Vec2::ZERO;
     std::vector<Game::Chest> _chests;
     cocos2d::DrawNode* _cursor = nullptr;
+    cocos2d::DrawNode* _chestDraw = nullptr;
     cocos2d::Vec2 _lastClickWorldPos = cocos2d::Vec2::ZERO;
     bool _hasLastClick = false;
 };
 
 } // namespace Controllers
-

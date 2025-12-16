@@ -1,6 +1,7 @@
 #include "Game/Chest.h"
 #include "Game/WorldState.h"
 #include "Game/Inventory.h"
+#include "Game/Tool/ToolFactory.h"
 #include "Controllers/IMapController.h"
 #include "Controllers/UI/UIController.h"
 #include "Controllers/Map/RoomMapController.h"
@@ -109,24 +110,37 @@ bool openChestNearPlayer(Controllers::IMapController* map,
                          const Vec2& playerWorldPos,
                          const Vec2& lastDir) {
     if (!map || !ui) return false;
-    if (!map->isFarm()) return false;
     auto& chs = map->chests();
     if (chs.empty()) return false;
-    auto tgt = map->targetTile(playerWorldPos, lastDir);
-    int tc = tgt.first;
-    int tr = tgt.second;
-    Vec2 center = map->tileToWorld(tc, tr);
     int idx = -1;
-    for (int i = 0; i < static_cast<int>(chs.size()); ++i) {
-        auto r = chestRect(chs[i]);
-        if (r.containsPoint(center)) {
-            idx = i;
-            break;
+    if (map->isFarm()) {
+        auto tgt = map->targetTile(playerWorldPos, lastDir);
+        int tc = tgt.first;
+        int tr = tgt.second;
+        Vec2 center = map->tileToWorld(tc, tr);
+        for (int i = 0; i < static_cast<int>(chs.size()); ++i) {
+            auto r = chestRect(chs[i]);
+            if (r.containsPoint(center)) {
+                idx = i;
+                break;
+            }
         }
+    } else {
+        if (!isNearAnyChest(playerWorldPos, chs)) return false;
+        idx = nearestChestIndex(playerWorldPos, chs);
     }
     if (idx < 0) return false;
     ui->buildChestPanel();
     ui->refreshChestPanel(&chs[idx]);
+    ui->toggleChestPanel(true);
+    return true;
+}
+
+bool openGlobalChest(Controllers::UIController* ui) {
+    if (!ui) return false;
+    auto& ws = Game::globalState();
+    ui->buildChestPanel();
+    ui->refreshChestPanel(&ws.globalChest);
     ui->toggleChestPanel(true);
     return true;
 }
@@ -151,11 +165,13 @@ bool placeChestInRoom(Controllers::RoomMapController* room,
                       Controllers::UIController* ui,
                       std::shared_ptr<Game::Inventory> inventory,
                       const Vec2& playerPos) {
-    (void)room;
-    (void)ui;
-    (void)inventory;
-    (void)playerPos;
-    return false;
+    if (!room || !ui || !inventory) return false;
+    auto& chs = room->chests();
+    auto blocked = [room](const Rect& r) {
+        return r.intersectsRect(room->doorRect()) || r.intersectsRect(room->bedRect());
+    };
+    Vec2 center = playerPos;
+    return placeChestCommon(center, ui, inventory, chs, blocked, false, nullptr, room);
 }
 
 void transferChestCell(Game::Chest& chest,
@@ -169,13 +185,16 @@ void transferChestCell(Game::Chest& chest,
     Slot& cs = chest.slots[static_cast<std::size_t>(flatIndex)];
     int invIndex = inventory.selectedIndex();
     if (invIndex < 0 || invIndex >= static_cast<int>(inventory.size())) return;
+    SlotKind invKind = inventory.selectedKind();
     bool invIsItem = inventory.isItem(static_cast<std::size_t>(invIndex));
+    bool invIsTool = inventory.isTool(static_cast<std::size_t>(invIndex));
     bool invEmpty = inventory.isEmpty(static_cast<std::size_t>(invIndex));
     ItemStack invStack = inventory.itemAt(static_cast<std::size_t>(invIndex));
     bool chestHasItem = (cs.kind == SlotKind::Item && cs.itemQty > 0);
+    bool chestHasTool = (cs.kind == SlotKind::Tool && cs.tool != nullptr);
 
-    // 1) 物品栏当前选中槽位里有物品时：执行「物品栏 → 箱子」
     if (invIsItem && invStack.quantity > 0) {
+        if (chestHasTool) return;
         if (chestHasItem && cs.itemType != invStack.type) return;
         if (!chestHasItem) {
             cs.kind = SlotKind::Item;
@@ -187,24 +206,49 @@ void transferChestCell(Game::Chest& chest,
         bool ok = inventory.consumeSelectedItem(1);
         if (!ok) return;
         cs.itemQty += 1;
-    } else {
-        // 2) 物品栏当前选中槽位为空（或非物品）时：执行「箱子 → 物品栏」
-        if (!chestHasItem) return;
-        ItemType type = cs.itemType;
-        bool canReceive = false;
-        if (invEmpty) {
-            canReceive = true;
-        } else if (invIsItem && invStack.type == type && invStack.quantity < ItemStack::MAX_STACK) {
-            canReceive = true;
-        }
-        if (!canReceive) return;
-        bool okAdd = inventory.addOneItemToSlot(static_cast<std::size_t>(invIndex), type);
-        if (!okAdd) return;
-        if (cs.itemQty <= 0) return;
-        cs.itemQty -= 1;
-        if (cs.itemQty <= 0) {
+    } else if (invIsTool) {
+        if (chestHasItem || chestHasTool) return;
+        const ToolBase* tConst = inventory.toolAt(static_cast<std::size_t>(invIndex));
+        if (!tConst) return;
+        ToolKind tk = tConst->kind();
+        cs.kind = SlotKind::Tool;
+        cs.tool = makeTool(tk);
+        cs.itemQty = 0;
+        bool cleared = inventory.clearSlot(static_cast<std::size_t>(invIndex));
+        if (!cleared) {
+            cs.tool.reset();
             cs.kind = SlotKind::Empty;
             cs.itemQty = 0;
+            return;
+        }
+    } else {
+        if (chestHasItem) {
+            ItemType type = cs.itemType;
+            bool canReceive = false;
+            if (invEmpty) {
+                canReceive = true;
+            } else if (invIsItem && invStack.type == type && invStack.quantity < ItemStack::MAX_STACK) {
+                canReceive = true;
+            }
+            if (!canReceive) return;
+            bool okAdd = inventory.addOneItemToSlot(static_cast<std::size_t>(invIndex), type);
+            if (!okAdd) return;
+            if (cs.itemQty <= 0) return;
+            cs.itemQty -= 1;
+            if (cs.itemQty <= 0) {
+                cs.kind = SlotKind::Empty;
+                cs.itemQty = 0;
+            }
+        } else if (chestHasTool) {
+            if (!invEmpty) return;
+            if (!cs.tool) return;
+            ToolKind tk = cs.tool->kind();
+            inventory.setTool(static_cast<std::size_t>(invIndex), makeTool(tk));
+            cs.tool.reset();
+            cs.kind = SlotKind::Empty;
+            cs.itemQty = 0;
+        } else {
+            return;
         }
     }
 
@@ -218,6 +262,19 @@ void transferChestCell(Game::Chest& chest,
         if (ch.pos.equals(chest.pos)) {
             ch = chest;
         }
+    }
+    for (auto& ch : ws.townChests) {
+        if (ch.pos.equals(chest.pos)) {
+            ch = chest;
+        }
+    }
+    for (auto& ch : ws.beachChests) {
+        if (ch.pos.equals(chest.pos)) {
+            ch = chest;
+        }
+    }
+    if (&chest == &ws.globalChest) {
+        ws.globalChest = chest;
     }
 }
 

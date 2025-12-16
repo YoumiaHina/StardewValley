@@ -38,4 +38,5 @@ private:
 
 protected:
     void onKeyPressedHook(cocos2d::EventKeyboard::KeyCode code) override;
+    void onMouseDown(cocos2d::EventMouse* e) override;
 };

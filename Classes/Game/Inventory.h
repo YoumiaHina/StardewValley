@@ -42,6 +42,7 @@ public:
     const ItemStack itemAt(std::size_t index) const;
     bool isItem(std::size_t index) const;
     bool isEmpty(std::size_t index) const;
+    bool isTool(std::size_t index) const;
     // add items into inventory, stacking first; returns remaining qty not fitted
     int addItems(ItemType type, int qty);
     // count items of given type across all slots
@@ -63,6 +64,7 @@ public:
     Slot const& selectedSlot() const { return _slots[_selected]; }
     bool addOneItemToSlot(std::size_t index, ItemType type);
     bool removeOneItemFromSlot(std::size_t index);
+    bool clearSlot(std::size_t index);
 
 private:
     std::vector<Slot> _slots;

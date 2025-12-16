@@ -2,6 +2,7 @@
 #include "cocos2d.h"
 #include "Game/Tool/ToolFactory.h"
 #include "Scenes/RoomScene.h"
+#include "Game/Chest.h"
 
 using namespace cocos2d;
 
@@ -105,6 +106,10 @@ void SceneBase::registerCommonInputHandlers(bool enableToolOnSpace, bool enableT
             case EventKeyboard::KeyCode::KEY_B: {
                 if (chestOpen) break;
                 _uiController->toggleStorePanel(true);
+            } break;
+            case EventKeyboard::KeyCode::KEY_E: {
+                if (chestOpen) break;
+                Game::openGlobalChest(_uiController);
             } break;
             case EventKeyboard::KeyCode::KEY_X: {
                 if (chestOpen) break;
@@ -242,9 +247,7 @@ void SceneBase::update(float dt) {
             _mapController->collectDropsNear(p, _inventory.get());
         }
         bool nearDoor = _mapController->isNearDoor(p);
-        bool nearChest = _mapController->isNearChest(p);
         _uiController->showDoorPrompt(nearDoor, p, doorPromptText());
-        _uiController->showChestPrompt(nearChest, p, "Right-click to Open / Space to Deposit");
         bool nearLake = _mapController->isNearLake(p, _mapController->tileSize() * (GameConfig::LAKE_REFILL_RADIUS_TILES + 0.5f));
         bool rodSelected = (_inventory && _inventory->selectedTool() && _inventory->selectedTool()->kind() == Game::ToolKind::FishingRod);
         bool canShowFishPrompt = nearLake && rodSelected && !ws.fishingActive;
