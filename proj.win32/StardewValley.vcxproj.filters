@@ -376,6 +376,12 @@
     <ClCompile Include="..\Classes\Controllers\Environment\RockSystem.cpp">
       <Filter>Classes\Controllers\Environment</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\Game\Mineral.cpp">
+      <Filter>Classes\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\Environment\MineralSystem.cpp">
+      <Filter>Classes\Controllers\Environment</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <!-- Header Files -->
@@ -655,6 +661,12 @@
     </ClInclude>
     <ClInclude Include="..\Classes\Game\EnvironmentObstacleBase.h">
       <Filter>Classes\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\Mineral.h">
+      <Filter>Classes\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\Environment\MineralSystem.h">
+      <Filter>Classes\Controllers\Environment</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

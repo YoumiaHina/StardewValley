@@ -153,6 +153,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\Classes\AppDelegate.cpp" />
+    <ClCompile Include="..\Classes\Controllers\Environment\MineralSystem.cpp" />
     <ClCompile Include="..\Classes\Controllers\Environment\RockSystem.cpp" />
     <ClCompile Include="..\Classes\Controllers\Environment\TreeSystem.cpp" />
     <ClCompile Include="..\Classes\Controllers\Interact\BeachInteractor.cpp" />
@@ -185,6 +186,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClCompile Include="..\Classes\Game\Map\MineMap.cpp" />
     <ClCompile Include="..\Classes\Game\Map\RoomMap.cpp" />
     <ClCompile Include="..\Classes\Game\Map\TownMap.cpp" />
+    <ClCompile Include="..\Classes\Game\Mineral.cpp" />
     <ClCompile Include="..\Classes\Game\NPC\AbigailNpc.cpp" />
     <ClCompile Include="..\Classes\Game\NPC\NpcBase.cpp" />
     <ClCompile Include="..\Classes\Game\NPC\PierreNpc.cpp" />
@@ -256,6 +258,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
   <ItemGroup>
     <ClInclude Include="..\Classes\AppDelegate.h" />
     <ClInclude Include="..\Classes\Controllers\Environment\EnvironmentObstacleSystemBase.h" />
+    <ClInclude Include="..\Classes\Controllers\Environment\MineralSystem.h" />
     <ClInclude Include="..\Classes\Controllers\Environment\RockSystem.h" />
     <ClInclude Include="..\Classes\Controllers\Environment\TreeSystem.h" />
     <ClInclude Include="..\Classes\Controllers\Interact\BeachInteractor.h" />
@@ -290,6 +293,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClInclude Include="..\Classes\Game\Map\MineMap.h" />
     <ClInclude Include="..\Classes\Game\Map\RoomMap.h" />
     <ClInclude Include="..\Classes\Game\Map\TownMap.h" />
+    <ClInclude Include="..\Classes\Game\Mineral.h" />
     <ClInclude Include="..\Classes\Game\NPC\AbigailNpc.h" />
     <ClInclude Include="..\Classes\Game\NPC\NpcBase.h" />
     <ClInclude Include="..\Classes\Game\NPC\PierreNpc.h" />

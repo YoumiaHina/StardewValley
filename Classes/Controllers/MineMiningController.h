@@ -9,20 +9,15 @@
 #include "Controllers/Map/MineMapController.h"
 #include "Game/WorldState.h"
 #include "Game/Item.h"
+#include "Game/Mineral.h"
 
 namespace Controllers {
 
 class MineMiningController {
 public:
-    enum class NodeType { Rock, HardRock, HugeRock, CopperOre, IronOre, GoldOre };
-
     struct Node {
-        NodeType type;
-        cocos2d::Vec2 pos;
-        int hp = 1;
-        int sizeTiles = 1;
-        std::string tex;
-        cocos2d::Sprite* sprite = nullptr;
+        Game::MineralData mineral;
+        Game::Mineral* node = nullptr;
     };
 
     struct Stair {
