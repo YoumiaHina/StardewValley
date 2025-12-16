@@ -680,9 +680,6 @@
     <ClInclude Include="..\Classes\Game\Stair.h">
       <Filter>Classes\Game</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\Game\Map\IMapBase.h">
-      <Filter>Classes\Game\Map</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="game.rc">

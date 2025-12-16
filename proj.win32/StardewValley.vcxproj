@@ -292,7 +292,6 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClInclude Include="..\Classes\Game\EnvironmentObstacleBase.h" />
     <ClInclude Include="..\Classes\Game\Map\BeachMap.h" />
     <ClInclude Include="..\Classes\Game\Map\FarmMap.h" />
-    <ClInclude Include="..\Classes\Game\Map\IMapBase.h" />
     <ClInclude Include="..\Classes\Game\Map\MapBase.h" />
     <ClInclude Include="..\Classes\Game\Map\MineMap.h" />
     <ClInclude Include="..\Classes\Game\Map\RoomMap.h" />

@@ -29,11 +29,11 @@ public:
     void attachTo(cocos2d::Node* root) override;
 
     bool spawnFromTile(int c, int r, const cocos2d::Vec2& tileCenter,
-                       Game::IMapBase* map, int tileSize) override;
+                       Game::MapBase* map, int tileSize) override;
 
     void spawnRandom(int count, int cols, int rows,
                      const std::function<cocos2d::Vec2(int,int)>& tileToWorld,
-                     Game::IMapBase* map, int tileSize,
+                     Game::MapBase* map, int tileSize,
                      const std::function<bool(int,int)>& isSafe) override;
 
     bool collides(const cocos2d::Vec2& point, float radius, int tileSize) const override;

@@ -15,7 +15,7 @@ void RockSystem::attachTo(Node* root) {
 }
 
 bool RockSystem::spawnFromTile(int c, int r, const Vec2& tileCenter,
-                               IMapBase* map, int tileSize) {
+                               MapBase* map, int tileSize) {
     if (!_root) return false;
     float s = static_cast<float>(tileSize);
     Vec2 footCenter = tileCenter + Vec2(0, -s * 0.5f);
@@ -33,7 +33,7 @@ bool RockSystem::spawnFromTile(int c, int r, const Vec2& tileCenter,
 
 void RockSystem::spawnRandom(int count, int cols, int rows,
                              const std::function<Vec2(int,int)>& tileToWorld,
-                             IMapBase* map, int tileSize,
+                             MapBase* map, int tileSize,
                              const std::function<bool(int,int)>& isSafe) {
     if (!_root) return;
     std::mt19937 rng(static_cast<unsigned>(std::time(nullptr)));

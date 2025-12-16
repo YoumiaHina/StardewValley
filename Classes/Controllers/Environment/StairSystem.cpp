@@ -13,13 +13,13 @@ void StairSystem::attachTo(Node* root) {
 }
 
 bool StairSystem::spawnFromTile(int, int, const Vec2&,
-                               Game::IMapBase*, int) {
+                               Game::MapBase*, int) {
     return false;
 }
 
 void StairSystem::spawnRandom(int, int, int,
                               const std::function<Vec2(int,int)>&,
-                              Game::IMapBase*, int,
+                              Game::MapBase*, int,
                               const std::function<bool(int,int)>&) {
 }
 
