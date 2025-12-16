@@ -18,6 +18,7 @@
 #include "Game/Tree.h"
 #include "Controllers/Environment/TreeSystem.h"
 #include "Controllers/TileSelector.h"
+#include "Controllers/Systems/ChestController.h"
 
 namespace Controllers {
 
@@ -59,9 +60,14 @@ public:
     void refreshDropsVisuals() override;
     void spawnDropAt(int c, int r, int itemType, int qty) override;
 
-    // Expose data for other controllers
-    const std::vector<Game::Chest>& chests() const { return _chests; }
-    std::vector<Game::Chest>& chests() { return _chests; }
+    const std::vector<Game::Chest>& chests() const override {
+        static const std::vector<Game::Chest> empty;
+        return _chestController ? _chestController->chests() : empty;
+    }
+    std::vector<Game::Chest>& chests() override {
+        static std::vector<Game::Chest> empty;
+        return _chestController ? _chestController->chests() : empty;
+    }
 
     Game::FarmMap* tmx() const { return _farmMap; }
     cocos2d::Node* worldNode() const { return _worldNode; }
@@ -89,8 +95,7 @@ private:
     std::vector<Game::Drop> _drops;
     cocos2d::DrawNode* _dropsDraw = nullptr;
     cocos2d::Node* _dropsRoot = nullptr;
-    std::vector<Game::Chest> _chests;
-    cocos2d::DrawNode* _chestDraw = nullptr;
+    Controllers::ChestController* _chestController = nullptr;
     cocos2d::DrawNode* _cropsDraw = nullptr;
     cocos2d::Node* _cropsRoot = nullptr;
     std::unordered_map<long long, cocos2d::Sprite*> _cropSprites;
@@ -116,7 +121,6 @@ public:
     void clearLastClickWorldPos() override { _hasLastClick = false; }
 
     void collectDropsNear(const cocos2d::Vec2& playerWorldPos, Game::Inventory* inv) override;
-    void refreshChestsVisuals();
 
 };
 

@@ -155,6 +155,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClCompile Include="..\Classes\AppDelegate.cpp" />
     <ClCompile Include="..\Classes\Controllers\Environment\TreeSystem.cpp" />
     <ClCompile Include="..\Classes\Controllers\Interact\BeachInteractor.cpp" />
+    <ClCompile Include="..\Classes\Controllers\Interact\ChestInteractor.cpp" />
     <ClCompile Include="..\Classes\Controllers\Interact\TownInteractor.cpp" />
     <ClCompile Include="..\Classes\Controllers\Map\BeachMapController.cpp" />
     <ClCompile Include="..\Classes\Controllers\Map\TownMapController.cpp" />
@@ -163,6 +164,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClCompile Include="..\Classes\Controllers\NPC\NpcDialogueManager.cpp" />
     <ClCompile Include="..\Classes\Controllers\NPC\WillyNpcController.cpp" />
     <ClCompile Include="..\Classes\Controllers\Store\StoreController.cpp" />
+    <ClCompile Include="..\Classes\Controllers\Systems\ChestController.cpp" />
     <ClCompile Include="..\Classes\Controllers\TileSelector.cpp" />
     <ClCompile Include="..\Classes\Controllers\UI\ChestPanelUI.cpp" />
     <ClCompile Include="..\Classes\Controllers\UI\CraftPanelUI.cpp" />
@@ -248,6 +250,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClInclude Include="..\Classes\AppDelegate.h" />
     <ClInclude Include="..\Classes\Controllers\Environment\TreeSystem.h" />
     <ClInclude Include="..\Classes\Controllers\Interact\BeachInteractor.h" />
+    <ClInclude Include="..\Classes\Controllers\Interact\ChestInteractor.h" />
     <ClInclude Include="..\Classes\Controllers\Interact\MineInteractor.h" />
     <ClInclude Include="..\Classes\Controllers\Interact\TownInteractor.h" />
     <ClInclude Include="..\Classes\Controllers\Map\BeachMapController.h" />
@@ -257,6 +260,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClInclude Include="..\Classes\Controllers\NPC\NpcDialogueManager.h" />
     <ClInclude Include="..\Classes\Controllers\NPC\WillyNpcController.h" />
     <ClInclude Include="..\Classes\Controllers\Store\StoreController.h" />
+    <ClInclude Include="..\Classes\Controllers\Systems\ChestController.h" />
     <ClInclude Include="..\Classes\Controllers\TileSelector.h" />
     <ClInclude Include="..\Classes\Controllers\UI\ChestPanelUI.h" />
     <ClInclude Include="..\Classes\Controllers\UI\CraftPanelUI.h" />

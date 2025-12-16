@@ -10,6 +10,7 @@
 #include "Controllers/MineCombatController.h"
 #include "Controllers/Interact/MineInteractor.h"
 #include "Controllers/MineElevatorController.h"
+namespace Controllers { class ChestInteractor; }
 
 class MineScene : public SceneBase {
 public:
@@ -24,6 +25,7 @@ private:
     Controllers::MineCombatController* _combat = nullptr;
     Controllers::MineInteractor* _interactor = nullptr;
     Controllers::MineElevatorController* _elevator = nullptr;
+    Controllers::ChestInteractor* _chestInteractor = nullptr;
     bool _inTransition = false;
 
     // SceneBase overrides

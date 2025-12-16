@@ -37,6 +37,8 @@ bool openChestNearPlayer(Controllers::IMapController* map,
                          const cocos2d::Vec2& playerWorldPos,
                          const cocos2d::Vec2& lastDir);
 
+bool openGlobalChest(Controllers::UIController* ui);
+
 bool placeChestOnFarm(Controllers::IMapController* map,
                       Controllers::UIController* ui,
                       std::shared_ptr<Game::Inventory> inventory,

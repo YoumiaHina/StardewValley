@@ -70,3 +70,8 @@ void RoomScene::onKeyPressedHook(EventKeyboard::KeyCode code) {
         Director::getInstance()->replaceScene(trans);
     }
 }
+
+void RoomScene::onMouseDown(cocos2d::EventMouse* e) {
+    if (e->getMouseButton() != EventMouse::MouseButton::BUTTON_LEFT) return;
+    if (_interactor) _interactor->onLeftClick();
+}

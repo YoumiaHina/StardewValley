@@ -46,6 +46,10 @@ bool Inventory::isEmpty(std::size_t index) const {
     return index < _slots.size() && _slots[index].kind == SlotKind::Empty;
 }
 
+bool Inventory::isTool(std::size_t index) const {
+    return index < _slots.size() && _slots[index].kind == SlotKind::Tool;
+}
+
 int Inventory::addItems(ItemType type, int qty) {
     if (qty <= 0) return 0;
     // 1) fill existing stacks
@@ -146,6 +150,18 @@ bool Inventory::removeOneItemFromSlot(std::size_t index) {
         s.itemType = ItemType::Wood;
         s.itemQty = 0;
     }
+    return true;
+}
+
+bool Inventory::clearSlot(std::size_t index) {
+    if (index >= _slots.size()) return false;
+    auto& s = _slots[index];
+    if (s.kind == SlotKind::Tool) {
+        s.tool.reset();
+    }
+    s.kind = SlotKind::Empty;
+    s.itemType = ItemType::Wood;
+    s.itemQty = 0;
     return true;
 }
 

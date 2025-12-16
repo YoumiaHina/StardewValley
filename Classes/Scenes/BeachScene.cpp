@@ -4,6 +4,7 @@
 #include "Game/GameConfig.h"
 #include "Controllers/Systems/FishingController.h"
 #include "Game/Tool/FishingRod.h"
+#include "Controllers/Interact/ChestInteractor.h"
 
 using namespace cocos2d;
 using namespace Controllers;
@@ -71,3 +72,16 @@ void BeachScene::onSpacePressed() {
 }
 
 const char* BeachScene::doorPromptText() const { return "Press Space to Enter Farm"; }
+
+void BeachScene::onMouseDown(EventMouse* e) {
+    if (e->getMouseButton() != EventMouse::MouseButton::BUTTON_LEFT) return;
+    if (!_chestInteractor && _inventory && _mapController && _uiController) {
+        _chestInteractor = new Controllers::ChestInteractor(
+            _inventory,
+            _mapController,
+            _uiController,
+            [this]() -> Vec2 { return _player ? _player->getPosition() : Vec2(); },
+            [this]() -> Vec2 { return _playerController ? _playerController->lastDir() : Vec2(0,-1); });
+    }
+    if (_chestInteractor) _chestInteractor->onLeftClick();
+}

@@ -3,7 +3,7 @@
 #include "Scenes/SceneBase.h"
 #include "Controllers/Map/BeachMapController.h"
 #include "Controllers/Interact/BeachInteractor.h"
-namespace Controllers { class FishingController; }
+namespace Controllers { class FishingController; class ChestInteractor; }
 
 class BeachScene : public SceneBase {
 public:
@@ -16,9 +16,11 @@ protected:
     void positionPlayerInitial() override;
     void onSpacePressed() override;
     const char* doorPromptText() const override;
+    void onMouseDown(cocos2d::EventMouse* e) override;
 
 private:
     Controllers::BeachMapController* _beachMap = nullptr;
     Controllers::BeachInteractor _interactor;
     Controllers::FishingController* _fishing = nullptr;
+    Controllers::ChestInteractor* _chestInteractor = nullptr;
 };

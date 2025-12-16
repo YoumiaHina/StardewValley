@@ -8,6 +8,7 @@
 #include "Controllers/IMapController.h"
 #include "Game/Chest.h"
 #include "Game/Map/RoomMap.h"
+#include "Controllers/Systems/ChestController.h"
 
 namespace Controllers {
 
@@ -37,8 +38,14 @@ public:
     const cocos2d::Rect& roomRect() const { return _roomRect; }
     const cocos2d::Rect& doorRect() const { return _doorRect; }
     const cocos2d::Rect& bedRect()  const { return _bedRect; }
-    const std::vector<Game::Chest>& chests() const { return _chests; }
-    std::vector<Game::Chest>& chests() { return _chests; }
+    const std::vector<Game::Chest>& chests() const override {
+        static const std::vector<Game::Chest> empty;
+        return _chestController ? _chestController->chests() : empty;
+    }
+    std::vector<Game::Chest>& chests() override {
+        static std::vector<Game::Chest> empty;
+        return _chestController ? _chestController->chests() : empty;
+    }
     void addActorToMap(cocos2d::Node* node, int zOrder) override;
     cocos2d::Vec2 roomFarmDoorSpawnPos() const;
     void refreshChestsVisuals();
@@ -50,8 +57,7 @@ private:
     cocos2d::Rect _roomRect;
     cocos2d::Rect _doorRect;
     cocos2d::Rect _bedRect;
-    std::vector<Game::Chest> _chests;
-    cocos2d::DrawNode* _chestDraw = nullptr;
+    Controllers::ChestController* _chestController = nullptr;
 };
 
 }

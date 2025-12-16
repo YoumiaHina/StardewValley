@@ -56,11 +56,18 @@ void RoomMapController::init() {
         }
     }
 
-    _chestDraw = DrawNode::create();
+    if (!_chestController) {
+        _chestController = new Controllers::ChestController(false);
+    }
+    cocos2d::Node* chestParent = nullptr;
     if (_roomMap && _roomMap->getTMX()) {
-        _roomMap->getTMX()->addChild(_chestDraw, 19);
+        chestParent = _roomMap->getTMX();
     } else if (_worldNode) {
-        _worldNode->addChild(_chestDraw, 1);
+        chestParent = _worldNode;
+    }
+    if (_chestController && chestParent) {
+        _chestController->attachTo(chestParent, 19);
+        _chestController->syncLoad();
     }
 }
 
@@ -85,10 +92,8 @@ Vec2 RoomMapController::clampPosition(const Vec2& current, const Vec2& next, flo
             candidate.y = current.y;
         }
     }
-    for (const auto& ch : _chests) {
-        if (Game::chestCollisionRect(ch).containsPoint(Vec2(candidate.x, candidate.y))) {
-            return current;
-        }
+    if (_chestController && _chestController->collides(Vec2(candidate.x, candidate.y))) {
+        return current;
     }
     return candidate;
 }
@@ -102,7 +107,7 @@ bool RoomMapController::isNearFarmDoor(const Vec2& playerWorldPos) const {
 }
 
 bool RoomMapController::isNearChest(const Vec2& playerWorldPos) const {
-    return Game::isNearAnyChest(playerWorldPos, _chests);
+    return _chestController ? _chestController->isNearChest(playerWorldPos) : false;
 }
 
 void RoomMapController::addActorToMap(cocos2d::Node* node, int zOrder) {
@@ -114,9 +119,7 @@ void RoomMapController::addActorToMap(cocos2d::Node* node, int zOrder) {
 }
 bool RoomMapController::collides(const Vec2& pos, float radius) const {
     if (_roomMap && _roomMap->collides(pos, radius)) return true;
-    for (const auto& ch : _chests) {
-        if (Game::chestCollisionRect(ch).containsPoint(pos)) return true;
-    }
+    if (_chestController && _chestController->collides(pos)) return true;
     return false;
 }
 cocos2d::Vec2 RoomMapController::roomFarmDoorSpawnPos() const {
@@ -127,31 +130,8 @@ cocos2d::Vec2 RoomMapController::roomFarmDoorSpawnPos() const {
 }
 
 void RoomMapController::refreshChestsVisuals() {
-    if (!_chestDraw) return;
-    _chestDraw->clear();
-    _chestDraw->removeAllChildren();
-    for (const auto& ch : _chests) {
-        auto r = Game::chestRect(ch);
-        cocos2d::Vec2 center(r.getMidX(), r.getMidY());
-        auto spr = cocos2d::Sprite::create("Chest.png");
-        if (spr && spr->getTexture()) {
-            auto cs = spr->getContentSize();
-            if (cs.width > 0 && cs.height > 0) {
-                float sx = r.size.width / cs.width;
-                float sy = r.size.height / cs.height;
-                float scale = std::min(sx, sy);
-                spr->setScale(scale);
-            }
-            spr->setPosition(center);
-            _chestDraw->addChild(spr);
-        } else {
-            cocos2d::Vec2 a(r.getMinX(), r.getMinY());
-            cocos2d::Vec2 b(r.getMaxX(), r.getMinY());
-            cocos2d::Vec2 c(r.getMaxX(), r.getMaxY());
-            cocos2d::Vec2 d(r.getMinX(), r.getMaxY());
-            cocos2d::Vec2 v[4] = { a, b, c, d };
-            _chestDraw->drawSolidPoly(v, 4, cocos2d::Color4F(0.6f,0.4f,0.2f,0.9f));
-        }
+    if (_chestController) {
+        _chestController->refreshVisuals();
     }
 }
 

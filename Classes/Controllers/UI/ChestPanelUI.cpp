@@ -2,6 +2,8 @@
 #include "Game/WorldState.h"
 #include "Game/Item.h"
 #include "Game/Chest.h"
+#include "Game/Tool/ToolBase.h"
+#include "Game/Tool/ToolFactory.h"
 
 using namespace cocos2d;
 
@@ -189,6 +191,43 @@ void ChestPanelUI::refreshChestPanel(Game::Chest* chest) {
                     std::string name = Game::itemName(slot.itemType);
                     nameLabel->setString(name);
                     nameLabel->setVisible(true);
+                } else if (slot.kind == Game::SlotKind::Tool && slot.tool) {
+                    std::string path;
+                    auto t = slot.tool.get();
+                    if (t) {
+                        switch (t->kind()) {
+                            case Game::ToolKind::Axe:        path = "Tool/Axe.png"; break;
+                            case Game::ToolKind::Hoe:        path = "Tool/Hoe.png"; break;
+                            case Game::ToolKind::Pickaxe:    path = "Tool/Pickaxe.png"; break;
+                            case Game::ToolKind::WaterCan:   path = "Tool/WaterCan.png"; break;
+                            case Game::ToolKind::FishingRod: path = "Tool/FishingRod.png"; break;
+                            case Game::ToolKind::Sword:      path = "Weapon/sword.png"; break;
+                            default: break;
+                        }
+                    }
+                    if (!path.empty()) {
+                        icon->setTexture(path);
+                    }
+                    if (icon->getTexture()) {
+                        auto cs = icon->getContentSize();
+                        float targetW = cellW - 8.f;
+                        float targetH = cellH - 8.f;
+                        float sx = cs.width > 0 ? targetW / cs.width : 1.0f;
+                        float sy = cs.height > 0 ? targetH / cs.height : 1.0f;
+                        float s = std::min(sx, sy);
+                        icon->setScale(s);
+                        icon->setVisible(true);
+                    } else {
+                        icon->setVisible(false);
+                    }
+                    countLabel->setVisible(false);
+                    std::string name = t ? t->displayName() : std::string();
+                    if (!name.empty()) {
+                        nameLabel->setString(name);
+                        nameLabel->setVisible(true);
+                    } else {
+                        nameLabel->setVisible(false);
+                    }
                 } else {
                     icon->setVisible(false);
                     countLabel->setVisible(false);
@@ -282,6 +321,43 @@ void ChestPanelUI::refreshChestPanel(Game::Chest* chest) {
                     std::string name = Game::itemName(slot.itemType);
                     nameLabel->setString(name);
                     nameLabel->setVisible(true);
+                } else if (slot.kind == Game::SlotKind::Tool && slot.tool) {
+                    std::string path;
+                    auto t = slot.tool.get();
+                    if (t) {
+                        switch (t->kind()) {
+                            case Game::ToolKind::Axe:        path = "Tool/Axe.png"; break;
+                            case Game::ToolKind::Hoe:        path = "Tool/Hoe.png"; break;
+                            case Game::ToolKind::Pickaxe:    path = "Tool/Pickaxe.png"; break;
+                            case Game::ToolKind::WaterCan:   path = "Tool/WaterCan.png"; break;
+                            case Game::ToolKind::FishingRod: path = "Tool/FishingRod.png"; break;
+                            case Game::ToolKind::Sword:      path = "Weapon/sword.png"; break;
+                            default: break;
+                        }
+                    }
+                    if (!path.empty()) {
+                        icon->setTexture(path);
+                    }
+                    if (icon->getTexture()) {
+                        auto cs = icon->getContentSize();
+                        float targetW = cellW - 8.f;
+                        float targetH = cellH - 8.f;
+                        float sx = cs.width > 0 ? targetW / cs.width : 1.0f;
+                        float sy = cs.height > 0 ? targetH / cs.height : 1.0f;
+                        float s = std::min(sx, sy);
+                        icon->setScale(s);
+                        icon->setVisible(true);
+                    } else {
+                        icon->setVisible(false);
+                    }
+                    countLabel->setVisible(false);
+                    std::string name = t ? t->displayName() : std::string();
+                    if (!name.empty()) {
+                        nameLabel->setString(name);
+                        nameLabel->setVisible(true);
+                    } else {
+                        nameLabel->setVisible(false);
+                    }
                 } else {
                     icon->setVisible(false);
                     countLabel->setVisible(false);
@@ -323,21 +399,34 @@ void ChestPanelUI::onInventorySlotClicked(int invIndex) {
     if (invIndex < 0 || invIndex >= _inventory->size()) return;
     if (_selectedIndex < 0 || _selectedIndex >= static_cast<int>(_currentChest->slots.size())) return;
     auto& slotChest = _currentChest->slots[static_cast<std::size_t>(_selectedIndex)];
-    if (!(slotChest.kind == Game::SlotKind::Item && slotChest.itemQty > 0)) return;
-    Game::ItemType type = slotChest.itemType;
-    bool invEmpty = _inventory->isEmpty(static_cast<std::size_t>(invIndex));
-    bool invIsItem = _inventory->isItem(static_cast<std::size_t>(invIndex));
-    Game::ItemStack st = _inventory->itemAt(static_cast<std::size_t>(invIndex));
-    bool sameType = invIsItem && st.type == type;
-    bool canReceive = (invEmpty || sameType) && (!invIsItem || st.quantity < Game::ItemStack::MAX_STACK);
-    if (!canReceive) return;
-    bool okAdd = _inventory->addOneItemToSlot(static_cast<std::size_t>(invIndex), type);
-    if (!okAdd) return;
-    if (slotChest.itemQty <= 0) return;
-    slotChest.itemQty -= 1;
-    if (slotChest.itemQty <= 0) {
+    if (slotChest.kind == Game::SlotKind::Item && slotChest.itemQty > 0) {
+        Game::ItemType type = slotChest.itemType;
+        bool invEmpty = _inventory->isEmpty(static_cast<std::size_t>(invIndex));
+        bool invIsItem = _inventory->isItem(static_cast<std::size_t>(invIndex));
+        Game::ItemStack st = _inventory->itemAt(static_cast<std::size_t>(invIndex));
+        bool sameType = invIsItem && st.type == type;
+        bool canReceive = (invEmpty || sameType) && (!invIsItem || st.quantity < Game::ItemStack::MAX_STACK);
+        if (!canReceive) return;
+        bool okAdd = _inventory->addOneItemToSlot(static_cast<std::size_t>(invIndex), type);
+        if (!okAdd) return;
+        if (slotChest.itemQty <= 0) return;
+        slotChest.itemQty -= 1;
+        if (slotChest.itemQty <= 0) {
+            slotChest.kind = Game::SlotKind::Empty;
+            slotChest.itemQty = 0;
+        }
+    } else if (slotChest.kind == Game::SlotKind::Tool && slotChest.tool) {
+        bool invEmpty = _inventory->isEmpty(static_cast<std::size_t>(invIndex));
+        if (!invEmpty) return;
+        auto t = slotChest.tool.get();
+        if (!t) return;
+        Game::ToolKind tk = t->kind();
+        _inventory->setTool(static_cast<std::size_t>(invIndex), Game::makeTool(tk));
+        slotChest.tool.reset();
         slotChest.kind = Game::SlotKind::Empty;
         slotChest.itemQty = 0;
+    } else {
+        return;
     }
     if (_selectedIndex >= 0 && _selectedIndex < static_cast<int>(_cellIcons.size())) {
         auto icon = _cellIcons[_selectedIndex];
@@ -372,6 +461,36 @@ void ChestPanelUI::onInventorySlotClicked(int invIndex) {
                 std::string name = Game::itemName(slot.itemType);
                 nameLabel->setString(name);
                 nameLabel->setVisible(true);
+            } else if (slot.kind == Game::SlotKind::Tool && slot.tool) {
+                std::string path;
+                auto t = slot.tool.get();
+                if (t) {
+                    switch (t->kind()) {
+                        case Game::ToolKind::Axe:        path = "Tool/Axe.png"; break;
+                        case Game::ToolKind::Hoe:        path = "Tool/Hoe.png"; break;
+                        case Game::ToolKind::Pickaxe:    path = "Tool/Pickaxe.png"; break;
+                        case Game::ToolKind::WaterCan:   path = "Tool/WaterCan.png"; break;
+                        case Game::ToolKind::FishingRod: path = "Tool/FishingRod.png"; break;
+                        case Game::ToolKind::Sword:      path = "Weapon/sword.png"; break;
+                        default: break;
+                    }
+                }
+                if (!path.empty()) {
+                    icon->setTexture(path);
+                }
+                if (icon->getTexture()) {
+                    icon->setVisible(true);
+                } else {
+                    icon->setVisible(false);
+                }
+                countLabel->setVisible(false);
+                std::string name = t ? t->displayName() : std::string();
+                if (!name.empty()) {
+                    nameLabel->setString(name);
+                    nameLabel->setVisible(true);
+                } else {
+                    nameLabel->setVisible(false);
+                }
             } else {
                 icon->setVisible(false);
                 countLabel->setVisible(false);

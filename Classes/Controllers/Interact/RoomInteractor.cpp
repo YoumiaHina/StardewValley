@@ -3,7 +3,6 @@
 #include "Controllers/Systems/GameStateController.h"
 #include "Game/WorldState.h"
 #include "Game/GameConfig.h"
-#include "Game/Chest.h"
 
 using namespace cocos2d;
 
@@ -28,16 +27,17 @@ RoomInteractor::SpaceAction RoomInteractor::onSpacePressed() {
         return SpaceAction::Slept;
     }
 
-    if (_inventory->selectedKind() == Game::SlotKind::Item) {
-        const auto &slot = _inventory->selectedSlot();
-        if (slot.itemType == Game::ItemType::Chest) {
-            Game::placeChestInRoom(room, _ui, _inventory, p);
-        }
-    }
-
-    Game::openChestNearPlayer(_map, _ui, p, Vec2(0,-1));
-
     return SpaceAction::None;
 }
+
+void RoomInteractor::onLeftClick() {
+    if (!_map || !_inventory || !_ui || !_getPlayerPos) return;
+    if (!_chestInteractor) {
+        std::function<Vec2()> getLastDir = []() { return Vec2(0, -1); };
+        _chestInteractor = new Controllers::ChestInteractor(_inventory, _map, _ui, _getPlayerPos, getLastDir);
+    }
+    _chestInteractor->onLeftClick();
+}
+
 // namespace Controllers
 }

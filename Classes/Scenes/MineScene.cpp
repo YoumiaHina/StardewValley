@@ -3,6 +3,7 @@
 #include "Controllers/Managers/AudioManager.h"
 #include "Scenes/FarmScene.h"
 #include "Game/Tool/ToolFactory.h"
+#include "Controllers/Interact/ChestInteractor.h"
 
 USING_NS_CC;
 
@@ -147,6 +148,28 @@ void MineScene::onSpacePressed() {
 const char* MineScene::doorPromptText() const { return "Press Space to Descend"; }
 
 void MineScene::onMouseDown(EventMouse* e) {
+    if (e->getMouseButton() == EventMouse::MouseButton::BUTTON_LEFT) {
+        if (!_chestInteractor && _inventory && _mapController && _uiController) {
+            _chestInteractor = new Controllers::ChestInteractor(
+                _inventory,
+                _mapController,
+                _uiController,
+                [this]() -> Vec2 { return _player ? _player->getPosition() : Vec2(); },
+                [this]() -> Vec2 { return _playerController ? _playerController->lastDir() : Vec2(0,-1); });
+        }
+        if (_chestInteractor) {
+            _chestInteractor->onLeftClick();
+        }
+        if (_uiController && _uiController->isChestPanelVisible()) {
+            return;
+        }
+        if (_inventory && _inventory->selectedKind() == Game::SlotKind::Item) {
+            const auto& slot = _inventory->selectedSlot();
+            if (slot.itemType == Game::ItemType::Chest) {
+                return;
+            }
+        }
+    }
     if (_combat) _combat->onMouseDown(e);
 }
 
