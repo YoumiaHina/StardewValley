@@ -104,6 +104,7 @@ private:
     // Tilled tile overlay sprites
     cocos2d::Node* _tileRoot = nullptr;
     std::unordered_map<long long, cocos2d::Sprite*> _tileSprites;
+    std::unordered_map<long long, cocos2d::Sprite*> _waterSprites;
     cocos2d::Node* _actorsRoot = nullptr;
     Controllers::TreeSystem* _treeSystem = nullptr;
     cocos2d::Vec2 _lastClickWorldPos = cocos2d::Vec2::ZERO;

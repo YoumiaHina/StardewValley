@@ -391,6 +391,7 @@ void FarmMapController::refreshMapVisuals() {
     float s = tileSize();
     // Track which overlay sprites are alive
     std::unordered_set<long long> alive;
+    std::unordered_set<long long> aliveWater;
     for (int r = 0; r < _rows; ++r) {
         for (int c = 0; c < _cols; ++c) {
             auto center = tileToWorld(c, r);
@@ -476,9 +477,6 @@ void FarmMapController::refreshMapVisuals() {
                     case 15: rowBottom = 2; colLeft = 3; break;
                     default: rowBottom = 1; colLeft = 1; break;
                 }
-                if (getTile(c, r) == Game::TileType::Watered) {
-                    colLeft += 4;
-                }
                 float texW = spr->getTexture() ? spr->getTexture()->getContentSize().width : 0.0f;
                 float texH = spr->getTexture() ? spr->getTexture()->getContentSize().height : 0.0f;
                 int columns = texW > 0 ? static_cast<int>(texW / tw) : 1;
@@ -492,6 +490,77 @@ void FarmMapController::refreshMapVisuals() {
                 auto pos = tileToWorld(c, r);
                 spr->setPosition(pos);
                 spr->setVisible(true);
+
+                if (getTile(c, r) == Game::TileType::Watered) {
+                    aliveWater.insert(key);
+                    cocos2d::Sprite* sprW = nullptr;
+                    auto itW = _waterSprites.find(key);
+                    if (itW == _waterSprites.end()) {
+                        sprW = cocos2d::Sprite::create("hoeDirt.png");
+                        sprW->setAnchorPoint(cocos2d::Vec2(0.5f, 0.5f));
+                        _tileRoot->addChild(sprW, 1);
+                        _waterSprites[key] = sprW;
+                    } else {
+                        sprW = itW->second;
+                    }
+                    bool upW = false, downW = false, leftW = false, rightW = false;
+                    if (r + 1 < _rows) {
+                        auto t = getTile(c, r + 1);
+                        upW = (t == Game::TileType::Watered);
+                    }
+                    if (r - 1 >= 0) {
+                        auto t = getTile(c, r - 1);
+                        downW = (t == Game::TileType::Watered);
+                    }
+                    if (c - 1 >= 0) {
+                        auto t = getTile(c - 1, r);
+                        leftW = (t == Game::TileType::Watered);
+                    }
+                    if (c + 1 < _cols) {
+                        auto t = getTile(c + 1, r);
+                        rightW = (t == Game::TileType::Watered);
+                    }
+                    int maskW = 0;
+                    if (upW) maskW |= 1;
+                    if (downW) maskW |= 2;
+                    if (leftW) maskW |= 4;
+                    if (rightW) maskW |= 8;
+                    int rowBottomW = 4;
+                    int colLeftW = 1;
+                    switch (maskW) {
+                        case 0:  rowBottomW = 1; colLeftW = 1; break;
+                        case 2:  rowBottomW = 2; colLeftW = 1; break;
+                        case 1:  rowBottomW = 4; colLeftW = 1; break;
+                        case 3:  rowBottomW = 3; colLeftW = 1; break;
+                        case 8:  rowBottomW = 4; colLeftW = 2; break;
+                        case 4:  rowBottomW = 4; colLeftW = 4; break;
+                        case 12: rowBottomW = 4; colLeftW = 3; break;
+                        case 10: rowBottomW = 1; colLeftW = 2; break;
+                        case 6:  rowBottomW = 1; colLeftW = 4; break;
+                        case 5:  rowBottomW = 3; colLeftW = 4; break;
+                        case 9:  rowBottomW = 3; colLeftW = 2; break;
+                        case 11: rowBottomW = 2; colLeftW = 2; break;
+                        case 13: rowBottomW = 3; colLeftW = 3; break;
+                        case 14: rowBottomW = 1; colLeftW = 3; break;
+                        case 7:  rowBottomW = 2; colLeftW = 4; break;
+                        case 15: rowBottomW = 2; colLeftW = 3; break;
+                        default: rowBottomW = 1; colLeftW = 1; break;
+                    }
+                    colLeftW += 4;
+                    float texWW = sprW->getTexture() ? sprW->getTexture()->getContentSize().width : 0.0f;
+                    float texHW = sprW->getTexture() ? sprW->getTexture()->getContentSize().height : 0.0f;
+                    int columnsW = texWW > 0 ? static_cast<int>(texWW / tw) : 1;
+                    int totalRowsW = texHW > 0 ? static_cast<int>(texHW / th) : 1;
+                    int colIndex0W = colLeftW - 1;
+                    int rowIndexFromTop0W = totalRowsW - rowBottomW;
+                    if (rowIndexFromTop0W < 0) rowIndexFromTop0W = 0;
+                    float xW = static_cast<float>(colIndex0W * tw);
+                    float yW = texHW - static_cast<float>((rowIndexFromTop0W + 1) * th);
+                    sprW->setTextureRect(cocos2d::Rect(xW, yW, static_cast<float>(tw), static_cast<float>(th)));
+                    auto posW = tileToWorld(c, r);
+                    sprW->setPosition(posW);
+                    sprW->setVisible(true);
+                }
             }
         }
     }
@@ -508,6 +577,19 @@ void FarmMapController::refreshMapVisuals() {
             auto spr = _tileSprites[k];
             if (spr) spr->removeFromParent();
             _tileSprites.erase(k);
+        }
+    }
+    std::vector<long long> toRemoveWater;
+    for (auto &kv : _waterSprites) {
+        if (aliveWater.find(kv.first) == aliveWater.end()) {
+            toRemoveWater.push_back(kv.first);
+        }
+    }
+    for (auto k : toRemoveWater) {
+        if (_waterSprites.count(k)) {
+            auto spr = _waterSprites[k];
+            if (spr) spr->removeFromParent();
+            _waterSprites.erase(k);
         }
     }
     if (_chestController) {
