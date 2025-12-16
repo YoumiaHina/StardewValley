@@ -2,6 +2,7 @@
 
 #include "Controllers/IMapController.h"
 #include "Game/Map/TownMap.h"
+#include "Game/Drop.h"
 
 namespace Controllers {
 
@@ -43,6 +44,9 @@ public:
 
     void refreshMapVisuals() override;
     void refreshCropsVisuals() override {}
+    void refreshDropsVisuals() override;
+    void spawnDropAt(int c, int r, int itemType, int qty) override;
+    void collectDropsNear(const cocos2d::Vec2& playerWorldPos, Game::Inventory* inv) override;
 
     cocos2d::Vec2 farmRoomDoorSpawnPos() const override { return cocos2d::Vec2::ZERO; }
     cocos2d::Vec2 farmMineDoorSpawnPos() const override { return cocos2d::Vec2::ZERO; }
@@ -62,6 +66,9 @@ private:
     std::vector<Game::Chest> _chests;
     cocos2d::DrawNode* _cursor = nullptr;
     cocos2d::DrawNode* _chestDraw = nullptr;
+    std::vector<Game::Drop> _drops;
+    cocos2d::DrawNode* _dropsDraw = nullptr;
+    cocos2d::Node* _dropsRoot = nullptr;
     cocos2d::Vec2 _lastClickWorldPos = cocos2d::Vec2::ZERO;
     bool _hasLastClick = false;
 };

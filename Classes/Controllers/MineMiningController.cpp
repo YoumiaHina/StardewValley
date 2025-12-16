@@ -165,10 +165,15 @@ bool MineMiningController::hitNearestNode(const Vec2& worldPos, int power) {
     _map->worldToTileIndex(_minerals[idx].pos, tc, tr);
     int hpBefore = _minerals[idx].hp;
 
-    auto spawnDrop = [](int, int, int item) {
-        auto inv = Game::globalState().inventory;
-        if (inv) {
-            inv->addItems(static_cast<Game::ItemType>(item), 1);
+    auto spawnDrop = [this](int c, int r, int item) {
+        if (_map) {
+            _map->spawnDropAt(c, r, item, 1);
+            _map->refreshDropsVisuals();
+        } else {
+            auto inv = Game::globalState().inventory;
+            if (inv) {
+                inv->addItems(static_cast<Game::ItemType>(item), 1);
+            }
         }
     };
 

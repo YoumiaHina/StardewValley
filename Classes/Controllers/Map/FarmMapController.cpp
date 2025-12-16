@@ -747,38 +747,7 @@ void FarmMapController::refreshCropsVisuals() {
 }
 
 void FarmMapController::refreshDropsVisuals() {
-    if (!_dropsDraw) return;
-    _dropsDraw->clear();
-    if (_dropsRoot) {
-        _dropsRoot->removeAllChildren();
-    }
-    for (const auto& d : _drops) {
-        bool usedSprite = false;
-        if (_dropsRoot) {
-            std::string path = Game::itemIconPath(d.type);
-            if (!path.empty()) {
-                auto spr = Sprite::create(path);
-                if (spr && spr->getTexture()) {
-                    float radius = GameConfig::DROP_DRAW_RADIUS;
-                    auto cs = spr->getContentSize();
-                    if (cs.width > 0 && cs.height > 0) {
-                        float targetSize = radius * 2.0f;
-                        float sx = targetSize / cs.width;
-                        float sy = targetSize / cs.height;
-                        float scale = std::min(sx, sy);
-                        spr->setScale(scale);
-                    }
-                    spr->setPosition(d.pos);
-                    _dropsRoot->addChild(spr);
-                    usedSprite = true;
-                }
-            }
-        }
-        if (!usedSprite) {
-            _dropsDraw->drawSolidCircle(d.pos, GameConfig::DROP_DRAW_RADIUS, 0.0f, 12, Game::itemColor(d.type));
-            _dropsDraw->drawCircle(d.pos, GameConfig::DROP_DRAW_RADIUS, 0.0f, 12, false, Color4F(0,0,0,0.4f));
-        }
-    }
+    DropHelper::renderDrops(_drops, _dropsRoot, _dropsDraw);
 }
 
 void FarmMapController::spawnDropAt(int c, int r, int itemType, int qty) {
@@ -790,23 +759,7 @@ void FarmMapController::spawnDropAt(int c, int r, int itemType, int qty) {
 
 void FarmMapController::collectDropsNear(const cocos2d::Vec2& playerWorldPos, Game::Inventory* inv) {
     if (!inv) return;
-    float radius = GameConfig::DROP_PICK_RADIUS;
-    float r2 = radius * radius;
-    std::vector<Game::Drop> kept;
-    for (auto& d : _drops) {
-        float dist2 = playerWorldPos.distanceSquared(d.pos);
-        if (dist2 <= r2) {
-            int leftover = inv->addItems(d.type, d.qty);
-            if (leftover > 0) {
-                Game::Drop nd = d;
-                nd.qty = leftover;
-                kept.push_back(nd);
-            }
-        } else {
-            kept.push_back(d);
-        }
-    }
-    _drops.swap(kept);
+    DropHelper::collectDropsNear(playerWorldPos, _drops, inv);
     Game::globalState().farmDrops = _drops;
     refreshDropsVisuals();
 }
