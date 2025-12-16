@@ -24,6 +24,7 @@ private:
     cocos2d::Scene* _scene = nullptr;
     std::shared_ptr<Game::Inventory> _inventory;
     cocos2d::Node* _panelNode = nullptr;
+    cocos2d::EventListenerKeyboard* _escListener = nullptr;
     Game::Chest* _currentChest = nullptr;
     cocos2d::Node* _slotsRoot = nullptr;
     cocos2d::DrawNode* _highlightNode = nullptr;

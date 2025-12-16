@@ -81,9 +81,9 @@ bool TreeSystem::collides(const Vec2& p, float radius, int /*tileSize*/) const {
     return false;
 }
 
-bool TreeSystem::damageTreeAt(int c, int r, int amount,
-                              const std::function<void(int,int,int)>& spawnDrop,
-                              const std::function<void(int,int, Game::TileType)>& setTile) {
+bool TreeSystem::damageAt(int c, int r, int amount,
+                          const std::function<void(int,int,int)>& spawnDrop,
+                          const std::function<void(int,int, Game::TileType)>& setTile) {
     auto t = findTreeAt(c, r);
     if (!t) return false;
     t->applyDamage(amount);
@@ -91,19 +91,13 @@ bool TreeSystem::damageTreeAt(int c, int r, int amount,
         long long k = (static_cast<long long>(r) << 32) | static_cast<unsigned long long>(c);
         _trees.erase(k);
         if (setTile) setTile(c, r, Game::TileType::Soil);
-        t->playFallAnimation([t, c, r, spawnDrop]{
+        t->playDestructionAnimation([t, c, r, spawnDrop]{
             t->removeFromParent();
             if (spawnDrop) spawnDrop(c, r, static_cast<int>(Game::ItemType::Wood));
         });
         return true;
     }
     return true;
-}
-
-bool TreeSystem::damageAt(int c, int r, int amount,
-                          const std::function<void(int,int,int)>& spawnDrop,
-                          const std::function<void(int,int, Game::TileType)>& setTile) {
-    return damageTreeAt(c, r, amount, spawnDrop, setTile);
 }
 
 void TreeSystem::sortTrees() {

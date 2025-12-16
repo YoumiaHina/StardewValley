@@ -80,6 +80,11 @@ bool placeChestCommon(const Vec2& center,
 
     if (isNearAnyChest(center, chs)) return false;
 
+    if (chs.size() >= static_cast<std::size_t>(Chest::MAX_PER_AREA)) {
+        ui->popTextAt(center, "Too many chests", Color3B::RED);
+        return false;
+    }
+
     Game::Chest chest;
     chest.pos = center;
     chs.push_back(chest);

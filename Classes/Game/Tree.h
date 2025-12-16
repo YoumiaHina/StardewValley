@@ -15,7 +15,6 @@ public:
     bool dead() const override { return _hp <= 0; }
 
     cocos2d::Rect footRect() const override;
-    void playFallAnimation(const std::function<void()>& onComplete);
     void playDestructionAnimation(const std::function<void()>& onComplete) override;
 
 private:

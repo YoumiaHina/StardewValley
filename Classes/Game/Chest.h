@@ -19,6 +19,7 @@ struct Chest {
     static constexpr int ROWS = 3;
     static constexpr int COLS = 12;
     static constexpr int CAPACITY = ROWS * COLS;
+    static constexpr int MAX_PER_AREA = 200;
 
     cocos2d::Vec2 pos;
     std::vector<Slot> slots;

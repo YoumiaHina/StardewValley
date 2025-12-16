@@ -1,4 +1,4 @@
-﻿#include "Controllers/Interact/ChestInteractor.h"
+#include "Controllers/Interact/ChestInteractor.h"
 #include "Controllers/Map/RoomMapController.h"
 #include "Controllers/Map/TownMapController.h"
 #include "Controllers/Map/BeachMapController.h"
@@ -26,6 +26,10 @@ void ChestInteractor::onLeftClick() {
                 Game::placeChestInRoom(room, _ui, _inventory, p);
             } else {
                 auto& chs = _map->chests();
+                if (chs.size() >= static_cast<std::size_t>(Game::Chest::MAX_PER_AREA)) {
+                    _ui->popTextAt(p, "Too many chests", Color3B::RED);
+                    return;
+                }
                 if (Game::isNearAnyChest(p, chs)) return;
                 Game::Chest chest;
                 chest.pos = p;

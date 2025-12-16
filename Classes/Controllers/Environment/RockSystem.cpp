@@ -23,6 +23,7 @@ bool RockSystem::spawnFromTile(int c, int r, const Vec2& tileCenter,
     if (blocked) return false;
     auto rock = Rock::create("FarmEnvironment/rock.png");
     if (!rock) return false;
+    rock->setBrokenTexture("FarmEnvironment/rock_broken.png");
     rock->setPosition(footCenter);
     _root->addChild(rock, 0);
     long long key = (static_cast<long long>(r) << 32) | static_cast<unsigned long long>(c);
@@ -50,6 +51,7 @@ void RockSystem::spawnRandom(int count, int cols, int rows,
         if (blocked) continue;
         auto rock = Rock::create("FarmEnvironment/rock.png");
         if (!rock) continue;
+        rock->setBrokenTexture("FarmEnvironment/rock_broken.png");
         rock->setPosition(footCenter);
         _root->addChild(rock, 0);
         long long key = (static_cast<long long>(r) << 32) | static_cast<unsigned long long>(c);
@@ -79,9 +81,9 @@ bool RockSystem::collides(const Vec2& p, float radius, int) const {
     return false;
 }
 
-bool RockSystem::damageRockAt(int c, int r, int amount,
-                              const std::function<void(int,int,int)>& spawnDrop,
-                              const std::function<void(int,int, Game::TileType)>& setTile) {
+bool RockSystem::damageAt(int c, int r, int amount,
+                          const std::function<void(int,int,int)>& spawnDrop,
+                          const std::function<void(int,int, Game::TileType)>& setTile) {
     auto rock = findRockAt(c, r);
     if (!rock) return false;
     rock->applyDamage(amount);
@@ -89,19 +91,13 @@ bool RockSystem::damageRockAt(int c, int r, int amount,
         long long k = (static_cast<long long>(r) << 32) | static_cast<unsigned long long>(c);
         _rocks.erase(k);
         if (setTile) setTile(c, r, Game::TileType::Soil);
-        rock->playBreakAnimation([rock, c, r, spawnDrop]{
+        rock->playDestructionAnimation([rock, c, r, spawnDrop]{
             if (spawnDrop) spawnDrop(c, r, static_cast<int>(Game::ItemType::Stone));
             rock->removeFromParent();
         });
         return true;
     }
     return true;
-}
-
-bool RockSystem::damageAt(int c, int r, int amount,
-                          const std::function<void(int,int,int)>& spawnDrop,
-                          const std::function<void(int,int, Game::TileType)>& setTile) {
-    return damageRockAt(c, r, amount, spawnDrop, setTile);
 }
 
 void RockSystem::sortRocks() {

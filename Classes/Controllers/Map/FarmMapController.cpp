@@ -18,18 +18,17 @@ void FarmMapController::init() {
     _worldNode->addChild(_mapNode, 0);
 
     _farmMap = Game::FarmMap::create("Maps/spring_outdoors/spring_outdoors.tmx");
-    Size content = _farmMap ? _farmMap->getContentSize() : Size(_cols * GameConfig::TILE_SIZE, _rows * GameConfig::TILE_SIZE);
+    if (!_farmMap) return;
+    Size content = _farmMap->getContentSize();
     auto visibleSize = Director::getInstance()->getVisibleSize();
     auto origin = Director::getInstance()->getVisibleOrigin();
     _mapOrigin = Vec2(origin.x + (visibleSize.width - content.width) * 0.5f,
                       origin.y + (visibleSize.height - content.height) * 0.5f);
-    if (_farmMap) {
-        _farmMap->setAnchorPoint(Vec2(0,0));
-        _farmMap->setPosition(_mapOrigin);
-        _mapNode->addChild(_farmMap, 0);
-        _cols = static_cast<int>(_farmMap->getMapSize().width);
-        _rows = static_cast<int>(_farmMap->getMapSize().height);
-    }
+    _farmMap->setAnchorPoint(Vec2(0,0));
+    _farmMap->setPosition(_mapOrigin);
+    _mapNode->addChild(_farmMap, 0);
+    _cols = static_cast<int>(_farmMap->getMapSize().width);
+    _rows = static_cast<int>(_farmMap->getMapSize().height);
 
     auto &ws = Game::globalState();
     if (ws.farmTiles.empty()) {
@@ -67,9 +66,6 @@ void FarmMapController::init() {
         if (ws.farmRows == 0) ws.farmRows = _rows;
         applyStaticNotSoilMask();
     }
-
-    _mapDraw = DrawNode::create();
-    _mapNode->addChild(_mapDraw, -1);
 
     _cursor = DrawNode::create();
     if (_farmMap && _farmMap->getTMX()) {
@@ -482,41 +478,12 @@ void FarmMapController::worldToTileIndex(const Vec2& p, int& c, int& r) const {
 }
 
 void FarmMapController::refreshMapVisuals() {
-    if (!_mapDraw) return;
-    _mapDraw->clear();
+    if (!_tileRoot) return;
     float s = tileSize();
-    // Track which overlay sprites are alive
     std::unordered_set<long long> alive;
     std::unordered_set<long long> aliveWater;
     for (int r = 0; r < _rows; ++r) {
         for (int c = 0; c < _cols; ++c) {
-            auto center = tileToWorld(c, r);
-            Vec2 a(center.x - s/2, center.y - s/2);
-            Vec2 b(center.x + s/2, center.y - s/2);
-            Vec2 c2(center.x + s/2, center.y + s/2);
-            Vec2 d(center.x - s/2, center.y + s/2);
-            Color4F base;
-            switch (getTile(c, r)) {
-                case Game::TileType::Soil:   base = Color4F(0.55f, 0.40f, 0.25f, 1.0f); break;
-                case Game::TileType::Tilled: base = Color4F(0.45f, 0.30f, 0.18f, 1.0f); break;
-                case Game::TileType::Watered:base = Color4F(0.40f, 0.28f, 0.16f, 1.0f); break;
-                case Game::TileType::Rock:   base = Color4F(0.55f, 0.40f, 0.25f, 1.0f); break;
-                case Game::TileType::Tree:   base = Color4F(0.55f, 0.40f, 0.25f, 1.0f); break;
-                case Game::TileType::NotSoil:base = Color4F(0.35f, 0.30f, 0.25f, 1.0f); break;
-            }
-            Vec2 rect[4] = { a, b, c2, d };
-            if (getTile(c, r) != Game::TileType::Tilled && getTile(c, r) != Game::TileType::Watered) {
-                _mapDraw->drawSolidPoly(rect, 4, base);
-            }
-            _mapDraw->drawLine(a,b, Color4F(0,0,0,0.25f));
-            _mapDraw->drawLine(b,c2,Color4F(0,0,0,0.25f));
-            _mapDraw->drawLine(c2,d, Color4F(0,0,0,0.25f));
-            _mapDraw->drawLine(d,a, Color4F(0,0,0,0.25f));
-            switch (getTile(c, r)) {
-                case Game::TileType::Rock:    _mapDraw->drawSolidCircle(center, s*0.35f, 0.0f, 12, Color4F(0.6f,0.6f,0.6f,1.0f)); break;
-                default: break; // 不再为 Tree 绘制占位，避免出现“木桩”效果
-            }
-
             if (getTile(c, r) == Game::TileType::Tilled || getTile(c, r) == Game::TileType::Watered) {
                 long long key = (static_cast<long long>(r) << 32) | static_cast<unsigned long long>(c);
                 alive.insert(key);
@@ -576,7 +543,6 @@ void FarmMapController::refreshMapVisuals() {
                 }
                 float texW = spr->getTexture() ? spr->getTexture()->getContentSize().width : 0.0f;
                 float texH = spr->getTexture() ? spr->getTexture()->getContentSize().height : 0.0f;
-                int columns = texW > 0 ? static_cast<int>(texW / tw) : 1;
                 int totalRows = texH > 0 ? static_cast<int>(texH / th) : 1;
                 int colIndex0 = colLeft - 1;
                 int rowIndexFromTop0 = totalRows - rowBottom;

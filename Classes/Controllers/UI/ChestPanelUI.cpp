@@ -19,6 +19,15 @@ void ChestPanelUI::buildChestPanel() {
         _panelNode->setPosition(Vec2(origin.x + visibleSize.width * 0.5f,
                                      origin.y + visibleSize.height * 0.5f));
         _panelNode->setVisible(false);
+        if (!_escListener) {
+            _escListener = EventListenerKeyboard::create();
+            _escListener->onKeyReleased = [this](EventKeyboard::KeyCode code, Event*) {
+                if (code == EventKeyboard::KeyCode::KEY_ESCAPE) {
+                    toggleChestPanel(false);
+                }
+            };
+            _panelNode->getEventDispatcher()->addEventListenerWithSceneGraphPriority(_escListener, _panelNode);
+        }
     }
 }
 
@@ -89,7 +98,7 @@ void ChestPanelUI::refreshChestPanel(Game::Chest* chest) {
     title->setPosition(Vec2(0, panelH * 0.5f - 26));
     _panelNode->addChild(title);
     auto closeLabel = Label::createWithTTF("X", "fonts/arial.ttf", 26);
-    closeLabel->setPosition(Vec2(panelW * 0.5f - 24.f, panelH * 0.5f - 24.f));
+    closeLabel->setPosition(Vec2(panelW * 0.5f - 16.f, panelH * 0.5f - 16.f));
     _panelNode->addChild(closeLabel);
     auto closeListener = EventListenerTouchOneByOne::create();
     closeListener->setSwallowTouches(true);

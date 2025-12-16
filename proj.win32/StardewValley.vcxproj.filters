@@ -650,6 +650,12 @@
     <ClInclude Include="..\Classes\Controllers\IMapController.h">
       <Filter>Classes\Controllers\Map</Filter>
     </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\Environment\EnvironmentObstacleSystemBase.h">
+      <Filter>Classes\Controllers\Environment</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\EnvironmentObstacleBase.h">
+      <Filter>Classes\Game</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="game.rc">

@@ -26,10 +26,6 @@ public:
     
     bool collides(const cocos2d::Vec2& point, float radius, int tileSize) const override;
 
-    bool damageTreeAt(int c, int r, int amount,
-                      const std::function<void(int,int,int)>& spawnDrop,
-                      const std::function<void(int,int, Game::TileType)>& setTile);
-
     bool damageAt(int c, int r, int amount,
                   const std::function<void(int,int,int)>& spawnDrop,
                   const std::function<void(int,int, Game::TileType)>& setTile) override;

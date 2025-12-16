@@ -80,14 +80,25 @@ public:
     cocos2d::Vec2 farmBeachDoorSpawnPos() const override;
     cocos2d::Vec2 farmTownDoorSpawnPos() const override;
 
+    bool isNearLake(const cocos2d::Vec2& playerWorldPos, float radius) const override;
+    void sortActorWithEnvironment(cocos2d::Node* actor) override;
+    bool damageTreeAt(int c, int r, int amount) override;
+    bool damageRockAt(int c, int r, int amount) override;
+    Game::Tree* findTreeAt(int c, int r) const;
+    Game::Rock* findRockAt(int c, int r) const;
+    bool isFarm() const override { return true; }
+    void setLastClickWorldPos(const cocos2d::Vec2& p) override { _lastClickWorldPos = p; _hasLastClick = true; }
+    void clearLastClickWorldPos() override { _hasLastClick = false; }
+
+    void collectDropsNear(const cocos2d::Vec2& playerWorldPos, Game::Inventory* inv) override;
+
 private:
     cocos2d::Node* _worldNode = nullptr;
     cocos2d::Node* _mapNode = nullptr;
     Game::FarmMap* _farmMap = nullptr;
     int _cols = GameConfig::MAP_COLS;
     int _rows = GameConfig::MAP_ROWS;
-    std::vector<Game::TileType> _tiles; // row-major
-    cocos2d::DrawNode* _mapDraw = nullptr;
+    std::vector<Game::TileType> _tiles;
     cocos2d::DrawNode* _cursor = nullptr;
     cocos2d::Vec2 _mapOrigin;
 
@@ -115,22 +126,6 @@ private:
     bool _hasLastClick = false;
 
     void applyStaticNotSoilMask();
-
-
-    // 接口扩展：湖边判定
-public:
-    bool isNearLake(const cocos2d::Vec2& playerWorldPos, float radius) const override;
-    void sortActorWithEnvironment(cocos2d::Node* actor) override;
-    bool damageTreeAt(int c, int r, int amount) override;
-    bool damageRockAt(int c, int r, int amount) override;
-    Game::Tree* findTreeAt(int c, int r) const;
-    Game::Rock* findRockAt(int c, int r) const;
-    bool isFarm() const override { return true; }
-    void setLastClickWorldPos(const cocos2d::Vec2& p) override { _lastClickWorldPos = p; _hasLastClick = true; }
-    void clearLastClickWorldPos() override { _hasLastClick = false; }
-
-    void collectDropsNear(const cocos2d::Vec2& playerWorldPos, Game::Inventory* inv) override;
-
 };
 
 }
