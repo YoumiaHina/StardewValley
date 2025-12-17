@@ -4,12 +4,17 @@
 #pragma once
 
 #include "cocos2d.h"
+#include <functional>
 #include <memory>
 #include "Controllers/IMapController.h"
 
 namespace Game { class IPlayerView; }
+namespace Game { class Inventory; }
 
 namespace Controllers {
+
+class UIController;
+class CropSystem;
 
 class PlayerController {
 public:
@@ -25,6 +30,17 @@ public:
     void onKeyPressed(cocos2d::EventKeyboard::KeyCode code);
     void onKeyReleased(cocos2d::EventKeyboard::KeyCode code);
 
+    void registerCommonInputHandlers(
+        cocos2d::Node* ownerNode,
+        UIController* ui,
+        std::shared_ptr<Game::Inventory> inventory,
+        CropSystem* cropSystem,
+        bool enableToolOnSpace,
+        bool enableToolOnLeftClick,
+        std::function<void()> onSpacePressed,
+        std::function<void(cocos2d::EventKeyboard::KeyCode)> onKeyPressedHook,
+        std::function<void(cocos2d::EventMouse*)> onMouseDownHook);
+
     void update(float dt);
     void setMovementLocked(bool locked) { _movementLocked = locked; }
     bool isMovementLocked() const { return _movementLocked; }
@@ -35,6 +51,19 @@ private:
     Game::IPlayerView* _player = nullptr;
     IMapController* _map = nullptr;
     cocos2d::Node* _worldNode = nullptr;
+
+    cocos2d::Node* _inputOwner = nullptr;
+    UIController* _ui = nullptr;
+    std::shared_ptr<Game::Inventory> _inventory;
+    CropSystem* _cropSystem = nullptr;
+    bool _enableToolOnSpace = false;
+    bool _enableToolOnLeftClick = false;
+    std::function<void()> _onSpacePressed;
+    std::function<void(cocos2d::EventKeyboard::KeyCode)> _onKeyPressedHook;
+    std::function<void(cocos2d::EventMouse*)> _onMouseDownHook;
+    cocos2d::EventListenerKeyboard* _kbListener = nullptr;
+    cocos2d::EventListenerMouse* _mouseListener = nullptr;
+    cocos2d::EventListenerTouchOneByOne* _touchListener = nullptr;
 
     // input state
     bool _up = false, _down = false, _left = false, _right = false;

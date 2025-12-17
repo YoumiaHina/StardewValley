@@ -100,161 +100,18 @@ bool SceneBase::initBase(float worldScale, bool buildCraftPanel, bool enableTool
 }
 
 void SceneBase::registerCommonInputHandlers(bool enableToolOnSpace, bool enableToolOnLeftClick, bool buildCraftPanel) {
-    // 键盘
-    auto kb = EventListenerKeyboard::create();
-    kb->onKeyPressed = [this, enableToolOnSpace](EventKeyboard::KeyCode code, Event*) {
-        bool chestOpen = _uiController && _uiController->isChestPanelVisible();
-        bool storeOpen = _uiController && (_uiController->isStorePanelVisible() || _uiController->isAnimalStorePanelVisible());
-        if (_uiController && _uiController->isNpcSocialVisible()) {
-            return;
-        }
-        _playerController->onKeyPressed(code);
-        switch (code) {
-            case EventKeyboard::KeyCode::KEY_1: _uiController->selectHotbarIndex(0); break;
-            case EventKeyboard::KeyCode::KEY_2: _uiController->selectHotbarIndex(1); break;
-            case EventKeyboard::KeyCode::KEY_3: _uiController->selectHotbarIndex(2); break;
-            case EventKeyboard::KeyCode::KEY_4: _uiController->selectHotbarIndex(3); break;
-            case EventKeyboard::KeyCode::KEY_5: _uiController->selectHotbarIndex(4); break;
-            case EventKeyboard::KeyCode::KEY_6: _uiController->selectHotbarIndex(5); break;
-            case EventKeyboard::KeyCode::KEY_7: _uiController->selectHotbarIndex(6); break;
-            case EventKeyboard::KeyCode::KEY_8: _uiController->selectHotbarIndex(7); break;
-            case EventKeyboard::KeyCode::KEY_9: _uiController->selectHotbarIndex(8); break;
-            case EventKeyboard::KeyCode::KEY_0: _uiController->selectHotbarIndex(9); break;
-            case EventKeyboard::KeyCode::KEY_Z: {
-                if (chestOpen || storeOpen) break;
-                Game::Cheat::grantBasic(_inventory);
-                _uiController->refreshHotbar();
-            } break;
-            case EventKeyboard::KeyCode::KEY_F6: {
-                if (chestOpen || storeOpen) break;
-                Game::Cheat::grantProduce(_inventory, Game::CropType::Eggplant, 5);
-                _uiController->refreshHotbar();
-                if (_player && _mapController) _uiController->popTextAt(_mapController->getPlayerPosition(_player->getPosition()), "Eggplant x5", Color3B::YELLOW);
-            } break;
-            case EventKeyboard::KeyCode::KEY_E: {
-                if (chestOpen || storeOpen) break;
-                Game::openGlobalChest(_uiController);
-            } break;
-            case EventKeyboard::KeyCode::KEY_X: {
-                if (chestOpen || storeOpen) break;
-                // 仅让当前目标格子的作物提升一个阶段
-                int tc = 0, tr = 0;
-                if (_player && _mapController) {
-                    Vec2 playerPos = _player->getPosition();
-                    Vec2 dir = _playerController ? _playerController->lastDir() : Vec2(0,-1);
-                    auto tgt = _mapController->targetTile(playerPos, dir);
-                    tc = tgt.first; tr = tgt.second;
-                    if (_cropSystem) { _cropSystem->advanceCropOnceAt(tc, tr); }
-                }
-                if (_uiController && _player) {
-                    _mapController->refreshCropsVisuals();
-                    if (_mapController) _uiController->popTextAt(_mapController->getPlayerPosition(_player->getPosition()), "Grow +1", Color3B::YELLOW);
-                }
-            } break;
-            case EventKeyboard::KeyCode::KEY_F: {
-                if (chestOpen || storeOpen) break;
-                auto &ws = Game::globalState();
-                if (_inventory && _inventory->selectedKind() == Game::SlotKind::Item) {
-                    auto slot = _inventory->selectedSlot();
-                    if (slot.itemQty > 0 && Game::itemEdible(slot.itemType)) {
-                        bool ok = _inventory->consumeSelectedItem(1);
-                        if (ok) {
-                            int e = ws.energy + Game::itemEnergyRestore(slot.itemType);
-                            int h = ws.hp + Game::itemHpRestore(slot.itemType);
-                            ws.energy = std::min(ws.maxEnergy, e);
-                            ws.hp = std::min(ws.maxHp, h);
-                            _uiController->refreshHotbar();
-                            _uiController->refreshHUD();
-                            if (_player && _mapController) _uiController->popTextAt(_mapController->getPlayerPosition(_player->getPosition()), "Ate", Color3B::GREEN);
-                        }
-                    }
-                }
-            } break;
-            case EventKeyboard::KeyCode::KEY_SPACE: {
-                if (chestOpen || storeOpen) break;
-                if (Game::globalState().fishingActive) break;
-                if (enableToolOnSpace) {
-                    bool nearDoor = false;
-                    if (_player && _mapController) {
-                        Vec2 p = _player->getPosition();
-                        nearDoor = _mapController->isNearDoor(p)
-                                   || _mapController->isNearMineDoor(p)
-                                   || _mapController->isNearBeachDoor(p)
-                                   || _mapController->isNearFarmDoor(p)
-                                   || _mapController->isNearTownDoor(p);
-                    }
-                    if (!nearDoor) {
-                        auto t = _inventory ? _inventory->selectedTool() : nullptr;
-                        if (t && t->kind() != Game::ToolKind::FishingRod) {
-                            std::string msg = t->use(_mapController, _cropSystem,
-                                [this]() -> Vec2 { return _player ? _player->getPosition() : Vec2(); },
-                                [this]() -> Vec2 { return _playerController ? _playerController->lastDir() : Vec2(0,-1); },
-                                _uiController);
-                            if (_player && !msg.empty()) {
-                                _player->playToolAnimation(t->kind());
-                            }
-                        }
-                    }
-                }
-                onSpacePressed();
-            } break;
-            default: break;
-        }
-        // 子类扩展键盘处理（如快速进入矿洞 K 键）
-        onKeyPressedHook(code);
-    };
-    kb->onKeyReleased = [this](EventKeyboard::KeyCode code, Event*) {
-        _playerController->onKeyReleased(code);
-    };
-    _eventDispatcher->addEventListenerWithSceneGraphPriority(kb, this);
-
-    // 鼠标
-    auto mouse = EventListenerMouse::create();
-    mouse->onMouseDown = [this, enableToolOnLeftClick](EventMouse* e){
-        bool chestOpen = _uiController && _uiController->isChestPanelVisible();
-        bool storeOpen = _uiController && (_uiController->isStorePanelVisible() || _uiController->isAnimalStorePanelVisible());
-        if (_uiController && _uiController->isNpcSocialVisible()) {
-            return;
-        }
-        if (_uiController && _uiController->handleHotbarMouseDown(e)) return;
-        if (chestOpen || storeOpen) return;
-        if (_mapController && _player) {
-            Vec2 clickScene = e->getLocation();
-            auto parent = dynamic_cast<Node*>(_player)->getParent();
-            Vec2 mapPos = parent ? parent->convertToNodeSpace(clickScene) : clickScene;
-            _mapController->setLastClickWorldPos(mapPos);
-        }
-        if (enableToolOnLeftClick && e->getMouseButton() == EventMouse::MouseButton::BUTTON_LEFT) {
-            auto t = _inventory ? _inventory->selectedTool() : nullptr;
-            if (t) {
-                std::string msg = t->use(_mapController, _cropSystem,
-                    [this]() -> Vec2 { return _player ? _player->getPosition() : Vec2(); },
-                    [this]() -> Vec2 { return _playerController ? _playerController->lastDir() : Vec2(0,-1); },
-                    _uiController);
-                if (_player && !msg.empty()) {
-                    _player->playToolAnimation(t->kind());
-                }
-            }
-        }
-        if (e->getMouseButton() == EventMouse::MouseButton::BUTTON_RIGHT) {
-            _uiController->handleChestRightClick(e, _mapController->chests());
-        }
-        onMouseDown(e);
-        if (_mapController) {
-            _mapController->clearLastClickWorldPos();
-        }
-    };
-    mouse->onMouseScroll = [this](EventMouse* e){
-        _uiController->handleHotbarScroll(e->getScrollY());
-    };
-    _eventDispatcher->addEventListenerWithSceneGraphPriority(mouse, this);
-
-    // 触摸
-    auto touch = EventListenerTouchOneByOne::create();
-    touch->onTouchBegan = [this](Touch* t, Event*){
-        return _uiController->handleHotbarAtPoint(t->getLocation());
-    };
-    _eventDispatcher->addEventListenerWithSceneGraphPriority(touch, this);
+    (void)buildCraftPanel;
+    if (!_playerController) return;
+    _playerController->registerCommonInputHandlers(
+        this,
+        _uiController,
+        _inventory,
+        _cropSystem,
+        enableToolOnSpace,
+        enableToolOnLeftClick,
+        [this]() { onSpacePressed(); },
+        [this](EventKeyboard::KeyCode code) { onKeyPressedHook(code); },
+        [this](EventMouse* e) { onMouseDown(e); });
 }
 
 void SceneBase::update(float dt) {
@@ -295,4 +152,3 @@ void SceneBase::update(float dt) {
 void SceneBase::addUpdateCallback(const std::function<void(float)>& cb) {
     _extraUpdates.push_back(cb);
 }
-#include "Game/Tool/ToolFactory.h"
