@@ -172,6 +172,7 @@ void SceneBase::registerCommonInputHandlers(bool enableToolOnSpace, bool enableT
             } break;
             case EventKeyboard::KeyCode::KEY_SPACE: {
                 if (chestOpen || storeOpen) break;
+                if (Game::globalState().fishingActive) break;
                 if (enableToolOnSpace) {
                     bool nearDoor = false;
                     if (_player && _mapController) {
@@ -184,7 +185,7 @@ void SceneBase::registerCommonInputHandlers(bool enableToolOnSpace, bool enableT
                     }
                     if (!nearDoor) {
                         auto t = _inventory ? _inventory->selectedTool() : nullptr;
-                        if (t) {
+                        if (t && t->kind() != Game::ToolKind::FishingRod) {
                             std::string msg = t->use(_mapController, _cropSystem,
                                 [this]() -> Vec2 { return _player ? _player->getPosition() : Vec2(); },
                                 [this]() -> Vec2 { return _playerController ? _playerController->lastDir() : Vec2(0,-1); },
@@ -267,11 +268,13 @@ void SceneBase::update(float dt) {
         return;
     }
     _stateController->update(dt);
-    bool blockMove = _uiController && (_uiController->isNpcSocialVisible()
+    bool blockMove = _uiController && (_uiController->isDialogueVisible()
+                                       || _uiController->isNpcSocialVisible()
                                        || _uiController->isChestPanelVisible()
                                        || _uiController->isStorePanelVisible()
                                        || _uiController->isAnimalStorePanelVisible());
-    if (!blockMove) {
+    if (_playerController) {
+        _playerController->setMovementLocked(blockMove);
         _playerController->update(dt);
     }
     for (auto& cb : _extraUpdates) { cb(dt); }
@@ -285,7 +288,7 @@ void SceneBase::update(float dt) {
         bool nearLake = _mapController->isNearLake(p, _mapController->tileSize() * (GameConfig::LAKE_REFILL_RADIUS_TILES + 0.5f));
         bool rodSelected = (_inventory && _inventory->selectedTool() && _inventory->selectedTool()->kind() == Game::ToolKind::FishingRod);
         bool canShowFishPrompt = nearLake && rodSelected && !ws.fishingActive;
-        _uiController->showFishPrompt(canShowFishPrompt, _mapController->getPlayerPosition(p), "Space/Left-click to Fish");
+        _uiController->showFishPrompt(canShowFishPrompt, _mapController->getPlayerPosition(p), "Left-click to Fish");
     }
 }
 

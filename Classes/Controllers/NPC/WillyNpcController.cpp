@@ -1,5 +1,4 @@
 #include "Controllers/NPC/WillyNpcController.h"
-#include "Controllers/Map/TownMapController.h"
 #include "Controllers/UI/UIController.h"
 #include "Game/WorldState.h"
 #include "Game/NPC/WillyNpc.h"
@@ -7,7 +6,7 @@
 namespace Controllers {
 
 WillyNpcController::WillyNpcController(
-    TownMapController* map,
+    IMapController* map,
     cocos2d::Node* world_node,
     UIController* ui,
     std::shared_ptr<Game::Inventory> inventory,
@@ -25,8 +24,9 @@ WillyNpcController::WillyNpcController(
   if (!npc_) return;
   auto sprite = cocos2d::Sprite::create(npc_->texturePath());
   if (!sprite) return;
-  float offset_x = 2.0f * tile;
-  cocos2d::Vec2 pos(center.x + offset_x, center.y);
+  float offset_x = 13.5f * tile;
+  float offset_y = -11.0f * tile;
+  cocos2d::Vec2 pos(center.x + offset_x, center.y + offset_y);
   sprite->setPosition(pos);
   map_->addActorToMap(sprite, 22);
   sprite_ = sprite;

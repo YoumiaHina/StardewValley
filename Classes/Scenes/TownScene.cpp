@@ -3,6 +3,8 @@
 #include "Game/Map/TownMap.h"
 #include "Game/GameConfig.h"
 #include "Controllers/Interact/ChestInteractor.h"
+#include "Controllers/NPC/AbigailNpcController.h"
+#include "Controllers/NPC/PierreNpcController.h"
 
 using namespace cocos2d;
 using namespace Controllers;
@@ -11,7 +13,9 @@ Scene* TownScene::createScene() { return TownScene::create(); }
 
 bool TownScene::init() {
     if (!SceneBase::initBase(3.0f, true, true, true)) return false;
-    _npcController = new TownNpcController(_townMap, _worldNode, _uiController, _inventory);
+    _npcController = new NpcController(_uiController);
+    _npcController->add(std::make_unique<AbigailNpcController>(_townMap, _worldNode, _uiController, _inventory, _npcController->dialogue()));
+    _npcController->add(std::make_unique<PierreNpcController>(_townMap, _worldNode, _uiController, _inventory));
     addUpdateCallback([this](float) {
         if (_npcController && _player) {
             _npcController->update(_player->getPosition());

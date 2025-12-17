@@ -3,17 +3,17 @@
 #include <memory>
 #include "cocos2d.h"
 #include "Controllers/NPC/NpcControllerBase.h"
+#include "Controllers/IMapController.h"
 #include "Game/Inventory.h"
 #include "Game/NPC/NpcBase.h"
 
 namespace Controllers {
 
-class TownMapController;
 class UIController;
 
 class AbigailNpcController : public NpcControllerBase {
  public:
-  AbigailNpcController(TownMapController* map,
+  AbigailNpcController(IMapController* map,
                        cocos2d::Node* world_node,
                        UIController* ui,
                        std::shared_ptr<Game::Inventory> inventory,
@@ -22,10 +22,10 @@ class AbigailNpcController : public NpcControllerBase {
   void update(const cocos2d::Vec2& player_pos) override;
 
   void handleTalkAt(const cocos2d::Vec2& player_pos) override;
-  bool handleRightClick(cocos2d::EventMouse* e) override;
+ bool handleRightClick(cocos2d::EventMouse* e) override;
 
  private:
-  TownMapController* map_ = nullptr;
+  IMapController* map_ = nullptr;
   cocos2d::Node* world_node_ = nullptr;
   UIController* ui_ = nullptr;
   std::shared_ptr<Game::Inventory> inventory_;

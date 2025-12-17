@@ -654,8 +654,6 @@
     <ClInclude Include="..\Classes\Controllers\Systems\ChestController.h">
       <Filter>Classes\Controllers\Systems</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\Game\NPC\PierreNpc.h" />
-    <ClInclude Include="..\Classes\Game\NPC\RobinNpc.h" />
     <ClInclude Include="..\Classes\Game\Rock.h">
       <Filter>Classes\Game</Filter>
     </ClInclude>
