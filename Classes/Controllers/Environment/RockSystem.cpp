@@ -1,6 +1,7 @@
 #include "Controllers/Environment/RockSystem.h"
 #include "Game/GameConfig.h"
 #include "Game/Item.h"
+#include "Game/WorldState.h"
 #include <random>
 #include <ctime>
 #include <algorithm>
@@ -90,6 +91,16 @@ bool RockSystem::damageAt(int c, int r, int amount,
     if (rock->dead()) {
         long long k = (static_cast<long long>(r) << 32) | static_cast<unsigned long long>(c);
         _rocks.erase(k);
+        {
+            auto& ws = Game::globalState();
+            auto& v = ws.farmRocks;
+            v.erase(
+                std::remove_if(v.begin(), v.end(), [c, r](const Game::RockPos& rp) {
+                    return rp.c == c && rp.r == r;
+                }),
+                v.end()
+            );
+        }
         if (setTile) setTile(c, r, Game::TileType::Soil);
         rock->playDestructionAnimation([rock, c, r, spawnDrop]{
             if (spawnDrop) spawnDrop(c, r, static_cast<int>(Game::ItemType::Stone));

@@ -12,6 +12,48 @@ using namespace cocos2d;
 
 namespace Controllers {
 
+FarmMapController::FarmMapController(cocos2d::Node* worldNode)
+: _worldNode(worldNode) {}
+
+cocos2d::Vec2 FarmMapController::getOrigin() const { return _mapOrigin; }
+
+float FarmMapController::tileSize() const { return static_cast<float>(GameConfig::TILE_SIZE); }
+
+EnvironmentObstacleSystemBase* FarmMapController::obstacleSystem(ObstacleKind kind) {
+    if (kind == ObstacleKind::Tree) return _treeSystem;
+    if (kind == ObstacleKind::Rock) return _rockSystem;
+    return nullptr;
+}
+
+const EnvironmentObstacleSystemBase* FarmMapController::obstacleSystem(ObstacleKind kind) const {
+    if (kind == ObstacleKind::Tree) return _treeSystem;
+    if (kind == ObstacleKind::Rock) return _rockSystem;
+    return nullptr;
+}
+
+const std::vector<Game::Chest>& FarmMapController::chests() const {
+    static const std::vector<Game::Chest> empty;
+    return _chestController ? _chestController->chests() : empty;
+}
+
+std::vector<Game::Chest>& FarmMapController::chests() {
+    static std::vector<Game::Chest> empty;
+    return _chestController ? _chestController->chests() : empty;
+}
+
+Game::FarmMap* FarmMapController::tmx() const { return _farmMap; }
+
+cocos2d::Node* FarmMapController::worldNode() const { return _worldNode; }
+
+bool FarmMapController::isFarm() const { return true; }
+
+void FarmMapController::setLastClickWorldPos(const cocos2d::Vec2& p) {
+    _lastClickWorldPos = p;
+    _hasLastClick = true;
+}
+
+void FarmMapController::clearLastClickWorldPos() { _hasLastClick = false; }
+
 void FarmMapController::init() {
     if (!_worldNode) return;
     _mapNode = Node::create();
@@ -353,54 +395,6 @@ void FarmMapController::sortActorWithEnvironment(cocos2d::Node* actor) {
     if (treeSystemConcrete) treeSystemConcrete->sortTrees();
     auto rockSystemConcrete = static_cast<Controllers::RockSystem*>(_rockSystem);
     if (rockSystemConcrete) rockSystemConcrete->sortRocks();
-}
-
-Game::Tree* FarmMapController::findTreeAt(int c, int r) const {
-    auto treeSystemConcrete = static_cast<Controllers::TreeSystem*>(_treeSystem);
-    return treeSystemConcrete ? treeSystemConcrete->findTreeAt(c, r) : nullptr;
-}
-
-bool FarmMapController::damageTreeAt(int c, int r, int amount) {
-    if (!_treeSystem) return false;
-    bool ok = _treeSystem->damageAt(c, r, amount,
-        [this](int c2,int r2,int item){ this->spawnDropAt(c2, r2, item, 3); this->refreshDropsVisuals(); },
-        [this](int c2,int r2, Game::TileType t){ this->setTile(c2, r2, t); }
-    );
-    auto treeSystemConcrete = static_cast<Controllers::TreeSystem*>(_treeSystem);
-    if (ok && treeSystemConcrete && !treeSystemConcrete->findTreeAt(c, r)) {
-        auto& ws = Game::globalState();
-        std::vector<Game::TreePos> v;
-        v.reserve(ws.farmTrees.size());
-        for (const auto& tp : ws.farmTrees) {
-            if (!(tp.c == c && tp.r == r)) v.push_back(tp);
-        }
-        ws.farmTrees = v;
-    }
-    return ok;
-}
-
-Game::Rock* FarmMapController::findRockAt(int c, int r) const {
-    auto rockSystemConcrete = static_cast<Controllers::RockSystem*>(_rockSystem);
-    return rockSystemConcrete ? rockSystemConcrete->findRockAt(c, r) : nullptr;
-}
-
-bool FarmMapController::damageRockAt(int c, int r, int amount) {
-    if (!_rockSystem) return false;
-    bool ok = _rockSystem->damageAt(c, r, amount,
-        [this](int c2,int r2,int item){ this->spawnDropAt(c2, r2, item, 1); this->refreshDropsVisuals(); },
-        [this](int c2,int r2, Game::TileType t){ this->setTile(c2, r2, t); }
-    );
-    auto rockSystemConcrete = static_cast<Controllers::RockSystem*>(_rockSystem);
-    if (ok && rockSystemConcrete && !rockSystemConcrete->findRockAt(c, r)) {
-        auto& ws = Game::globalState();
-        std::vector<Game::RockPos> v;
-        v.reserve(ws.farmRocks.size());
-        for (const auto& rp : ws.farmRocks) {
-            if (!(rp.c == c && rp.r == r)) v.push_back(rp);
-        }
-        ws.farmRocks = v;
-    }
-    return ok;
 }
 
 cocos2d::Vec2 FarmMapController::farmMineDoorSpawnPos() const {

@@ -12,6 +12,14 @@
 
 namespace Controllers {
 
+class EnvironmentObstacleSystemBase;
+
+enum class ObstacleKind {
+    Mineral,
+    Rock,
+    Tree,
+};
+
 class IMapController {
 public:
     virtual ~IMapController() = default;
@@ -47,6 +55,9 @@ public:
     virtual void setTile(int c, int r, Game::TileType t) {}
     virtual cocos2d::Vec2 tileToWorld(int c, int r) const { return cocos2d::Vec2(); }
     virtual void worldToTileIndex(const cocos2d::Vec2& p, int& c, int& r) const { c = 0; r = 0; }
+
+    virtual EnvironmentObstacleSystemBase* obstacleSystem(ObstacleKind) { return nullptr; }
+    virtual const EnvironmentObstacleSystemBase* obstacleSystem(ObstacleKind) const { return nullptr; }
 
     // Farm 专用：湖边判定（默认不支持）
     virtual bool isNearLake(const cocos2d::Vec2& playerWorldPos, float radius) const { return false; }
@@ -85,14 +96,9 @@ public:
 
     // Actors sorting and interactive objects
     virtual void sortActorWithEnvironment(cocos2d::Node* actor) {}
-    virtual bool damageTreeAt(int c, int r, int amount) { return false; }
-    virtual bool damageRockAt(int c, int r, int amount) { return false; }
 
     // Type check
     virtual bool isFarm() const { return false; }
-
-    // Mining hook: 供镐子在矿洞中触发采掘（默认不支持）
-    virtual bool applyPickaxeAt(const cocos2d::Vec2& worldPos, int power) { return false; }
 };
 
 } // namespace Controllers

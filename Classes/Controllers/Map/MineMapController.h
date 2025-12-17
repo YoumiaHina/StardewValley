@@ -21,23 +21,19 @@ class MineMapController : public Controllers::IMapController {
 public:
     enum class Theme { Rock, Ice, Lava };
 
-    MineMapController(cocos2d::Node* worldNode)
-    : _worldNode(worldNode), _mineralSystem(this), _stairSystem(this) {}
-
-    Controllers::MineralSystem* mineralSystem() { return &_mineralSystem; }
-    const Controllers::MineralSystem* mineralSystem() const { return &_mineralSystem; }
+    MineMapController(cocos2d::Node* worldNode);
 
     // IMapController overrides
     cocos2d::Vec2 getPlayerPosition(const cocos2d::Vec2& playerMapLocalPos) const override;
     cocos2d::Size getContentSize() const override;
-    cocos2d::Vec2 getOrigin() const override { return cocos2d::Vec2(0,0); }
+    cocos2d::Vec2 getOrigin() const override;
     cocos2d::Vec2 clampPosition(const cocos2d::Vec2& current,
                                  const cocos2d::Vec2& next,
                                  float radius) const override;
     bool collides(const cocos2d::Vec2& pos, float radius) const override;
     bool isNearDoor(const cocos2d::Vec2& playerWorldPos) const override; // 门提示替换为“楼梯/电梯”，这里近似为楼梯区域
-    bool isNearChest(const cocos2d::Vec2& playerWorldPos) const override { return false; }
-    float tileSize() const override { return static_cast<float>(GameConfig::TILE_SIZE); }
+    bool isNearChest(const cocos2d::Vec2& playerWorldPos) const override;
+    float tileSize() const override;
     bool inBounds(int c, int r) const override;
     std::pair<int,int> targetTile(const cocos2d::Vec2& playerPos,
                                   const cocos2d::Vec2& lastDir) const override;
@@ -47,19 +43,20 @@ public:
     void setTile(int c, int r, Game::TileType t) override;
     cocos2d::Vec2 tileToWorld(int c, int r) const override;
     void worldToTileIndex(const cocos2d::Vec2& p, int& c, int& r) const override;
+
+    EnvironmentObstacleSystemBase* obstacleSystem(ObstacleKind kind) override;
+    const EnvironmentObstacleSystemBase* obstacleSystem(ObstacleKind kind) const override;
     void refreshMapVisuals() override;
-    void refreshCropsVisuals() override {} // not used
+    void refreshCropsVisuals() override;
     void refreshDropsVisuals() override;
     void spawnDropAt(int c, int r, int itemType, int qty) override;
     void collectDropsNear(const cocos2d::Vec2& playerWorldPos, Game::Inventory* inv) override;
-    bool applyPickaxeAt(const cocos2d::Vec2& worldPos, int power) override;
-    void setDynamicColliders(const std::vector<cocos2d::Rect>& rects) { _dynamicColliders = rects; }
-    void setMonsterColliders(const std::vector<cocos2d::Rect>& rects) { _monsterColliders = rects; }
+    void setDynamicColliders(const std::vector<cocos2d::Rect>& rects);
+    void setMonsterColliders(const std::vector<cocos2d::Rect>& rects);
     bool collidesWithoutMonsters(const cocos2d::Vec2& pos, float radius) const;
-    const std::vector<Game::Chest>& chests() const override { return _emptyChests; }
-    std::vector<Game::Chest>& chests() override { return _emptyChests; }
+    const std::vector<Game::Chest>& chests() const override;
+    std::vector<Game::Chest>& chests() override;
     void addActorToMap(cocos2d::Node* node, int zOrder) override;
-    void setMineHitCallback(std::function<bool(const cocos2d::Vec2&, int)> cb) { _mineHit = std::move(cb); }
 
     // Mine specific
     void generateFloor(int floorIndex);
@@ -72,12 +69,10 @@ public:
     bool isNearFarmDoor(const cocos2d::Vec2& p) const;
     bool isNearBack0(const cocos2d::Vec2& p) const;
     bool isNearElestair(const cocos2d::Vec2& p) const;
-    cocos2d::Vec2 stairsWorldPos() const { return _stairsPos; }
-    void setExtraStairs(const std::vector<cocos2d::Vec2>& stairs) { _extraStairs = stairs; }
+    void setExtraStairs(const std::vector<cocos2d::Vec2>& stairs);
     std::vector<int> getActivatedElevatorFloors() const;
     // Entrance (floor 0)
     void loadEntrance();
-    bool isEntranceLoaded() const { return _entrance != nullptr; }
     cocos2d::Vec2 entranceSpawnPos() const;
     // 返回入口时的出生点（BackAppear 优先）
     cocos2d::Vec2 entranceBackSpawnPos() const;
@@ -111,15 +106,14 @@ private:
     std::vector<Game::MineralData> _minerals;
     Controllers::MineralSystem _mineralSystem;
     Controllers::StairSystem _stairSystem;
-    std::function<bool(const cocos2d::Vec2&, int)> _mineHit;
     std::vector<cocos2d::Rect> _dynamicColliders; // 采矿节点临时碰撞
     std::vector<cocos2d::Rect> _monsterColliders;
     cocos2d::Vec2 _lastClickWorldPos = cocos2d::Vec2::ZERO;
     bool _hasLastClick = false;
 
 public:
-    void setLastClickWorldPos(const cocos2d::Vec2& p) override { _lastClickWorldPos = p; _hasLastClick = true; }
-    void clearLastClickWorldPos() override { _hasLastClick = false; }
+    void setLastClickWorldPos(const cocos2d::Vec2& p) override;
+    void clearLastClickWorldPos() override;
 };
 
 }

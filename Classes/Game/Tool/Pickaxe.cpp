@@ -2,6 +2,7 @@
 #include "Controllers/IMapController.h"
 #include "Controllers/UI/UIController.h"
 #include "Controllers/Systems/CropSystem.h"
+#include "Controllers/Environment/EnvironmentObstacleSystemBase.h"
 #include "Game/WorldState.h"
 #include "Game/GameConfig.h"
 #include "Game/Tile.h"
@@ -30,30 +31,47 @@ std::string Pickaxe::use(Controllers::IMapController* map,
         }
         return std::string("");
     }
+    if (!map) return std::string("");
     Vec2 playerPos = getPlayerPos ? getPlayerPos() : Vec2();
     Vec2 lastDir = getLastDir ? getLastDir() : Vec2(0,-1);
     auto tgt = map->targetTile(playerPos, lastDir);
     int tc = tgt.first, tr = tgt.second;
     if (!map->inBounds(tc, tr)) return std::string("");
-    Vec2 targetWorld = map->tileToWorld(tc, tr);
-    std::string msg;
-    if (map->applyPickaxeAt(targetWorld, 1)) {
-        msg = std::string("Hit!");
-    } else if (map->damageRockAt(tc, tr, 1)) {
+
+    bool hit = false;
+    if (auto* sys = map->obstacleSystem(Controllers::ObstacleKind::Rock)) {
+        hit = sys->damageAt(
+            tc,
+            tr,
+            1,
+            [map](int c, int r, int itemType) {
+                if (!map) return;
+                map->spawnDropAt(c, r, itemType, 1);
+                map->refreshDropsVisuals();
+            },
+            [map](int c, int r, Game::TileType t) {
+                if (!map) return;
+                map->setTile(c, r, t);
+            }
+        );
+    }
+
+    std::string msg = std::string("Nothing");
+    if (hit) {
         msg = std::string("Mine!");
-    } else if (map->isFarm()) {
+    } else {
         auto current = map->getTile(tc, tr);
         if (current == Game::TileType::Rock) {
             map->setTile(tc, tr, Game::TileType::Soil);
-            msg = std::string("Mine!");
             map->spawnDropAt(tc, tr, static_cast<int>(Game::ItemType::Stone), 1);
-        } else {
-            msg = std::string("Nothing");
+            msg = std::string("Mine!");
         }
-    } else {
-        msg = std::string("Nothing");
     }
     ws.energy = std::max(0, ws.energy - need);
+    if (!ui) {
+        map->refreshMapVisuals();
+        map->refreshDropsVisuals();
+    }
     if (ui) {
         ui->refreshHUD();
         ui->refreshHotbar();
@@ -65,4 +83,3 @@ std::string Pickaxe::use(Controllers::IMapController* map,
 }
 
 }
-

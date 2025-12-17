@@ -1,6 +1,7 @@
 #include "Controllers/Environment/TreeSystem.h"
 #include "Game/GameConfig.h"
 #include "Game/Item.h"
+#include "Game/WorldState.h"
 #include <random>
 #include <ctime>
 #include <algorithm>
@@ -90,6 +91,16 @@ bool TreeSystem::damageAt(int c, int r, int amount,
     if (t->dead()) {
         long long k = (static_cast<long long>(r) << 32) | static_cast<unsigned long long>(c);
         _trees.erase(k);
+        {
+            auto& ws = Game::globalState();
+            auto& v = ws.farmTrees;
+            v.erase(
+                std::remove_if(v.begin(), v.end(), [c, r](const Game::TreePos& tp) {
+                    return tp.c == c && tp.r == r;
+                }),
+                v.end()
+            );
+        }
         if (setTile) setTile(c, r, Game::TileType::Soil);
         t->playDestructionAnimation([t, c, r, spawnDrop]{
             t->removeFromParent();

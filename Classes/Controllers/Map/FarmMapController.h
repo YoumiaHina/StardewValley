@@ -14,8 +14,6 @@
 #include "Game/Chest.h"
 #include "Game/Drop.h"
 #include "Game/WorldState.h"
-#include "Game/Tree.h"
-#include "Game/Rock.h"
 #include "Controllers/Environment/TreeSystem.h"
 #include "Controllers/Environment/RockSystem.h"
 #include "Controllers/Environment/EnvironmentObstacleSystemBase.h"
@@ -26,15 +24,14 @@ namespace Controllers {
 
 class FarmMapController : public Controllers::IMapController {
 public:
-    FarmMapController(cocos2d::Node* worldNode)
-    : _worldNode(worldNode) {}
+    FarmMapController(cocos2d::Node* worldNode);
 
     void init();
 
     // IMapController overrides
     cocos2d::Vec2 getPlayerPosition(const cocos2d::Vec2& playerMapLocalPos) const override;
     cocos2d::Size getContentSize() const override;
-    cocos2d::Vec2 getOrigin() const override { return _mapOrigin; }
+    cocos2d::Vec2 getOrigin() const override;
     cocos2d::Vec2 clampPosition(const cocos2d::Vec2& current,
                                  const cocos2d::Vec2& next,
                                  float radius) const override;
@@ -46,7 +43,7 @@ public:
     bool isNearTownDoor(const cocos2d::Vec2& playerWorldPos) const override;
     bool isNearChest(const cocos2d::Vec2& playerWorldPos) const override;
 
-    float tileSize() const override { return static_cast<float>(GameConfig::TILE_SIZE); }
+    float tileSize() const override;
     bool inBounds(int c, int r) const override;
     std::pair<int,int> targetTile(const cocos2d::Vec2& playerPos,
                                   const cocos2d::Vec2& lastDir) const override;
@@ -58,22 +55,19 @@ public:
     cocos2d::Vec2 tileToWorld(int c, int r) const override;
     void worldToTileIndex(const cocos2d::Vec2& p, int& c, int& r) const override;
 
+    EnvironmentObstacleSystemBase* obstacleSystem(ObstacleKind kind) override;
+    const EnvironmentObstacleSystemBase* obstacleSystem(ObstacleKind kind) const override;
+
     void refreshMapVisuals() override;
     void refreshCropsVisuals() override;
     void refreshDropsVisuals() override;
     void spawnDropAt(int c, int r, int itemType, int qty) override;
 
-    const std::vector<Game::Chest>& chests() const override {
-        static const std::vector<Game::Chest> empty;
-        return _chestController ? _chestController->chests() : empty;
-    }
-    std::vector<Game::Chest>& chests() override {
-        static std::vector<Game::Chest> empty;
-        return _chestController ? _chestController->chests() : empty;
-    }
+    const std::vector<Game::Chest>& chests() const override;
+    std::vector<Game::Chest>& chests() override;
 
-    Game::FarmMap* tmx() const { return _farmMap; }
-    cocos2d::Node* worldNode() const { return _worldNode; }
+    Game::FarmMap* tmx() const;
+    cocos2d::Node* worldNode() const;
     void addActorToMap(cocos2d::Node* node, int zOrder) override;
     cocos2d::Vec2 farmMineDoorSpawnPos() const override;
     cocos2d::Vec2 farmRoomDoorSpawnPos() const override;
@@ -82,13 +76,9 @@ public:
 
     bool isNearLake(const cocos2d::Vec2& playerWorldPos, float radius) const override;
     void sortActorWithEnvironment(cocos2d::Node* actor) override;
-    bool damageTreeAt(int c, int r, int amount) override;
-    bool damageRockAt(int c, int r, int amount) override;
-    Game::Tree* findTreeAt(int c, int r) const;
-    Game::Rock* findRockAt(int c, int r) const;
-    bool isFarm() const override { return true; }
-    void setLastClickWorldPos(const cocos2d::Vec2& p) override { _lastClickWorldPos = p; _hasLastClick = true; }
-    void clearLastClickWorldPos() override { _hasLastClick = false; }
+    bool isFarm() const override;
+    void setLastClickWorldPos(const cocos2d::Vec2& p) override;
+    void clearLastClickWorldPos() override;
 
     void collectDropsNear(const cocos2d::Vec2& playerWorldPos, Game::Inventory* inv) override;
 
