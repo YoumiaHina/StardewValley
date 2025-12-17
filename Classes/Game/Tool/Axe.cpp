@@ -2,8 +2,10 @@
 #include "Controllers/IMapController.h"
 #include "Controllers/UI/UIController.h"
 #include "Controllers/Systems/CropSystem.h"
+#include "Controllers/Environment/EnvironmentObstacleSystemBase.h"
 #include "Game/WorldState.h"
 #include "Game/GameConfig.h"
+#include "Game/Tile.h"
 #include "cocos2d.h"
 
 using namespace cocos2d;
@@ -33,9 +35,30 @@ std::string Axe::use(Controllers::IMapController* map,
     auto tgt = map->targetTile(playerPos, lastDir);
     int tc = tgt.first, tr = tgt.second;
     if (!map->inBounds(tc, tr)) return std::string("");
-    bool acted = map->damageTreeAt(tc, tr, 1);
+
+    bool acted = false;
+    if (auto* sys = map->obstacleSystem(Controllers::ObstacleKind::Tree)) {
+        acted = sys->damageAt(
+            tc,
+            tr,
+            1,
+            [map](int c, int r, int itemType) {
+                if (!map) return;
+                map->spawnDropAt(c, r, itemType, 3);
+                map->refreshDropsVisuals();
+            },
+            [map](int c, int r, Game::TileType t) {
+                if (!map) return;
+                map->setTile(c, r, t);
+            }
+        );
+    }
     std::string msg = acted ? std::string("Chop!") : std::string("Nothing");
     ws.energy = std::max(0, ws.energy - need);
+    if (!ui) {
+        map->refreshMapVisuals();
+        map->refreshDropsVisuals();
+    }
     if (ui) {
         ui->refreshHUD();
         ui->refreshHotbar();

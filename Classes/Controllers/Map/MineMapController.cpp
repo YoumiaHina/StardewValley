@@ -9,6 +9,44 @@ using namespace cocos2d;
 
 namespace Controllers {
 
+MineMapController::MineMapController(cocos2d::Node* worldNode)
+: _worldNode(worldNode), _mineralSystem(this), _stairSystem(this) {}
+
+cocos2d::Vec2 MineMapController::getOrigin() const { return cocos2d::Vec2(0, 0); }
+
+bool MineMapController::isNearChest(const cocos2d::Vec2&) const { return false; }
+
+float MineMapController::tileSize() const { return static_cast<float>(GameConfig::TILE_SIZE); }
+
+EnvironmentObstacleSystemBase* MineMapController::obstacleSystem(ObstacleKind kind) {
+    if (kind == ObstacleKind::Mineral || kind == ObstacleKind::Rock) return &_mineralSystem;
+    return nullptr;
+}
+
+const EnvironmentObstacleSystemBase* MineMapController::obstacleSystem(ObstacleKind kind) const {
+    if (kind == ObstacleKind::Mineral || kind == ObstacleKind::Rock) return &_mineralSystem;
+    return nullptr;
+}
+
+void MineMapController::refreshCropsVisuals() {}
+
+void MineMapController::setDynamicColliders(const std::vector<cocos2d::Rect>& rects) { _dynamicColliders = rects; }
+
+void MineMapController::setMonsterColliders(const std::vector<cocos2d::Rect>& rects) { _monsterColliders = rects; }
+
+const std::vector<Game::Chest>& MineMapController::chests() const { return _emptyChests; }
+
+std::vector<Game::Chest>& MineMapController::chests() { return _emptyChests; }
+
+void MineMapController::setExtraStairs(const std::vector<cocos2d::Vec2>& stairs) { _extraStairs = stairs; }
+
+void MineMapController::setLastClickWorldPos(const cocos2d::Vec2& p) {
+    _lastClickWorldPos = p;
+    _hasLastClick = true;
+}
+
+void MineMapController::clearLastClickWorldPos() { _hasLastClick = false; }
+
 Vec2 MineMapController::getPlayerPosition(const Vec2& playerMapLocalPos) const {
     if (!_worldNode) return playerMapLocalPos;
     Node* ref = nullptr;
@@ -91,18 +129,6 @@ std::pair<int,int> MineMapController::targetTile(const Vec2& playerPos, const Ve
 }
 
 void MineMapController::updateCursor(const Vec2& playerPos, const Vec2& lastDir) {
-    if (!_cursor) {
-        if (_entrance && _entrance->getTMX()) {
-            _cursor = DrawNode::create();
-            _entrance->getTMX()->addChild(_cursor, 51);
-        } else if (_floorMap && _floorMap->getTMX()) {
-            _cursor = DrawNode::create();
-            _floorMap->getTMX()->addChild(_cursor, 51);
-        } else if (_worldNode) {
-            _cursor = DrawNode::create();
-            _worldNode->addChild(_cursor, 51);
-        }
-    }
     if (!_cursor) return;
     TileSelector::drawFanCursor(
         _cursor,
@@ -111,7 +137,7 @@ void MineMapController::updateCursor(const Vec2& playerPos, const Vec2& lastDir)
         [this](const Vec2& p, int& c, int& r) { worldToTileIndex(p, c, r); },
         [this](int c, int r) { return inBounds(c, r); },
         [this](int c, int r) { return tileToWorld(c, r); },
-        static_cast<float>(GameConfig::TILE_SIZE));
+        tileSize());
 }
 
 Game::TileType MineMapController::getTile(int c, int r) const {
@@ -160,6 +186,8 @@ void MineMapController::refreshMapVisuals() {
         }
         if (_mapDraw) _mapDraw->clear();
         _stairsPos = _floorMap->stairsCenter();
+        _stairSystem.syncExtraStairsToMap(_minerals);
+        _stairSystem.refreshVisuals();
         return;
     }
     if (!_mapDraw) {
@@ -190,29 +218,6 @@ void MineMapController::refreshMapVisuals() {
         }
     }
     _mapDraw->drawSolidCircle(_stairsPos, s*0.4f, 0.0f, 16, Color4F(0.95f,0.85f,0.15f,1.0f));
-}
-
-bool MineMapController::applyPickaxeAt(const Vec2& worldPos, int power) {
-    if (!_floorMap) return false;
-    int c = 0;
-    int r = 0;
-    worldToTileIndex(worldPos, c, r);
-    if (!inBounds(c, r)) return false;
-    bool handled = _mineralSystem.damageAt(
-        c,
-        r,
-        power,
-        [this](int c2, int r2, int item) {
-            this->spawnDropAt(c2, r2, item, 1);
-            this->refreshDropsVisuals();
-        },
-        nullptr
-    );
-    if (handled) {
-        _stairSystem.syncExtraStairsToMap(_minerals);
-        _stairSystem.refreshVisuals();
-    }
-    return handled;
 }
 
 void MineMapController::refreshDropsVisuals() {

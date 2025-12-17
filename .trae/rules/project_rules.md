@@ -2,10 +2,22 @@
 - 仅允许场景类继承自 SceneBase ；所有业务逻辑仍必须分流到独立模块（Controller/System/Interactor/Manager）。
 - SceneBase 统一承担场景骨架与事件转发；具体差异点由子类（GameScene/RoomScene）覆盖指定接口。
 - 所有模块之间通过明确接口协作，不允许跨模块私访或内部状态耦合。
+
+代码注释规范
+
+- 定义一个类（class/struct）时，必须在其头文件中、类定义处前几行用中文注释说明：该类的作用/职责边界/主要协作对象（通过接口而非直接访问内部状态）。
+- 编写方法时，每个方法都必须有中文注释说明其作用；注释可写在声明处或定义处（二选一即可），但必须覆盖所有对外接口与关键私有方法。
+
+高内聚低耦合
+
+- 一个类/文件只做一类事情（单一职责）；若同时包含“状态 + 规则 + 渲染 + 输入/流程编排”，必须拆分到对应模块。
+- 模块间通过明确接口协作，不允许跨模块私访或依赖对方内部状态；避免把业务规则塞进与其职责无关的类中（例如 MapController/Scene 里堆业务）。
+
 SceneBase 职责（唯一允许的场景继承基类）
 
 代码规模限制
 
+- 任意单个源文件（.h/.cpp）代码行数不超过 1000 行；超出必须拆分（按职责拆到 Controller/System/Interactor/Manager 或上移通用接口）。
 - GameScene.cpp 与 RoomScene.cpp 必须保持不超过 300 行。
 - 如超过，立即拆分到对应模块，或将通用部分上移到 SceneBase / 新的模块接口。
 环境系统与业务“唯一来源”
@@ -36,8 +48,10 @@ SceneBase 职责（唯一允许的场景继承基类）
 
 - 玩家交互（如挖矿、砍树、耕地等）统一链路：
   
-  - 输入采集 → PlayerController / ToolSystem → 对应环境 System ( MineralSystem 等) → 掉落/音效/UI 等其它模块。
-  - 中间的 *Controller （如 MineMiningController ）只能做“输入转换 + 调用顺序编排”，不得夹带业务规则（比如 HP 计算、掉落种类判断）。
+  - 输入采集 → PlayerController / ToolSystem → Tool → 对应环境 System（MineralSystem/TreeSystem/RockSystem 等） → 掉落/音效/UI 等其它模块。
+  - Tool 必须直接与对应环境 System 交互，不得通过 MapController 的“业务钩子”实现工具逻辑。
+  - MapController 只提供必要的 tile/world 坐标转换，以及对环境 System 的统一访问入口（用于 Tool/Controller 获取系统接口），不得夹带工具判定、HP 计算、掉落种类判断等业务规则。
+  - 中间的 *Controller（如 MineMiningController）只能做“输入转换 + 调用顺序编排”，不得夹带业务规则（比如 HP 计算、掉落种类判断）。
 - *Controller 只关心“有没有命中、有没有打碎、掉了什么”：
   
   - 系统层提供类似 hitAt(worldPos, power) -> HitResult 接口，包含 hit/destroyed/drops 等结果。
