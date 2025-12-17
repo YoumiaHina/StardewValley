@@ -22,6 +22,8 @@ public:
     static Mineral* create(const std::string& texture);
     bool initWithTexture(const std::string& texture);
     void setBrokenTexture(const std::string& texture);
+    void setType(MineralType type) { _type = type; }
+    MineralType type() const { return _type; }
 
     void applyDamage(int amount) override;
     int hp() const override { return _hp; }
@@ -36,6 +38,7 @@ private:
     int _hp = 1;
     bool _breaking = false;
     std::string _brokenTexture;
+    MineralType _type = MineralType::Rock;
 };
 
 struct MineralData {

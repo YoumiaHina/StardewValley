@@ -215,7 +215,6 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClCompile Include="..\Classes\Scenes\MineScene.cpp" />
     <ClCompile Include="..\Classes\Controllers\Map\MineMapController.cpp" />
     <ClCompile Include="..\Classes\Controllers\MineMonsterController.cpp" />
-    <ClCompile Include="..\Classes\Controllers\MineMiningController.cpp" />
     <ClCompile Include="..\Classes\Controllers\MineCombatController.cpp" />
     <ClCompile Include="..\Classes\Controllers\Interact\MineInteractor.cpp" />
     <ClCompile Include="..\Classes\Controllers\MineElevatorController.cpp" />

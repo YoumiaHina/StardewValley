@@ -6,7 +6,6 @@
 #include "Scenes/SceneBase.h"
 #include "Controllers/Map/MineMapController.h"
 #include "Controllers/MineMonsterController.h"
-#include "Controllers/MineMiningController.h"
 #include "Controllers/MineCombatController.h"
 #include "Controllers/Interact/MineInteractor.h"
 #include "Controllers/MineElevatorController.h"
@@ -21,7 +20,6 @@ public:
 private:
     Controllers::MineMapController* _map = nullptr;
     Controllers::MineMonsterController* _monsters = nullptr;
-    Controllers::MineMiningController* _mining = nullptr;
     Controllers::MineCombatController* _combat = nullptr;
     Controllers::MineInteractor* _interactor = nullptr;
     Controllers::MineElevatorController* _elevator = nullptr;

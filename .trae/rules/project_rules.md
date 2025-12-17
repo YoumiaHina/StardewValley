@@ -4,65 +4,63 @@
 - 所有模块之间通过明确接口协作，不允许跨模块私访或内部状态耦合。
 SceneBase 职责（唯一允许的场景继承基类）
 
-- 组合与初始化
-  - 创建并管理 worldNode 与 PlayerAppearance 。
-  - 加载共享 Inventory ，构建 UIController 、 PlayerController 、 GameStateController 。
-  - 可选加载 ToolSystem （根据初始化参数启用）。
-- 统一事件转发（无业务逻辑）
-  - 数字键选择热键栏；滚轮切换热键栏；热键栏点击选择槽位。
-  - Z 键作弊（调用 Cheat 模块并刷新 UI；场景本身不直接改库存）。
-  - 左键工具触发（启用时转发到 ToolSystem ）。
-  - 空格键交互：调用子类覆盖的 onSpacePressed() ；不在场景内处理任何交互逻辑。
-- 更新调度
-  - update(dt) 只调用控制器的 update() 并刷新提示文案；任何业务逻辑不得进入 update() 。
-- 地图挂载
-  - 通过 IMapController::addActorToMap(node, zOrder) 将角色加入正确父节点（Farm: TMX；Room: world）。
-子类（GameScene / RoomScene）最小职责
-
-- 仅覆盖以下接口以补充差异化特性：
-  - createMapController(worldNode) ：返回具体 MapController （Farm/Room）。
-  - positionPlayerInitial() ：设置初始位置（农场居中、室内中上部等）。
-  - onSpacePressed() ：转发到对应 Interactor ，根据返回动作执行场景切换（农场进屋、室内出屋）。
-  - doorPromptText() ：提供门口提示文案（农场“Press Space to Enter House”、室内“Press Space to Exit”）。
-- 子类不得新增或处理任何业务逻辑；不得直接操纵 UI 或游戏数据；不得绕过控制器接口。
-禁止事项（场景/基类内）
-
-- 不得出现人物属性/行为、工具逻辑、地图碰撞、动画切换、背包操作、存档/加载、任意业务流程。
-- 不得新建除 SceneBase 之外的场景继承层次；模块仍采用组合，不得把模块塞进场景。
-- 不得在 update() 中写业务逻辑；仅允许控制器 update() 调度与提示刷新。
-输入与更新规范
-
-- 键盘：
-  - 1–0 ：选择热键栏槽位（通过 UIController ）。
-  - Z ：调用 Cheat 模块授予物资并刷新 UI。
-  - Space ：SceneBase 先（可选）转发工具使用，再调用子类 onSpacePressed() 。
-- 鼠标：
-  - 左键：命中热键栏则选择；否则（可选）转发为工具使用。
-  - 右键：靠近箱子时转发到 UIController 打开面板。
-  - 滚轮：转发到 UIController 切换热键栏选中。
-- 更新：
-  - SceneBase::update(dt) 只调用 GameStateController::update() 与 PlayerController::update() 并刷新提示文案；不得包含业务逻辑。
-模块化与解耦
-
-- 必须通过接口协作：
-  - PlayerController 、 ToolSystem 、 UIController 、 GameStateController 、 Interactor 、 MapController 。
-  - 房间几何数据（ doorRect/roomRect/bedRect ）仅在 RoomMapController 暴露，禁止从 IMapController 以外访问子类特性除非接口提供。
-- 不允许：
-  - Controller/System 相互调用对方的私有或内部方法。
-  - 任意模块直接修改其他模块内部变量。
-  - 场景绕过模块接口直接操作数据。
-扩展与新功能引导
-
-- 新功能必须先判定归属模块（例如：合成 → CraftSystem；箱子交互 → ChestController；音效 → AudioManager）。
-- 若需场景差异化表现（文案、交互路径），在子类覆盖 doorPromptText() / onSpacePressed() 即可；严禁把逻辑放入场景主体。
-合规自检（提交新代码时自动检查）
-
-- 场景文件是否只继承 SceneBase 且仅覆盖四个接口。
-- 场景是否只进行模块组合、事件转发与场景切换；无业务逻辑、无数据操作。
-- update(dt) 是否仅包含控制器更新与提示刷新。
-- 模块间是否通过接口协作，无跨模块私访。
-- 接口实现是否集中在对应模块（Controller/System/Interactor）。
 代码规模限制
 
 - GameScene.cpp 与 RoomScene.cpp 必须保持不超过 300 行。
 - 如超过，立即拆分到对应模块，或将通用部分上移到 SceneBase / 新的模块接口。
+环境系统与业务“唯一来源”
+
+- 同一类业务实体（矿石、树木、杂草、楼梯等）在项目中必须有且仅有一个“状态唯一来源”模块，通常是某个 *System 或 *Controller （如 MineralSystem ）。
+  
+  - 禁止在多个模块中维护同一实体的并行状态列表（例如： MineralSystem::_minerals + MineMiningController::_nodes/_minerals 双份存储）。
+  - 若发现某模块需要直接访问该实体状态，必须通过唯一来源模块提供的接口获取。
+- 所有环境障碍物（矿石、石头、树、草丛等）统一通过 EnvironmentObstacleSystemBase 的子类管理：
+  
+  - 负责生成、存储、更新、销毁实体状态。
+  - 负责挂接和管理对应的渲染节点（sprite / DrawNode 等）。
+- 业务 Controller（如 MineMiningController ）禁止自建环境实体容器（ std::vector<MineralData> 之类）来“镜像”系统状态；
+  
+  - 需要查询或遍历时，通过 MineralSystem 公开接口完成。
+  - 需要新增状态字段时，先改动系统层的数据结构，而不是在 Controller 额外塞一份。
+视觉节点与 System 的职责划分
+
+- 环境实体对应的 Cocos 节点（例如 Game::Mineral ）的创建、缩放、添加到 worldNode 、位置同步与销毁，必须由对应的 System 完成：
+  
+  - System 应提供 attachToWorld(Node*) / syncVisuals() / clearVisuals() 等接口。
+  - Controller 可以驱动这些接口的调用时机，但禁止在内部 new / create 环境实体节点并长期持有指针。
+- Controller 内禁止出现以下模式：
+  
+  - 维护 _nodes 、 _visuals 等“实体+节点”列表，用以重复管理本应由 System 处理的节点。
+  - 在 Controller 自己算瓦片尺寸、贴图缩放，手动挂载到 worldNode 。 正确做法：把这些逻辑集中在 System 内部，让 System 统一为所有调用者提供视觉呈现。
+输入转发与交互链路
+
+- 玩家交互（如挖矿、砍树、耕地等）统一链路：
+  
+  - 输入采集 → PlayerController / ToolSystem → 对应环境 System ( MineralSystem 等) → 掉落/音效/UI 等其它模块。
+  - 中间的 *Controller （如 MineMiningController ）只能做“输入转换 + 调用顺序编排”，不得夹带业务规则（比如 HP 计算、掉落种类判断）。
+- *Controller 只关心“有没有命中、有没有打碎、掉了什么”：
+  
+  - 系统层提供类似 hitAt(worldPos, power) -> HitResult 接口，包含 hit/destroyed/drops 等结果。
+  - Controller 根据结果调用 DropSystem 、 InventoryController 、 AudioManager 、 CameraController 等模块，不直接操作矿石/树木的内部数据。
+楼层切换与对象生命周期
+
+- 楼层切换 / 地图切换的责任链统一：
+  
+  - MapController 负责发起： onFloorChanged(floor, candidates, stairPos) 等事件。
+  - 各环境 System 负责在自己的实现中清理旧状态与节点，再按新层级生成新状态与节点。
+  - Controller 不得在多个地方重复清理同一批节点，避免“多方各持一份指针”的情况。
+- 与地图生命周期有关的节点（例如矿石节点、矿物掉落、楼梯节点）必须只挂在一个明确 owner 上：
+  
+  - MapController 只负责世界节点树结构（TMX、worldNode）和挂载点。
+  - 具体实体节点由 System 挂载/移除。
+  - 禁止出现 “MapController 删 TMX + 某个 Controller 又自己删一遍子节点” 的双重管理。
+新模块/新功能的约束
+
+- 引入新的环境类业务（例如新增一种可破坏的地形、机关）前，必须先判定：
+  
+  - 是否应实现为某个 EnvironmentObstacleSystemBase 子类，作为该业务的唯一来源。
+  - 再决定 Controller 层是否需要新增一个轻量的 *Controller 来做输入转发。
+- 在代码评审 / 自检时新增一条检查项：
+  
+  - “同一实体是否被多处维护状态或节点？”
+  - 若存在重复状态/节点容器，应当合并到 System 层，并让其它模块通过接口访问。

@@ -28,8 +28,6 @@ void MineCombatController::onMouseDown(EventMouse* e) {
     }
     if (_monsters && baseDamage > 0) {
         _monsters->applyDamageAt(pos, baseDamage);
-    } else if (_mining) {
-        _mining->hitNearestNode(pos, 1);
     }
 }
 

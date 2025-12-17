@@ -13,6 +13,7 @@
 #include "Game/Drop.h"
 #include "Controllers/TileSelector.h"
 #include "Controllers/Environment/MineralSystem.h"
+#include "Controllers/Environment/StairSystem.h"
 
 namespace Controllers {
 
@@ -21,7 +22,7 @@ public:
     enum class Theme { Rock, Ice, Lava };
 
     MineMapController(cocos2d::Node* worldNode)
-    : _worldNode(worldNode), _mineralSystem(this) {}
+    : _worldNode(worldNode), _mineralSystem(this), _stairSystem(this) {}
 
     Controllers::MineralSystem* mineralSystem() { return &_mineralSystem; }
     const Controllers::MineralSystem* mineralSystem() const { return &_mineralSystem; }
@@ -107,7 +108,9 @@ private:
     Game::MineMap* _entrance = nullptr;
     Game::MineMap* _floorMap = nullptr;
     cocos2d::Node* _mapNode = nullptr;
+    std::vector<Game::MineralData> _minerals;
     Controllers::MineralSystem _mineralSystem;
+    Controllers::StairSystem _stairSystem;
     std::function<bool(const cocos2d::Vec2&, int)> _mineHit;
     std::vector<cocos2d::Rect> _dynamicColliders; // 采矿节点临时碰撞
     std::vector<cocos2d::Rect> _monsterColliders;

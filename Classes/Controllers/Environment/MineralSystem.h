@@ -18,6 +18,9 @@ public:
 
     void bindRuntimeStorage(std::vector<Game::MineralData>* minerals) { _runtime = minerals; }
 
+    void clearVisuals();
+    void syncVisuals();
+
     void generateNodesForFloor(std::vector<Game::MineralData>& outNodes,
                                const std::vector<cocos2d::Vec2>& candidates,
                                const std::vector<cocos2d::Vec2>& stairWorldPos) const;

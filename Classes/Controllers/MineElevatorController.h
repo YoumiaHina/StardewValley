@@ -9,7 +9,6 @@
 #include <functional>
 #include "Controllers/Map/MineMapController.h"
 #include "Controllers/MineMonsterController.h"
-#include "Controllers/MineMiningController.h"
 
 namespace Controllers {
 
@@ -17,9 +16,8 @@ class MineElevatorController {
 public:
     MineElevatorController(MineMapController* map,
                             MineMonsterController* monsters,
-                            MineMiningController* mining,
                             cocos2d::Scene* scene)
-    : _map(map), _monsters(monsters), _mining(mining), _scene(scene) {}
+    : _map(map), _monsters(monsters), _scene(scene) {}
 
     void buildPanel();
     void togglePanel();
@@ -31,7 +29,6 @@ public:
 private:
     MineMapController* _map = nullptr;
     MineMonsterController* _monsters = nullptr;
-    MineMiningController* _mining = nullptr;
     cocos2d::Scene* _scene = nullptr;
     cocos2d::ui::Layout* _panel = nullptr;
     std::function<void(bool)> _setMovementLocked;

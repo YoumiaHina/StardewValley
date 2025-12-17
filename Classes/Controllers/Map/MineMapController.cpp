@@ -2,6 +2,7 @@
 #include "cocos2d.h"
 #include "Game/WorldState.h"
 #include "Game/Tool/ToolFactory.h"
+#include "Game/Map/MapBase.h"
 
 using namespace cocos2d;
 
@@ -43,6 +44,7 @@ cocos2d::Vec2 MineMapController::clampPosition(const Vec2& current, const Vec2& 
         if (_entrance) base = _entrance->collides(p, r);
         else if (_floorMap) base = _floorMap->collides(p, r);
         if (base) return true;
+        if (!_mineralSystem.isEmpty() && _mineralSystem.collides(p, r * 0.75f, GameConfig::TILE_SIZE)) return true;
         for (const auto& rc : _dynamicColliders) {
             if (rc.containsPoint(p)) return true;
         }
@@ -118,7 +120,10 @@ Game::TileType MineMapController::getTile(int c, int r) const {
 }
 
 void MineMapController::setTile(int c, int r, Game::TileType t) {
-    _tiles[r * _cols + c] = t;
+    size_t idx = static_cast<size_t>(r) * static_cast<size_t>(_cols) + static_cast<size_t>(c);
+    if (idx < _tiles.size()) {
+        _tiles[idx] = t;
+    }
 }
 
 Vec2 MineMapController::tileToWorld(int c, int r) const {
@@ -183,13 +188,30 @@ void MineMapController::refreshMapVisuals() {
             _mapDraw->drawLine(d,a, Color4F(0,0,0,0.25f));
         }
     }
-    // 楼梯标记
     _mapDraw->drawSolidCircle(_stairsPos, s*0.4f, 0.0f, 16, Color4F(0.95f,0.85f,0.15f,1.0f));
 }
 
 bool MineMapController::applyPickaxeAt(const Vec2& worldPos, int power) {
-    if (_mineHit) return _mineHit(worldPos, power);
-    return false;
+    if (!_floorMap) return false;
+    int c = 0;
+    int r = 0;
+    worldToTileIndex(worldPos, c, r);
+    if (!inBounds(c, r)) return false;
+    bool handled = _mineralSystem.damageAt(
+        c,
+        r,
+        power,
+        [this](int c2, int r2, int item) {
+            this->spawnDropAt(c2, r2, item, 1);
+            this->refreshDropsVisuals();
+        },
+        nullptr
+    );
+    if (handled) {
+        _stairSystem.syncExtraStairsToMap(_minerals);
+        _stairSystem.refreshVisuals();
+    }
+    return handled;
 }
 
 void MineMapController::refreshDropsVisuals() {
@@ -247,7 +269,6 @@ void MineMapController::addActorToMap(cocos2d::Node* node, int zOrder) {
 
 void MineMapController::generateFloor(int floorIndex) {
     _floor = std::max(1, std::min(120, floorIndex));
-    // 旧 TMX 被移除前，先清理依附其上的运行时节点和指针
     _cursor = nullptr;
     _drops.clear();
     if (_dropsDraw) {
@@ -258,6 +279,11 @@ void MineMapController::generateFloor(int floorIndex) {
         _dropsRoot->removeFromParent();
         _dropsRoot = nullptr;
     }
+    _extraStairs.clear();
+    _stairSystem.reset();
+    _minerals.clear();
+    _mineralSystem.clearVisuals();
+    _stairSystem.attachTo(nullptr);
     if (_entrance) { _entrance->removeFromParent(); _entrance = nullptr; }
     if (_floorMap) { _floorMap->removeFromParent(); _floorMap = nullptr; }
     loadFloorTMX(_floor);
@@ -347,7 +373,6 @@ std::vector<int> MineMapController::getActivatedElevatorFloors() const {
 void MineMapController::loadEntrance() {
     if (!_worldNode) return;
     if (!_mapNode) { _mapNode = Node::create(); _worldNode->addChild(_mapNode, 0); }
-    // 切换到入口前，先清理当前楼层 TMX 及其挂载节点
     _cursor = nullptr;
     _drops.clear();
     if (_dropsDraw) {
@@ -358,6 +383,11 @@ void MineMapController::loadEntrance() {
         _dropsRoot->removeFromParent();
         _dropsRoot = nullptr;
     }
+    _extraStairs.clear();
+    _stairSystem.reset();
+    _minerals.clear();
+    _mineralSystem.clearVisuals();
+    _stairSystem.attachTo(nullptr);
     if (_floorMap) { _floorMap->removeFromParent(); _floorMap = nullptr; }
     if (_entrance) { _entrance->removeFromParent(); _entrance = nullptr; }
     // 同步电梯楼层（持久化）到控制器
@@ -370,7 +400,7 @@ void MineMapController::loadEntrance() {
     }
     _entrance = Game::MineMap::createEntrance();
     if (_entrance) {
-        _floor = 0; // 标记为零层入口
+        _floor = 0;
         _entrance->setAnchorPoint(Vec2(0,0));
         _entrance->setPosition(Vec2(0,0));
         _mapNode->addChild(_entrance, 0);
@@ -378,6 +408,9 @@ void MineMapController::loadEntrance() {
         _cols = static_cast<int>(tsize.width);
         _rows = static_cast<int>(tsize.height);
         _stairsPos = _entrance->stairsCenter();
+        _mineralSystem.attachTo(_entrance->getTMX());
+        _mineralSystem.bindRuntimeStorage(&_minerals);
+        _stairSystem.attachTo(_entrance->getTMX());
         refreshMapVisuals();
 
         // 首次进入矿洞0层：仅赠送一次剑（控制器内处理，避免场景包含业务逻辑）
@@ -417,7 +450,49 @@ void MineMapController::loadFloorTMX(int floorIndex) {
         auto tsize = _floorMap->getMapSize();
         _cols = static_cast<int>(tsize.width);
         _rows = static_cast<int>(tsize.height);
+        _extraStairs.clear();
         _stairsPos = _floorMap->stairsCenter();
+        _minerals.clear();
+        _mineralSystem.bindRuntimeStorage(&_minerals);
+        if (_floorMap->getTMX()) {
+            _mineralSystem.attachTo(_floorMap->getTMX());
+        } else {
+            _mineralSystem.attachTo(_mapNode);
+        }
+        cocos2d::Node* stairRoot = nullptr;
+        if (_floorMap->getTMX()) {
+            stairRoot = _floorMap->getTMX();
+        } else {
+            stairRoot = _mapNode;
+        }
+        if (stairRoot) {
+            _stairSystem.attachTo(stairRoot);
+        }
+        std::vector<Vec2> candidates;
+        candidates.reserve(static_cast<std::size_t>(_cols * _rows));
+        float s = static_cast<float>(GameConfig::TILE_SIZE);
+        const auto& rockRects = rockAreaRects();
+        const auto& rockPolys = rockAreaPolys();
+        for (int r = 0; r < _rows; ++r) {
+            for (int c = 0; c < _cols; ++c) {
+                Vec2 center = tileToWorld(c, r);
+                if (Game::MapBase::collidesAt(center, s * 0.5f, rockRects, rockPolys)) {
+                    candidates.push_back(center);
+                }
+            }
+        }
+        if (!candidates.empty()) {
+            _stairSystem.generateStairs(candidates, 2, 5, _extraStairs);
+        }
+        std::vector<Vec2> stairWorldPos;
+        stairWorldPos.push_back(_stairsPos);
+        for (const auto& sp : _extraStairs) {
+            stairWorldPos.push_back(sp);
+        }
+        _mineralSystem.generateNodesForFloor(_minerals, candidates, stairWorldPos);
+        _mineralSystem.syncVisuals();
+        _stairSystem.syncExtraStairsToMap(_minerals);
+        _stairSystem.refreshVisuals();
         refreshMapVisuals();
     }
 }
@@ -478,6 +553,7 @@ bool MineMapController::collides(const Vec2& pos, float radius) const {
     if (_entrance) base = _entrance->collides(pos, radius);
     else if (_floorMap) base = _floorMap->collides(pos, radius);
     if (base) return true;
+    if (!_mineralSystem.isEmpty() && _mineralSystem.collides(pos, radius * 0.75f, GameConfig::TILE_SIZE)) return true;
     for (const auto& rc : _dynamicColliders) { if (rc.containsPoint(pos)) return true; }
     for (const auto& rc : _monsterColliders) { if (rc.containsPoint(pos)) return true; }
     return false;
@@ -488,6 +564,7 @@ bool MineMapController::collidesWithoutMonsters(const Vec2& pos, float radius) c
     if (_entrance) base = _entrance->collides(pos, radius);
     else if (_floorMap) base = _floorMap->collides(pos, radius);
     if (base) return true;
+    if (!_mineralSystem.isEmpty() && _mineralSystem.collides(pos, radius * 0.75f, GameConfig::TILE_SIZE)) return true;
     for (const auto& rc : _dynamicColliders) { if (rc.containsPoint(pos)) return true; }
     return false;
 }

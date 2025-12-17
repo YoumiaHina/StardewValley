@@ -58,21 +58,15 @@ bool MineScene::init() {
         }
     }
     _monsters = new Controllers::MineMonsterController(_map, _worldNode, [this]() -> Vec2 { return _player ? _player->getPosition() : Vec2(); });
-    _mining = new Controllers::MineMiningController(_map, _worldNode);
-    // 镐子采掘回调：由 MapController 转发到 MiningController
-    _map->setMineHitCallback([this](const Vec2& wp, int power){ return _mining ? _mining->hitNearestNode(wp, power) : false; });
-    // 矿洞零层不刷怪、不生成矿点
     if (_map->currentFloor() > 0) {
         _monsters->generateInitialWave();
-        _mining->generateNodesForFloor();
     }
     _combat = new Controllers::MineCombatController(_map,
                                                     _monsters,
-                                                    _mining,
                                                     [this]() -> Vec2 { return _player ? _player->getPosition() : Vec2(); },
                                                     [this]() -> Vec2 { return _playerController ? _playerController->lastDir() : Vec2(0,-1); });
     _interactor = new Controllers::MineInteractor(_map, [this]() -> Vec2 { return _player ? _player->getPosition() : Vec2(); });
-    _elevator = new Controllers::MineElevatorController(_map, _monsters, _mining, this);
+    _elevator = new Controllers::MineElevatorController(_map, _monsters, this);
     _elevator->buildPanel();
     // 电梯面板打开时锁定移动；跳转后更新楼层标签并定位到该层出生点
     _elevator->setMovementLocker([this](bool locked){ if (_playerController) _playerController->setMovementLocked(locked); });
@@ -87,9 +81,7 @@ bool MineScene::init() {
         _uiController->setMineFloorNumber(_map->currentFloor());
     }
 
-    // 注册模块更新
     addUpdateCallback([this](float dt){ if (_monsters) _monsters->update(dt); });
-    addUpdateCallback([this](float dt){ if (_mining) _mining->update(dt); });
     addUpdateCallback([this](float dt){ if (_combat) _combat->update(dt); });
     addUpdateCallback([this](float){ if (_uiController) _uiController->refreshHUD(); });
 
@@ -114,7 +106,6 @@ void MineScene::onSpacePressed() {
     if (act == Controllers::MineInteractor::SpaceAction::Descend) {
         // 重置当层状态并根据 TMX 对象层生成
         if (_monsters) { _monsters->resetFloor(); _monsters->generateInitialWave(); }
-        if (_mining) { _mining->generateNodesForFloor(); }
         // 新楼层出生点：优先 Appear，否则楼梯中心
         _player->setPosition(_map->floorSpawnPos());
         if (_uiController) _uiController->setMineFloorNumber(_map->currentFloor());
@@ -134,7 +125,6 @@ void MineScene::onSpacePressed() {
         // 返回入口（零层）
         _map->loadEntrance();
         if (_monsters) _monsters->resetFloor();
-        if (_mining) _mining->resetFloor();
         if (_player) _player->setPosition(_map->entranceBackSpawnPos());
         if (_uiController) _uiController->setMineFloorNumber(_map->currentFloor());
         // UI 提示：返回入口
@@ -178,7 +168,6 @@ void MineScene::onKeyPressedHook(EventKeyboard::KeyCode code) {
         // 调试：直接去下一层
         _map->descend(1);
         if (_monsters) { _monsters->resetFloor(); _monsters->generateInitialWave(); }
-        if (_mining) { _mining->generateNodesForFloor(); }
         if (_player) _player->setPosition(_map->floorSpawnPos());
         if (_uiController) _uiController->setMineFloorNumber(_map->currentFloor());
         if (_uiController && _player) {

@@ -70,10 +70,8 @@ void MineElevatorController::_jumpToFloor(int floor) {
     if (!_map) return;
     _map->setFloor(floor);
     if (_monsters) { _monsters->resetFloor(); }
-    if (_mining) { _mining->resetFloor(); }
     if (floor > 0) {
         if (_monsters) _monsters->generateInitialWave();
-        if (_mining) _mining->generateNodesForFloor();
     }
     // 更新 UI 楼层显示与关闭面板、解锁移动
     if (_onFloorChanged) _onFloorChanged(floor);

@@ -101,9 +101,6 @@
     <ClCompile Include="..\Classes\Controllers\MineMonsterController.cpp">
       <Filter>Classes\Controllers</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\Controllers\MineMiningController.cpp">
-      <Filter>Classes\Controllers</Filter>
-    </ClCompile>
     <ClCompile Include="..\Classes\Controllers\MineCombatController.cpp">
       <Filter>Classes\Controllers</Filter>
     </ClCompile>

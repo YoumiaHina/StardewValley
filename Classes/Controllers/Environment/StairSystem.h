@@ -4,6 +4,8 @@
 #include <vector>
 #include <functional>
 #include "Controllers/Environment/EnvironmentObstacleSystemBase.h"
+#include "Game/Mineral.h"
+#include "Game/Stair.h"
 
 namespace Controllers {
 
@@ -15,6 +17,8 @@ public:
     : _map(map) {}
 
     void attachTo(cocos2d::Node* root) override;
+
+    void reset();
 
     bool spawnFromTile(int c, int r, const cocos2d::Vec2& tileCenter,
                        Game::IMapBase* map, int tileSize) override;
@@ -35,12 +39,23 @@ public:
     void generateStairs(const std::vector<cocos2d::Vec2>& candidates,
                         int minCount,
                         int maxCount,
-                        std::vector<cocos2d::Vec2>& outWorldPos) const;
+                        std::vector<cocos2d::Vec2>& outWorldPos);
+
+    void syncExtraStairsToMap(const std::vector<Game::MineralData>& minerals);
+
+    void refreshVisuals();
 
 private:
+    struct StairData {
+        cocos2d::Vec2 pos;
+        Game::Stair* node = nullptr;
+        bool covered = false;
+    };
+
     MineMapController* _map = nullptr;
     cocos2d::Node* _root = nullptr;
+    cocos2d::DrawNode* _debugDraw = nullptr;
+    std::vector<StairData> _stairs;
 };
 
 }
-
