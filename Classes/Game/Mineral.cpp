@@ -36,17 +36,14 @@ void Mineral::applyDamage(int amount) {
 }
 
 Rect Mineral::footRect() const {
-    float s = static_cast<float>(GameConfig::TILE_SIZE);
     float w = 12.0f;
     float h = 12.0f;
     Vec2 base = getPosition();
-    float bottom = base.y - s * 0.5f;
     if (_type == MineralType::HugeRock) {
-        w = s * 2.0f;
-        h = s;
-        bottom = base.y - s * 0.5f;
+        w = 24.0f;
+        h = 20.0f;
     }
-    return Rect(base.x - w * 0.5f, bottom, w, h);
+    return Rect(base.x - w * 0.5f, base.y - h * 0.4f, w, h);
 }
 
 Size Mineral::spriteContentSize() const {
