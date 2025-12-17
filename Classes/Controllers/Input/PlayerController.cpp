@@ -227,6 +227,7 @@ void PlayerController::registerCommonInputHandlers(
         if (chestOpen || storeOpen) return;
         if (_map && _player) {
             Vec2 clickScene = e->getLocation();
+			clickScene.y = Director::getInstance()->getVisibleSize().height - clickScene.y;
             auto parent = dynamic_cast<Node*>(_player)->getParent();
             Vec2 mapPos = parent ? parent->convertToNodeSpace(clickScene) : clickScene;
             _map->setLastClickWorldPos(mapPos);

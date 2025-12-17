@@ -129,6 +129,7 @@ bool openChestNearPlayer(Controllers::IMapController* map,
         auto tgt = map->targetTile(playerWorldPos, lastDir);
         int tc = tgt.first;
         int tr = tgt.second;
+        if (!map->inBounds(tc, tr)) return false;
         Vec2 center = map->tileToWorld(tc, tr);
         for (int i = 0; i < static_cast<int>(chs.size()); ++i) {
             auto r = chestRect(chs[i]);
@@ -167,6 +168,7 @@ bool placeChestOnFarm(Controllers::IMapController* map,
     auto tgt = map->targetTile(playerPos, lastDir);
     int tc = tgt.first;
     int tr = tgt.second;
+    if (!map->inBounds(tc, tr)) return false;
     auto& chs = map->chests();
     auto blocked = [](const Rect&) { return false; };
     Vec2 center = map->tileToWorld(tc, tr);
