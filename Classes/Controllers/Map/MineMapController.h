@@ -11,7 +11,7 @@
 #include "Game/GameConfig.h"
 #include "Game/Map/MineMap.h"
 #include "Game/Drop.h"
-#include "Controllers/TileSelector.h"
+#include "Controllers/Interact/TileSelector.h"
 #include "Controllers/Environment/MineralSystem.h"
 #include "Controllers/Environment/StairSystem.h"
 

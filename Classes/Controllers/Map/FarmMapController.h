@@ -17,7 +17,7 @@
 #include "Controllers/Environment/TreeSystem.h"
 #include "Controllers/Environment/RockSystem.h"
 #include "Controllers/Environment/EnvironmentObstacleSystemBase.h"
-#include "Controllers/TileSelector.h"
+#include "Controllers/Interact/TileSelector.h"
 #include "Controllers/Systems/ChestController.h"
 
 namespace Controllers {

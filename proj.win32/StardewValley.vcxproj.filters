@@ -391,8 +391,8 @@
     <ClCompile Include="..\Classes\Controllers\Mine\MonsterSystem.cpp">
       <Filter>Classes\Controllers\Mine</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\Controllers\TileSelector.cpp">
-      <Filter>Classes\Controllers</Filter>
+    <ClCompile Include="..\Classes\Controllers\Interact\TileSelector.cpp">
+      <Filter>Classes\Controllers\Interact</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -681,8 +681,8 @@
     <ClInclude Include="..\Classes\Controllers\Mine\MonsterSystem.h">
       <Filter>Classes\Controllers\Mine</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\Controllers\TileSelector.h">
-      <Filter>Classes\Controllers</Filter>
+    <ClInclude Include="..\Classes\Controllers\Interact\TileSelector.h">
+      <Filter>Classes\Controllers\Interact</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
