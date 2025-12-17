@@ -23,6 +23,8 @@ Scene* RoomScene::createScene() { return RoomScene::create(); }
 
 bool RoomScene::init() {
     if (!initBase(/*worldScale*/3.0f, /*buildCraftPanel*/false, /*enableToolOnSpace*/false, /*enableToolOnLeftClick*/false)) return false;
+    auto& ws = Game::globalState();
+    ws.lastScene = static_cast<int>(Game::SceneKind::Room);
     Managers::AudioManager::getInstance().playBackgroundFor(Managers::SceneZone::Room);
     _interactor = new Controllers::RoomInteractor(_inventory, _mapController, _uiController, _cropSystem, _stateController,
         [this]() -> Vec2 { return _player ? _player->getPosition() : Vec2(); });
@@ -46,6 +48,12 @@ Controllers::IMapController* RoomScene::createMapController(Node* worldNode) {
 
 void RoomScene::positionPlayerInitial() {
     if (!_roomMap || !_player) return;
+    auto& ws = Game::globalState();
+    if (ws.lastScene == static_cast<int>(Game::SceneKind::Room) &&
+        (ws.lastPlayerX != 0.0f || ws.lastPlayerY != 0.0f)) {
+        _player->setPosition(Vec2(ws.lastPlayerX, ws.lastPlayerY));
+        return;
+    }
     const auto& b = _roomMap->bedRect();
     _player->setPosition(Vec2(b.getMidX(), b.getMidY()));
 }

@@ -71,6 +71,9 @@
     <Filter Include="Classes\Game\NPC">
       <UniqueIdentifier>{a80b0a1b-bf87-472e-a314-5dbbf0b1f14f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Classes\Game\Save">
+      <UniqueIdentifier>{ec978dea-64a7-422e-911a-bf6acdc65b08}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <!-- Source Files -->
@@ -99,9 +102,6 @@
       <Filter>Classes\Controllers\Map</Filter>
     </ClCompile>
     <ClCompile Include="..\Classes\Controllers\MineMonsterController.cpp">
-      <Filter>Classes\Controllers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Classes\Controllers\MineCombatController.cpp">
       <Filter>Classes\Controllers</Filter>
     </ClCompile>
     <ClCompile Include="..\Classes\Controllers\Interact\MineInteractor.cpp">
@@ -384,6 +384,12 @@
     </ClCompile>
     <ClCompile Include="..\Classes\Game\Drop.cpp">
       <Filter>Classes\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\MineCombatController.cpp">
+      <Filter>Classes\Controllers\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\Save\SaveSystem.cpp">
+      <Filter>Classes\Game\Save</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -671,6 +677,12 @@
     </ClInclude>
     <ClInclude Include="..\Classes\Game\Stair.h">
       <Filter>Classes\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\Save\SaveDetail.h">
+      <Filter>Classes\Game\Save</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\Save\SaveSystem.h">
+      <Filter>Classes\Game\Save</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -27,6 +27,8 @@ Scene* FarmScene::createScene() { return FarmScene::create(); }
 
 bool FarmScene::init() {
     if (!initBase(/*worldScale*/3.0f, /*buildCraftPanel*/true, /*enableToolOnSpace*/true, /*enableToolOnLeftClick*/true)) return false;
+    auto& ws = Game::globalState();
+    ws.lastScene = static_cast<int>(Game::SceneKind::Farm);
     Managers::AudioManager::getInstance().playBackgroundFor(Managers::SceneZone::Farm);
     _animalSystem = new Controllers::AnimalSystem(_mapController, _worldNode);
     if (_stateController) {
@@ -105,6 +107,12 @@ Controllers::IMapController* FarmScene::createMapController(Node* worldNode) {
 }
 
 void FarmScene::positionPlayerInitial() {
+    auto& ws = Game::globalState();
+    if (ws.lastScene == static_cast<int>(Game::SceneKind::Farm) &&
+        (ws.lastPlayerX != 0.0f || ws.lastPlayerY != 0.0f)) {
+        _player->setPosition(Vec2(ws.lastPlayerX, ws.lastPlayerY));
+        return;
+    }
     _player->setPosition(_mapController->tileToWorld(GameConfig::MAP_COLS / 2, GameConfig::MAP_ROWS / 2));
 }
 

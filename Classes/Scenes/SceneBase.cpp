@@ -116,6 +116,11 @@ void SceneBase::registerCommonInputHandlers(bool enableToolOnSpace, bool enableT
 
 void SceneBase::update(float dt) {
     auto& ws = Game::globalState();
+    if (_player) {
+        Vec2 p = _player->getPosition();
+        ws.lastPlayerX = p.x;
+        ws.lastPlayerY = p.y;
+    }
     if (ws.hp <= 0) {
         ws.gold = ws.gold > 0 ? ws.gold / 2 : 0;
         ws.hp = ws.maxHp;

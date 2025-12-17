@@ -57,6 +57,26 @@ void MineralSystem::generateNodesForFloor(std::vector<Game::MineralData>& outNod
 
     std::vector<Vec2> selected = candidates;
 
+    std::vector<std::pair<int,int>> stairTiles;
+    stairTiles.reserve(stairWorldPos.size());
+    for (const auto& p : stairWorldPos) {
+        int c = 0;
+        int r = 0;
+        _map->worldToTileIndex(p, c, r);
+        stairTiles.emplace_back(c, r);
+    }
+    auto isStairTile = [this,&stairTiles](const Vec2& wp){
+        int c = 0;
+        int r = 0;
+        _map->worldToTileIndex(wp, c, r);
+        for (const auto& t : stairTiles) {
+            if (t.first == c && t.second == r) {
+                return true;
+            }
+        }
+        return false;
+    };
+
     auto alignToTileCenter = [this](const Vec2& wp){
         int c = 0;
         int r = 0;
@@ -70,6 +90,9 @@ void MineralSystem::generateNodesForFloor(std::vector<Game::MineralData>& outNod
     float spawnChance = 0.3f;
     for (const auto& rawP : selected) {
         Vec2 p = alignToTileCenter(rawP);
+        if (isStairTile(p)) {
+            continue;
+        }
         if (prob(rng) > spawnChance) {
             continue;
         }
@@ -106,6 +129,49 @@ void MineralSystem::generateNodesForFloor(std::vector<Game::MineralData>& outNod
         if (placed) {
             continue;
         }
+        float r = probRock(rng);
+        if (r < 0.08f) {
+            Game::MineralData m;
+            m.type = Game::MineralType::HugeRock;
+            m.hp = 5;
+            m.sizeTiles = 2;
+            m.pos = p;
+            m.texture = "Rock/hugeRock.png";
+            outNodes.push_back(m);
+        } else if (r < 0.25f) {
+            int hi = hardIdx(rng);
+            Game::MineralData m;
+            m.type = Game::MineralType::HardRock;
+            m.hp = 3;
+            m.sizeTiles = 1;
+            m.pos = p;
+            if (hi == 1) m.texture = "Rock/hardRock1.png";
+            else if (hi == 2) m.texture = "Rock/hardRock2.png";
+            else m.texture = "Rock/hardRock3.png";
+            outNodes.push_back(m);
+        } else {
+            int ni = normalIdx(rng);
+            Game::MineralData m;
+            m.type = Game::MineralType::Rock;
+            m.hp = 1;
+            m.sizeTiles = 1;
+            m.pos = p;
+            switch (ni) {
+                case 1: m.texture = "Rock/Rock1.png"; break;
+                case 2: m.texture = "Rock/Rock2.png"; break;
+                case 3: m.texture = "Rock/Rock3.png"; break;
+                case 4: m.texture = "Rock/Rock4.png"; break;
+                default: m.texture = "Rock/Rock5.png"; break;
+            }
+            outNodes.push_back(m);
+        }
+    }
+
+    for (const auto& stairPos : stairWorldPos) {
+        if (prob(rng) > 0.8f) {
+            continue;
+        }
+        Vec2 p = alignToTileCenter(stairPos);
         float r = probRock(rng);
         if (r < 0.08f) {
             Game::MineralData m;

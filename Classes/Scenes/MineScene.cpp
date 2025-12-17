@@ -3,6 +3,7 @@
 #include "Controllers/Managers/AudioManager.h"
 #include "Scenes/FarmScene.h"
 #include "Game/Tool/ToolFactory.h"
+#include "Game/WorldState.h"
 #include "Controllers/Interact/ChestInteractor.h"
 
 USING_NS_CC;
@@ -12,6 +13,8 @@ cocos2d::Scene* MineScene::createScene() { return MineScene::create(); }
 bool MineScene::init() {
     // 深渊矿洞：不启用空格工具，启用左键工具；不显示 Craft 面板
     if (!initBase(/*worldScale*/3.0f, /*buildCraftPanel*/false, /*enableToolOnSpace*/false, /*enableToolOnLeftClick*/true)) return false;
+    auto& ws = Game::globalState();
+    ws.lastScene = static_cast<int>(Game::SceneKind::Mine);
     Managers::AudioManager::getInstance().playBackgroundFor(Managers::SceneZone::Abyss);
 
     // 组合矿洞模块
@@ -84,6 +87,12 @@ bool MineScene::init() {
     addUpdateCallback([this](float dt){ if (_monsters) _monsters->update(dt); });
     addUpdateCallback([this](float dt){ if (_combat) _combat->update(dt); });
     addUpdateCallback([this](float){ if (_uiController) _uiController->refreshHUD(); });
+    addUpdateCallback([this](float){
+        auto& ws = Game::globalState();
+        if (_map) {
+            ws.lastMineFloor = _map->currentFloor();
+        }
+    });
 
     return true;
 }
@@ -94,7 +103,13 @@ Controllers::IMapController* MineScene::createMapController(Node* worldNode) {
 }
 
 void MineScene::positionPlayerInitial() {
-    // 初始放置在地图中部偏上
+    if (!_map || !_player) return;
+    auto& ws = Game::globalState();
+    if (ws.lastScene == static_cast<int>(Game::SceneKind::Mine) &&
+        (ws.lastPlayerX != 0.0f || ws.lastPlayerY != 0.0f)) {
+        _player->setPosition(Vec2(ws.lastPlayerX, ws.lastPlayerY));
+        return;
+    }
     auto size = _map->getContentSize();
     _player->setPosition(Vec2(size.width * 0.5f, size.height * 0.65f));
 }

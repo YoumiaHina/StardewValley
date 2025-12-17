@@ -2,6 +2,7 @@
 #include "Controllers/Systems/AnimalSystem.h"
 #include "Game/GameConfig.h"
 #include "Game/WorldState.h"
+#include "Game/Save/SaveSystem.h"
 
 namespace Controllers {
 
@@ -26,11 +27,23 @@ void GameStateController::update(float dt) {
         timeChanged = true;
     }
     if (timeChanged && _ui) _ui->refreshHUD();
-    if (dayChanged && _map) {
-        if (_crop) { _crop->advanceCropsDaily(_map); }
-        if (_animals) { _animals->advanceAnimalsDaily(); }
-        _map->refreshMapVisuals();
-        _map->refreshCropsVisuals();
+    if (dayChanged) {
+        if (_map) {
+            if (_crop) { _crop->advanceCropsDaily(_map); }
+            if (_animals) { _animals->advanceAnimalsDaily(); }
+            _map->refreshMapVisuals();
+            _map->refreshCropsVisuals();
+        } else {
+            if (_crop) { _crop->advanceCropsDaily(nullptr); }
+            if (_animals) { _animals->advanceAnimalsDaily(); }
+        }
+        std::string path = Game::currentSavePath();
+        if (path.empty()) {
+            if (ws.lastSaveSlot < 1) ws.lastSaveSlot = 1;
+            if (ws.lastSaveSlot > 50) ws.lastSaveSlot = 50;
+            path = Game::savePathForSlot(ws.lastSaveSlot);
+        }
+        Game::saveToFile(path);
     }
 }
 
@@ -50,6 +63,13 @@ void GameStateController::sleepToNextMorning() {
     }
     advanceAnimalsDailyWorldOnly();
     if (_ui) _ui->refreshHUD();
+    std::string path = Game::currentSavePath();
+    if (path.empty()) {
+        if (ws.lastSaveSlot < 1) ws.lastSaveSlot = 1;
+        if (ws.lastSaveSlot > 50) ws.lastSaveSlot = 50;
+        path = Game::savePathForSlot(ws.lastSaveSlot);
+    }
+    Game::saveToFile(path);
 }
 
 }
