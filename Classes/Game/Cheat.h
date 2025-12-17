@@ -7,7 +7,7 @@
 #include "Game/Inventory.h"
 #include "Game/Item.h"
 #include "Controllers/Systems/CropSystem.h"
-#include "Game/Crop.h"
+#include "Game/Crops/crop/CropBase.h"
 
 namespace Game {
 

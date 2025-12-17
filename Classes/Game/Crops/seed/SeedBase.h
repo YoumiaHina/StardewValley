@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Game/Item.h"
-#include "Game/Crop.h"
+#include "Game/Crops/crop/CropBase.h"
 
 namespace Game {
 
@@ -19,6 +19,41 @@ public:
     virtual const char* name() const = 0;
     // 购买价格或物品本身定价（具体由商店策略决定）
     virtual int price() const = 0;
+
+    static ItemType seedItemFor(CropType t) {
+        switch (t) {
+            case CropType::Parsnip: return ItemType::ParsnipSeed;
+            case CropType::Blueberry: return ItemType::BlueberrySeed;
+            case CropType::Eggplant: return ItemType::EggplantSeed;
+            case CropType::Corn: return ItemType::CornSeed;
+            case CropType::Strawberry: return ItemType::StrawberrySeed;
+            default: return ItemType::ParsnipSeed;
+        }
+    }
+
+    static bool isSeed(ItemType t) {
+        switch (t) {
+            case ItemType::ParsnipSeed:
+            case ItemType::BlueberrySeed:
+            case ItemType::EggplantSeed:
+            case ItemType::CornSeed:
+            case ItemType::StrawberrySeed:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    static CropType cropTypeFromSeed(ItemType t) {
+        switch (t) {
+            case ItemType::ParsnipSeed: return CropType::Parsnip;
+            case ItemType::BlueberrySeed: return CropType::Blueberry;
+            case ItemType::EggplantSeed: return CropType::Eggplant;
+            case ItemType::CornSeed: return CropType::Corn;
+            case ItemType::StrawberrySeed: return CropType::Strawberry;
+            default: return CropType::Parsnip;
+        }
+    }
 };
 
 }

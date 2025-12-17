@@ -3,7 +3,19 @@
 
 namespace Game {
 
-class StrawberryCrop : public RegrowCropBase {
+class StrawberryCrop : public CropBase {
+public:
+    StrawberryCrop() {
+        def_.baseRow16 = 26;
+        def_.startCol = 0;
+        def_.stageDays = {1, 1, 1, 1, 1, 1, 1, 1};
+        def_.seasons = {true, false, false, false};
+        seedItem_ = ItemType::StrawberrySeed;
+        produceItem_ = ItemType::Strawberry;
+        regrow_ = true;
+    }
+
+    CropType cropType() const override { return CropType::Strawberry; }
 };
 
 const CropBase& strawberryCropBehavior() {

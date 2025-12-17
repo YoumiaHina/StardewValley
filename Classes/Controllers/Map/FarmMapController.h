@@ -13,7 +13,6 @@
 #include "Game/Map/FarmMap.h"
 #include "Game/Chest.h"
 #include "Game/Drop.h"
-#include "Game/Crop.h"
 #include "Game/WorldState.h"
 #include "Game/Tree.h"
 #include "Game/Rock.h"

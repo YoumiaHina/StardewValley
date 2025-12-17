@@ -13,7 +13,7 @@
 #include "Game/Drop.h"
 #include "Game/Chest.h"
 #include "Game/GameConfig.h"
-#include "Game/Crop.h"
+#include "Game/Crops/crop/CropBase.h"
 #include "Game/Tree.h"
 #include "Game/Rock.h"
 #include "Game/Animal.h"

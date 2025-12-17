@@ -3,7 +3,19 @@
 
 namespace Game {
 
-class CornCrop : public RegrowCropBase {
+class CornCrop : public CropBase {
+public:
+    CornCrop() {
+        def_.baseRow16 = 48;
+        def_.startCol = 8;
+        def_.stageDays = {1, 1, 1, 1, 1, 1, 1, 1};
+        def_.seasons = {false, false, true, false};
+        seedItem_ = ItemType::CornSeed;
+        produceItem_ = ItemType::Corn;
+        regrow_ = true;
+    }
+
+    CropType cropType() const override { return CropType::Corn; }
 };
 
 const CropBase& cornCropBehavior() {

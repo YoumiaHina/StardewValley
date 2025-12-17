@@ -3,7 +3,19 @@
 
 namespace Game {
 
-class EggplantCrop : public RegrowCropBase {
+class EggplantCrop : public CropBase {
+public:
+    EggplantCrop() {
+        def_.baseRow16 = 46;
+        def_.startCol = 0;
+        def_.stageDays = {1, 1, 1, 1, 1, 1, 1, 1};
+        def_.seasons = {false, false, true, false};
+        seedItem_ = ItemType::EggplantSeed;
+        produceItem_ = ItemType::Eggplant;
+        regrow_ = true;
+    }
+
+    CropType cropType() const override { return CropType::Eggplant; }
 };
 
 const CropBase& eggplantCropBehavior() {

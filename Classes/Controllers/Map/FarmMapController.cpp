@@ -6,7 +6,7 @@
 #include <unordered_set>
 #include "Game/GameConfig.h"
 #include "Game/WorldState.h"
-#include "Game/CropSprites.h"
+#include "Game/Crops/crop/CropBase.h"
 
 using namespace cocos2d;
 

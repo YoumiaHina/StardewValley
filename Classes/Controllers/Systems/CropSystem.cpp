@@ -1,18 +1,9 @@
 // 作物系统实现：
 // - 管理农场上的作物列表与状态持久化
-// - 每日推进依赖 CropDefs::stageDays；特殊回生由 CropBase 派生覆盖
-// - 收获/加速等操作通过适配器委派给具体作物行为
+// - 每日推进依赖 CropDefs::stageDays；回生/收获/加速由系统统一分支处理
 #include "Controllers/Systems/CropSystem.h"
-#include "Game/Crops/crop/CropBase.h"
+#include <algorithm>
 #include <cstdlib>
-// 行为实现由各作物派生在 *.cpp 中定义；此处仅声明获取入口
-namespace Game {
-    const CropBase& parsnipCropBehavior();
-    const CropBase& blueberryCropBehavior();
-    const CropBase& eggplantCropBehavior();
-    const CropBase& cornCropBehavior();
-    const CropBase& strawberryCropBehavior();
-}
 
 namespace Controllers {
 
@@ -44,25 +35,33 @@ void CropSystem::markWateredAt(int c, int r) {
     syncSave();
 }
 
-// 是否可收获：委派给行为实现
+// 是否可收获
 bool CropSystem::canHarvestAt(int c, int r) const {
     int idx = findCropIndex(c, r);
     if (idx < 0) return false;
     const auto& cp = _crops[idx];
-    return behaviorFor(cp.type).canHarvest(cp);
+    if (Game::CropDefs::isRegrow(cp.type)) {
+        int penultimate = std::max(0, cp.maxStage - 1);
+        return cp.stage == penultimate || cp.stage >= cp.maxStage;
+    }
+    return cp.stage >= cp.maxStage;
 }
 
-// 收获是否产出：委派给行为实现
+// 收获是否产出
 bool CropSystem::yieldsOnHarvestAt(int c, int r) const {
     int idx = findCropIndex(c, r);
     if (idx < 0) return false;
     const auto& cp = _crops[idx];
-    return behaviorFor(cp.type).yieldsOnHarvest(cp);
+    if (Game::CropDefs::isRegrow(cp.type)) {
+        int penultimate = std::max(0, cp.maxStage - 1);
+        return cp.stage == penultimate;
+    }
+    return cp.stage >= cp.maxStage;
 }
 
 // 每日推进：
-// - 若行为 onDailyRegrow 已处理（例如成熟占位退回倒数阶段），则跳过常规增长
-// - 否则在浇水条件下推进阶段内进度，并根据阶段天数决定是否升级阶段
+// - 普通作物：浇水则按阶段天数推进到 maxStage
+// - 回生作物：浇水则推进到倒数第二阶段；收获后处于 maxStage 占位，再浇水从 maxStage 长回倒数第二阶段
 void CropSystem::advanceCropsDaily(IMapController* map) {
     auto &ws = Game::globalState();
     int cols = ws.farmCols;
@@ -97,14 +96,26 @@ void CropSystem::advanceCropsDaily(IMapController* map) {
             continue;
         }
 
-        if (behaviorFor(cp.type).onDailyRegrow(cp)) {
-        } else {
-            if (watered && cp.stage < cp.maxStage) {
+        bool regrow = Game::CropDefs::isRegrow(cp.type);
+        int penultimate = std::max(0, cp.maxStage - 1);
+        int growMaxStage = regrow ? penultimate : cp.maxStage;
+
+        if (regrow && cp.stage >= cp.maxStage) {
+            if (watered) {
                 cp.progress += 1;
                 const auto& days = Game::CropDefs::stageDays(cp.type);
-                int need = (cp.stage >= 0 && cp.stage < static_cast<int>(days.size())) ? days[cp.stage] : 1;
-                if (cp.progress >= need) { cp.stage += 1; cp.progress = 0; }
+                int idx = cp.maxStage;
+                int need = (idx >= 0 && idx < static_cast<int>(days.size())) ? std::max(1, days[idx]) : 1;
+                if (cp.progress >= need) {
+                    cp.stage = penultimate;
+                    cp.progress = 0;
+                }
             }
+        } else if (watered && cp.stage < growMaxStage) {
+            cp.progress += 1;
+            const auto& days = Game::CropDefs::stageDays(cp.type);
+            int need = (cp.stage >= 0 && cp.stage < static_cast<int>(days.size())) ? std::max(1, days[cp.stage]) : 1;
+            if (cp.progress >= need) { cp.stage += 1; cp.progress = 0; }
         }
 
         cp.wateredToday = false;
@@ -139,59 +150,63 @@ void CropSystem::advanceCropsDaily(IMapController* map) {
     }
 }
 
-// 收获：由行为决定是否移除作物（remove=true）
+// 收获
 void CropSystem::harvestCropAt(int c, int r) {
     int idx = findCropIndex(c, r);
     if (idx < 0) return;
-    auto cp = _crops[idx];
-    bool remove = false;
-    behaviorFor(cp.type).onHarvest(_crops[idx], remove);
-    if (remove) { _crops.erase(_crops.begin() + idx); }
+    auto& cp = _crops[idx];
+    if (Game::CropDefs::isRegrow(cp.type)) {
+        int penultimate = std::max(0, cp.maxStage - 1);
+        if (cp.stage == penultimate) {
+            cp.stage = cp.maxStage;
+            cp.progress = 0;
+        } else if (cp.stage >= cp.maxStage) {
+            _crops.erase(_crops.begin() + idx);
+        }
+    } else {
+        if (cp.stage >= cp.maxStage) { _crops.erase(_crops.begin() + idx); }
+    }
     syncSave();
 }
 
 // 作弊：使所有作物瞬间成熟
 void CropSystem::instantMatureAllCrops() {
-    for (auto& cp : _crops) { cp.stage = cp.maxStage; cp.progress = 0; }
+    for (auto& cp : _crops) {
+        if (Game::CropDefs::isRegrow(cp.type)) {
+            cp.stage = std::max(0, cp.maxStage - 1);
+        } else {
+            cp.stage = cp.maxStage;
+        }
+        cp.progress = 0;
+    }
     syncSave();
 }
 
-// 加速一次：委派行为执行阶段推进或回退
+// 加速一次
 void CropSystem::advanceCropOnceAt(int c, int r) {
     int idx = findCropIndex(c, r);
     if (idx < 0) return;
     auto& cp = _crops[idx];
-    if (behaviorFor(cp.type).accelerate(cp)) { syncSave(); }
+    bool regrow = Game::CropDefs::isRegrow(cp.type);
+    int penultimate = std::max(0, cp.maxStage - 1);
+    int growMaxStage = regrow ? penultimate : cp.maxStage;
+
+    bool changed = false;
+    if (regrow && cp.stage >= cp.maxStage) {
+        cp.stage = penultimate;
+        cp.progress = 0;
+        changed = true;
+    } else if (cp.stage < growMaxStage) {
+        cp.stage += 1;
+        cp.progress = 0;
+        changed = true;
+    }
+
+    if (changed) { syncSave(); }
 }
 
 // 与全局状态同步（存/取）
 void CropSystem::syncLoad() { _crops = Game::globalState().farmCrops; }
 void CropSystem::syncSave() { Game::globalState().farmCrops = _crops; }
-
-// 行为适配器：将 Game::CropBase 映射为本地 ICropBehavior 接口
-const CropSystem::ICropBehavior& CropSystem::behaviorFor(Game::CropType t) const {
-    struct Adapter : ICropBehavior {
-        const Game::CropBase* impl;
-        Adapter(const Game::CropBase* p) : impl(p) {}
-        bool canAccelerate(const Game::Crop& cp) const override { return impl->canAccelerate(cp); }
-        bool canHarvest(const Game::Crop& cp) const override { return impl->canHarvest(cp); }
-        void onHarvest(Game::Crop& cp, bool& remove) const override { impl->onHarvest(cp, remove); }
-        bool onDailyRegrow(Game::Crop& cp) const override { return impl->onDailyRegrow(cp); }
-        bool accelerate(Game::Crop& cp) const override { return impl->accelerate(cp); }
-        bool yieldsOnHarvest(const Game::Crop& cp) const override { return impl->yieldsOnHarvest(cp); }
-    };
-    static Adapter parsnip(&Game::parsnipCropBehavior());
-    static Adapter blueberry(&Game::blueberryCropBehavior());
-    static Adapter eggplant(&Game::eggplantCropBehavior());
-    static Adapter corn(&Game::cornCropBehavior());
-    static Adapter strawberry(&Game::strawberryCropBehavior());
-    switch (t) {
-        case Game::CropType::Blueberry: return blueberry;
-        case Game::CropType::Eggplant: return eggplant;
-        case Game::CropType::Corn: return corn;
-        case Game::CropType::Strawberry: return strawberry;
-        default: return parsnip;
-    }
-}
 
 }

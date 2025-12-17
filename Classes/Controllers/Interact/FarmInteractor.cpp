@@ -1,7 +1,7 @@
 #include "Controllers/Interact/FarmInteractor.h"
 #include "Controllers/Map/FarmMapController.h"
 #include "Controllers/NPC/NpcControllerBase.h"
-#include "Game/Crop.h"
+#include "Game/Crops/crop/CropBase.h"
 #include "Game/WorldState.h"
 #include "Game/GameConfig.h"
 #include "Game/Chest.h"

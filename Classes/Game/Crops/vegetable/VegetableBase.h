@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Game/Item.h"
-#include "Game/Crop.h"
+#include "Game/Crops/crop/CropBase.h"
 
 namespace Game {
 
@@ -23,6 +23,17 @@ public:
     virtual int energyRestore() const = 0;
     // 食用恢复生命值
     virtual int hpRestore() const = 0;
+
+    static ItemType produceItemFor(CropType t) {
+        switch (t) {
+            case CropType::Parsnip: return ItemType::Parsnip;
+            case CropType::Blueberry: return ItemType::Blueberry;
+            case CropType::Eggplant: return ItemType::Eggplant;
+            case CropType::Corn: return ItemType::Corn;
+            case CropType::Strawberry: return ItemType::Strawberry;
+            default: return ItemType::Parsnip;
+        }
+    }
 };
 
 }

@@ -154,8 +154,8 @@
     <ClCompile Include="..\Classes\Controllers\Systems\CropSystem.cpp">
       <Filter>Classes\Controllers\Systems</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\Game\Crop.cpp">
-      <Filter>Classes\Game</Filter>
+    <ClCompile Include="..\Classes\Game\Crops\crop\CropBase.cpp">
+      <Filter>Classes\Game\Crop</Filter>
     </ClCompile>
     <ClCompile Include="..\Classes\Game\Tree.cpp">
       <Filter>Classes\Game</Filter>
@@ -304,9 +304,6 @@
     <ClCompile Include="..\Classes\Game\Animals\SheepAnimal.cpp">
       <Filter>Classes\Game\Animals</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\Game\Crops\crop\RegrowCropBase.cpp">
-      <Filter>Classes\Game\Crop</Filter>
-    </ClCompile>
     <ClCompile Include="..\Classes\Controllers\Managers\AudioManager.cpp">
       <Filter>Classes\Controllers\Audio</Filter>
     </ClCompile>
@@ -440,9 +437,6 @@
       <Filter>Classes\Game</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\Game\Chest.h">
-      <Filter>Classes\Game</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Classes\Game\Crop.h">
       <Filter>Classes\Game</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\Game\GameConfig.h">
