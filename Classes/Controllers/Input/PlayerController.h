@@ -6,7 +6,7 @@
 #include "cocos2d.h"
 #include <functional>
 #include <memory>
-#include "Controllers/IMapController.h"
+#include "Controllers/Map/IMapController.h"
 
 namespace Game { class IPlayerView; }
 namespace Game { class Inventory; }

@@ -1,5 +1,5 @@
 #include "Game/Tool/Axe.h"
-#include "Controllers/IMapController.h"
+#include "Controllers/Map/IMapController.h"
 #include "Controllers/UI/UIController.h"
 #include "Controllers/Systems/CropSystem.h"
 #include "Controllers/Environment/EnvironmentObstacleSystemBase.h"
@@ -70,4 +70,3 @@ std::string Axe::use(Controllers::IMapController* map,
 }
 
 }
-

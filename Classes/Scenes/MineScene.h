@@ -5,10 +5,10 @@
 
 #include "Scenes/SceneBase.h"
 #include "Controllers/Map/MineMapController.h"
-#include "Controllers/MineMonsterController.h"
-#include "Controllers/MineCombatController.h"
+#include "Controllers/Mine/MonsterSystem.h"
+#include "Controllers/Mine/CombatSystem.h"
 #include "Controllers/Interact/MineInteractor.h"
-#include "Controllers/MineElevatorController.h"
+#include "Controllers/Mine/ElevatorSystem.h"
 namespace Controllers { class ChestInteractor; }
 
 class MineScene : public SceneBase {

@@ -6,7 +6,7 @@
 #include <memory>
 #include "cocos2d.h"
 #include "Game/Inventory.h"
-#include "Controllers/IMapController.h"
+#include "Controllers/Map/IMapController.h"
 #include "Controllers/UI/UIController.h"
 #include "Controllers/Systems/CropSystem.h"
 #include "Controllers/Interact/ChestInteractor.h"

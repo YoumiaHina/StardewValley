@@ -74,6 +74,9 @@
     <Filter Include="Classes\Game\Save">
       <UniqueIdentifier>{ec978dea-64a7-422e-911a-bf6acdc65b08}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Classes\Controllers\Mine">
+      <UniqueIdentifier>{2795bbf6-7b99-4df7-a34c-f8c9c2d900c6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <!-- Source Files -->
@@ -101,14 +104,8 @@
     <ClCompile Include="..\Classes\Controllers\Map\MineMapController.cpp">
       <Filter>Classes\Controllers\Map</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\Controllers\MineMonsterController.cpp">
-      <Filter>Classes\Controllers</Filter>
-    </ClCompile>
     <ClCompile Include="..\Classes\Controllers\Interact\MineInteractor.cpp">
       <Filter>Classes\Controllers\Interact</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Classes\Controllers\MineElevatorController.cpp">
-      <Filter>Classes\Controllers</Filter>
     </ClCompile>
     <ClCompile Include="..\Classes\Scenes\RoomScene.cpp">
       <Filter>Classes\Scenes</Filter>
@@ -346,9 +343,6 @@
     <ClCompile Include="..\Classes\Game\NPC\WillyNpc.cpp">
       <Filter>Classes\Game\NPC</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\Controllers\TileSelector.cpp">
-      <Filter>Classes\Controllers</Filter>
-    </ClCompile>
     <ClCompile Include="..\Classes\Controllers\UI\DialogueUI.cpp">
       <Filter>Classes\Game\NPC</Filter>
     </ClCompile>
@@ -385,11 +379,20 @@
     <ClCompile Include="..\Classes\Game\Drop.cpp">
       <Filter>Classes\Game</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\Controllers\MineCombatController.cpp">
-      <Filter>Classes\Controllers\UI</Filter>
-    </ClCompile>
     <ClCompile Include="..\Classes\Game\Save\SaveSystem.cpp">
       <Filter>Classes\Game\Save</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\Mine\CombatSystem.cpp">
+      <Filter>Classes\Controllers\Mine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\Mine\ElevatorSystem.cpp">
+      <Filter>Classes\Controllers\Mine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\Mine\MonsterSystem.cpp">
+      <Filter>Classes\Controllers\Mine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\TileSelector.cpp">
+      <Filter>Classes\Controllers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -420,18 +423,6 @@
     </ClInclude>
     <ClInclude Include="..\Classes\Controllers\Map\MineMapController.h">
       <Filter>Classes\Controllers\Map</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Classes\Controllers\MineMonsterController.h">
-      <Filter>Classes\Controllers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Classes\Controllers\MineMiningController.h">
-      <Filter>Classes\Controllers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Classes\Controllers\MineCombatController.h">
-      <Filter>Classes\Controllers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Classes\Controllers\MineElevatorController.h">
-      <Filter>Classes\Controllers</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\Scenes\RoomScene.h">
       <Filter>Classes\Scenes</Filter>
@@ -633,9 +624,6 @@
     <ClInclude Include="..\Classes\Game\NPC\WillyNpc.h">
       <Filter>Classes\Game\NPC</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\Controllers\TileSelector.h">
-      <Filter>Classes\Controllers</Filter>
-    </ClInclude>
     <ClInclude Include="..\Classes\Controllers\NPC\NpcDialogueManager.h">
       <Filter>Classes\Controllers\NPC</Filter>
     </ClInclude>
@@ -683,6 +671,18 @@
     </ClInclude>
     <ClInclude Include="..\Classes\Game\Save\SaveSystem.h">
       <Filter>Classes\Game\Save</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\Mine\CombatSystem.h">
+      <Filter>Classes\Controllers\Mine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\Mine\ElevatorSystem.h">
+      <Filter>Classes\Controllers\Mine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\Mine\MonsterSystem.h">
+      <Filter>Classes\Controllers\Mine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\TileSelector.h">
+      <Filter>Classes\Controllers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

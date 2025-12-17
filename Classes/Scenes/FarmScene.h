@@ -10,7 +10,7 @@
 #include "Game/Inventory.h"
 #include "Game/GameConfig.h"
 #include "Game/View/PlayerView.h"
-#include "Controllers/IMapController.h"
+#include "Controllers/Map/IMapController.h"
 #include "Controllers/Input/PlayerController.h"
 #include "Controllers/Map/FarmMapController.h"
 #include "Controllers/UI/UIController.h"

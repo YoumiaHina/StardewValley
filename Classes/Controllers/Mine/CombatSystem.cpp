@@ -1,4 +1,4 @@
-#include "Controllers/MineCombatController.h"
+#include "Controllers/Mine/CombatSystem.h"
 #include "cocos2d.h"
 #include "Game/WorldState.h"
 #include "Game/Tool/ToolBase.h"

@@ -1,5 +1,5 @@
 #include "Controllers/NPC/PierreNpcController.h"
-#include "Controllers/IMapController.h"
+#include "Controllers/Map/IMapController.h"
 #include "Controllers/UI/UIController.h"
 #include "Game/NPC/PierreNpc.h"
 #include <string>

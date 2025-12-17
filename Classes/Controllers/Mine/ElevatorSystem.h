@@ -8,7 +8,7 @@
 #include <vector>
 #include <functional>
 #include "Controllers/Map/MineMapController.h"
-#include "Controllers/MineMonsterController.h"
+#include "Controllers/Mine/MonsterSystem.h"
 
 namespace Controllers {
 

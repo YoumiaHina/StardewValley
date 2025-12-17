@@ -7,7 +7,7 @@
 #include "cocos2d.h"
 #include <vector>
 #include <unordered_set>
-#include "Controllers/IMapController.h"
+#include "Controllers/Map/IMapController.h"
 #include "Game/GameConfig.h"
 #include "Game/Map/MineMap.h"
 #include "Game/Drop.h"

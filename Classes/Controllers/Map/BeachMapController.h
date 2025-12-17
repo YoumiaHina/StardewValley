@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Controllers/IMapController.h"
+#include "Controllers/Map/IMapController.h"
 #include "Game/Map/BeachMap.h"
 #include "Game/Drop.h"
 

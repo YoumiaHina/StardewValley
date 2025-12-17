@@ -1,4 +1,4 @@
-#include "Controllers/MineElevatorController.h"
+#include "Controllers/Mine/ElevatorSystem.h"
 
 using namespace cocos2d;
 using namespace cocos2d::ui;

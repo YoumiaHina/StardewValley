@@ -162,6 +162,9 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClCompile Include="..\Classes\Controllers\Interact\TownInteractor.cpp" />
     <ClCompile Include="..\Classes\Controllers\Map\BeachMapController.cpp" />
     <ClCompile Include="..\Classes\Controllers\Map\TownMapController.cpp" />
+    <ClCompile Include="..\Classes\Controllers\Mine\CombatSystem.cpp" />
+    <ClCompile Include="..\Classes\Controllers\Mine\ElevatorSystem.cpp" />
+    <ClCompile Include="..\Classes\Controllers\Mine\MonsterSystem.cpp" />
     <ClCompile Include="..\Classes\Controllers\NPC\AbigailNpcController.cpp" />
     <ClCompile Include="..\Classes\Controllers\NPC\NpcControllerBase.cpp" />
     <ClCompile Include="..\Classes\Controllers\NPC\NpcDialogueAbigail.cpp" />
@@ -216,10 +219,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClCompile Include="..\Classes\Scenes\RoomScene.cpp" />
     <ClCompile Include="..\Classes\Scenes\MineScene.cpp" />
     <ClCompile Include="..\Classes\Controllers\Map\MineMapController.cpp" />
-    <ClCompile Include="..\Classes\Controllers\MineMonsterController.cpp" />
-    <ClCompile Include="..\Classes\Controllers\MineCombatController.cpp" />
     <ClCompile Include="..\Classes\Controllers\Interact\MineInteractor.cpp" />
-    <ClCompile Include="..\Classes\Controllers\MineElevatorController.cpp" />
     <ClCompile Include="..\Classes\Scenes\SceneBase.cpp" />
     <ClCompile Include="..\Classes\Game\WorldState.cpp" />
     <ClCompile Include="..\Classes\Game\Inventory.cpp" />
@@ -270,6 +270,9 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClInclude Include="..\Classes\Controllers\Interact\TownInteractor.h" />
     <ClInclude Include="..\Classes\Controllers\Map\BeachMapController.h" />
     <ClInclude Include="..\Classes\Controllers\Map\TownMapController.h" />
+    <ClInclude Include="..\Classes\Controllers\Mine\CombatSystem.h" />
+    <ClInclude Include="..\Classes\Controllers\Mine\ElevatorSystem.h" />
+    <ClInclude Include="..\Classes\Controllers\Mine\MonsterSystem.h" />
     <ClInclude Include="..\Classes\Controllers\NPC\AbigailNpcController.h" />
     <ClInclude Include="..\Classes\Controllers\NPC\NpcControllerBase.h" />
     <ClInclude Include="..\Classes\Controllers\NPC\NpcDialogueManager.h" />
@@ -325,10 +328,6 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClInclude Include="..\Classes\Scenes\RoomScene.h" />
     <ClInclude Include="..\Classes\Scenes\MineScene.h" />
     <ClInclude Include="..\Classes\Controllers\Map\MineMapController.h" />
-    <ClInclude Include="..\Classes\Controllers\MineMonsterController.h" />
-    <ClInclude Include="..\Classes\Controllers\MineMiningController.h" />
-    <ClInclude Include="..\Classes\Controllers\MineCombatController.h" />
-    <ClInclude Include="..\Classes\Controllers\MineElevatorController.h" />
     <ClInclude Include="..\Classes\Scenes\SceneBase.h" />
     <ClInclude Include="..\Classes\Game\GameConfig.h" />
     <ClInclude Include="..\Classes\Game\WorldState.h" />

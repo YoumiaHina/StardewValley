@@ -2,7 +2,7 @@
 
 #include "cocos2d.h"
 #include <memory>
-#include "Controllers/IMapController.h"
+#include "Controllers/Map/IMapController.h"
 #include "Game/Inventory.h"
 #include "Controllers/UI/UIController.h"
 

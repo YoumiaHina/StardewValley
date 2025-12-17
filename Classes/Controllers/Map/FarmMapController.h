@@ -8,7 +8,7 @@
 #include <utility>
 #include <memory>
 #include <unordered_map>
-#include "Controllers/IMapController.h"
+#include "Controllers/Map/IMapController.h"
 #include "Game/GameConfig.h"
 #include "Game/Map/FarmMap.h"
 #include "Game/Chest.h"

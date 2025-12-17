@@ -9,7 +9,7 @@
 #include "Game/Inventory.h"
 #include "ui/CocosGUI.h"
 #include "Game/View/PlayerView.h"
-#include "Controllers/IMapController.h"
+#include "Controllers/Map/IMapController.h"
 #include "Controllers/Input/PlayerController.h"
 #include "Controllers/Map/RoomMapController.h"
 #include "Controllers/UI/UIController.h"

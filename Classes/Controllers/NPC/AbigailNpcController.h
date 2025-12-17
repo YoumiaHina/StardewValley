@@ -3,7 +3,7 @@
 #include <memory>
 #include "cocos2d.h"
 #include "Controllers/NPC/NpcControllerBase.h"
-#include "Controllers/IMapController.h"
+#include "Controllers/Map/IMapController.h"
 #include "Game/Inventory.h"
 #include "Game/NPC/NpcBase.h"
 

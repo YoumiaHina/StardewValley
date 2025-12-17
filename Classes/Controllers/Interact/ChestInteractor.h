@@ -1,10 +1,10 @@
-﻿#pragma once
+#pragma once
 
 #include <memory>
 #include <functional>
 #include "cocos2d.h"
 #include "Game/Inventory.h"
-#include "Controllers/IMapController.h"
+#include "Controllers/Map/IMapController.h"
 #include "Controllers/UI/UIController.h"
 
 namespace Controllers {

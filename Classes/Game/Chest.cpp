@@ -2,7 +2,7 @@
 #include "Game/WorldState.h"
 #include "Game/Inventory.h"
 #include "Game/Tool/ToolFactory.h"
-#include "Controllers/IMapController.h"
+#include "Controllers/Map/IMapController.h"
 #include "Controllers/UI/UIController.h"
 #include "Controllers/Map/RoomMapController.h"
 #include <functional>

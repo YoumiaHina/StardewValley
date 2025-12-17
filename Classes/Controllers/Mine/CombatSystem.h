@@ -4,7 +4,7 @@
 #pragma once
 
 #include "cocos2d.h"
-#include "Controllers/MineMonsterController.h"
+#include "Controllers/Mine/MonsterSystem.h"
 #include "Controllers/Map/MineMapController.h"
 #include <functional>
 

@@ -17,7 +17,7 @@
 #include "Game/View/PlayerView.h"
 #include "Game/GameConfig.h"
 #include "Game/Cheat.h"
-#include "Controllers/IMapController.h"
+#include "Controllers/Map/IMapController.h"
 #include "Controllers/UI/UIController.h"
 #include "Controllers/Input/PlayerController.h"
 #include "Controllers/Systems/GameStateController.h"
