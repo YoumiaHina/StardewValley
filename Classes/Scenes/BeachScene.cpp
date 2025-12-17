@@ -2,6 +2,7 @@
 #include "Scenes/FarmScene.h"
 #include "Game/Map/BeachMap.h"
 #include "Game/GameConfig.h"
+#include "Game/WorldState.h"
 #include "Controllers/Interact/ChestInteractor.h"
 #include "Controllers/NPC/WillyNpcController.h"
 #include "Controllers/NPC/NpcControllerBase.h"
@@ -13,6 +14,8 @@ Scene* BeachScene::createScene() { return BeachScene::create(); }
 
 bool BeachScene::init() {
     if (!SceneBase::initBase(3.0f, true, true, true)) return false;
+    auto& ws = Game::globalState();
+    ws.lastScene = static_cast<int>(Game::SceneKind::Beach);
     _interactor.setMap(_beachMap);
     _interactor.setInventory(_inventory.get());
     _interactor.setUI(_uiController);
@@ -46,6 +49,12 @@ IMapController* BeachScene::createMapController(Node* worldNode) {
 
 void BeachScene::positionPlayerInitial() {
     if (!_beachMap || !_player) return;
+    auto& ws = Game::globalState();
+    if (ws.lastScene == static_cast<int>(Game::SceneKind::Beach) &&
+        (ws.lastPlayerX != 0.0f || ws.lastPlayerY != 0.0f)) {
+        _player->setPosition(Vec2(ws.lastPlayerX, ws.lastPlayerY));
+        return;
+    }
     auto center = _beachMap->getBeachMap()->doorToFarmCenter();
     Vec2 p = center != Vec2::ZERO ? center + Vec2(0, 28.0f) : Vec2(_beachMap->getContentSize().width*0.5f, _beachMap->getContentSize().height*0.5f);
     _player->setPosition(p);

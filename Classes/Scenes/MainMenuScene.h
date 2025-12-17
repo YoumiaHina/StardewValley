@@ -14,5 +14,6 @@ public:
 
 private:
     void onStart(cocos2d::Ref* sender);
+    void onLoad(cocos2d::Ref* sender);
     void onExit(cocos2d::Ref* sender);
 };

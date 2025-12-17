@@ -25,6 +25,14 @@ struct NpcQuest {
     std::string description;
 };
 
+enum class SceneKind {
+    Room = 0,
+    Farm = 1,
+    Mine = 2,
+    Beach = 3,
+    Town = 4
+};
+
 struct WorldState {
     // 共享背包实例（室内外一致）
     std::shared_ptr<Inventory> inventory;
@@ -97,6 +105,12 @@ struct WorldState {
     std::unordered_map<int, int> npcLastGiftDay;
     std::unordered_map<int, std::vector<NpcQuest>> npcQuests;
     bool fishingActive = false;
+
+    int lastScene = static_cast<int>(SceneKind::Room);
+    float lastPlayerX = 0.0f;
+    float lastPlayerY = 0.0f;
+    int lastMineFloor = 0;
+    int lastSaveSlot = 1;
 };
 
 // 获取全局状态（惰性初始化由调用方保证）

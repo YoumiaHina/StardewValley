@@ -2,6 +2,7 @@
 #include "Scenes/FarmScene.h"
 #include "Game/Map/TownMap.h"
 #include "Game/GameConfig.h"
+#include "Game/WorldState.h"
 #include "Controllers/Interact/ChestInteractor.h"
 #include "Controllers/NPC/AbigailNpcController.h"
 #include "Controllers/NPC/PierreNpcController.h"
@@ -13,6 +14,8 @@ Scene* TownScene::createScene() { return TownScene::create(); }
 
 bool TownScene::init() {
     if (!SceneBase::initBase(3.0f, true, true, true)) return false;
+    auto& ws = Game::globalState();
+    ws.lastScene = static_cast<int>(Game::SceneKind::Town);
     _npcController = new NpcController(_uiController);
     _npcController->add(std::make_unique<AbigailNpcController>(_townMap, _worldNode, _uiController, _inventory, _npcController->dialogue()));
     _npcController->add(std::make_unique<PierreNpcController>(_townMap, _worldNode, _uiController, _inventory));
@@ -45,6 +48,12 @@ IMapController* TownScene::createMapController(Node* worldNode) {
 
 void TownScene::positionPlayerInitial() {
     if (!_townMap || !_player) return;
+    auto& ws = Game::globalState();
+    if (ws.lastScene == static_cast<int>(Game::SceneKind::Town) &&
+        (ws.lastPlayerX != 0.0f || ws.lastPlayerY != 0.0f)) {
+        _player->setPosition(Vec2(ws.lastPlayerX, ws.lastPlayerY));
+        return;
+    }
     auto center = _townMap->getTownMap()->doorToFarmCenter();
     Vec2 p = center != Vec2::ZERO ? center + Vec2(0, 28.0f) : Vec2(_townMap->getContentSize().width*0.5f, _townMap->getContentSize().height*0.5f);
     _player->setPosition(p);

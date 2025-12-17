@@ -13,15 +13,15 @@ RoomInteractor::SpaceAction RoomInteractor::onSpacePressed() {
     Vec2 p = _getPlayerPos();
     auto* room = static_cast<Controllers::RoomMapController*>(_map);
 
-    // 出屋：改为 DoorToFarm 对象层判定
     if (_map->isNearFarmDoor(p)) {
         return SpaceAction::ExitHouse;
     }
 
-    // 睡觉
     if (room->bedRect().containsPoint(p)) {
         if (_state) {
             _state->sleepToNextMorning();
+            auto& ws = Game::globalState();
+            ws.lastScene = static_cast<int>(Game::SceneKind::Room);
         }
         _ui->popTextAt(_map->getPlayerPosition(p), "New Day", Color3B::WHITE);
         return SpaceAction::Slept;

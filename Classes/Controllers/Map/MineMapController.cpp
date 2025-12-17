@@ -349,7 +349,22 @@ bool MineMapController::isNearStairs(const Vec2& p) const {
         return _entrance->nearStairs(p, radius);
     }
     if (_floorMap) {
-        if (_floorMap->nearStairs(p, radius)) {
+        bool mainCovered = false;
+        if (_stairsPos != Vec2::ZERO && !_minerals.empty()) {
+            int sc = 0;
+            int sr = 0;
+            worldToTileIndex(_stairsPos, sc, sr);
+            for (const auto& m : _minerals) {
+                int mc = 0;
+                int mr = 0;
+                worldToTileIndex(m.pos, mc, mr);
+                if (mc == sc && mr == sr) {
+                    mainCovered = true;
+                    break;
+                }
+            }
+        }
+        if (!mainCovered && _floorMap->nearStairs(p, radius)) {
             return true;
         }
         for (const auto& stairPos : _extraStairs) {
@@ -513,7 +528,7 @@ void MineMapController::loadFloorTMX(int floorIndex) {
             }
         }
         if (!candidates.empty()) {
-            _stairSystem.generateStairs(candidates, 2, 5, _extraStairs);
+            _stairSystem.generateStairs(candidates, 2, 4, _extraStairs);
         }
         std::vector<Vec2> stairWorldPos;
         stairWorldPos.push_back(_stairsPos);

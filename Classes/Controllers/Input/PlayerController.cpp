@@ -7,6 +7,8 @@
 #include "Game/Cheat.h"
 #include "Game/Inventory.h"
 #include "Game/Tool/ToolBase.h"
+#include "Game/Save/SaveSystem.h"
+#include "Scenes/MainMenuScene.h"
 #include "cocos2d.h"
 #include <algorithm>
 #include <cmath>
@@ -57,9 +59,38 @@ void PlayerController::registerCommonInputHandlers(
     _kbListener->onKeyPressed = [this](EventKeyboard::KeyCode code, Event*) {
         bool chestOpen = _ui && _ui->isChestPanelVisible();
         bool storeOpen = _ui && (_ui->isStorePanelVisible() || _ui->isAnimalStorePanelVisible());
-        if (_ui && _ui->isNpcSocialVisible()) {
+        bool dialogueOpen = _ui && _ui->isDialogueVisible();
+        bool socialOpen = _ui && _ui->isNpcSocialVisible();
+
+        if (code == EventKeyboard::KeyCode::KEY_ESCAPE) {
+            if (_ui) {
+                if (_ui->isChestPanelVisible()) _ui->toggleChestPanel(false);
+                if (_ui->isStorePanelVisible()) _ui->toggleStorePanel(false);
+                if (_ui->isAnimalStorePanelVisible()) _ui->toggleAnimalStorePanel(false);
+                if (_ui->isDialogueVisible()) _ui->hideDialogue();
+                if (_ui->isNpcSocialVisible()) _ui->hideNpcSocial();
+            }
+            if (chestOpen || storeOpen || dialogueOpen || socialOpen) {
+                return;
+            }
+            auto& ws = Game::globalState();
+            std::string path = Game::currentSavePath();
+            if (path.empty()) {
+                if (ws.lastSaveSlot < 1) ws.lastSaveSlot = 1;
+                if (ws.lastSaveSlot > 50) ws.lastSaveSlot = 50;
+                path = Game::savePathForSlot(ws.lastSaveSlot);
+            }
+            Game::saveToFile(path);
+            auto next = MainMenuScene::createScene();
+            auto trans = TransitionFade::create(0.5f, next);
+            Director::getInstance()->replaceScene(trans);
             return;
         }
+
+        if (socialOpen) {
+            return;
+        }
+
         onKeyPressed(code);
         switch (code) {
             case EventKeyboard::KeyCode::KEY_1: if (_ui) _ui->selectHotbarIndex(0); break;
@@ -76,6 +107,20 @@ void PlayerController::registerCommonInputHandlers(
                 if (chestOpen || storeOpen) break;
                 Game::Cheat::grantBasic(_inventory);
                 if (_ui) _ui->refreshHotbar();
+            } break;
+        case EventKeyboard::KeyCode::KEY_F5: {
+            if (chestOpen || storeOpen) break;
+            auto& ws = Game::globalState();
+            std::string path = Game::currentSavePath();
+            if (path.empty()) {
+                if (ws.lastSaveSlot < 1) ws.lastSaveSlot = 1;
+                if (ws.lastSaveSlot > 50) ws.lastSaveSlot = 50;
+                path = Game::savePathForSlot(ws.lastSaveSlot);
+            }
+                Game::saveToFile(path);
+                if (_ui && _player && _map) {
+                    _ui->popTextAt(_map->getPlayerPosition(_player->getPosition()), "Saved", Color3B::WHITE);
+                }
             } break;
             case EventKeyboard::KeyCode::KEY_F6: {
                 if (chestOpen || storeOpen) break;
