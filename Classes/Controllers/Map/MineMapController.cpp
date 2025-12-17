@@ -3,6 +3,7 @@
 #include "Game/WorldState.h"
 #include "Game/Tool/ToolFactory.h"
 #include "Game/Map/MapBase.h"
+#include "Game/Drop.h"
 
 using namespace cocos2d;
 
@@ -241,7 +242,7 @@ void MineMapController::refreshDropsVisuals() {
             parent->addChild(_dropsRoot, 19);
         }
     }
-    DropHelper::renderDrops(_drops, _dropsRoot, _dropsDraw);
+    Game::Drop::renderDrops(_drops, _dropsRoot, _dropsDraw);
 }
 
 void MineMapController::spawnDropAt(int c, int r, int itemType, int qty) {
@@ -252,7 +253,7 @@ void MineMapController::spawnDropAt(int c, int r, int itemType, int qty) {
 
 void MineMapController::collectDropsNear(const cocos2d::Vec2& playerWorldPos, Game::Inventory* inv) {
     if (!inv) return;
-    DropHelper::collectDropsNear(playerWorldPos, _drops, inv);
+    Game::Drop::collectDropsNear(playerWorldPos, _drops, inv);
     refreshDropsVisuals();
 }
 
