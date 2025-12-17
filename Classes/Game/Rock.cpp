@@ -38,7 +38,7 @@ Rect Rock::footRect() const {
     float w = 12.0f;
     float h = 12.0f;
     Vec2 base = getPosition();
-    return Rect(base.x - w * 0.5f, base.y + h * 0.4f, w, h);
+    return Rect(base.x - w * 0.5f, base.y + h * 0.3f, w, h);
 }
 
 void Rock::playDestructionAnimation(const std::function<void()>& onComplete) {
