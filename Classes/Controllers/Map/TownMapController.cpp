@@ -80,6 +80,7 @@ std::pair<int,int> TownMapController::targetTile(const Vec2& playerPos, const Ve
         lastDir,
         [this](const Vec2& p, int& c, int& r){ worldToTileIndex(p, c, r); },
         [this](int c, int r){ return inBounds(c, r); },
+        tileSize(),
         _hasLastClick,
         _lastClickWorldPos,
         [this](int c, int r){ return tileToWorld(c, r); });

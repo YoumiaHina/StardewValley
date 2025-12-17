@@ -96,7 +96,7 @@ private:
     cocos2d::Vec2 _stairsPos;
     std::vector<cocos2d::Vec2> _extraStairs;
     std::unordered_set<int> _elevatorFloors; // 已激活楼层（5的倍数）
-    std::vector<Game::Chest> _emptyChests; // 深渊内无胸，返回空引用
+    std::vector<Game::Chest> _emptyChests; // 深渊内无箱子，返回空引用
     std::vector<Game::Drop> _drops;
     cocos2d::DrawNode* _dropsDraw = nullptr;
     cocos2d::Node* _dropsRoot = nullptr;

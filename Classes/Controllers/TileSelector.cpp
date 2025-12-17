@@ -1,4 +1,5 @@
 #include "Controllers/TileSelector.h"
+#include "Game/GameConfig.h"
 #include <cmath>
 
 namespace {
@@ -8,11 +9,12 @@ struct TileCandidate {
     int r;
 };
 
-int buildFanCandidates(int pc,
-                       int pr,
-                       const cocos2d::Vec2& dir,
-                       const std::function<bool(int,int)>& inBounds,
-                       TileCandidate* outCands) {
+int buildFront3x3Candidates(int pc,
+                            int pr,
+                            const cocos2d::Vec2& dir,
+                            const std::function<bool(int,int)>& inBounds,
+                            TileCandidate* outCands,
+                            int maxOut) {
     int dc = 0;
     int dr = 0;
     if (std::abs(dir.x) > std::abs(dir.y)) {
@@ -23,30 +25,27 @@ int buildFanCandidates(int pc,
     if (dc == 0 && dr == 0) {
         dr = -1;
     }
+
     int count = 0;
-    if (dr != 0) {
-        int fr = pr + dr;
-        TileCandidate center{pc, fr};
-        TileCandidate left{pc - 1, fr};
-        TileCandidate right{pc + 1, fr};
-        TileCandidate arr[3] = { center, left, right };
-        for (int i = 0; i < 3; ++i) {
-            if (!inBounds || inBounds(arr[i].c, arr[i].r)) {
-                outCands[count++] = arr[i];
-            }
+    auto pushUnique = [&](int c, int r) {
+        if (count >= maxOut) return;
+        if (inBounds && !inBounds(c, r)) return;
+        for (int i = 0; i < count; ++i) {
+            if (outCands[i].c == c && outCands[i].r == r) return;
         }
-    } else if (dc != 0) {
-        int fc = pc + dc;
-        TileCandidate center{fc, pr};
-        TileCandidate up{fc, pr + 1};
-        TileCandidate down{fc, pr - 1};
-        TileCandidate arr[3] = { center, up, down };
-        for (int i = 0; i < 3; ++i) {
-            if (!inBounds || inBounds(arr[i].c, arr[i].r)) {
-                outCands[count++] = arr[i];
-            }
+        outCands[count++] = TileCandidate{c, r};
+    };
+
+    pushUnique(pc, pr);
+
+    int fc = pc + dc;
+    int fr = pr + dr;
+    for (int rr = fr - 1; rr <= fr + 1; ++rr) {
+        for (int cc = fc - 1; cc <= fc + 1; ++cc) {
+            pushUnique(cc, rr);
         }
     }
+
     return count;
 }
 
@@ -59,6 +58,7 @@ std::pair<int,int> TileSelector::selectForwardTile(
     const cocos2d::Vec2& lastDir,
     const std::function<void(const cocos2d::Vec2&, int&, int&)>& worldToTileIndex,
     const std::function<bool(int,int)>& inBounds,
+    float tileSize,
     bool hasLastClick,
     const cocos2d::Vec2& lastClickWorldPos,
     const std::function<cocos2d::Vec2(int,int)>& tileToWorld)
@@ -72,29 +72,40 @@ std::pair<int,int> TileSelector::selectForwardTile(
     if (dir.lengthSquared() < 0.0001f) {
         dir = cocos2d::Vec2(0, -1);
     }
-    TileCandidate cands[3];
-    int count = buildFanCandidates(pc, pr, dir, inBounds, cands);
-    if (count == 0) return { pc, pr };
-    if (hasLastClick && tileToWorld) {
+    TileCandidate cands[10];
+    int count = buildFront3x3Candidates(pc, pr, dir, inBounds, cands, 10);
+    if (count <= 0) return { pc, pr };
+
+    if (hasLastClick && tileToWorld && tileSize > 0.0f) {
         cocos2d::Vec2 click = lastClickWorldPos;
-        if (std::abs(dir.x) > std::abs(dir.y)) {
-            click.y = 2.0f * playerPos.y - click.y;
-        }
-        float best = 1e9f;
-        int bestIdx = 0;
+        float half = tileSize * 0.5f;
         for (int i = 0; i < count; ++i) {
             cocos2d::Vec2 center = tileToWorld(cands[i].c, cands[i].r);
-            float dx = center.x - click.x;
-            float dy = center.y - click.y;
-            float d2 = dx * dx + dy * dy;
-            if (d2 < best) {
-                best = d2;
-                bestIdx = i;
+            cocos2d::Rect rect(center.x - half, center.y - half, tileSize, tileSize);
+            if (rect.containsPoint(click)) {
+                return { cands[i].c, cands[i].r };
             }
         }
-        return { cands[bestIdx].c, cands[bestIdx].r };
+        return { -1, -1 };
     }
-    return { cands[0].c, cands[0].r };
+
+    int dc = 0;
+    int dr = 0;
+    if (std::abs(dir.x) > std::abs(dir.y)) {
+        dc = (dir.x > 0.1f) ? 1 : ((dir.x < -0.1f) ? -1 : 0);
+    } else {
+        dr = (dir.y > 0.1f) ? 1 : ((dir.y < -0.1f) ? -1 : 0);
+    }
+    if (dc == 0 && dr == 0) {
+        dr = -1;
+    }
+
+    int fc = pc + dc;
+    int fr = pr + dr;
+    if (!inBounds || inBounds(fc, fr)) {
+        return { fc, fr };
+    }
+    return { pc, pr };
 }
 
 void TileSelector::drawFanCursor(
@@ -117,9 +128,9 @@ void TileSelector::drawFanCursor(
     if (dir.lengthSquared() < 0.0001f) {
         dir = cocos2d::Vec2(0, -1);
     }
-    TileCandidate cands[3];
-    int count = buildFanCandidates(pc, pr, dir, inBounds, cands);
-    if (count == 0) return;
+    TileCandidate cands[10];
+    int count = buildFront3x3Candidates(pc, pr, dir, inBounds, cands, 10);
+    if (count <= 0) return;
     float s = tileSize;
     for (int i = 0; i < count; ++i) {
         int c = cands[i].c;

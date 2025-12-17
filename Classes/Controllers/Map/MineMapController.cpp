@@ -123,13 +123,32 @@ std::pair<int,int> MineMapController::targetTile(const Vec2& playerPos, const Ve
         lastDir,
         [this](const Vec2& p, int& c, int& r){ worldToTileIndex(p, c, r); },
         [this](int c, int r){ return inBounds(c, r); },
+        tileSize(),
         _hasLastClick,
         _lastClickWorldPos,
         [this](int c, int r){ return tileToWorld(c, r); });
 }
 
 void MineMapController::updateCursor(const Vec2& playerPos, const Vec2& lastDir) {
-    if (!_cursor) return;
+    if (!_cursor) {
+        _cursor = DrawNode::create();
+        cocos2d::Node* parent = nullptr;
+        int z = 21;
+        if (_entrance && _entrance->getTMX()) {
+            parent = _entrance->getTMX();
+        } else if (_floorMap && _floorMap->getTMX()) {
+            parent = _floorMap->getTMX();
+        } else if (_mapNode) {
+            parent = _mapNode;
+            z = 1;
+        } else if (_worldNode) {
+            parent = _worldNode;
+            z = 1;
+        }
+        if (parent) {
+            parent->addChild(_cursor, z);
+        }
+    }
     TileSelector::drawFanCursor(
         _cursor,
         playerPos,
@@ -275,7 +294,10 @@ void MineMapController::addActorToMap(cocos2d::Node* node, int zOrder) {
 
 void MineMapController::generateFloor(int floorIndex) {
     _floor = std::max(1, std::min(120, floorIndex));
-    _cursor = nullptr;
+    if (_cursor) {
+        _cursor->removeFromParent();
+        _cursor = nullptr;
+    }
     _drops.clear();
     if (_dropsDraw) {
         _dropsDraw->removeFromParent();
@@ -379,7 +401,10 @@ std::vector<int> MineMapController::getActivatedElevatorFloors() const {
 void MineMapController::loadEntrance() {
     if (!_worldNode) return;
     if (!_mapNode) { _mapNode = Node::create(); _worldNode->addChild(_mapNode, 0); }
-    _cursor = nullptr;
+    if (_cursor) {
+        _cursor->removeFromParent();
+        _cursor = nullptr;
+    }
     _drops.clear();
     if (_dropsDraw) {
         _dropsDraw->removeFromParent();

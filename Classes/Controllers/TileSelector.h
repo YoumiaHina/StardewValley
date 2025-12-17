@@ -13,6 +13,7 @@ public:
         const cocos2d::Vec2& lastDir,
         const std::function<void(const cocos2d::Vec2&, int&, int&)>& worldToTileIndex,
         const std::function<bool(int,int)>& inBounds,
+        float tileSize,
         bool hasLastClick,
         const cocos2d::Vec2& lastClickWorldPos,
         const std::function<cocos2d::Vec2(int,int)>& tileToWorld);
