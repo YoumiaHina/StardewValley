@@ -27,12 +27,7 @@ FarmInteractor::SpaceAction FarmInteractor::onSpacePressed() {
         return SpaceAction::EnterTown;
     }
 
-    if (_npc) {
-        // 若已有对话在进行，则优先推进对话
-        if (_npc->advanceDialogueIfActive()) {
-            return SpaceAction::None;
-        }
-        _npc->handleTalkAt(p);
+    if (_npc && _npc->advanceDialogueIfActive()) {
         return SpaceAction::None;
     }
 
@@ -76,6 +71,9 @@ FarmInteractor::SpaceAction FarmInteractor::onSpacePressed() {
             return SpaceAction::None;
         }
         // 空格不再放置或打开箱子，避免与左键逻辑冲突
+    }
+    if (_npc) {
+        _npc->handleTalkAt(p);
     }
     return SpaceAction::None;
 }
