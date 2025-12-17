@@ -13,7 +13,7 @@ public:
 
     void setMap(TownMapController* m) { _map = m; }
     void setGetPlayerPos(std::function<cocos2d::Vec2()> f) { _getPlayerPos = std::move(f); }
-    void setNpcController(TownNpcController* c) { _npc = c; }
+    void setNpcController(NpcControllerBase* c) { _npc = c; }
     void setUI(Controllers::UIController* ui) { _ui = ui; }
     void setInventory(std::shared_ptr<Game::Inventory> inv) { _inventory = std::move(inv); }
 
@@ -22,7 +22,7 @@ public:
 private:
     Controllers::TownMapController* _map = nullptr;
     std::function<cocos2d::Vec2()> _getPlayerPos;
-    Controllers::TownNpcController* _npc = nullptr;
+    Controllers::NpcControllerBase* _npc = nullptr;
     Controllers::UIController* _ui = nullptr;
     std::shared_ptr<Game::Inventory> _inventory;
 };

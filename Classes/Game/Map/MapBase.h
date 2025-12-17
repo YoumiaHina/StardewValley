@@ -6,23 +6,27 @@
 
 #include "cocos2d.h"
 #include "Game/GameConfig.h"
-#include "Game/Map/IMapBase.h"
 #include <vector>
 
 namespace Game {
 
-class MapBase : public IMapBase {
+class MapBase : public cocos2d::Node {
 public:
+    virtual ~MapBase() = default;
+
     bool initWithFile(const std::string& tmxFile);
 
-    cocos2d::TMXTiledMap* getTMX() const override { return _tmx; }
+    cocos2d::TMXTiledMap* getTMX() const { return _tmx; }
 
-    cocos2d::Size getMapSize() const override;
-    cocos2d::Size getTileSize() const override;
+    cocos2d::Size getMapSize() const;
+    cocos2d::Size getTileSize() const;
     const cocos2d::Size& getContentSize() const override;
 
-    cocos2d::Vec2 tileToWorld(int c, int r) const override;
-    void worldToTileIndex(const cocos2d::Vec2& p, int& c, int& r) const override;
+    cocos2d::Vec2 tileToWorld(int c, int r) const;
+    void worldToTileIndex(const cocos2d::Vec2& p, int& c, int& r) const;
+
+    virtual bool collides(const cocos2d::Vec2& p, float radius) const = 0;
+    virtual bool inBuildingArea(const cocos2d::Vec2&) const { return false; }
 
     static bool collidesAt(const cocos2d::Vec2& p, float radius,
                            const std::vector<cocos2d::Rect>& rects,

@@ -8,7 +8,6 @@
 
 namespace Controllers {
 
-class TownMapController;
 class UIController;
 
 class NpcControllerBase {
@@ -20,25 +19,23 @@ class NpcControllerBase {
   virtual bool advanceDialogueIfActive() { return false; }
 };
 
-class TownNpcController : public NpcControllerBase {
+class NpcController : public NpcControllerBase {
  public:
-  TownNpcController(TownMapController* map,
-                    cocos2d::Node* world_node,
-                    UIController* ui,
-                    std::shared_ptr<Game::Inventory> inventory);
+  explicit NpcController(UIController* ui);
+
+  void add(std::unique_ptr<NpcControllerBase> controller);
 
   void update(const cocos2d::Vec2& player_pos) override;
 
   void handleTalkAt(const cocos2d::Vec2& player_pos) override;
+  bool handleRightClick(cocos2d::EventMouse* e) override;
+  bool advanceDialogueIfActive() override;
+
+  NpcDialogueManager* dialogue() { return &dialogue_; }
 
  private:
   std::vector<std::unique_ptr<NpcControllerBase>> controllers_;
   NpcDialogueManager dialogue_;
-
- public:
-  bool advanceDialogueIfActive();
-  void startDialogueFor(int npcKey, const std::string& npcName);
-  bool handleRightClick(cocos2d::EventMouse* e);
 };
 
 } // namespace Controllers

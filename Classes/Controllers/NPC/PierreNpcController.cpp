@@ -1,5 +1,5 @@
 #include "Controllers/NPC/PierreNpcController.h"
-#include "Controllers/Map/TownMapController.h"
+#include "Controllers/IMapController.h"
 #include "Controllers/UI/UIController.h"
 #include "Game/NPC/PierreNpc.h"
 #include <string>
@@ -8,7 +8,7 @@
 namespace Controllers {
 
 PierreNpcController::PierreNpcController(
-    TownMapController* map,
+    IMapController* map,
     cocos2d::Node* world_node,
     UIController* ui,
     std::shared_ptr<Game::Inventory> inventory)
@@ -24,8 +24,8 @@ PierreNpcController::PierreNpcController(
   if (!npc_) return;
   auto sprite = cocos2d::Sprite::create(npc_->texturePath());
   if (!sprite) return;
-  float offset_x = -2.0f * tile;
-  float offset_y = 1.5f * tile;
+  float offset_x = -7.0f * tile;
+  float offset_y = 6.0f * tile;
   cocos2d::Vec2 pos(center.x + offset_x, center.y + offset_y);
   sprite->setPosition(pos);
   map_->addActorToMap(sprite, 22);

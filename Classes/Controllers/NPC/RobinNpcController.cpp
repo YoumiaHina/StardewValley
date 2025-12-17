@@ -27,8 +27,8 @@ RobinNpcController::RobinNpcController(
   if (!npc_) return;
   auto sprite = cocos2d::Sprite::create(npc_->texturePath());
   if (!sprite) return;
-  float offset_x = -3.0f * tile;
-  float offset_y = 2.0f * tile;
+  float offset_x = 5.0f * tile;
+  float offset_y = 12.0f * tile;
   cocos2d::Vec2 pos(center.x + offset_x, center.y + offset_y);
   sprite->setPosition(pos);
   map_->addActorToMap(sprite, 22);

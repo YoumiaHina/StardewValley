@@ -181,6 +181,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClCompile Include="..\Classes\Controllers\UI\PromptUI.cpp" />
     <ClCompile Include="..\Classes\Controllers\UI\StorePanelUI.cpp" />
     <ClCompile Include="..\Classes\Game\Chest.cpp" />
+    <ClCompile Include="..\Classes\Game\Drop.cpp" />
     <ClCompile Include="..\Classes\Game\Map\BeachMap.cpp" />
     <ClCompile Include="..\Classes\Game\Map\FarmMap.cpp" />
     <ClCompile Include="..\Classes\Game\Map\MapBase.cpp" />
@@ -291,7 +292,6 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClInclude Include="..\Classes\Game\EnvironmentObstacleBase.h" />
     <ClInclude Include="..\Classes\Game\Map\BeachMap.h" />
     <ClInclude Include="..\Classes\Game\Map\FarmMap.h" />
-    <ClInclude Include="..\Classes\Game\Map\IMapBase.h" />
     <ClInclude Include="..\Classes\Game\Map\MapBase.h" />
     <ClInclude Include="..\Classes\Game\Map\MineMap.h" />
     <ClInclude Include="..\Classes\Game\Map\RoomMap.h" />
@@ -299,8 +299,6 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClInclude Include="..\Classes\Game\Mineral.h" />
     <ClInclude Include="..\Classes\Game\NPC\AbigailNpc.h" />
     <ClInclude Include="..\Classes\Game\NPC\NpcBase.h" />
-    <ClInclude Include="..\Classes\Game\NPC\PierreNpc.h" />
-    <ClInclude Include="..\Classes\Game\NPC\RobinNpc.h" />
     <ClInclude Include="..\Classes\Game\NPC\WillyNpc.h" />
     <ClInclude Include="..\Classes\Game\Rock.h" />
     <ClInclude Include="..\Classes\Game\Stair.h" />

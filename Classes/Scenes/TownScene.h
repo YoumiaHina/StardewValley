@@ -5,6 +5,7 @@
 #include "Controllers/Interact/TownInteractor.h"
 #include "Controllers/NPC/NpcControllerBase.h"
 namespace Controllers { class ChestInteractor; }
+namespace Controllers { class AbigailNpcController; class PierreNpcController; }
 
 class TownScene : public SceneBase {
 public:
@@ -22,6 +23,6 @@ protected:
 private:
     Controllers::TownMapController* _townMap = nullptr;
     Controllers::TownInteractor _interactor;
-    Controllers::TownNpcController* _npcController = nullptr;
+    Controllers::NpcController* _npcController = nullptr;
     Controllers::ChestInteractor* _chestInteractor = nullptr;
 };

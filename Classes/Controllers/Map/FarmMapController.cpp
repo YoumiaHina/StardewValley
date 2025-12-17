@@ -747,7 +747,7 @@ void FarmMapController::refreshCropsVisuals() {
 }
 
 void FarmMapController::refreshDropsVisuals() {
-    DropHelper::renderDrops(_drops, _dropsRoot, _dropsDraw);
+    Game::Drop::renderDrops(_drops, _dropsRoot, _dropsDraw);
 }
 
 void FarmMapController::spawnDropAt(int c, int r, int itemType, int qty) {
@@ -759,7 +759,7 @@ void FarmMapController::spawnDropAt(int c, int r, int itemType, int qty) {
 
 void FarmMapController::collectDropsNear(const cocos2d::Vec2& playerWorldPos, Game::Inventory* inv) {
     if (!inv) return;
-    DropHelper::collectDropsNear(playerWorldPos, _drops, inv);
+    Game::Drop::collectDropsNear(playerWorldPos, _drops, inv);
     Game::globalState().farmDrops = _drops;
     refreshDropsVisuals();
 }

@@ -3,6 +3,8 @@
 #include "Game/Map/BeachMap.h"
 #include "Game/GameConfig.h"
 #include "Controllers/Interact/ChestInteractor.h"
+#include "Controllers/NPC/WillyNpcController.h"
+#include "Controllers/NPC/NpcControllerBase.h"
 
 using namespace cocos2d;
 using namespace Controllers;
@@ -15,6 +17,24 @@ bool BeachScene::init() {
     _interactor.setInventory(_inventory.get());
     _interactor.setUI(_uiController);
     _interactor.setGetPlayerPos([this]() { return _player ? _player->getPosition() : Vec2::ZERO; });
+    if (!_npcController && _uiController) {
+        _npcController = new NpcController(_uiController);
+    }
+    if (_npcController && _beachMap && _worldNode && _uiController) {
+        _npcController->add(std::make_unique<WillyNpcController>(
+            _beachMap,
+            _worldNode,
+            _uiController,
+            _inventory,
+            _npcController->dialogue()));
+    }
+    if (_npcController) {
+        addUpdateCallback([this](float) {
+            if (_npcController && _player) {
+                _npcController->update(_player->getPosition());
+            }
+        });
+    }
     return true;
 }
 
@@ -37,12 +57,19 @@ void BeachScene::onSpacePressed() {
         auto next = FarmScene::create();
         next->setSpawnAtFarmBeachDoor();
         Director::getInstance()->replaceScene(TransitionFade::create(0.6f, next));
+        return;
     }
+    if (!_npcController || !_player) return;
+    if (_npcController->advanceDialogueIfActive()) return;
+    _npcController->handleTalkAt(_player->getPosition());
 }
 
 const char* BeachScene::doorPromptText() const { return "Press Space to Enter Farm"; }
 
 void BeachScene::onMouseDown(EventMouse* e) {
+    if (e->getMouseButton() == EventMouse::MouseButton::BUTTON_RIGHT) {
+        if (_npcController && _npcController->handleRightClick(e)) return;
+    }
     if (e->getMouseButton() != EventMouse::MouseButton::BUTTON_LEFT) return;
     if (!_chestInteractor && _inventory && _mapController && _uiController) {
         _chestInteractor = new Controllers::ChestInteractor(

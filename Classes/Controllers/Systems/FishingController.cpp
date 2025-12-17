@@ -56,15 +56,6 @@ void FishingController::buildOverlayAt(const Vec2& worldPos) {
     _fishSprite = Sprite::create("fish/Bream.png");
     if (_fishSprite) { _fishSprite->setScale(0.6f); _overlay->addChild(_fishSprite, 1); }
 
-    _kb = EventListenerKeyboard::create();
-    _kb->onKeyPressed = [this](EventKeyboard::KeyCode code, Event*){
-        if (!_active) return; if (code == EventKeyboard::KeyCode::KEY_SPACE) { _hold = true; }
-    };
-    _kb->onKeyReleased = [this](EventKeyboard::KeyCode code, Event*){
-        if (!_active) return; if (code == EventKeyboard::KeyCode::KEY_SPACE) { _hold = false; }
-    };
-    if (_scene) _scene->getEventDispatcher()->addEventListenerWithSceneGraphPriority(_kb, _overlay);
-
     _mouse = EventListenerMouse::create();
     _mouse->onMouseDown = [this](EventMouse* e){ if (!_active) return; if (e->getMouseButton() == EventMouse::MouseButton::BUTTON_LEFT) _hold = true; };
     _mouse->onMouseUp =   [this](EventMouse* e){ if (!_active) return; if (e->getMouseButton() == EventMouse::MouseButton::BUTTON_LEFT) _hold = false; };
@@ -72,9 +63,8 @@ void FishingController::buildOverlayAt(const Vec2& worldPos) {
 }
 
 void FishingController::destroyOverlay() {
-    if (_kb && _scene) { _scene->getEventDispatcher()->removeEventListener(_kb); }
     if (_mouse && _scene) { _scene->getEventDispatcher()->removeEventListener(_mouse); }
-    _kb = nullptr; _mouse = nullptr;
+    _mouse = nullptr;
     if (_overlay) { _overlay->removeFromParent(); _overlay = nullptr; }
     _barBg = nullptr; _barCatch = nullptr; _progressFill = nullptr; _progressLabel = nullptr; _fishSprite = nullptr;
     // Restore default height after overlay destroyed

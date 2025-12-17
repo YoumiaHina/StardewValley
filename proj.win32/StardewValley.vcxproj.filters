@@ -385,6 +385,9 @@
     <ClCompile Include="..\Classes\Game\Stair.cpp">
       <Filter>Classes\Game</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\Game\Drop.cpp">
+      <Filter>Classes\Game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <!-- Header Files -->
@@ -648,8 +651,6 @@
     <ClInclude Include="..\Classes\Controllers\Systems\ChestController.h">
       <Filter>Classes\Controllers\Systems</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\Game\NPC\PierreNpc.h" />
-    <ClInclude Include="..\Classes\Game\NPC\RobinNpc.h" />
     <ClInclude Include="..\Classes\Game\Rock.h">
       <Filter>Classes\Game</Filter>
     </ClInclude>
@@ -676,9 +677,6 @@
     </ClInclude>
     <ClInclude Include="..\Classes\Game\Stair.h">
       <Filter>Classes\Game</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Classes\Game\Map\IMapBase.h">
-      <Filter>Classes\Game\Map</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
