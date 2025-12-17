@@ -66,7 +66,11 @@ std::pair<int,int> TileSelector::selectForwardTile(
     int pc = 0;
     int pr = 0;
     if (worldToTileIndex) {
-        worldToTileIndex(playerPos, pc, pr);
+        cocos2d::Vec2 basisPos = playerPos;
+        if (tileSize > 0.0f) {
+            basisPos = playerPos + cocos2d::Vec2(0, -tileSize * 0.75f);
+        }
+        worldToTileIndex(basisPos, pc, pr);
     }
     cocos2d::Vec2 dir = lastDir;
     if (dir.lengthSquared() < 0.0001f) {
@@ -122,7 +126,11 @@ void TileSelector::drawFanCursor(
     int pc = 0;
     int pr = 0;
     if (worldToTileIndex) {
-        worldToTileIndex(playerPos, pc, pr);
+        cocos2d::Vec2 basisPos = playerPos;
+        if (tileSize > 0.0f) {
+            basisPos = playerPos + cocos2d::Vec2(0, -tileSize * 0.75f);
+        }
+        worldToTileIndex(basisPos, pc, pr);
     }
     cocos2d::Vec2 dir = lastDir;
     if (dir.lengthSquared() < 0.0001f) {
