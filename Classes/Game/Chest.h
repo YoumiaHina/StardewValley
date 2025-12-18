@@ -5,6 +5,7 @@
 #include <vector>
 #include "Game/GameConfig.h"
 #include "Game/Inventory.h"
+#include "Game/PlaceableItemBase.h"
 
 namespace Controllers {
 class IMapController;
@@ -14,45 +15,25 @@ class RoomMapController;
 
 namespace Game {
 
-// 可放置的箱子：位置 + 内部物品槽（模拟三栏物品栏）
-struct Chest {
+struct Chest : public PlaceableItemBase {
     static constexpr int ROWS = 3;
     static constexpr int COLS = 12;
     static constexpr int CAPACITY = ROWS * COLS;
     static constexpr int MAX_PER_AREA = 200;
 
-    cocos2d::Vec2 pos;
     std::vector<Slot> slots;
 
     Chest()
-      : pos(cocos2d::Vec2::ZERO),
+      : PlaceableItemBase(),
         slots(static_cast<std::size_t>(CAPACITY)) {}
+
+    cocos2d::Rect placeRect() const override;
+    cocos2d::Rect collisionRect() const override;
+    int maxPerArea() const override { return MAX_PER_AREA; }
 };
 
 cocos2d::Rect chestRect(const Chest& chest);
 cocos2d::Rect chestCollisionRect(const Chest& chest);
 bool isNearAnyChest(const cocos2d::Vec2& playerWorldPos, const std::vector<Chest>& chests);
-
-bool openChestNearPlayer(Controllers::IMapController* map,
-                         Controllers::UIController* ui,
-                         const cocos2d::Vec2& playerWorldPos,
-                         const cocos2d::Vec2& lastDir);
-
-bool openGlobalChest(Controllers::UIController* ui);
-
-bool placeChestOnFarm(Controllers::IMapController* map,
-                      Controllers::UIController* ui,
-                      std::shared_ptr<Game::Inventory> inventory,
-                      const cocos2d::Vec2& playerPos,
-                      const cocos2d::Vec2& lastDir);
-
-bool placeChestInRoom(Controllers::RoomMapController* room,
-                      Controllers::UIController* ui,
-                      std::shared_ptr<Game::Inventory> inventory,
-                      const cocos2d::Vec2& playerPos);
-
-void transferChestCell(Game::Chest& chest,
-                       int flatIndex,
-                       Game::Inventory& inventory);
 
 } // namespace Game

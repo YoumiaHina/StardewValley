@@ -1,7 +1,7 @@
 #include "Controllers/Input/PlayerController.h"
 #include "Controllers/Systems/CropSystem.h"
+#include "Controllers/Systems/ChestController.h"
 #include "Controllers/UI/UIController.h"
-#include "Game/Chest.h"
 #include "Game/View/IPlayerView.h"
 #include "Game/WorldState.h"
 #include "Game/Cheat.h"
@@ -132,7 +132,7 @@ void PlayerController::registerCommonInputHandlers(
             } break;
             case EventKeyboard::KeyCode::KEY_E: {
                 if (chestOpen || storeOpen) break;
-                Game::openGlobalChest(_ui);
+                openGlobalChest(_ui);
             } break;
             case EventKeyboard::KeyCode::KEY_X: {
                 if (chestOpen || storeOpen) break;

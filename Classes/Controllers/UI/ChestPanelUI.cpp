@@ -1,4 +1,5 @@
 #include "Controllers/UI/ChestPanelUI.h"
+#include "Controllers/Systems/ChestController.h"
 #include "Game/WorldState.h"
 #include "Game/Item.h"
 #include "Game/Chest.h"
@@ -289,7 +290,7 @@ void ChestPanelUI::refreshChestPanel(Game::Chest* chest) {
         }
         if (hitIndex < 0) return;
         _selectedIndex = hitIndex;
-        Game::transferChestCell(*_currentChest, hitIndex, *_inventory);
+        transferChestCell(*_currentChest, hitIndex, *_inventory);
         if (hitIndex >= 0 && hitIndex < static_cast<int>(_cellIcons.size())) {
             auto icon = _cellIcons[hitIndex];
             auto countLabel = _cellCountLabels[hitIndex];
@@ -405,7 +406,7 @@ void ChestPanelUI::setOnInventoryChanged(const std::function<void()>& cb) {
 void ChestPanelUI::onInventorySlotClicked(int invIndex) {
     if (!_currentChest || !_inventory) return;
     if (_selectedIndex < 0) return;
-    if (invIndex < 0 || invIndex >= _inventory->size()) return;
+    if (invIndex < 0 || invIndex >= static_cast<int>(_inventory->size())) return;
     if (_selectedIndex < 0 || _selectedIndex >= static_cast<int>(_currentChest->slots.size())) return;
     auto& slotChest = _currentChest->slots[static_cast<std::size_t>(_selectedIndex)];
     if (slotChest.kind == Game::SlotKind::Item && slotChest.itemQty > 0) {
