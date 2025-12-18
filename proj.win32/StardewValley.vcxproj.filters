@@ -397,6 +397,9 @@
     <ClCompile Include="..\Classes\Controllers\Systems\FurnaceController.cpp">
       <Filter>Classes\Controllers\Systems</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\Game\Furnace.cpp">
+      <Filter>Classes\Game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <!-- Header Files -->
@@ -694,6 +697,9 @@
       <Filter>Classes\Controllers\Systems</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\Game\Furnace.h">
+      <Filter>Classes\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\PlaceableItemBase.h">
       <Filter>Classes\Game</Filter>
     </ClInclude>
   </ItemGroup>

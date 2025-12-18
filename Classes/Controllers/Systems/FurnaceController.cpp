@@ -171,12 +171,10 @@ bool FurnaceController::isNearFurnace(const cocos2d::Vec2& worldPos) const {
 
 bool FurnaceController::collides(const cocos2d::Vec2& worldPos) const {
     if (!_runtime) return false;
-    for (const auto& f : *_runtime) {
-        if (f.collisionRect().containsPoint(worldPos)) {
-            return true;
-        }
-    }
-    return false;
+    return Game::PlaceableItemBase::collidesAny<Game::Furnace>(
+        worldPos,
+        *_runtime,
+        [](const Game::Furnace& f) { return f.collisionRect(); });
 }
 
 bool FurnaceController::shouldPlace(const Game::Inventory& inventory) const {

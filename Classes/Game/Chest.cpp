@@ -6,22 +6,12 @@ namespace Game {
 
 Rect Chest::placeRect() const {
     float s = static_cast<float>(GameConfig::TILE_SIZE);
-    Vec2 center = pos;
-    float w = s;
-    float h = s * 2.0f;
-    float minX = center.x - w * 0.5f;
-    float minY = center.y - h * 0.5f;
-    return Rect(minX, minY, w, h);
+    return PlaceableItemBase::standard1x2PlaceRect(pos, s);
 }
 
 Rect Chest::collisionRect() const {
     float s = static_cast<float>(GameConfig::TILE_SIZE);
-    Vec2 center = pos;
-    float w = s;
-    float h = s * 2.0f;
-    float minX = center.x - w * 0.5f;
-    float midY = center.y;
-    return Rect(minX, midY, w, h * 0.5f);
+    return PlaceableItemBase::standardBottomHalfCollisionRect(pos, s);
 }
 
 Rect chestRect(const Chest& chest) {

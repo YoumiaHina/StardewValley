@@ -126,6 +126,9 @@ Vec2 RoomMapController::clampPosition(const Vec2& current, const Vec2& next, flo
     if (_chestController && _chestController->collides(finalPos)) {
         return current;
     }
+    if (_furnaceController && _furnaceController->collides(finalPos)) {
+        return current;
+    }
     return finalPos;
 }
 
@@ -151,6 +154,7 @@ void RoomMapController::addActorToMap(cocos2d::Node* node, int zOrder) {
 bool RoomMapController::collides(const Vec2& pos, float radius) const {
     if (_roomMap && _roomMap->collides(pos, radius)) return true;
     if (_chestController && _chestController->collides(pos)) return true;
+    if (_furnaceController && _furnaceController->collides(pos)) return true;
     return false;
 }
 cocos2d::Vec2 RoomMapController::roomFarmDoorSpawnPos() const {

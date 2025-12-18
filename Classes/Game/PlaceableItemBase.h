@@ -34,6 +34,23 @@ public:
     }
 
     template<typename T>
+    static bool collidesAny(const cocos2d::Vec2& worldPos,
+                            const std::vector<T>& items,
+                            const std::function<cocos2d::Rect(const T&)>& rectFn) {
+        for (const auto& item : items) {
+            cocos2d::Rect r = rectFn(item);
+            if (r.containsPoint(worldPos)) return true;
+        }
+        return false;
+    }
+
+    static cocos2d::Rect standard1x2PlaceRect(const cocos2d::Vec2& center,
+                                              float tileSize);
+
+    static cocos2d::Rect standardBottomHalfCollisionRect(const cocos2d::Vec2& center,
+                                                         float tileSize);
+
+    template<typename T>
     static bool canPlaceAt(const cocos2d::Vec2& center,
                            const std::vector<T>& items,
                            const std::function<cocos2d::Rect(const T&)>& rectFn,
@@ -52,5 +69,25 @@ inline PlaceableItemBase::PlaceableItemBase()
     : pos(cocos2d::Vec2::ZERO) {}
 
 inline PlaceableItemBase::~PlaceableItemBase() = default;
+
+inline cocos2d::Rect PlaceableItemBase::standard1x2PlaceRect(const cocos2d::Vec2& center,
+                                                              float tileSize) {
+    float s = tileSize;
+    float w = s;
+    float h = s * 2.0f;
+    float minX = center.x - w * 0.5f;
+    float minY = center.y - h * 0.5f;
+    return cocos2d::Rect(minX, minY, w, h);
+}
+
+inline cocos2d::Rect PlaceableItemBase::standardBottomHalfCollisionRect(const cocos2d::Vec2& center,
+                                                                         float tileSize) {
+    float s = tileSize;
+    float w = s;
+    float h = s * 2.0f;
+    float minX = center.x - w * 0.5f;
+    float midY = center.y;
+    return cocos2d::Rect(minX, midY, w, h * 0.5f);
+}
 
 } // namespace Game

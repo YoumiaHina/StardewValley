@@ -85,6 +85,9 @@ Vec2 BeachMapController::clampPosition(const Vec2& current, const Vec2& next, fl
             return current;
         }
     }
+    if (_furnaceController && _furnaceController->collides(finalPos)) {
+        return current;
+    }
     return finalPos;
 }
 

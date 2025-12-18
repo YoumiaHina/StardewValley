@@ -41,12 +41,10 @@ bool ChestController::isNearChest(const Vec2& worldPos) const {
 }
 
 bool ChestController::collides(const Vec2& worldPos) const {
-    for (const auto& ch : _chests) {
-        if (Game::chestCollisionRect(ch).containsPoint(worldPos)) {
-            return true;
-        }
-    }
-    return false;
+    return Game::PlaceableItemBase::collidesAny<Game::Chest>(
+        worldPos,
+        _chests,
+        [](const Game::Chest& c) { return Game::chestCollisionRect(c); });
 }
 
 void ChestController::refreshVisuals() {

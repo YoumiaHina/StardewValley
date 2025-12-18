@@ -186,6 +186,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClCompile Include="..\Classes\Controllers\UI\StorePanelUI.cpp" />
     <ClCompile Include="..\Classes\Game\Chest.cpp" />
     <ClCompile Include="..\Classes\Game\Drop.cpp" />
+    <ClCompile Include="..\Classes\Game\Furnace.cpp" />
     <ClCompile Include="..\Classes\Game\Map\BeachMap.cpp" />
     <ClCompile Include="..\Classes\Game\Map\FarmMap.cpp" />
     <ClCompile Include="..\Classes\Game\Map\MapBase.cpp" />
@@ -306,6 +307,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClInclude Include="..\Classes\Game\NPC\AbigailNpc.h" />
     <ClInclude Include="..\Classes\Game\NPC\NpcBase.h" />
     <ClInclude Include="..\Classes\Game\NPC\WillyNpc.h" />
+    <ClInclude Include="..\Classes\Game\PlaceableItemBase.h" />
     <ClInclude Include="..\Classes\Game\Rock.h" />
     <ClInclude Include="..\Classes\Game\Save\SaveDetail.h" />
     <ClInclude Include="..\Classes\Game\Save\SaveSystem.h" />

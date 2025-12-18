@@ -85,6 +85,9 @@ Vec2 TownMapController::clampPosition(const Vec2& current, const Vec2& next, flo
             return current;
         }
     }
+    if (_furnaceController && _furnaceController->collides(finalPos)) {
+        return current;
+    }
     return finalPos;
 }
 
