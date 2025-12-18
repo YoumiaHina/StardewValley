@@ -12,6 +12,8 @@
 
 namespace Controllers {
 
+class FurnaceController;
+
 class RoomMapController : public Controllers::IMapController {
 public:
     RoomMapController(cocos2d::Node* worldNode)
@@ -51,6 +53,8 @@ public:
     cocos2d::Vec2 roomFarmDoorSpawnPos() const;
     void refreshChestsVisuals();
 
+    Controllers::FurnaceController* furnaceController() const { return _furnaceController; }
+
 private:
     cocos2d::Node* _worldNode = nullptr;
     cocos2d::DrawNode* _roomDraw = nullptr;
@@ -59,6 +63,7 @@ private:
     cocos2d::Rect _doorRect;
     cocos2d::Rect _bedRect;
     Controllers::ChestController* _chestController = nullptr;
+    Controllers::FurnaceController* _furnaceController = nullptr;
 };
 
 }

@@ -15,6 +15,7 @@
 namespace Controllers {
 
 class GameStateController;
+class FurnaceController;
 
 class RoomInteractor {
 public:

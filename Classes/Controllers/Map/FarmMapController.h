@@ -19,6 +19,7 @@
 #include "Controllers/Environment/EnvironmentObstacleSystemBase.h"
 #include "Controllers/Interact/TileSelector.h"
 #include "Controllers/Systems/ChestController.h"
+#include "Controllers/Systems/FurnaceController.h"
 
 namespace Controllers {
 
@@ -66,6 +67,8 @@ public:
     const std::vector<Game::Chest>& chests() const override;
     std::vector<Game::Chest>& chests() override;
 
+    Controllers::FurnaceController* furnaceController() const { return _furnaceController; }
+
     Game::FarmMap* tmx() const;
     cocos2d::Node* worldNode() const;
     void addActorToMap(cocos2d::Node* node, int zOrder) override;
@@ -100,6 +103,7 @@ private:
     cocos2d::DrawNode* _dropsDraw = nullptr;
     cocos2d::Node* _dropsRoot = nullptr;
     Controllers::ChestController* _chestController = nullptr;
+    Controllers::FurnaceController* _furnaceController = nullptr;
     cocos2d::DrawNode* _cropsDraw = nullptr;
     cocos2d::Node* _cropsRoot = nullptr;
     std::unordered_map<long long, cocos2d::Sprite*> _cropSprites;

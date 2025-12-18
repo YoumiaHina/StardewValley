@@ -17,6 +17,7 @@
 #include "Game/Tree.h"
 #include "Game/Rock.h"
 #include "Game/Animal.h"
+#include "Game/Furnace.h"
 
 namespace Game {
 
@@ -47,6 +48,18 @@ struct WorldState {
 
     // 农场掉落（未拾取的物品）
     std::vector<Drop> farmDrops;
+
+    // 农场熔炉
+    std::vector<Furnace> farmFurnaces;
+
+    // 室内熔炉
+    std::vector<Furnace> houseFurnaces;
+
+    // 城镇熔炉
+    std::vector<Furnace> townFurnaces;
+
+    // 沙滩熔炉
+    std::vector<Furnace> beachFurnaces;
 
     // 农场箱子（已放置的储物箱）
     std::vector<Chest> farmChests;

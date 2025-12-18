@@ -111,6 +111,15 @@ void FarmInteractor::onLeftClick() {
         }
         return;
     }
+    auto* farm = dynamic_cast<FarmMapController*>(_map);
+    if (farm) {
+        auto* furnace = farm->furnaceController();
+        if (furnace) {
+            if (furnace->interactAt(p, lastDir)) {
+                return;
+            }
+        }
+    }
 }
 
 } // namespace Controllers

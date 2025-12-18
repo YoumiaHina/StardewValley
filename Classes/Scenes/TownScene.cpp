@@ -37,6 +37,18 @@ bool TownScene::init() {
     };
     Director::getInstance()->getEventDispatcher()
         ->addEventListenerWithSceneGraphPriority(mouseNpc, this);
+
+    auto* townMap = _townMap;
+    if (townMap && _uiController && _inventory) {
+        auto* furnace = townMap->furnaceController();
+        if (furnace) {
+            furnace->bindContext(_mapController, _uiController, _inventory);
+            furnace->syncLoad();
+            addUpdateCallback([furnace](float dt) {
+                furnace->update(dt);
+            });
+        }
+    }
     return true;
 }
 
@@ -81,4 +93,13 @@ void TownScene::onMouseDown(EventMouse* e) {
             [this]() -> Vec2 { return _playerController ? _playerController->lastDir() : Vec2(0,-1); });
     }
     if (_chestInteractor) _chestInteractor->onLeftClick();
+
+    if (_townMap && _player) {
+        auto* furnace = _townMap->furnaceController();
+        if (furnace) {
+            Vec2 p = _player->getPosition();
+            Vec2 lastDir = _playerController ? _playerController->lastDir() : Vec2(0,-1);
+            furnace->interactAt(p, lastDir);
+        }
+    }
 }

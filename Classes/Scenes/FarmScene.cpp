@@ -20,6 +20,7 @@
 #include "Controllers/UI/UIController.h"
 #include "Controllers/Systems/GameStateController.h"
 #include "Controllers/Interact/FarmInteractor.h"
+#include "Controllers/Systems/FurnaceController.h"
 
 USING_NS_CC;
 
@@ -43,6 +44,17 @@ bool FarmScene::init() {
     }
     addUpdateCallback([this](float dt){ if (_animalSystem) _animalSystem->update(dt); });
     addUpdateCallback([this](float){ if (_robinNpc && _player) _robinNpc->update(_player->getPosition()); });
+    auto* farmMap = _farmMap;
+    if (farmMap && _uiController && _inventory) {
+        auto* furnace = farmMap->furnaceController();
+        if (furnace) {
+            furnace->bindContext(_mapController, _uiController, _inventory);
+            furnace->syncLoad();
+            addUpdateCallback([furnace](float dt) {
+                furnace->update(dt);
+            });
+        }
+    }
     if (_uiController && _animalSystem) {
         _uiController->setAnimalStoreHandler([this](Game::AnimalType type) -> bool {
             if (!_animalSystem || !_player || !_mapController) return false;

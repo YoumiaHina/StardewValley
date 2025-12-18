@@ -3,6 +3,7 @@
 #include "Game/GameConfig.h"
 #include "Game/WorldState.h"
 #include "Game/Map/RoomMap.h"
+#include "Controllers/Systems/FurnaceController.h"
 
 using namespace cocos2d;
 
@@ -68,6 +69,19 @@ void RoomMapController::init() {
     if (_chestController && chestParent) {
         _chestController->attachTo(chestParent, 19);
         _chestController->syncLoad();
+    }
+
+    if (!_furnaceController) {
+        _furnaceController = new Controllers::FurnaceController();
+    }
+    cocos2d::Node* furnaceParent = nullptr;
+    if (_roomMap && _roomMap->getTMX()) {
+        furnaceParent = _roomMap->getTMX();
+    } else if (_worldNode) {
+        furnaceParent = _worldNode;
+    }
+    if (_furnaceController && furnaceParent) {
+        _furnaceController->attachTo(furnaceParent, 19);
     }
 }
 

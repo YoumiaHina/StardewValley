@@ -13,6 +13,7 @@
 #include "Game/Tree.h"
 #include "Game/Rock.h"
 #include "Game/Animal.h"
+#include "Game/Furnace.h"
 #include "cocos2d.h"
 
 namespace {
@@ -159,6 +160,38 @@ void readDrops(std::istream& in, std::vector<Game::Drop>& drops) {
         d.pos = cocos2d::Vec2(x, y);
         d.qty = qty;
         drops.push_back(d);
+    }
+}
+
+void writeFurnaces(std::ostream& out, const std::vector<Game::Furnace>& furnaces) {
+    out << furnaces.size() << '\n';
+    for (const auto& f : furnaces) {
+        out << f.pos.x << ' ' << f.pos.y << ' '
+            << static_cast<int>(f.oreType) << ' '
+            << f.remainingSeconds << '\n';
+    }
+}
+
+void readFurnaces(std::istream& in, std::vector<Game::Furnace>& furnaces) {
+    std::size_t count = 0;
+    in >> count;
+    in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    furnaces.clear();
+    furnaces.reserve(count);
+    for (std::size_t i = 0; i < count; ++i) {
+        float x = 0.0f;
+        float y = 0.0f;
+        int ore = 0;
+        float remaining = 0.0f;
+        in >> x >> y >> ore >> remaining;
+        in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        if (!in) break;
+        Game::Furnace f;
+        f.pos = cocos2d::Vec2(x, y);
+        f.oreType = static_cast<Game::ItemType>(ore);
+        f.remainingSeconds = remaining;
+        f.dropOffset = cocos2d::Vec2::ZERO;
+        furnaces.push_back(f);
     }
 }
 
@@ -403,4 +436,3 @@ void readNpcData(std::istream& in, Game::WorldState& ws) {
 }
 
 } 
-

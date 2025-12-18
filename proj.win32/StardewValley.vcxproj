@@ -175,6 +175,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClCompile Include="..\Classes\Controllers\NPC\WillyNpcController.cpp" />
     <ClCompile Include="..\Classes\Controllers\Store\StoreController.cpp" />
     <ClCompile Include="..\Classes\Controllers\Systems\ChestController.cpp" />
+    <ClCompile Include="..\Classes\Controllers\Systems\FurnaceController.cpp" />
     <ClCompile Include="..\Classes\Controllers\UI\ChestPanelUI.cpp" />
     <ClCompile Include="..\Classes\Controllers\UI\CraftPanelUI.cpp" />
     <ClCompile Include="..\Classes\Controllers\UI\DialogueUI.cpp" />
@@ -280,6 +281,8 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClInclude Include="..\Classes\Controllers\NPC\WillyNpcController.h" />
     <ClInclude Include="..\Classes\Controllers\Store\StoreController.h" />
     <ClInclude Include="..\Classes\Controllers\Systems\ChestController.h" />
+    <ClInclude Include="..\Classes\Controllers\Systems\FurnaceController.h" />
+    <ClInclude Include="..\Classes\Controllers\Systems\PlaceableItemSystemBase.h" />
     <ClInclude Include="..\Classes\Controllers\UI\ChestPanelUI.h" />
     <ClInclude Include="..\Classes\Controllers\UI\CraftPanelUI.h" />
     <ClInclude Include="..\Classes\Controllers\UI\DialogueUI.h" />
@@ -292,6 +295,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClInclude Include="..\Classes\Game\Cheat.h" />
     <ClInclude Include="..\Classes\Game\Chest.h" />
     <ClInclude Include="..\Classes\Game\EnvironmentObstacleBase.h" />
+    <ClInclude Include="..\Classes\Game\Furnace.h" />
     <ClInclude Include="..\Classes\Game\Map\BeachMap.h" />
     <ClInclude Include="..\Classes\Game\Map\FarmMap.h" />
     <ClInclude Include="..\Classes\Game\Map\MapBase.h" />

@@ -394,6 +394,9 @@
     <ClCompile Include="..\Classes\Controllers\Interact\TileSelector.cpp">
       <Filter>Classes\Controllers\Interact</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\Systems\FurnaceController.cpp">
+      <Filter>Classes\Controllers\Systems</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <!-- Header Files -->
@@ -683,6 +686,15 @@
     </ClInclude>
     <ClInclude Include="..\Classes\Controllers\Interact\TileSelector.h">
       <Filter>Classes\Controllers\Interact</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\Systems\FurnaceController.h">
+      <Filter>Classes\Controllers\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\Systems\PlaceableItemSystemBase.h">
+      <Filter>Classes\Controllers\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\Furnace.h">
+      <Filter>Classes\Game</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

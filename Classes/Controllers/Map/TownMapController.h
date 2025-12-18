@@ -6,6 +6,8 @@
 
 namespace Controllers {
 
+class FurnaceController;
+
 class TownMapController : public IMapController {
 public:
     explicit TownMapController(Game::TownMap* map, cocos2d::Node* worldNode);
@@ -59,6 +61,8 @@ public:
 
     Game::TownMap* getTownMap() const { return _map; }
 
+    Controllers::FurnaceController* furnaceController() const { return _furnaceController; }
+
 private:
     Game::TownMap* _map = nullptr;
     cocos2d::Node* _worldNode = nullptr;
@@ -71,6 +75,7 @@ private:
     cocos2d::Node* _dropsRoot = nullptr;
     cocos2d::Vec2 _lastClickWorldPos = cocos2d::Vec2::ZERO;
     bool _hasLastClick = false;
+    Controllers::FurnaceController* _furnaceController = nullptr;
 };
 
 } // namespace Controllers

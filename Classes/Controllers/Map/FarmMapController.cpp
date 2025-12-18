@@ -144,6 +144,20 @@ void FarmMapController::init() {
             _chestController->syncLoad();
         }
     }
+    if (!_furnaceController) {
+        _furnaceController = new Controllers::FurnaceController();
+    }
+    if (_furnaceController) {
+        Node* furnaceParent = nullptr;
+        if (_farmMap && _farmMap->getTMX()) {
+            furnaceParent = _farmMap->getTMX();
+        } else if (_worldNode) {
+            furnaceParent = _worldNode;
+        }
+        if (furnaceParent) {
+            _furnaceController->attachTo(furnaceParent, 19);
+        }
+    }
     _cropsDraw = DrawNode::create();
     _worldNode->addChild(_cropsDraw, 1);
     _cropsRoot = Node::create();
@@ -345,7 +359,9 @@ Vec2 FarmMapController::clampPosition(const Vec2& current, const Vec2& next, flo
             tryY.y = current.y;
         }
     }
-    if (_chestController && _chestController->collides(Vec2(tryX.x, tryY.y))) {
+    Vec2 testPos(tryX.x, tryY.y);
+    if ((_chestController && _chestController->collides(testPos)) ||
+        (_furnaceController && _furnaceController->collides(testPos))) {
         return current;
     }
     return Vec2(tryX.x, tryY.y);
@@ -356,6 +372,7 @@ bool FarmMapController::collides(const Vec2& pos, float radius) const {
     if (_treeSystem && _treeSystem->collides(pos, radius, GameConfig::TILE_SIZE)) return true;
     if (_rockSystem && _rockSystem->collides(pos, radius, GameConfig::TILE_SIZE)) return true;
     if (_chestController && _chestController->collides(pos)) return true;
+    if (_furnaceController && _furnaceController->collides(pos)) return true;
     return false;
 }
 

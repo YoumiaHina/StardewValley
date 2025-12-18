@@ -31,7 +31,8 @@ enum class ItemType {
     GoldIngot   = 107,
     Egg         = 200,
     Milk        = 201,
-    Wool        = 202
+    Wool        = 202,
+    Furnace     = 300
 };
 
 // 英文名称（内部使用）
@@ -62,6 +63,7 @@ inline const char* itemName(ItemType t) {
         case ItemType::Egg: return "Egg";
         case ItemType::Milk: return "Milk";
         case ItemType::Wool: return "Wool";
+        case ItemType::Furnace: return "Furnace";
         default: return "Unknown";
     }
 }
@@ -95,6 +97,7 @@ inline cocos2d::Color4F itemColor(ItemType t) {
         case ItemType::Egg: return Color4F(0.98f, 0.98f, 0.90f, 1.0f);
         case ItemType::Milk: return Color4F(0.95f, 0.95f, 0.85f, 1.0f);
         case ItemType::Wool: return Color4F(0.90f, 0.90f, 0.95f, 1.0f);
+        case ItemType::Furnace: return Color4F(0.80f, 0.50f, 0.20f, 1.0f);
         default: return Color4F(1,1,1,1);
     }
 }
@@ -105,6 +108,7 @@ inline std::string itemIconPath(ItemType t) {
         case ItemType::Stone: return "item/Stone.png";
         case ItemType::Fiber: return "item/Fiber.png";
         case ItemType::Chest: return "PlaceableItem/Chest.png";
+        case ItemType::Furnace: return "PlaceableItem/Furnace.png";
         case ItemType::Coal: return "Mineral/Coal.png";
         case ItemType::CopperGrain: return "Mineral/copperGrain.png";
         case ItemType::CopperIngot: return "Mineral/copperIngot.png";

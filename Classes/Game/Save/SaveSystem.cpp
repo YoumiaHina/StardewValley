@@ -177,7 +177,7 @@ bool saveToFile(const std::string& fullPath) {
     std::ofstream out(path, std::ios::trunc);
     if (!out) return false;
     auto& ws = globalState();
-    out << "SDV_SAVE 2" << '\n';
+    out << "SDV_SAVE 4" << '\n';
     out << ws.seasonIndex << ' ' << ws.dayOfSeason << ' '
         << ws.timeHour << ' ' << ws.timeMinute << ' '
         << ws.timeAccum << ' '
@@ -210,6 +210,10 @@ bool saveToFile(const std::string& fullPath) {
     writeInventory(out, ws.inventory);
     writeChest(out, ws.globalChest);
     writeDrops(out, ws.farmDrops);
+    writeFurnaces(out, ws.farmFurnaces);
+    writeFurnaces(out, ws.houseFurnaces);
+    writeFurnaces(out, ws.townFurnaces);
+    writeFurnaces(out, ws.beachFurnaces);
     writeChests(out, ws.farmChests);
     writeCrops(out, ws.farmCrops);
     writeTreePositions(out, ws.farmTrees);
@@ -234,7 +238,7 @@ bool loadFromFile(const std::string& fullPath) {
     int version = 0;
     in >> magic >> version;
     in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-    if (!in || magic != "SDV_SAVE" || (version != 1 && version != 2)) {
+    if (!in || magic != "SDV_SAVE" || version < 1 || version > 4) {
         return false;
     }
     auto& ws = globalState();
@@ -290,6 +294,23 @@ bool loadFromFile(const std::string& fullPath) {
     ws.inventory = readInventory(in);
     ws.globalChest = readChest(in);
     readDrops(in, ws.farmDrops);
+    if (version >= 3) {
+        readFurnaces(in, ws.farmFurnaces);
+        if (version >= 4) {
+            readFurnaces(in, ws.houseFurnaces);
+            readFurnaces(in, ws.townFurnaces);
+            readFurnaces(in, ws.beachFurnaces);
+        } else {
+            ws.houseFurnaces.clear();
+            ws.townFurnaces.clear();
+            ws.beachFurnaces.clear();
+        }
+    } else {
+        ws.farmFurnaces.clear();
+        ws.houseFurnaces.clear();
+        ws.townFurnaces.clear();
+        ws.beachFurnaces.clear();
+    }
     readChests(in, ws.farmChests);
     readCrops(in, ws.farmCrops);
     readTreePositions(in, ws.farmTrees);

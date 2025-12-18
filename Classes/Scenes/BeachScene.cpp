@@ -38,6 +38,17 @@ bool BeachScene::init() {
             }
         });
     }
+    auto* beachMap = _beachMap;
+    if (beachMap && _uiController && _inventory) {
+        auto* furnace = beachMap->furnaceController();
+        if (furnace) {
+            furnace->bindContext(_mapController, _uiController, _inventory);
+            furnace->syncLoad();
+            addUpdateCallback([furnace](float dt) {
+                furnace->update(dt);
+            });
+        }
+    }
     return true;
 }
 
@@ -89,4 +100,13 @@ void BeachScene::onMouseDown(EventMouse* e) {
             [this]() -> Vec2 { return _playerController ? _playerController->lastDir() : Vec2(0,-1); });
     }
     if (_chestInteractor) _chestInteractor->onLeftClick();
+
+    if (_beachMap && _player) {
+        auto* furnace = _beachMap->furnaceController();
+        if (furnace) {
+            Vec2 p = _player->getPosition();
+            Vec2 lastDir = _playerController ? _playerController->lastDir() : Vec2(0,-1);
+            furnace->interactAt(p, lastDir);
+        }
+    }
 }

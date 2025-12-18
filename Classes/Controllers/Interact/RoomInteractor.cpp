@@ -1,6 +1,7 @@
 #include "Controllers/Interact/RoomInteractor.h"
 #include "Controllers/Map/RoomMapController.h"
 #include "Controllers/Systems/GameStateController.h"
+#include "Controllers/Systems/FurnaceController.h"
 #include "Game/WorldState.h"
 #include "Game/GameConfig.h"
 
@@ -37,6 +38,16 @@ void RoomInteractor::onLeftClick() {
         _chestInteractor = new Controllers::ChestInteractor(_inventory, _map, _ui, _getPlayerPos, getLastDir);
     }
     _chestInteractor->onLeftClick();
+
+    Vec2 p = _getPlayerPos();
+    Vec2 lastDir(0, -1);
+    auto* room = dynamic_cast<Controllers::RoomMapController*>(_map);
+    if (room) {
+        auto* furnace = room->furnaceController();
+        if (furnace) {
+            furnace->interactAt(p, lastDir);
+        }
+    }
 }
 
 // namespace Controllers

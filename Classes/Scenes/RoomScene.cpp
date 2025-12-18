@@ -28,6 +28,17 @@ bool RoomScene::init() {
     Managers::AudioManager::getInstance().playBackgroundFor(Managers::SceneZone::Room);
     _interactor = new Controllers::RoomInteractor(_inventory, _mapController, _uiController, _cropSystem, _stateController,
         [this]() -> Vec2 { return _player ? _player->getPosition() : Vec2(); });
+    auto* roomMap = _roomMap;
+    if (roomMap && _uiController && _inventory) {
+        auto* furnace = roomMap->furnaceController();
+        if (furnace) {
+            furnace->bindContext(_mapController, _uiController, _inventory);
+            furnace->syncLoad();
+            addUpdateCallback([furnace](float dt) {
+                furnace->update(dt);
+            });
+        }
+    }
     return true;
 }
 

@@ -3,6 +3,7 @@
 #include "Game/GameConfig.h"
 #include "Game/Chest.h"
 #include "Game/WorldState.h"
+#include "Controllers/Systems/FurnaceController.h"
 
 using namespace cocos2d;
 
@@ -23,6 +24,19 @@ BeachMapController::BeachMapController(Game::BeachMap* map, cocos2d::Node* world
     auto& ws = Game::globalState();
     _chests = ws.beachChests;
     refreshMapVisuals();
+
+    if (!_furnaceController) {
+        _furnaceController = new Controllers::FurnaceController();
+    }
+    cocos2d::Node* furnaceParent = nullptr;
+    if (_map && _map->getTMX()) {
+        furnaceParent = _map->getTMX();
+    } else if (_worldNode) {
+        furnaceParent = _worldNode;
+    }
+    if (_furnaceController && furnaceParent) {
+        _furnaceController->attachTo(furnaceParent, 19);
+    }
 }
 
 Vec2 BeachMapController::getPlayerPosition(const Vec2& playerMapLocalPos) const {
@@ -112,6 +126,9 @@ bool BeachMapController::collides(const Vec2& p, float radius) const {
         if (Game::chestCollisionRect(ch).containsPoint(p)) {
             return true;
         }
+    }
+    if (_furnaceController && _furnaceController->collides(p)) {
+        return true;
     }
     return false;
 }

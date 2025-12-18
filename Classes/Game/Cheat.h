@@ -14,7 +14,7 @@ namespace Game {
 struct Cheat {
     static void grantBasic(const std::shared_ptr<Inventory>& inv) {
         if (!inv) return;
-        for (auto t : { ItemType::Wood, ItemType::Stone, ItemType::Fiber, ItemType::Chest,
+        for (auto t : { ItemType::Wood, ItemType::Stone, ItemType::Furnace, ItemType::Chest,
                         ItemType::Parsnip }) {
             inv->addItems(t, 99);
         }
