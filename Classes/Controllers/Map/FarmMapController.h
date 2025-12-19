@@ -18,6 +18,7 @@
 #include "Game/WorldState.h"
 #include "Controllers/Environment/TreeSystem.h"
 #include "Controllers/Environment/RockSystem.h"
+#include "Controllers/Environment/WeedSystem.h"
 #include "Controllers/Environment/EnvironmentObstacleSystemBase.h"
 #include "Controllers/Interact/TileSelector.h"
 #include "Controllers/Systems/ChestController.h"
@@ -164,6 +165,7 @@ private:
     cocos2d::Node* _actorsRoot = nullptr;
     Controllers::EnvironmentObstacleSystemBase* _treeSystem = nullptr;
     Controllers::EnvironmentObstacleSystemBase* _rockSystem = nullptr;
+    Controllers::EnvironmentObstacleSystemBase* _weedSystem = nullptr;
     cocos2d::Vec2 _lastClickWorldPos = cocos2d::Vec2::ZERO;
     bool _hasLastClick = false;
 

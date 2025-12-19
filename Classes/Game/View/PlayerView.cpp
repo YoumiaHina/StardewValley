@@ -189,6 +189,7 @@ void PlayerView::playToolAnimation(Game::ToolKind kind) {
         case Game::ToolKind::Hoe: path = "Tool/HoeAction.png"; break;
         case Game::ToolKind::Pickaxe: path = "Tool/PickaxeAction.png"; break;
         case Game::ToolKind::WaterCan: path = "Tool/WaterCanAction.png"; break;
+        case Game::ToolKind::Scythe: path = "Tool/Scythe.png"; break;
         default: break;
     }
     if (path.empty()) {
@@ -222,13 +223,26 @@ void PlayerView::updateToolSprite() {
         return;
     }
 
-    int col = toolColumnFor(_currentDir, _toolAnimFrame);
-    int w = 16;
-    int h = 32;
-    float x = static_cast<float>(col * w);
-    float y = 0.0f;
-    cocos2d::Rect r(x, y, static_cast<float>(w), static_cast<float>(h));
-    _toolSprite->setTextureRect(r);
+    if (_currentTool == Game::ToolKind::Scythe) {
+        auto tex = _toolSprite->getTexture();
+        auto size = tex->getContentSize();
+        cocos2d::Rect r(0.0f, 0.0f, size.width, size.height);
+        _toolSprite->setTextureRect(r);
+    } else {
+        int col = toolColumnFor(_currentDir, _toolAnimFrame);
+        int w = 16;
+        int h = 32;
+        float x = static_cast<float>(col * w);
+        float y = 0.0f;
+        cocos2d::Rect r(x, y, static_cast<float>(w), static_cast<float>(h));
+        _toolSprite->setTextureRect(r);
+    }
+
+    if (_currentTool == Game::ToolKind::Scythe) {
+        _toolSprite->setScale(0.2f);
+    } else {
+        _toolSprite->setScale(1.0f);
+    }
 
     bool flipX = (_currentDir == Direction::LEFT);
     _toolSprite->setFlippedX(flipX);

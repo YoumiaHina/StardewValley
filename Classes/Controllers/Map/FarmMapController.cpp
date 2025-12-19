@@ -18,12 +18,14 @@ FarmMapController::FarmMapController(cocos2d::Node* worldNode)
 EnvironmentObstacleSystemBase* FarmMapController::obstacleSystem(ObstacleKind kind) {
     if (kind == ObstacleKind::Tree) return _treeSystem;
     if (kind == ObstacleKind::Rock) return _rockSystem;
+    if (kind == ObstacleKind::Weed) return _weedSystem;
     return nullptr;
 }
 
 const EnvironmentObstacleSystemBase* FarmMapController::obstacleSystem(ObstacleKind kind) const {
     if (kind == ObstacleKind::Tree) return _treeSystem;
     if (kind == ObstacleKind::Rock) return _rockSystem;
+    if (kind == ObstacleKind::Weed) return _weedSystem;
     return nullptr;
 }
 
@@ -176,6 +178,8 @@ void FarmMapController::init() {
     _treeSystem->attachTo(_actorsRoot);
     _rockSystem = new Controllers::RockSystem();
     _rockSystem->attachTo(_actorsRoot);
+    _weedSystem = new Controllers::WeedSystem();
+    _weedSystem->attachTo(_actorsRoot);
 
     refreshMapVisuals();
     refreshDropsVisuals();
@@ -279,6 +283,45 @@ void FarmMapController::init() {
         }
     }
 
+    if (_weedSystem && _weedSystem->isEmpty()) {
+        auto weedSystemConcrete = static_cast<Controllers::WeedSystem*>(_weedSystem);
+        auto rockSystemConcrete = static_cast<Controllers::RockSystem*>(_rockSystem);
+        if (!ws.farmWeeds.empty()) {
+            for (const auto& wp : ws.farmWeeds) {
+                if (rockSystemConcrete && rockSystemConcrete->findRockAt(wp.c, wp.r)) {
+                    continue;
+                }
+                auto center = tileToWorld(wp.c, wp.r);
+                _weedSystem->spawnFromTile(wp.c, wp.r, center, _farmMap, GameConfig::TILE_SIZE);
+            }
+        } else {
+            int cx = _cols / 2;
+            int cy = _rows / 2;
+            auto safe = [this, cx, cy, rockSystemConcrete](int c, int r){
+                if (std::abs(c - cx) <= 4 && std::abs(r - cy) <= 4) return true;
+                if (!inBounds(c, r)) return true;
+                auto t = getTile(c, r);
+                if (t == Game::TileType::NotSoil) return true;
+                if (rockSystemConcrete && rockSystemConcrete->findRockAt(c, r)) return true;
+                if (_farmMap) {
+                    auto center = this->tileToWorld(c, r);
+                    Vec2 footCenter = center + Vec2(0, -static_cast<float>(GameConfig::TILE_SIZE) * 0.5f);
+                    if (_farmMap->inBuildingArea(footCenter) || _farmMap->inWallArea(footCenter)) return true;
+                }
+                return false;
+            };
+            int weeds = (_cols * _rows) / 35;
+            _weedSystem->spawnRandom(weeds, _cols, _rows,
+                [this](int c, int r){ return this->tileToWorld(c, r); },
+                _farmMap, GameConfig::TILE_SIZE,
+                [safe](int c, int r){ return safe(c, r); }
+            );
+        }
+        if (weedSystemConcrete) {
+            ws.farmWeeds = weedSystemConcrete->getAllWeedTiles();
+        }
+    }
+
     // 门口区域
     float s = static_cast<float>(GameConfig::TILE_SIZE);
     float doorW = s * 2.0f;
@@ -344,13 +387,17 @@ Vec2 FarmMapController::clampPosition(const Vec2& current, const Vec2& next, flo
         bool baseBlockedX = _farmMap->collides(footX, radius);
         bool treeBlockedX = false;
         bool rockBlockedX = false;
+        bool weedBlockedX = false;
         if (_treeSystem) {
             treeBlockedX = _treeSystem->collides(footX, radius * 0.75f, GameConfig::TILE_SIZE);
         }
         if (_rockSystem) {
             rockBlockedX = _rockSystem->collides(footX, radius * 0.75f, GameConfig::TILE_SIZE);
         }
-        if (baseBlockedX || treeBlockedX || rockBlockedX) {
+        if (_weedSystem) {
+            weedBlockedX = _weedSystem->collides(footX, radius * 0.75f, GameConfig::TILE_SIZE);
+        }
+        if (baseBlockedX || treeBlockedX || rockBlockedX || weedBlockedX) {
             tryX.x = current.x;
         }
     }
@@ -360,13 +407,17 @@ Vec2 FarmMapController::clampPosition(const Vec2& current, const Vec2& next, flo
         bool baseBlockedY = _farmMap->collides(footY, radius);
         bool treeBlockedY = false;
         bool rockBlockedY = false;
+        bool weedBlockedY = false;
         if (_treeSystem) {
             treeBlockedY = _treeSystem->collides(footY, radius * 0.75f, GameConfig::TILE_SIZE);
         }
         if (_rockSystem) {
             rockBlockedY = _rockSystem->collides(footY, radius * 0.75f, GameConfig::TILE_SIZE);
         }
-        if (baseBlockedY || treeBlockedY || rockBlockedY) {
+        if (_weedSystem) {
+            weedBlockedY = _weedSystem->collides(footY, radius * 0.75f, GameConfig::TILE_SIZE);
+        }
+        if (baseBlockedY || treeBlockedY || rockBlockedY || weedBlockedY) {
             tryY.y = current.y;
         }
     }
@@ -382,6 +433,7 @@ bool FarmMapController::collides(const Vec2& pos, float radius) const {
     if (_farmMap && _farmMap->collides(pos, radius)) return true;
     if (_treeSystem && _treeSystem->collides(pos, radius, GameConfig::TILE_SIZE)) return true;
     if (_rockSystem && _rockSystem->collides(pos, radius, GameConfig::TILE_SIZE)) return true;
+    if (_weedSystem && _weedSystem->collides(pos, radius, GameConfig::TILE_SIZE)) return true;
     if (_chestController && _chestController->collides(pos)) return true;
     if (_furnaceController && _furnaceController->collides(pos)) return true;
     return false;
@@ -423,6 +475,8 @@ void FarmMapController::sortActorWithEnvironment(cocos2d::Node* actor) {
     if (treeSystemConcrete) treeSystemConcrete->sortTrees();
     auto rockSystemConcrete = static_cast<Controllers::RockSystem*>(_rockSystem);
     if (rockSystemConcrete) rockSystemConcrete->sortRocks();
+    auto weedSystemConcrete = static_cast<Controllers::WeedSystem*>(_weedSystem);
+    if (weedSystemConcrete) weedSystemConcrete->sortWeeds();
 }
 
 cocos2d::Vec2 FarmMapController::farmMineDoorSpawnPos() const {

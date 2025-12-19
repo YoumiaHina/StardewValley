@@ -221,6 +221,7 @@ void ChestPanelUI::refreshChestPanel(Game::Chest* chest) {
                             case Game::ToolKind::WaterCan:   path = "Tool/WaterCan.png"; break;
                             case Game::ToolKind::FishingRod: path = "Tool/FishingRod.png"; break;
                             case Game::ToolKind::Sword:      path = "Weapon/sword.png"; break;
+                            case Game::ToolKind::Scythe:     path = "Tool/Scythe.png"; break;
                             default: break;
                         }
                     }
@@ -385,6 +386,7 @@ void ChestPanelUI::refreshChestPanel(Game::Chest* chest) {
                             case Game::ToolKind::WaterCan:   path = "Tool/WaterCan.png"; break;
                             case Game::ToolKind::FishingRod: path = "Tool/FishingRod.png"; break;
                             case Game::ToolKind::Sword:      path = "Weapon/sword.png"; break;
+                            case Game::ToolKind::Scythe:     path = "Tool/Scythe.png"; break;
                             default: break;
                         }
                     }
@@ -531,6 +533,7 @@ void ChestPanelUI::onInventorySlotClicked(int invIndex) {
                         case Game::ToolKind::WaterCan:   path = "Tool/WaterCan.png"; break;
                         case Game::ToolKind::FishingRod: path = "Tool/FishingRod.png"; break;
                         case Game::ToolKind::Sword:      path = "Weapon/sword.png"; break;
+                        case Game::ToolKind::Scythe:     path = "Tool/Scythe.png"; break;
                         default: break;
                     }
                 }

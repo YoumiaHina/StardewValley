@@ -18,6 +18,7 @@ enum class ObstacleKind {
     Mineral,
     Rock,
     Tree,
+    Weed,
 };
 
 class IMapController {

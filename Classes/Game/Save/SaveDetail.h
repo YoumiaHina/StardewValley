@@ -319,6 +319,32 @@ void readRockPositions(std::istream& in, std::vector<Game::RockPos>& rocks) {
     }
 }
 
+void writeWeedPositions(std::ostream& out, const std::vector<Game::WeedPos>& weeds) {
+    out << weeds.size() << '\n';
+    for (const auto& w : weeds) {
+        out << w.c << ' ' << w.r << '\n';
+    }
+}
+
+void readWeedPositions(std::istream& in, std::vector<Game::WeedPos>& weeds) {
+    std::size_t count = 0;
+    in >> count;
+    in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    weeds.clear();
+    weeds.reserve(count);
+    for (std::size_t i = 0; i < count; ++i) {
+        int c = 0;
+        int r = 0;
+        in >> c >> r;
+        in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        if (!in) break;
+        Game::WeedPos wp;
+        wp.c = c;
+        wp.r = r;
+        weeds.push_back(wp);
+    }
+}
+
 void writeAnimals(std::ostream& out, const std::vector<Game::Animal>& animals) {
     out << animals.size() << '\n';
     for (const auto& a : animals) {

@@ -16,6 +16,7 @@
 #include "Game/Crops/crop/CropBase.h"
 #include "Game/Tree.h"
 #include "Game/Rock.h"
+#include "Game/Weed.h"
 #include "Game/Animal.h"
 #include "Game/Furnace.h"
 
@@ -69,6 +70,7 @@ struct WorldState {
 
     std::vector<TreePos> farmTrees;
     std::vector<RockPos> farmRocks;
+    std::vector<WeedPos> farmWeeds;
 
     std::vector<Animal> farmAnimals;
 

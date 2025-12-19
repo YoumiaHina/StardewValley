@@ -55,6 +55,7 @@ bool SceneBase::initBase(float worldScale, bool buildCraftPanel, bool enableTool
         ws.inventory->setTool(2, Game::makeTool(Game::ToolKind::Pickaxe));
         ws.inventory->setTool(3, Game::makeTool(Game::ToolKind::WaterCan));
         ws.inventory->setTool(4, Game::makeTool(Game::ToolKind::FishingRod));
+        ws.inventory->setTool(5, Game::makeTool(Game::ToolKind::Scythe));
     }
     _inventory = ws.inventory;
     if (_inventory) _inventory->selectIndex(ws.selectedIndex);

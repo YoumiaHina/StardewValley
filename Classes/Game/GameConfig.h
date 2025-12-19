@@ -32,6 +32,7 @@ namespace GameConfig {
     static const int ENERGY_COST_HOE = 4;
     static const int ENERGY_COST_WATER = 2;
     static const int ENERGY_COST_SWORD = 6;
+    static const int ENERGY_COST_SCYTHE = 4;
     static const int ENERGY_RECOVER_FIBER = 15; // 纤维作为占位食物
 
     // Time mapping

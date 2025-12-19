@@ -177,7 +177,7 @@ bool saveToFile(const std::string& fullPath) {
     std::ofstream out(path, std::ios::trunc);
     if (!out) return false;
     auto& ws = globalState();
-    out << "SDV_SAVE 7" << '\n';
+    out << "SDV_SAVE 8" << '\n';
     out << ws.seasonIndex << ' ' << ws.dayOfSeason << ' '
         << ws.timeHour << ' ' << ws.timeMinute << ' '
         << ws.timeAccum << ' '
@@ -227,6 +227,7 @@ bool saveToFile(const std::string& fullPath) {
     writeCrops(out, ws.farmCrops);
     writeTreePositions(out, ws.farmTrees);
     writeRockPositions(out, ws.farmRocks);
+    writeWeedPositions(out, ws.farmWeeds);
     writeAnimals(out, ws.farmAnimals);
     writeChests(out, ws.houseChests);
     writeChests(out, ws.townChests);
@@ -247,7 +248,7 @@ bool loadFromFile(const std::string& fullPath) {
     int version = 0;
     in >> magic >> version;
     in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-    if (!in || magic != "SDV_SAVE" || version != 7) {
+    if (!in || magic != "SDV_SAVE" || version < 7 || version > 8) {
         return false;
     }
     auto& ws = globalState();
@@ -344,6 +345,11 @@ bool loadFromFile(const std::string& fullPath) {
     readCrops(in, ws.farmCrops);
     readTreePositions(in, ws.farmTrees);
     readRockPositions(in, ws.farmRocks);
+    if (version >= 8) {
+        readWeedPositions(in, ws.farmWeeds);
+    } else {
+        ws.farmWeeds.clear();
+    }
     readAnimals(in, ws.farmAnimals);
     readChests(in, ws.houseChests);
     readChests(in, ws.townChests);

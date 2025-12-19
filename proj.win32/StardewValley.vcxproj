@@ -154,6 +154,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
   <ItemGroup>
     <ClCompile Include="..\Classes\AppDelegate.cpp" />
     <ClCompile Include="..\Classes\Controllers\Environment\MineralSystem.cpp" />
+    <ClCompile Include="..\Classes\Controllers\Environment\WeedSystem.cpp" />
     <ClCompile Include="..\Classes\Controllers\Environment\RockSystem.cpp" />
     <ClCompile Include="..\Classes\Controllers\Environment\StairSystem.cpp" />
     <ClCompile Include="..\Classes\Controllers\Environment\TreeSystem.cpp" />
@@ -201,6 +202,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClCompile Include="..\Classes\Game\NPC\PierreNpc.cpp" />
     <ClCompile Include="..\Classes\Game\NPC\RobinNpc.cpp" />
     <ClCompile Include="..\Classes\Game\NPC\WillyNpc.cpp" />
+    <ClCompile Include="..\Classes\Game\Weed.cpp" />
     <ClCompile Include="..\Classes\Game\Rock.cpp" />
     <ClCompile Include="..\Classes\Game\Save\SaveSystem.cpp" />
     <ClCompile Include="..\Classes\Game\Stair.cpp" />
@@ -208,6 +210,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClCompile Include="..\Classes\Game\Tool\FishingRod.cpp" />
     <ClCompile Include="..\Classes\Game\Tool\Hoe.cpp" />
     <ClCompile Include="..\Classes\Game\Tool\Pickaxe.cpp" />
+    <ClCompile Include="..\Classes\Game\Tool\Scythe.cpp" />
     <ClCompile Include="..\Classes\Game\Tool\Sword.cpp" />
     <ClCompile Include="..\Classes\Game\Tool\ToolFactory.cpp" />
     <ClCompile Include="..\Classes\Game\Tool\WaterCan.cpp" />
@@ -268,6 +271,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClInclude Include="..\Classes\Controllers\Environment\RockSystem.h" />
     <ClInclude Include="..\Classes\Controllers\Environment\StairSystem.h" />
     <ClInclude Include="..\Classes\Controllers\Environment\TreeSystem.h" />
+    <ClInclude Include="..\Classes\Controllers\Environment\WeedSystem.h" />
     <ClInclude Include="..\Classes\Controllers\Interact\BeachInteractor.h" />
     <ClInclude Include="..\Classes\Controllers\Interact\ChestInteractor.h" />
     <ClInclude Include="..\Classes\Controllers\Interact\MineInteractor.h" />
@@ -314,6 +318,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClInclude Include="..\Classes\Game\NPC\WillyNpc.h" />
     <ClInclude Include="..\Classes\Game\PlaceableItemBase.h" />
     <ClInclude Include="..\Classes\Game\Rock.h" />
+    <ClInclude Include="..\Classes\Game\Weed.h" />
     <ClInclude Include="..\Classes\Game\Save\SaveDetail.h" />
     <ClInclude Include="..\Classes\Game\Save\SaveSystem.h" />
     <ClInclude Include="..\Classes\Game\Stair.h" />
@@ -321,6 +326,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClInclude Include="..\Classes\Game\Tool\FishingRod.h" />
     <ClInclude Include="..\Classes\Game\Tool\Hoe.h" />
     <ClInclude Include="..\Classes\Game\Tool\Pickaxe.h" />
+    <ClInclude Include="..\Classes\Game\Tool\Scythe.h" />
     <ClInclude Include="..\Classes\Game\Tool\Weapon.h" />
     <ClInclude Include="..\Classes\Game\Tool\Sword.h" />
     <ClInclude Include="..\Classes\Game\Tool\ToolBase.h" />
