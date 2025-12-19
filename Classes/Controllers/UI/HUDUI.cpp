@@ -71,7 +71,7 @@ void HUDUI::refreshHUD() {
         _hudTimeLabel->setString(StringUtils::format("%s Day %d, %02d:%02d", seasonName(ws.seasonIndex), ws.dayOfSeason, ws.timeHour, ws.timeMinute));
     }
     if (_hudWeatherLabel) {
-        _hudWeatherLabel->setString(StringUtils::format("Weather: %s", ws.isRaining ? "Rain" : "Sunny"));
+        _hudWeatherLabel->setString(StringUtils::format("Weather: %s", ws.isRaining ? "Rainy" : "Sunny"));
     }
     if (_hudGoldLabel) {
         _hudGoldLabel->setString(StringUtils::format("Gold: %lld", ws.gold));

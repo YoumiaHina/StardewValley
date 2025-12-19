@@ -11,12 +11,6 @@ namespace Controllers {
 MineMapController::MineMapController(cocos2d::Node* worldNode)
 : _worldNode(worldNode), _mineralSystem(this), _stairSystem(this) {}
 
-cocos2d::Vec2 MineMapController::getOrigin() const { return cocos2d::Vec2(0, 0); }
-
-bool MineMapController::isNearChest(const cocos2d::Vec2&) const { return false; }
-
-float MineMapController::tileSize() const { return static_cast<float>(GameConfig::TILE_SIZE); }
-
 EnvironmentObstacleSystemBase* MineMapController::obstacleSystem(ObstacleKind kind) {
     if (kind == ObstacleKind::Mineral || kind == ObstacleKind::Rock) return &_mineralSystem;
     return nullptr;
@@ -27,24 +21,10 @@ const EnvironmentObstacleSystemBase* MineMapController::obstacleSystem(ObstacleK
     return nullptr;
 }
 
-void MineMapController::refreshCropsVisuals() {}
-
-void MineMapController::setDynamicColliders(const std::vector<cocos2d::Rect>& rects) { _dynamicColliders = rects; }
-
-void MineMapController::setMonsterColliders(const std::vector<cocos2d::Rect>& rects) { _monsterColliders = rects; }
-
-const std::vector<Game::Chest>& MineMapController::chests() const { return _emptyChests; }
-
-std::vector<Game::Chest>& MineMapController::chests() { return _emptyChests; }
-
-void MineMapController::setExtraStairs(const std::vector<cocos2d::Vec2>& stairs) { _extraStairs = stairs; }
-
 void MineMapController::setLastClickWorldPos(const cocos2d::Vec2& p) {
     _lastClickWorldPos = p;
     _hasLastClick = true;
 }
-
-void MineMapController::clearLastClickWorldPos() { _hasLastClick = false; }
 
 Vec2 MineMapController::getPlayerPosition(const Vec2& playerMapLocalPos) const {
     if (!_worldNode) return playerMapLocalPos;
@@ -159,9 +139,10 @@ void MineMapController::updateCursor(const Vec2& playerPos, const Vec2& lastDir)
 }
 
 Game::TileType MineMapController::getTile(int c, int r) const {
+    if (c < 0 || r < 0 || c >= _cols || r >= _rows) return Game::TileType::NotSoil;
     size_t idx = static_cast<size_t>(r) * static_cast<size_t>(_cols) + static_cast<size_t>(c);
     if (idx < _tiles.size()) return _tiles[idx];
-    return Game::TileType::Soil;
+    return Game::TileType::NotSoil;
 }
 
 void MineMapController::setTile(int c, int r, Game::TileType t) {
@@ -406,6 +387,7 @@ void MineMapController::loadEntrance() {
         auto tsize = _entrance->getMapSize();
         _cols = static_cast<int>(tsize.width);
         _rows = static_cast<int>(tsize.height);
+        _tiles.assign(static_cast<std::size_t>(_cols) * static_cast<std::size_t>(_rows), Game::TileType::NotSoil);
         _stairsPos = _entrance->stairsCenter();
         _mineralSystem.attachTo(_entrance->getTMX());
         _mineralSystem.bindRuntimeStorage(&_minerals);
@@ -463,6 +445,7 @@ void MineMapController::loadFloorTMX(int floorIndex) {
         auto tsize = _floorMap->getMapSize();
         _cols = static_cast<int>(tsize.width);
         _rows = static_cast<int>(tsize.height);
+        _tiles.assign(static_cast<std::size_t>(_cols) * static_cast<std::size_t>(_rows), Game::TileType::NotSoil);
         _extraStairs.clear();
         _stairsPos = _floorMap->stairsCenter();
         _minerals.clear();

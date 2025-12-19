@@ -21,6 +21,11 @@ BeachMapController::BeachMapController(Game::BeachMap* map, cocos2d::Node* world
         _map->setPosition(_origin);
         _worldNode->addChild(_map, 0);
     }
+    if (_map) {
+        _cols = static_cast<int>(_map->getMapSize().width);
+        _rows = static_cast<int>(_map->getMapSize().height);
+        _tiles.assign(static_cast<size_t>(_cols) * static_cast<size_t>(_rows), Game::TileType::NotSoil);
+    }
     auto& ws = Game::globalState();
     _chests = ws.beachChests;
     refreshMapVisuals();
@@ -65,6 +70,20 @@ void BeachMapController::addActorToMap(Node* node, int zOrder) {
     } else if (_worldNode) {
         _worldNode->addChild(node, zOrder);
     }
+}
+
+void BeachMapController::worldToTileIndex(const cocos2d::Vec2& p, int& c, int& r) const {
+    if (_map) { _map->worldToTileIndex(p, c, r); return; }
+    c = 0;
+    r = 0;
+}
+
+Vec2 BeachMapController::tileToWorld(int c, int r) const {
+    return _map ? _map->tileToWorld(c, r) : cocos2d::Vec2();
+}
+
+bool BeachMapController::inBounds(int c, int r) const {
+    return _map && c >= 0 && r >= 0 && c < static_cast<int>(_map->getMapSize().width) && r < static_cast<int>(_map->getMapSize().height);
 }
 
 Vec2 BeachMapController::clampPosition(const Vec2& current, const Vec2& next, float radius) const {
@@ -148,8 +167,28 @@ bool BeachMapController::collides(const Vec2& p, float radius) const {
     return false;
 }
 
-bool BeachMapController::isNearChest(const Vec2& p) const {
-    return Game::isNearAnyChest(p, _chests);
+bool BeachMapController::isNearDoor(const Vec2& p) const {
+    return _map ? _map->nearDoorToFarm(p) : false;
+}
+
+Game::TileType BeachMapController::getTile(int c, int r) const {
+    if (c < 0 || r < 0 || c >= _cols || r >= _rows) return Game::TileType::NotSoil;
+    size_t idx = static_cast<size_t>(r) * static_cast<size_t>(_cols) + static_cast<size_t>(c);
+    if (idx < _tiles.size()) return _tiles[idx];
+    return Game::TileType::NotSoil;
+}
+
+void BeachMapController::setTile(int c, int r, Game::TileType) {
+    if (c < 0 || r < 0 || c >= _cols || r >= _rows) return;
+    size_t idx = static_cast<size_t>(r) * static_cast<size_t>(_cols) + static_cast<size_t>(c);
+    if (idx < _tiles.size()) {
+        _tiles[idx] = Game::TileType::NotSoil;
+    }
+}
+
+void BeachMapController::setLastClickWorldPos(const cocos2d::Vec2& p) {
+    _lastClickWorldPos = p;
+    _hasLastClick = true;
 }
 
 void BeachMapController::refreshMapVisuals() {

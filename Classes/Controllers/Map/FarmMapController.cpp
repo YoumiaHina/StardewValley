@@ -15,10 +15,6 @@ namespace Controllers {
 FarmMapController::FarmMapController(cocos2d::Node* worldNode)
 : _worldNode(worldNode) {}
 
-cocos2d::Vec2 FarmMapController::getOrigin() const { return _mapOrigin; }
-
-float FarmMapController::tileSize() const { return static_cast<float>(GameConfig::TILE_SIZE); }
-
 EnvironmentObstacleSystemBase* FarmMapController::obstacleSystem(ObstacleKind kind) {
     if (kind == ObstacleKind::Tree) return _treeSystem;
     if (kind == ObstacleKind::Rock) return _rockSystem;
@@ -41,18 +37,10 @@ std::vector<Game::Chest>& FarmMapController::chests() {
     return _chestController ? _chestController->chests() : empty;
 }
 
-Game::FarmMap* FarmMapController::tmx() const { return _farmMap; }
-
-cocos2d::Node* FarmMapController::worldNode() const { return _worldNode; }
-
-bool FarmMapController::isFarm() const { return true; }
-
 void FarmMapController::setLastClickWorldPos(const cocos2d::Vec2& p) {
     _lastClickWorldPos = p;
     _hasLastClick = true;
 }
-
-void FarmMapController::clearLastClickWorldPos() { _hasLastClick = false; }
 
 void FarmMapController::init() {
     if (!_worldNode) return;

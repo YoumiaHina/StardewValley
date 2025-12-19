@@ -1,4 +1,5 @@
 #include "Controllers/Map/RoomMapController.h"
+#include "Controllers/Interact/TileSelector.h"
 #include "cocos2d.h"
 #include "Game/GameConfig.h"
 #include "Game/WorldState.h"
@@ -9,6 +10,55 @@ using namespace cocos2d;
 
 namespace Controllers {
 
+RoomMapController::RoomMapController(cocos2d::Node* worldNode)
+: _worldNode(worldNode) {}
+
+void RoomMapController::worldToTileIndex(const cocos2d::Vec2& p, int& c, int& r) const {
+    float s = tileSize();
+    if (s <= 0.0f) {
+        c = 0;
+        r = 0;
+        return;
+    }
+    c = static_cast<int>(p.x / s);
+    r = static_cast<int>(p.y / s);
+}
+
+cocos2d::Vec2 RoomMapController::tileToWorld(int c, int r) const {
+    float s = tileSize();
+    return cocos2d::Vec2(c * s + s * 0.5f, r * s + s * 0.5f);
+}
+
+Game::TileType RoomMapController::getTile(int c, int r) const {
+    if (c < 0 || r < 0 || c >= _cols || r >= _rows) return Game::TileType::NotSoil;
+    size_t idx = static_cast<size_t>(r) * static_cast<size_t>(_cols) + static_cast<size_t>(c);
+    if (idx < _tiles.size()) return _tiles[idx];
+    return Game::TileType::NotSoil;
+}
+
+void RoomMapController::setTile(int c, int r, Game::TileType) {
+    if (c < 0 || r < 0 || c >= _cols || r >= _rows) return;
+    size_t idx = static_cast<size_t>(r) * static_cast<size_t>(_cols) + static_cast<size_t>(c);
+    if (idx < _tiles.size()) {
+        _tiles[idx] = Game::TileType::NotSoil;
+    }
+}
+
+void RoomMapController::setLastClickWorldPos(const cocos2d::Vec2& p) {
+    _lastClickWorldPos = p;
+    _hasLastClick = true;
+}
+
+const std::vector<Game::Chest>& RoomMapController::chests() const {
+    static const std::vector<Game::Chest> empty;
+    return _chestController ? _chestController->chests() : empty;
+}
+
+std::vector<Game::Chest>& RoomMapController::chests() {
+    static std::vector<Game::Chest> empty;
+    return _chestController ? _chestController->chests() : empty;
+}
+
 void RoomMapController::init() {
     if (!_worldNode) return;
     _roomMap = Game::RoomMap::create("Maps/farm_room/farm_room.tmx");
@@ -17,6 +67,12 @@ void RoomMapController::init() {
         _roomMap->setPosition(Vec2(0,0));
         _worldNode->addChild(_roomMap, 0);
 
+        float s = tileSize();
+        auto cs = _roomMap->getContentSize();
+        _cols = (s > 0.0f) ? static_cast<int>(cs.width / s) : 0;
+        _rows = (s > 0.0f) ? static_cast<int>(cs.height / s) : 0;
+        _tiles.assign(static_cast<size_t>(_cols) * static_cast<size_t>(_rows), Game::TileType::NotSoil);
+
         if (auto tmx = _roomMap->getTMX()) {
             auto bedBody = tmx->getLayer("BedBody");
             if (bedBody) {
@@ -24,7 +80,6 @@ void RoomMapController::init() {
             }
         }
 
-        auto cs = _roomMap->getContentSize();
         _roomRect = Rect(0, 0, cs.width, cs.height);
 
         cocos2d::Rect door;
@@ -142,6 +197,38 @@ bool RoomMapController::isNearFarmDoor(const Vec2& playerWorldPos) const {
 
 bool RoomMapController::isNearChest(const Vec2& playerWorldPos) const {
     return _chestController ? _chestController->isNearChest(playerWorldPos) : false;
+}
+
+std::pair<int,int> RoomMapController::targetTile(const Vec2& playerPos, const Vec2& lastDir) const {
+    return TileSelector::selectForwardTile(
+        playerPos,
+        lastDir,
+        [this](const Vec2& p, int& c, int& r){ worldToTileIndex(p, c, r); },
+        [this](int c, int r){ return inBounds(c, r); },
+        tileSize(),
+        _hasLastClick,
+        _lastClickWorldPos,
+        [this](int c, int r){ return tileToWorld(c, r); });
+}
+
+void RoomMapController::updateCursor(const Vec2& playerPos, const Vec2& lastDir) {
+    if (!_cursor) {
+        _cursor = DrawNode::create();
+        if (_roomMap && _roomMap->getTMX()) {
+            _roomMap->getTMX()->addChild(_cursor, 21);
+        } else if (_worldNode) {
+            _worldNode->addChild(_cursor, 21);
+        }
+    }
+    if (!_cursor) return;
+    TileSelector::drawFanCursor(
+        _cursor,
+        playerPos,
+        lastDir,
+        [this](const Vec2& p, int& c, int& r) { worldToTileIndex(p, c, r); },
+        [this](int c, int r) { return inBounds(c, r); },
+        [this](int c, int r) { return tileToWorld(c, r); },
+        tileSize());
 }
 
 void RoomMapController::addActorToMap(cocos2d::Node* node, int zOrder) {

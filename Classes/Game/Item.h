@@ -129,6 +129,7 @@ inline std::string itemIconPath(ItemType t) {
         case ItemType::Egg: return "DropsAndInventory/Animal_Products/Egg.png";
         case ItemType::Milk: return "DropsAndInventory/Animal_Products/Milk.png";
         case ItemType::Wool: return "DropsAndInventory/Animal_Products/Wool.png";
+        case ItemType::Fish: return "fish/globefish.png";
         default: return std::string();
     }
 }
