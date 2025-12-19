@@ -7,6 +7,7 @@
 #include "Game/Cheat.h"
 #include "Game/Inventory.h"
 #include "Game/Tool/ToolBase.h"
+#include "Game/Drop.h"
 #include "Game/Save/SaveSystem.h"
 #include "Scenes/MainMenuScene.h"
 #include "cocos2d.h"
@@ -162,6 +163,73 @@ void PlayerController::registerCommonInputHandlers(
                                 _ui->popTextAt(_map->getPlayerPosition(_player->getPosition()), "Ate", Color3B::GREEN);
                             }
                         }
+                    }
+                }
+            } break;
+            case EventKeyboard::KeyCode::KEY_Q: {
+                if (chestOpen || storeOpen) break;
+                if (!_inventory || !_player || !_map) break;
+                Vec2 playerPos = _player->getPosition();
+                Vec2 dir = lastDir();
+                int baseC = 0;
+                int baseR = 0;
+                _map->worldToTileIndex(playerPos, baseC, baseR);
+                int stepC = 0;
+                int stepR = 0;
+                if (std::abs(dir.x) >= std::abs(dir.y)) {
+                    if (dir.x > 0.0f) stepC = 1;
+                    if (dir.x < 0.0f) stepC = -1;
+                } else {
+                    if (dir.y > 0.0f) stepR = 1;
+                    if (dir.y < 0.0f) stepR = -1;
+                }
+                if (stepC == 0 && stepR == 0) {
+                    stepR = 1;
+                }
+                int c1 = baseC + stepC;
+                int r1 = baseR + stepR;
+                int c2 = baseC + stepC * 2;
+                int r2 = baseR + stepR * 2;
+                int dropC = c2;
+                int dropR = r2;
+                if (!_map->inBounds(dropC, dropR)) {
+                    if (_map->inBounds(c1, r1)) {
+                        dropC = c1;
+                        dropR = r1;
+                    } else if (_map->inBounds(baseC, baseR)) {
+                        dropC = baseC;
+                        dropR = baseR;
+                    } else {
+                        break;
+                    }
+                }
+                auto kind = _inventory->selectedKind();
+                if (kind == Game::SlotKind::Item) {
+                    int selected = _inventory->selectedIndex();
+                    if (selected < 0) break;
+                    auto slot = _inventory->selectedSlot();
+                    if (slot.itemQty <= 0) break;
+                    Game::ItemType type = slot.itemType;
+                    bool removed = _inventory->removeOneItemFromSlot(static_cast<std::size_t>(selected));
+                    if (!removed) break;
+                    _map->spawnDropAt(dropC, dropR, static_cast<int>(type), 1);
+                    _map->refreshDropsVisuals();
+                    if (_ui) {
+                        _ui->refreshHotbar();
+                    }
+                } else if (kind == Game::SlotKind::Tool) {
+                    int selected = _inventory->selectedIndex();
+                    if (selected < 0) break;
+                    const Game::ToolBase* tConst = _inventory->toolAt(static_cast<std::size_t>(selected));
+                    if (!tConst) break;
+                    Game::ToolKind tk = tConst->kind();
+                    bool cleared = _inventory->clearSlot(static_cast<std::size_t>(selected));
+                    if (!cleared) break;
+                    int raw = Game::toolDropRaw(tk);
+                    _map->spawnDropAt(dropC, dropR, raw, 1);
+                    _map->refreshDropsVisuals();
+                    if (_ui) {
+                        _ui->refreshHotbar();
                     }
                 }
             } break;

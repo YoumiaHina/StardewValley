@@ -23,4 +23,16 @@ public:
                                  Game::Inventory* inv);
 };
 
+inline int toolDropRaw(Game::ToolKind tk) {
+    return 10000 + static_cast<int>(tk);
+}
+
+inline bool isToolDropRaw(int raw) {
+    return raw >= 10000;
+}
+
+inline Game::ToolKind toolKindFromDropRaw(int raw) {
+    return static_cast<Game::ToolKind>(raw - 10000);
+}
+
 } // namespace Game

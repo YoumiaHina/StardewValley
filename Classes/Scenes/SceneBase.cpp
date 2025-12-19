@@ -158,6 +158,7 @@ void SceneBase::update(float dt) {
         Vec2 p = _player->getPosition();
         if (_inventory) {
             _mapController->collectDropsNear(p, _inventory.get());
+            _uiController->refreshHotbar();
         }
         bool nearDoor = _mapController->isNearDoor(p);
         _uiController->showDoorPrompt(nearDoor, _mapController->getPlayerPosition(p), doorPromptText());

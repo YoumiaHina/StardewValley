@@ -1,10 +1,24 @@
 #include "Game/Drop.h"
+#include "Game/Tool/ToolFactory.h"
 #include <algorithm>
 #include <string>
 
 using namespace cocos2d;
 
 namespace Game {
+
+static std::string toolDropIconPath(Game::ToolKind tk) {
+    switch (tk) {
+        case Game::ToolKind::Axe:        return "Tool/Axe.png";
+        case Game::ToolKind::Hoe:        return "Tool/Hoe.png";
+        case Game::ToolKind::Pickaxe:    return "Tool/Pickaxe.png";
+        case Game::ToolKind::WaterCan:   return "Tool/WaterCan.png";
+        case Game::ToolKind::FishingRod: return "Tool/FishingRod.png";
+        case Game::ToolKind::Sword:      return "Weapon/sword.png";
+        case Game::ToolKind::Scythe:     return "Tool/Scythe.png";
+        default:                         return std::string();
+    }
+}
 
 void Drop::renderDrops(const std::vector<Drop>& drops, cocos2d::Node* root, cocos2d::DrawNode* draw) {
     if (!draw) return;
@@ -14,8 +28,15 @@ void Drop::renderDrops(const std::vector<Drop>& drops, cocos2d::Node* root, coco
     }
     for (const auto& d : drops) {
         bool usedSprite = false;
+        int raw = static_cast<int>(d.type);
+        std::string path;
+        if (isToolDropRaw(raw)) {
+            Game::ToolKind tk = toolKindFromDropRaw(raw);
+            path = toolDropIconPath(tk);
+        } else {
+            path = Game::itemIconPath(d.type);
+        }
         if (root) {
-            std::string path = Game::itemIconPath(d.type);
             if (!path.empty()) {
                 auto spr = cocos2d::Sprite::create(path);
                 if (spr && spr->getTexture()) {
@@ -35,7 +56,11 @@ void Drop::renderDrops(const std::vector<Drop>& drops, cocos2d::Node* root, coco
             }
         }
         if (!usedSprite) {
-            draw->drawSolidCircle(d.pos, GameConfig::DROP_DRAW_RADIUS, 0.0f, 12, Game::itemColor(d.type));
+            cocos2d::Color4F color = Game::itemColor(d.type);
+            if (isToolDropRaw(raw)) {
+                color = cocos2d::Color4F(0.95f, 0.95f, 0.95f, 1.0f);
+            }
+            draw->drawSolidCircle(d.pos, GameConfig::DROP_DRAW_RADIUS, 0.0f, 12, color);
             draw->drawCircle(d.pos, GameConfig::DROP_DRAW_RADIUS, 0.0f, 12, false, cocos2d::Color4F(0, 0, 0, 0.4f));
         }
     }
@@ -50,11 +75,28 @@ void Drop::collectDropsNear(const cocos2d::Vec2& playerWorldPos, std::vector<Dro
     for (auto& d : drops) {
         float dist2 = playerWorldPos.distanceSquared(d.pos);
         if (dist2 <= r2) {
-            int leftover = inv->addItems(d.type, d.qty);
-            if (leftover > 0) {
-                Drop nd = d;
-                nd.qty = leftover;
-                kept.push_back(nd);
+            int raw = static_cast<int>(d.type);
+            if (isToolDropRaw(raw)) {
+                Game::ToolKind tk = toolKindFromDropRaw(raw);
+                bool placed = false;
+                std::size_t sz = inv->size();
+                for (std::size_t i = 0; i < sz; ++i) {
+                    if (inv->isEmpty(i)) {
+                        inv->setTool(i, Game::makeTool(tk));
+                        placed = true;
+                        break;
+                    }
+                }
+                if (!placed) {
+                    kept.push_back(d);
+                }
+            } else {
+                int leftover = inv->addItems(d.type, d.qty);
+                if (leftover > 0) {
+                    Drop nd = d;
+                    nd.qty = leftover;
+                    kept.push_back(nd);
+                }
             }
         } else {
             kept.push_back(d);
