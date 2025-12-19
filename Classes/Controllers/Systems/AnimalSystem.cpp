@@ -17,6 +17,57 @@ namespace Game {
 namespace Controllers {
 
 namespace {
+    // 产物掉落描述：
+    // - 用于把“动物当日产出”暂存为一条掉落信息（类型/数量/世界坐标）。
+    // - 由每日推进逻辑生成，随后交由 IMapController::spawnDropAt 落地到地图掉落系统。
+    struct ProducedDrop {
+        Game::ItemType type = Game::ItemType::Egg;
+        int qty = 0;
+        cocos2d::Vec2 pos;
+    };
+
+    // 获取某类动物从幼年到成年的所需“有效喂食天数”。
+    int matureDays(Game::AnimalType type);
+    // 获取某类动物成年且当日被喂食时产出的物品类型。
+    Game::ItemType productFor(Game::AnimalType type);
+    // 获取某类动物当日产出数量（可能包含随机）。
+    int productQty(Game::AnimalType type);
+
+    // 推进单只动物的“离线一天”：
+    // - 若 fedToday=true：年龄 +1，并在达到成熟天数后标记为成年。
+    // - 若成年且 fedToday=true：生成当日产物（通过 producedDrop 输出）。
+    // - 结尾统一清空 fedToday（跨日重置）。
+    // 返回值：本日是否产生了可掉落的产物（qty>0）。
+    bool advanceAnimalOneDay(Game::Animal& animal, ProducedDrop* producedDrop) {
+        if (producedDrop) {
+            producedDrop->qty = 0;
+            producedDrop->pos = animal.pos;
+        }
+
+        if (animal.fedToday) {
+            animal.ageDays += 1;
+            if (!animal.isAdult && animal.ageDays >= matureDays(animal.type)) {
+                animal.isAdult = true;
+            }
+        }
+
+        bool produced = false;
+        if (animal.isAdult && animal.fedToday) {
+            Game::ItemType prod = productFor(animal.type);
+            int qty = productQty(animal.type);
+            if (producedDrop) {
+                producedDrop->type = prod;
+                producedDrop->qty = qty;
+                producedDrop->pos = animal.pos;
+            }
+            produced = (qty > 0);
+        }
+
+        animal.fedToday = false;
+        return produced;
+    }
+
+    // 根据动物类型获取其静态行为数据（速度/半径/贴图路径）。
     const Game::AnimalBase& behaviorFor(Game::AnimalType type) {
         switch (type) {
             case Game::AnimalType::Chicken: return Game::chickenAnimalBehavior();
@@ -26,21 +77,27 @@ namespace {
         return Game::chickenAnimalBehavior();
     }
 
+    // 全局随机数引擎：用于动物游走与产物数量随机。
     std::mt19937& rng() {
         static std::mt19937 eng{ std::random_device{}() };
         return eng;
     }
 
+    // 生成 [a,b] 区间内的随机浮点数。
     float randomFloat(float a, float b) {
         std::uniform_real_distribution<float> dist(a, b);
         return dist(rng());
     }
 
+    // 生成 [a,b] 区间内的随机整数。
     int randomInt(int a, int b) {
         std::uniform_int_distribution<int> dist(a, b);
         return dist(rng());
     }
 
+    // 饲料可接受性判定：
+    // - 小鸡：接受任意种子（复用 Game::isSeed）。
+    // - 牛/羊：仅接受萝卜（示例规则，可后续替换为更完整的饲料系统）。
     bool acceptsFeed(Game::AnimalType type, Game::ItemType feed) {
         if (type == Game::AnimalType::Chicken) {
             return Game::isSeed(feed);
@@ -51,6 +108,7 @@ namespace {
         return false;
     }
 
+    // 动物产物映射：将动物类型映射为当日产物物品类型。
     Game::ItemType productFor(Game::AnimalType type) {
         switch (type) {
             case Game::AnimalType::Chicken: return Game::ItemType::Egg;
@@ -60,6 +118,7 @@ namespace {
         return Game::ItemType::Egg;
     }
 
+    // 动物产物数量规则：将动物类型映射为当日产物数量（部分带随机）。
     int productQty(Game::AnimalType type) {
         switch (type) {
             case Game::AnimalType::Chicken: return randomInt(1, 3);
@@ -69,6 +128,7 @@ namespace {
         return 1;
     }
 
+    // 成熟天数规则：将动物类型映射为“喂食累计天数达到后成年”。
     int matureDays(Game::AnimalType type) {
         switch (type) {
             case Game::AnimalType::Chicken: return 3;
@@ -79,7 +139,9 @@ namespace {
     }
 }
 
-// 构造：从全局 WorldState 还原农场动物实例，并附着到当前地图
+// 构造：从全局 WorldState 还原农场动物实例到运行时缓存。
+// - 仅恢复运行时状态（位置/目标/成长/喂食等），精灵节点延迟到 ensureSprite 创建。
+// - map/worldNode 用于后续挂载精灵与碰撞/掉落交互。
 AnimalSystem::AnimalSystem(Controllers::IMapController* map, cocos2d::Node* worldNode)
     : _map(map), _worldNode(worldNode) {
     auto& ws = Game::globalState();
@@ -92,7 +154,9 @@ AnimalSystem::AnimalSystem(Controllers::IMapController* map, cocos2d::Node* worl
     }
 }
 
-// 确保某个动物实例拥有精灵与成长/喂食状态标签
+// 确保实例拥有精灵与状态标签：
+// - 首次创建：按行为表选择贴图，按 tileSize 做高度缩放，并挂载到地图 actor 层。
+// - 标签：挂在精灵子节点上，用于显示成年/剩余天数与饥饿状态。
 void AnimalSystem::ensureSprite(Instance& inst) {
     if (!inst.sprite && _worldNode && _map) {
         const auto& beh = behaviorFor(inst.animal.type);
@@ -125,7 +189,11 @@ void AnimalSystem::ensureSprite(Instance& inst) {
     }
 }
 
-// 刷新头顶成长/喂食状态文本（Adult / 剩余天数 + Full/Hungry）
+// 刷新头顶状态文本：
+// - 未成年：显示距离成年还差的“有效喂食天数”。
+// - 已成年：显示 Adult。
+// - 追加当日喂食状态（Full/Hungry）。
+// - 位置：基于精灵的实际缩放后高度，在头顶上方偏移一定像素以避免遮挡。
 void AnimalSystem::updateGrowthLabel(Instance& inst) {
     if (!inst.growthLabel || !inst.sprite) return;
     int need = matureDays(inst.animal.type);
@@ -149,6 +217,10 @@ void AnimalSystem::updateGrowthLabel(Instance& inst) {
     inst.growthLabel->setPosition(pos);
 }
 
+// 生成一只新动物到系统：
+// - 初始化运行时数据（位置/目标/速度/游走半径/成长/喂食）。
+// - 立即创建并挂载精灵（如 map/worldNode 有效）。
+// - 写回 WorldState（用于存档/跨场景/离线推进）。
 void AnimalSystem::spawnAnimal(Game::AnimalType type, const cocos2d::Vec2& pos) {
     if (!_map || !_worldNode) return;
     Instance inst;
@@ -172,6 +244,9 @@ void AnimalSystem::spawnAnimal(Game::AnimalType type, const cocos2d::Vec2& pos) 
     }
 }
 
+// 购买动物：
+// - price 由上层决定（通常使用 Game::animalPrice），此处只负责校验余额并扣费。
+// - 成功时会调用 spawnAnimal 并写回 WorldState。
 bool AnimalSystem::buyAnimal(Game::AnimalType type, const cocos2d::Vec2& pos, long long price) {
     if (!_map || !_worldNode) return false;
     if (price < 0) price = 0;
@@ -182,6 +257,10 @@ bool AnimalSystem::buyAnimal(Game::AnimalType type, const cocos2d::Vec2& pos, lo
     return true;
 }
 
+// 每帧更新：
+// - 维护每只动物的游走/停留状态，做简单的“随机目标点 + 碰撞回退”。
+// - 同步精灵位置与深度排序（与环境遮挡关系）。
+// - 每帧把动物列表回写到 WorldState，确保存档与系统外读取的一致性。
 void AnimalSystem::update(float dt) {
     if (!_map) return;
     float s = _map->tileSize();
@@ -256,27 +335,24 @@ void AnimalSystem::update(float dt) {
     }
 }
 
+// 每日推进（在线版本）：
+// - 对当前系统内的动物逐只执行 advanceAnimalOneDay。
+// - 若产出：将世界坐标转换为瓦片坐标，并通过地图生成掉落。
+// - 末尾写回 WorldState，并刷新掉落可视化。
 void AnimalSystem::advanceAnimalsDaily() {
     if (!_map) return;
     auto& ws = Game::globalState();
     for (auto& inst : _animals) {
-        if (inst.animal.fedToday) {
-            inst.animal.ageDays += 1;
-            if (!inst.animal.isAdult && inst.animal.ageDays >= matureDays(inst.animal.type)) {
-                inst.animal.isAdult = true;
-            }
-        }
-        if (inst.animal.isAdult && inst.animal.fedToday) {
-            Game::ItemType prod = productFor(inst.animal.type);
-            int qty = productQty(inst.animal.type);
+        ProducedDrop drop;
+        bool produced = advanceAnimalOneDay(inst.animal, &drop);
+        if (produced) {
             int c = 0;
             int r = 0;
-            _map->worldToTileIndex(inst.animal.pos, c, r);
-            if (_map->inBounds(c, r) && qty > 0) {
-                _map->spawnDropAt(c, r, static_cast<int>(prod), qty);
+            _map->worldToTileIndex(drop.pos, c, r);
+            if (_map->inBounds(c, r)) {
+                _map->spawnDropAt(c, r, static_cast<int>(drop.type), drop.qty);
             }
         }
-        inst.animal.fedToday = false;
     }
     ws.farmAnimals.clear();
     for (const auto& it : _animals) {
@@ -287,27 +363,25 @@ void AnimalSystem::advanceAnimalsDaily() {
     }
 }
 
+// 每日推进（离线版本）：
+// - 仅依赖 WorldState.farmAnimals 推进成长与产物。
+// - 产物写入 WorldState.farmDrops（不需要地图与渲染环境）。
 void advanceAnimalsDailyWorldOnly() {
     auto& ws = Game::globalState();
     for (auto& a : ws.farmAnimals) {
-        if (a.fedToday) {
-            a.ageDays += 1;
-            if (!a.isAdult && a.ageDays >= matureDays(a.type)) {
-                a.isAdult = true;
-            }
+        ProducedDrop drop;
+        bool produced = advanceAnimalOneDay(a, &drop);
+        if (produced) {
+            Game::Drop d{ drop.type, drop.pos, drop.qty };
+            ws.farmDrops.push_back(d);
         }
-        if (a.isAdult && a.fedToday) {
-            Game::ItemType prod = productFor(a.type);
-            int qty = productQty(a.type);
-            if (qty > 0) {
-                Game::Drop d{ prod, a.pos, qty };
-                ws.farmDrops.push_back(d);
-            }
-        }
-        a.fedToday = false;
     }
 }
 
+// 尝试喂食：
+// - 从玩家附近选择最近的一只“未喂食且接受该饲料”的动物。
+// - 仅在系统内部标记 fedToday 并输出 consumedQty；背包扣除由调用方完成。
+// - 成功后写回 WorldState，确保当日状态持久化。
 bool AnimalSystem::tryFeedAnimal(const cocos2d::Vec2& playerPos, Game::ItemType feedType, int& consumedQty) {
     consumedQty = 0;
     if (!_map) return false;

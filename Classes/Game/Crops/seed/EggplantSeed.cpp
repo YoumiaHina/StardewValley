@@ -3,11 +3,16 @@
 
 namespace Game {
 
+// 茄子种子物品：仅提供背包内静态元数据。
 class EggplantSeed : public SeedBase {
 public:
+    // 返回该物品对应的枚举类型。
     ItemType item() const override { return ItemType::EggplantSeed; }
+    // 返回播种后对应的作物类型。
     CropType cropType() const override { return CropType::Eggplant; }
+    // 返回用于 UI 展示的名称。
     const char* name() const override { return "Eggplant Seed"; }
+    // 返回购买价格（供商店/经济系统使用）。
     int price() const override { return 25; }
 };
 

@@ -8,6 +8,9 @@
 
 namespace Game {
 
+// 成熟产物物品静态信息基类：
+// - 描述背包中“成熟作物产物”的名称/售价/食用恢复等元数据。
+// - 协作对象：CropSystem 在收获时根据 CropType 通过映射函数生成对应 ItemType。
 class VegetableBase {
 public:
     virtual ~VegetableBase() = default;
@@ -24,6 +27,7 @@ public:
     // 食用恢复生命值
     virtual int hpRestore() const = 0;
 
+    // 将作物类型映射为成熟产物物品类型（用于收获/掉落）。
     static ItemType produceItemFor(CropType t) {
         switch (t) {
             case CropType::Parsnip: return ItemType::Parsnip;

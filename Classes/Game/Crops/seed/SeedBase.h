@@ -8,6 +8,9 @@
 
 namespace Game {
 
+// 种子物品静态信息基类：
+// - 描述背包中“种子”的名称/价格/对应作物类型等元数据。
+// - 协作对象：CropBase 负责作物静态定义与行为；播种逻辑通过 CropType 与 ItemType 映射协作。
 class SeedBase {
 public:
     virtual ~SeedBase() = default;
@@ -20,6 +23,7 @@ public:
     // 购买价格或物品本身定价（具体由商店策略决定）
     virtual int price() const = 0;
 
+    // 将作物类型映射为种子物品类型（用于商店/作弊发放）。
     static ItemType seedItemFor(CropType t) {
         switch (t) {
             case CropType::Parsnip: return ItemType::ParsnipSeed;
@@ -31,6 +35,7 @@ public:
         }
     }
 
+    // 判断某个物品类型是否为种子（用于播种判定/喂鸡判定等）。
     static bool isSeed(ItemType t) {
         switch (t) {
             case ItemType::ParsnipSeed:
@@ -44,6 +49,7 @@ public:
         }
     }
 
+    // 将种子物品类型映射回作物类型（用于从背包解析播种目标）。
     static CropType cropTypeFromSeed(ItemType t) {
         switch (t) {
             case ItemType::ParsnipSeed: return CropType::Parsnip;
