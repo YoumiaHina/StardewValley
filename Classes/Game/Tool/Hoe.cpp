@@ -2,6 +2,8 @@
 #include "Controllers/Map/IMapController.h"
 #include "Controllers/UI/UIController.h"
 #include "Controllers/Systems/CropSystem.h"
+#include "Controllers/Environment/TreeSystem.h"
+#include "Controllers/Environment/RockSystem.h"
 #include "Game/WorldState.h"
 #include "Game/GameConfig.h"
 #include "Game/Crops/crop/CropBase.h"
@@ -83,8 +85,23 @@ std::string Hoe::use(Controllers::IMapController* map,
                 msg = std::string("Not ready");
             }
         } else if (current == Game::TileType::Soil) {
-            map->setTile(tc, tr, ws.isRaining ? Game::TileType::Watered : Game::TileType::Tilled);
-            msg = std::string("Till!");
+            bool blocked = false;
+            if (auto* sys = map->obstacleSystem(Controllers::ObstacleKind::Tree)) {
+                auto* ts = dynamic_cast<Controllers::TreeSystem*>(sys);
+                if (ts && ts->findTreeAt(tc, tr)) blocked = true;
+            }
+            if (!blocked) {
+                if (auto* sys = map->obstacleSystem(Controllers::ObstacleKind::Rock)) {
+                    auto* rs = dynamic_cast<Controllers::RockSystem*>(sys);
+                    if (rs && rs->findRockAt(tc, tr)) blocked = true;
+                }
+            }
+            if (blocked) {
+                msg = std::string("Nothing");
+            } else {
+                map->setTile(tc, tr, ws.isRaining ? Game::TileType::Watered : Game::TileType::Tilled);
+                msg = std::string("Till!");
+            }
         } else {
             msg = std::string("Nothing");
         }
