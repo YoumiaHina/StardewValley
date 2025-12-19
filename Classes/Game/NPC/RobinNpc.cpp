@@ -4,7 +4,7 @@ namespace Game {
 
 const char* Robin::name() const { return "Robin"; }
 
-const char* Robin::texturePath() const { return "NPC/Robin - stanging.png"; }
+const char* Robin::texturePath() const { return "NPC/Robin/Robin - stanging.png"; }
 
 int Robin::friendshipGainForGift(ItemType) const {
   return 10;

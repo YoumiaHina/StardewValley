@@ -18,6 +18,7 @@ class WillyNpcController : public NpcControllerBase {
                      UIController* ui,
                      std::shared_ptr<Game::Inventory> inventory,
                      NpcDialogueManager* dialogue);
+  ~WillyNpcController() override;
 
   void update(const cocos2d::Vec2& player_pos) override;
 
@@ -34,10 +35,22 @@ class WillyNpcController : public NpcControllerBase {
   bool was_near_ = false;
   NpcDialogueManager* dialogue_ = nullptr;
 
+  float tile_ = 0.0f;
+  cocos2d::Vec2 patrol_base_pos_;
+  cocos2d::Animation* walk_down_ = nullptr;
+  cocos2d::Animation* walk_up_ = nullptr;
+  cocos2d::Animation* walk_left_ = nullptr;
+  cocos2d::Animation* walk_right_ = nullptr;
+  int facing_dir_ = 0;
+
   bool isNear(const cocos2d::Vec2& player_pos,
               float max_dist,
               cocos2d::Vec2& out_pos) const;
   int friendshipGainForGift() const;
+
+  void startPatrol();
+  void playWalk(int dir);
+  void setStanding(int dir);
 };
 
 }  // namespace Controllers
