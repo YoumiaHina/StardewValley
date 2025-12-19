@@ -83,7 +83,7 @@ std::string Hoe::use(Controllers::IMapController* map,
                 msg = std::string("Not ready");
             }
         } else if (current == Game::TileType::Soil) {
-            map->setTile(tc, tr, Game::TileType::Tilled);
+            map->setTile(tc, tr, ws.isRaining ? Game::TileType::Watered : Game::TileType::Tilled);
             msg = std::string("Till!");
         } else {
             msg = std::string("Nothing");
