@@ -176,6 +176,18 @@ void PlayerController::registerCommonInputHandlers(
             case EventKeyboard::KeyCode::KEY_SPACE: {
                 if (chestOpen || storeOpen) break;
                 if (Game::globalState().fishingActive) break;
+                if (_onSpacePressed) {
+                    _onSpacePressed();
+                }
+                bool blockTool = false;
+                if (_ui) {
+                    blockTool = _ui->isDialogueVisible()
+                                || _ui->isNpcSocialVisible()
+                                || _ui->isChestPanelVisible()
+                                || _ui->isStorePanelVisible()
+                                || _ui->isAnimalStorePanelVisible();
+                }
+                if (blockTool) break;
                 if (_enableToolOnSpace) {
                     bool nearDoor = false;
                     if (_player && _map) {
@@ -201,9 +213,6 @@ void PlayerController::registerCommonInputHandlers(
                         }
                     }
                 }
-                if (_onSpacePressed) {
-                    _onSpacePressed();
-                }
             } break;
             default: break;
         }
@@ -220,7 +229,11 @@ void PlayerController::registerCommonInputHandlers(
     _mouseListener->onMouseDown = [this](EventMouse* e) {
         bool chestOpen = _ui && _ui->isChestPanelVisible();
         bool storeOpen = _ui && (_ui->isStorePanelVisible() || _ui->isAnimalStorePanelVisible());
+        bool dialogueOpen = _ui && _ui->isDialogueVisible();
         if (_ui && _ui->isNpcSocialVisible()) {
+            return;
+        }
+        if (dialogueOpen) {
             return;
         }
         if (_ui && _ui->handleHotbarMouseDown(e)) return;
