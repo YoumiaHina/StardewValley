@@ -403,6 +403,18 @@
     <ClCompile Include="..\Classes\Game\Furnace.cpp">
       <Filter>Classes\Game</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\Systems\DropSystem.cpp">
+      <Filter>Classes\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\Weed.cpp">
+      <Filter>Classes\Controllers\Environment</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\Environment\WeedSystem.cpp">
+      <Filter>Classes\Controllers\Environment</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\Tool\Scythe.cpp">
+      <Filter>Classes\Game\Tool</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <!-- Header Files -->
@@ -710,6 +722,18 @@
     </ClInclude>
     <ClInclude Include="..\Classes\Controllers\Interact\PlacementInteractor.h">
       <Filter>Classes\Controllers\Interact</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\Weed.h">
+      <Filter>Classes\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\Environment\WeedSystem.h">
+      <Filter>Classes\Game\Tool</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\Tool\Scythe.h">
+      <Filter>Classes\Game\Tool</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\Systems\DropSystem.h">
+      <Filter>Classes\Controllers\Systems</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
