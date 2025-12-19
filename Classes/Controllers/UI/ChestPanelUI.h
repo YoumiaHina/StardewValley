@@ -33,6 +33,7 @@ private:
     std::vector<cocos2d::Label*> _cellNameLabels;
     std::function<void()> _onInventoryChanged;
     int _selectedIndex = -1;
+    bool _shiftDown = false;
 };
 
-}
+} 

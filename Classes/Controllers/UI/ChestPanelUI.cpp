@@ -22,9 +22,21 @@ void ChestPanelUI::buildChestPanel() {
         _panelNode->setVisible(false);
         if (!_escListener) {
             _escListener = EventListenerKeyboard::create();
+            _escListener->onKeyPressed = [this](EventKeyboard::KeyCode code, Event*) {
+                if (code == EventKeyboard::KeyCode::KEY_SHIFT ||
+                    code == EventKeyboard::KeyCode::KEY_LEFT_SHIFT ||
+                    code == EventKeyboard::KeyCode::KEY_RIGHT_SHIFT) {
+                    _shiftDown = true;
+                }
+            };
             _escListener->onKeyReleased = [this](EventKeyboard::KeyCode code, Event*) {
                 if (code == EventKeyboard::KeyCode::KEY_ESCAPE) {
                     toggleChestPanel(false);
+                }
+                if (code == EventKeyboard::KeyCode::KEY_SHIFT ||
+                    code == EventKeyboard::KeyCode::KEY_LEFT_SHIFT ||
+                    code == EventKeyboard::KeyCode::KEY_RIGHT_SHIFT) {
+                    _shiftDown = false;
                 }
             };
             _panelNode->getEventDispatcher()->addEventListenerWithSceneGraphPriority(_escListener, _panelNode);
@@ -95,9 +107,6 @@ void ChestPanelUI::refreshChestPanel(Game::Chest* chest) {
         firstRowY = totalH * 0.5f - cellH * 0.5f - 16.f;
         rowGap = cellH;
     }
-    auto title = Label::createWithTTF("Chest", "fonts/arial.ttf", 22);
-    title->setPosition(Vec2(0, panelH * 0.5f - 26));
-    _panelNode->addChild(title);
     auto closeLabel = Label::createWithTTF("X", "fonts/arial.ttf", 26);
     closeLabel->setPosition(Vec2(panelW * 0.5f - 16.f, panelH * 0.5f - 16.f));
     _panelNode->addChild(closeLabel);
@@ -290,7 +299,41 @@ void ChestPanelUI::refreshChestPanel(Game::Chest* chest) {
         }
         if (hitIndex < 0) return;
         _selectedIndex = hitIndex;
-        transferChestCell(*_currentChest, hitIndex, *_inventory);
+        if (_shiftDown) {
+            int invIndex = _inventory->selectedIndex();
+            if (invIndex >= 0 && invIndex < static_cast<int>(_inventory->size())) {
+                int maxMoves = Game::ItemStack::MAX_STACK;
+                for (int i = 0; i < maxMoves; ++i) {
+                    if (hitIndex < 0 || hitIndex >= static_cast<int>(_currentChest->slots.size())) {
+                        break;
+                    }
+                    Game::Slot beforeChest = _currentChest->slots[static_cast<std::size_t>(hitIndex)];
+                    Game::ItemStack beforeInvStack = _inventory->itemAt(static_cast<std::size_t>(invIndex));
+                    bool beforeInvEmpty = _inventory->isEmpty(static_cast<std::size_t>(invIndex));
+                    bool beforeInvIsTool = _inventory->isTool(static_cast<std::size_t>(invIndex));
+                    transferChestCell(*_currentChest, hitIndex, *_inventory);
+                    if (hitIndex < 0 || hitIndex >= static_cast<int>(_currentChest->slots.size())) {
+                        break;
+                    }
+                    const Game::Slot& afterChest = _currentChest->slots[static_cast<std::size_t>(hitIndex)];
+                    Game::ItemStack afterInvStack = _inventory->itemAt(static_cast<std::size_t>(invIndex));
+                    bool afterInvEmpty = _inventory->isEmpty(static_cast<std::size_t>(invIndex));
+                    bool afterInvIsTool = _inventory->isTool(static_cast<std::size_t>(invIndex));
+                    bool chestSame = (beforeChest.kind == afterChest.kind &&
+                                      beforeChest.itemType == afterChest.itemType &&
+                                      beforeChest.itemQty == afterChest.itemQty);
+                    bool invSame = (beforeInvEmpty == afterInvEmpty &&
+                                    beforeInvIsTool == afterInvIsTool &&
+                                    beforeInvStack.type == afterInvStack.type &&
+                                    beforeInvStack.quantity == afterInvStack.quantity);
+                    if (chestSame && invSame) {
+                        break;
+                    }
+                }
+            }
+        } else {
+            transferChestCell(*_currentChest, hitIndex, *_inventory);
+        }
         if (hitIndex >= 0 && hitIndex < static_cast<int>(_cellIcons.size())) {
             auto icon = _cellIcons[hitIndex];
             auto countLabel = _cellCountLabels[hitIndex];
@@ -415,15 +458,21 @@ void ChestPanelUI::onInventorySlotClicked(int invIndex) {
         bool invIsItem = _inventory->isItem(static_cast<std::size_t>(invIndex));
         Game::ItemStack st = _inventory->itemAt(static_cast<std::size_t>(invIndex));
         bool sameType = invIsItem && st.type == type;
-        bool canReceive = (invEmpty || sameType) && (!invIsItem || st.quantity < Game::ItemStack::MAX_STACK);
+        int currentQty = (invEmpty || !invIsItem) ? 0 : st.quantity;
+        int space = Game::ItemStack::MAX_STACK - currentQty;
+        bool canReceive = (invEmpty || sameType) && (space > 0);
         if (!canReceive) return;
-        bool okAdd = _inventory->addOneItemToSlot(static_cast<std::size_t>(invIndex), type);
-        if (!okAdd) return;
-        if (slotChest.itemQty <= 0) return;
-        slotChest.itemQty -= 1;
-        if (slotChest.itemQty <= 0) {
-            slotChest.kind = Game::SlotKind::Empty;
-            slotChest.itemQty = 0;
+        int moveCount = _shiftDown ? std::min(space, slotChest.itemQty) : 1;
+        for (int i = 0; i < moveCount; ++i) {
+            bool okAdd = _inventory->addOneItemToSlot(static_cast<std::size_t>(invIndex), type);
+            if (!okAdd) break;
+            if (slotChest.itemQty <= 0) break;
+            slotChest.itemQty -= 1;
+            if (slotChest.itemQty <= 0) {
+                slotChest.kind = Game::SlotKind::Empty;
+                slotChest.itemQty = 0;
+                break;
+            }
         }
     } else if (slotChest.kind == Game::SlotKind::Tool && slotChest.tool) {
         bool invEmpty = _inventory->isEmpty(static_cast<std::size_t>(invIndex));

@@ -316,34 +316,7 @@ void transferChestCell(Game::Chest& chest,
             return;
         }
     } else {
-        if (chestHasItem) {
-            Game::ItemType type = cs.itemType;
-            bool canReceive = false;
-            if (invEmpty) {
-                canReceive = true;
-            } else if (invIsItem && invStack.type == type && invStack.quantity < Game::ItemStack::MAX_STACK) {
-                canReceive = true;
-            }
-            if (!canReceive) return;
-            bool okAdd = inventory.addOneItemToSlot(static_cast<std::size_t>(invIndex), type);
-            if (!okAdd) return;
-            if (cs.itemQty <= 0) return;
-            cs.itemQty -= 1;
-            if (cs.itemQty <= 0) {
-                cs.kind = Game::SlotKind::Empty;
-                cs.itemQty = 0;
-            }
-        } else if (chestHasTool) {
-            if (!invEmpty) return;
-            if (!cs.tool) return;
-            Game::ToolKind tk = cs.tool->kind();
-            inventory.setTool(static_cast<std::size_t>(invIndex), Game::makeTool(tk));
-            cs.tool.reset();
-            cs.kind = Game::SlotKind::Empty;
-            cs.itemQty = 0;
-        } else {
-            return;
-        }
+        return;
     }
 
     auto& ws = Game::globalState();
