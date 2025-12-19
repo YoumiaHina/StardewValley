@@ -17,7 +17,7 @@ ToolKind Pickaxe::kind() const { return ToolKind::Pickaxe; }
 std::string Pickaxe::displayName() const { return std::string("Pickaxe"); }
 
 std::string Pickaxe::use(Controllers::IMapController* map,
-                         Controllers::CropSystem* /*crop*/,
+                         Controllers::CropSystem* crop,
                          std::function<Vec2()> getPlayerPos,
                          std::function<Vec2()> getLastDir,
                          Controllers::UIController* ui) {
@@ -59,6 +59,14 @@ std::string Pickaxe::use(Controllers::IMapController* map,
     std::string msg = std::string("Nothing");
     if (hit) {
         msg = std::string("Mine!");
+    } else if (map->isFarm()) {
+        auto current = map->getTile(tc, tr);
+        bool hasCrop = (crop && crop->findCropIndex(tc, tr) >= 0);
+        if (!hasCrop && (current == Game::TileType::Tilled || current == Game::TileType::Watered)) {
+            map->setTile(tc, tr, Game::TileType::Soil);
+            msg = std::string("Flatten!");
+            map->refreshCropsVisuals();
+        }
     }
     ws.energy = std::max(0, ws.energy - need);
     if (!ui) {
