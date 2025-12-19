@@ -141,7 +141,8 @@ void DialogueUI::show(const std::string& npc_name,
         btn = option_buttons_[i];
       }
       if (!btn) {
-        btn = Button::create("CloseNormal.png", "CloseSelected.png");
+        btn = Button::create("NPC/Option-button.png",
+                             "NPC/Option-button.png");
         if (btn) {
           btn->addClickEventListener([this](Ref* r) {
             auto* n = dynamic_cast<Node*>(r);
@@ -154,10 +155,24 @@ void DialogueUI::show(const std::string& npc_name,
       }
       if (!btn) continue;
       btn->setTag(i);
+      btn->setTitleFontName("fonts/Marker Felt.ttf");
       btn->setTitleText(options[i]);
-      btn->setTitleFontSize(18.0f * uiScale);
+      btn->setTitleFontSize(25.0f * uiScale);
+      btn->setTitleColor(Color3B(139, 69, 19));
       btn->setScale9Enabled(true);
-      btn->setContentSize(Size(btnW, btnH));
+      Size targetSize(btnW, btnH);
+      auto titleNode = btn->getTitleRenderer();
+      auto* titleLabel = dynamic_cast<Label*>(titleNode);
+      if (titleLabel) {
+        Size titleSize = titleLabel->getContentSize();
+        float padBtnX = 16.0f * uiScale;
+        float padBtnY = 8.0f * uiScale;
+        float neededW = titleSize.width + padBtnX * 2.0f;
+        float neededH = titleSize.height + padBtnY * 2.0f;
+        if (neededW > targetSize.width) targetSize.width = neededW;
+        if (neededH > targetSize.height) targetSize.height = neededH;
+      }
+      btn->setContentSize(targetSize);
       btn->setPosition(Vec2(baseX + i * (btnW + gapX), y));
     }
   }
