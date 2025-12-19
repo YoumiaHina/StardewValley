@@ -177,7 +177,7 @@ bool saveToFile(const std::string& fullPath) {
     std::ofstream out(path, std::ios::trunc);
     if (!out) return false;
     auto& ws = globalState();
-    out << "SDV_SAVE 4" << '\n';
+    out << "SDV_SAVE 6" << '\n';
     out << ws.seasonIndex << ' ' << ws.dayOfSeason << ' '
         << ws.timeHour << ' ' << ws.timeMinute << ' '
         << ws.timeAccum << ' '
@@ -192,7 +192,10 @@ bool saveToFile(const std::string& fullPath) {
         << ws.lastPlayerX << ' '
         << ws.lastPlayerY << ' '
         << ws.lastMineFloor << ' '
-        << ws.lastSaveSlot << '\n';
+        << ws.lastSaveSlot << ' '
+        << (ws.isRaining ? 1 : 0) << ' '
+        << ws.weatherSeasonIndex << ' '
+        << ws.weatherDayOfSeason << '\n';
     out << ws.farmCols << ' ' << ws.farmRows << '\n';
     std::size_t tilesCount = ws.farmTiles.size();
     out << tilesCount << '\n';
@@ -238,13 +241,14 @@ bool loadFromFile(const std::string& fullPath) {
     int version = 0;
     in >> magic >> version;
     in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-    if (!in || magic != "SDV_SAVE" || version < 1 || version > 4) {
+    if (!in || magic != "SDV_SAVE" || version < 1 || version > 6) {
         return false;
     }
     auto& ws = globalState();
     ws = WorldState();
     int granted = 0;
     int fishing = 0;
+    int raining = 0;
     in >> ws.seasonIndex >> ws.dayOfSeason
        >> ws.timeHour >> ws.timeMinute
        >> ws.timeAccum
@@ -262,9 +266,20 @@ bool loadFromFile(const std::string& fullPath) {
            >> ws.lastMineFloor
            >> ws.lastSaveSlot;
     }
+    if (version >= 5) {
+        in >> raining;
+    }
+    if (version >= 6) {
+        in >> ws.weatherSeasonIndex >> ws.weatherDayOfSeason;
+    }
     in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     ws.grantedSwordAtEntrance = (granted != 0);
     ws.fishingActive = (fishing != 0);
+    ws.isRaining = (raining != 0);
+    if (version < 6) {
+        ws.weatherSeasonIndex = -1;
+        ws.weatherDayOfSeason = -1;
+    }
     in >> ws.farmCols >> ws.farmRows;
     in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     std::size_t tilesCount = 0;

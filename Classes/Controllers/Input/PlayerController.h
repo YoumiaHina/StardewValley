@@ -45,6 +45,9 @@ public:
     void setMovementLocked(bool locked) { _movementLocked = locked; }
     bool isMovementLocked() const { return _movementLocked; }
 
+    void setMoveSpeedMultiplier(float m) { _moveSpeedMultiplier = (m <= 0.0f ? 1.0f : m); }
+    float moveSpeedMultiplier() const { return _moveSpeedMultiplier; }
+
     cocos2d::Vec2 lastDir() const { return _lastDir; }
 
 private:
@@ -72,6 +75,7 @@ private:
     float _moveHeldDuration = 0.0f;
     bool  _isSprinting = false;
     float _sprintThreshold = 0.5f;
+    float _moveSpeedMultiplier = 1.0f;
     cocos2d::Vec2 _lastDir = cocos2d::Vec2(0, -1);
     bool _movementLocked = false;
 };

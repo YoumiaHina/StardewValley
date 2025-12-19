@@ -397,6 +397,9 @@
     <ClCompile Include="..\Classes\Controllers\Systems\FurnaceController.cpp">
       <Filter>Classes\Controllers\Systems</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\Systems\WeatherController.cpp">
+      <Filter>Classes\Controllers\Systems</Filter>
+    </ClCompile>
     <ClCompile Include="..\Classes\Game\Furnace.cpp">
       <Filter>Classes\Game</Filter>
     </ClCompile>
@@ -691,6 +694,9 @@
       <Filter>Classes\Controllers\Interact</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\Controllers\Systems\FurnaceController.h">
+      <Filter>Classes\Controllers\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\Systems\WeatherController.h">
       <Filter>Classes\Controllers\Systems</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\Controllers\Systems\PlaceableItemSystemBase.h">

@@ -16,6 +16,7 @@ public:
 private:
     cocos2d::Scene* _scene = nullptr;
     cocos2d::Label* _hudTimeLabel = nullptr;
+    cocos2d::Label* _hudWeatherLabel = nullptr;
     cocos2d::Label* _hudGoldLabel = nullptr;
     cocos2d::Node* _energyNode = nullptr;
     cocos2d::DrawNode* _energyFill = nullptr;

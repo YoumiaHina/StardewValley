@@ -5,6 +5,7 @@
 #include "Scenes/RoomScene.h"
 #include "Game/Chest.h"
 #include "Controllers/Systems/FishingController.h"
+#include "Controllers/Systems/WeatherController.h"
 #include "Game/Tool/FishingRod.h"
 
 using namespace cocos2d;
@@ -66,6 +67,13 @@ bool SceneBase::initBase(float worldScale, bool buildCraftPanel, bool enableTool
     _playerController = new Controllers::PlayerController(_player, _mapController, _worldNode);
     _cropSystem = new Controllers::CropSystem();
     _stateController = new Controllers::GameStateController(_mapController, _uiController, _cropSystem);
+
+    if (_mapController && _mapController->supportsWeather()) {
+        _weatherController = new Controllers::WeatherController(_mapController, _worldNode, _playerController);
+        addUpdateCallback([this](float dt) {
+            if (_weatherController) _weatherController->update(dt);
+        });
+    }
 
     _fishingController = new Controllers::FishingController(_mapController, _inventory, _uiController, this, _worldNode);
     addUpdateCallback([this](float dt) {

@@ -56,6 +56,10 @@ public:
     virtual cocos2d::Vec2 tileToWorld(int c, int r) const { return cocos2d::Vec2(); }
     virtual void worldToTileIndex(const cocos2d::Vec2& p, int& c, int& r) const { c = 0; r = 0; }
 
+    // 天气系统：默认不支持（仅 Farm/Beach/Town 开启）
+    virtual bool supportsWeather() const { return false; }
+    virtual void setAllPlantableTilesWatered() {}
+
     virtual EnvironmentObstacleSystemBase* obstacleSystem(ObstacleKind) { return nullptr; }
     virtual const EnvironmentObstacleSystemBase* obstacleSystem(ObstacleKind) const { return nullptr; }
 

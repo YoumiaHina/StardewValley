@@ -118,6 +118,9 @@ struct WorldState {
     std::unordered_map<int, int> npcLastGiftDay;
     std::unordered_map<int, std::vector<NpcQuest>> npcQuests;
     bool fishingActive = false;
+    bool isRaining = false;
+    int weatherSeasonIndex = -1;
+    int weatherDayOfSeason = -1;
 
     int lastScene = static_cast<int>(SceneKind::Room);
     float lastPlayerX = 0.0f;

@@ -85,6 +85,9 @@ public:
 
     void collectDropsNear(const cocos2d::Vec2& playerWorldPos, Game::Inventory* inv) override;
 
+    bool supportsWeather() const override { return true; }
+    void setAllPlantableTilesWatered() override;
+
 private:
     cocos2d::Node* _worldNode = nullptr;
     cocos2d::Node* _mapNode = nullptr;

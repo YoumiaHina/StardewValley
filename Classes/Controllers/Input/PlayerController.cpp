@@ -398,7 +398,7 @@ void PlayerController::update(float dt) {
     }
     _player->updateAnimation(dt);
 
-    float speed = _isSprinting ? _sprintSpeed : _baseSpeed;
+    float speed = (_isSprinting ? _sprintSpeed : _baseSpeed) * _moveSpeedMultiplier;
     Vec2 delta = dir * speed * dt;
     Vec2 next = _player->getPosition() + delta;
 

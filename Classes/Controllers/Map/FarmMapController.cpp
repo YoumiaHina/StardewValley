@@ -776,6 +776,23 @@ void FarmMapController::collectDropsNear(const cocos2d::Vec2& playerWorldPos, Ga
     refreshDropsVisuals();
 }
 
+void FarmMapController::setAllPlantableTilesWatered() {
+    bool changed = false;
+    for (int r = 0; r < _rows; ++r) {
+        for (int c = 0; c < _cols; ++c) {
+            int idx = r * _cols + c;
+            if (idx < 0 || idx >= static_cast<int>(_tiles.size())) continue;
+            if (_tiles[static_cast<std::size_t>(idx)] == Game::TileType::Tilled) {
+                _tiles[static_cast<std::size_t>(idx)] = Game::TileType::Watered;
+                changed = true;
+            }
+        }
+    }
+    if (!changed) return;
+    Game::globalState().farmTiles = _tiles;
+    refreshMapVisuals();
+}
+
  
 
 void FarmMapController::addActorToMap(cocos2d::Node* node, int /*zOrder*/) {

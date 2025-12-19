@@ -19,6 +19,9 @@ public:
     cocos2d::Size getContentSize() const override { return _map ? _map->getContentSize() : cocos2d::Size::ZERO; }
     cocos2d::Vec2 getOrigin() const override { return _origin; }
 
+    bool supportsWeather() const override { return true; }
+    void setAllPlantableTilesWatered() override {}
+
     float tileSize() const override { return _map ? _map->getTileSize().width : 0.0f; }
     void worldToTileIndex(const cocos2d::Vec2& p, int& c, int& r) const override {
         if (_map) { _map->worldToTileIndex(p, c, r); } else { c = 0; r = 0; }

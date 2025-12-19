@@ -20,12 +20,20 @@ void HUDUI::buildHUD() {
         _hudTimeLabel->setPosition(Vec2(origin.x + visibleSize.width - pad, origin.y + visibleSize.height - pad));
         if (_scene) _scene->addChild(_hudTimeLabel, 3);
     }
+    if (!_hudWeatherLabel) {
+        _hudWeatherLabel = Label::createWithTTF("", "fonts/Marker Felt.ttf", 18);
+        _hudWeatherLabel->setColor(Color3B::WHITE);
+        _hudWeatherLabel->setAnchorPoint(Vec2(1,1));
+        float pad = 10.0f;
+        _hudWeatherLabel->setPosition(Vec2(origin.x + visibleSize.width - pad, origin.y + visibleSize.height - pad - 24));
+        if (_scene) _scene->addChild(_hudWeatherLabel, 3);
+    }
     if (!_hudGoldLabel) {
         _hudGoldLabel = Label::createWithTTF("", "fonts/Marker Felt.ttf", 18);
         _hudGoldLabel->setColor(Color3B::YELLOW);
         _hudGoldLabel->setAnchorPoint(Vec2(1,1));
         float pad = 10.0f;
-        _hudGoldLabel->setPosition(Vec2(origin.x + visibleSize.width - pad, origin.y + visibleSize.height - pad - 24));
+        _hudGoldLabel->setPosition(Vec2(origin.x + visibleSize.width - pad, origin.y + visibleSize.height - pad - 48));
         if (_scene) _scene->addChild(_hudGoldLabel, 3);
     }
     if (!_energyNode) {
@@ -61,6 +69,9 @@ void HUDUI::refreshHUD() {
     };
     if (_hudTimeLabel) {
         _hudTimeLabel->setString(StringUtils::format("%s Day %d, %02d:%02d", seasonName(ws.seasonIndex), ws.dayOfSeason, ws.timeHour, ws.timeMinute));
+    }
+    if (_hudWeatherLabel) {
+        _hudWeatherLabel->setString(StringUtils::format("Weather: %s", ws.isRaining ? "Rain" : "Sunny"));
     }
     if (_hudGoldLabel) {
         _hudGoldLabel->setString(StringUtils::format("Gold: %lld", ws.gold));
