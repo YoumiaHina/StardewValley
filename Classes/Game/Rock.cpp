@@ -5,6 +5,11 @@ using namespace cocos2d;
 
 namespace Game {
 
+std::string Rock::texturePath(RockKind kind) {
+    return (kind == RockKind::Rock2) ? std::string("FarmEnvironment/rock2.png")
+                                    : std::string("FarmEnvironment/rock1.png");
+}
+
 Rock* Rock::create(const std::string& texture) {
     Rock* r = new (std::nothrow) Rock();
     if (r && r->initWithTexture(texture)) { r->autorelease(); return r; }
@@ -29,6 +34,18 @@ bool Rock::initWithTexture(const std::string& texture) {
 void Rock::setBrokenTexture(const std::string& texture) {
     _brokenTexture = texture;
 }
+
+void Rock::setKind(RockKind kind) {
+    _kind = kind;
+    if (_sprite) {
+        _sprite->setTexture(texturePath(_kind));
+        if (_sprite->getTexture()) {
+            _sprite->getTexture()->setAliasTexParameters();
+        }
+    }
+}
+
+RockKind Rock::kind() const { return _kind; }
 
 void Rock::applyDamage(int amount) {
     _hp = std::max(0, _hp - std::max(0, amount));

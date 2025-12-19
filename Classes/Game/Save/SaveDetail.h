@@ -256,7 +256,7 @@ void readCrops(std::istream& in, std::vector<Game::Crop>& crops) {
 void writeTreePositions(std::ostream& out, const std::vector<Game::TreePos>& trees) {
     out << trees.size() << '\n';
     for (const auto& t : trees) {
-        out << t.c << ' ' << t.r << '\n';
+        out << t.c << ' ' << t.r << ' ' << static_cast<int>(t.kind) << '\n';
     }
 }
 
@@ -269,12 +269,19 @@ void readTreePositions(std::istream& in, std::vector<Game::TreePos>& trees) {
     for (std::size_t i = 0; i < count; ++i) {
         int c = 0;
         int r = 0;
-        in >> c >> r;
+        int kind = 0;
+        in >> c >> r >> kind;
         in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         if (!in) break;
         Game::TreePos tp;
         tp.c = c;
         tp.r = r;
+        if (kind == static_cast<int>(Game::TreeKind::Tree1) ||
+            kind == static_cast<int>(Game::TreeKind::Tree2)) {
+            tp.kind = static_cast<Game::TreeKind>(kind);
+        } else {
+            tp.kind = Game::TreeKind::Tree1;
+        }
         trees.push_back(tp);
     }
 }
@@ -282,7 +289,7 @@ void readTreePositions(std::istream& in, std::vector<Game::TreePos>& trees) {
 void writeRockPositions(std::ostream& out, const std::vector<Game::RockPos>& rocks) {
     out << rocks.size() << '\n';
     for (const auto& r : rocks) {
-        out << r.c << ' ' << r.r << '\n';
+        out << r.c << ' ' << r.r << ' ' << static_cast<int>(r.kind) << '\n';
     }
 }
 
@@ -295,12 +302,19 @@ void readRockPositions(std::istream& in, std::vector<Game::RockPos>& rocks) {
     for (std::size_t i = 0; i < count; ++i) {
         int c = 0;
         int r = 0;
-        in >> c >> r;
+        int kind = 0;
+        in >> c >> r >> kind;
         in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         if (!in) break;
         Game::RockPos rp;
         rp.c = c;
         rp.r = r;
+        if (kind == static_cast<int>(Game::RockKind::Rock1) ||
+            kind == static_cast<int>(Game::RockKind::Rock2)) {
+            rp.kind = static_cast<Game::RockKind>(kind);
+        } else {
+            rp.kind = Game::RockKind::Rock1;
+        }
         rocks.push_back(rp);
     }
 }

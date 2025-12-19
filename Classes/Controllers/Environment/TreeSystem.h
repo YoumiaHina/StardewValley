@@ -17,6 +17,11 @@ public:
     bool spawnFromTile(int c, int r, const cocos2d::Vec2& tileCenter,
                        Game::MapBase* map, int tileSize) override;
 
+    // 在指定瓦片位置生成指定种类的树（用于从存档还原）。
+    bool spawnFromTileWithKind(int c, int r, const cocos2d::Vec2& tileCenter,
+                               Game::MapBase* map, int tileSize,
+                               Game::TreeKind kind);
+
     void spawnRandom(int count, int cols, int rows,
                      const std::function<cocos2d::Vec2(int,int)>& tileToWorld,
                      Game::MapBase* map, int tileSize,
@@ -37,5 +42,6 @@ public:
 private:
     cocos2d::Node* _root = nullptr;
     std::unordered_map<long long, Game::Tree*> _trees;
+    int _cachedSeasonIndex = -1;
 };
-}
+} // namespace Controllers

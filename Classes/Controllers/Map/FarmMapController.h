@@ -1,5 +1,8 @@
 /**
- * FarmMapController: 农场地图控制器，负责 TMX 地图、瓦片、光标、门口与箱子检测、农作物与掉落。
+ * FarmMapController：农场地图控制器。
+ * - 职责：加载并管理农场 TMX、维护农场瓦片类型、坐标换算与交互光标、门/区域检测、以及掉落/箱子/作物可视刷新入口。
+ * - 职责边界：不在此处实现工具命中/掉落规则等业务细节；树/石等环境实体状态由对应 System 作为唯一来源维护。
+ * - 协作对象：通过 IMapController 接口与 PlayerController/ToolSystem/DropSystem/ChestController/FurnaceController 以及环境 System 协作。
  */
 #pragma once
 
@@ -23,12 +26,6 @@
 
 namespace Controllers {
 
-/**
- * FarmMapController：农场地图控制器。
- * - 职责：加载并管理农场 TMX、维护农场瓦片类型、坐标换算与交互光标、门/区域检测、以及掉落/箱子/作物可视刷新入口。
- * - 职责边界：不在此处实现工具命中/掉落规则等业务细节；树/石等环境实体状态由对应 System 作为唯一来源维护。
- * - 协作对象：通过 IMapController 接口与 PlayerController/ToolSystem/DropSystem/ChestController/FurnaceController 以及环境 System 协作。
- */
 class FarmMapController : public Controllers::IMapController {
 public:
     // 构造：绑定世界节点。

@@ -1,5 +1,8 @@
 /**
- * RoomMapController: 室内地图控制器，负责房间几何、门/床检测与箱子区域。
+ * RoomMapController：室内地图控制器。
+ * - 职责：加载室内 TMX、维护房间几何（房间/门/床区域）、提供坐标换算与交互光标、门与箱子检测、以及室内箱子/熔炉等系统挂接入口。
+ * - 职责边界：不在此处实现背包/掉落等室外业务规则；箱子/熔炉交互由对应 Controller 负责，地图控制器只提供空间与转发接口。
+ * - 协作对象：通过 IMapController 接口与 PlayerController/ToolSystem，以及 ChestController/FurnaceController 等模块协作。
  */
 #pragma once
 
@@ -14,12 +17,6 @@ namespace Controllers {
 
 class FurnaceController;
 
-/**
- * RoomMapController：室内地图控制器。
- * - 职责：加载室内 TMX、维护房间几何（房间/门/床区域）、提供坐标换算与交互光标、门与箱子检测、以及室内箱子/熔炉等系统挂接入口。
- * - 职责边界：不在此处实现背包/掉落等室外业务规则；箱子/熔炉交互由对应 Controller 负责，地图控制器只提供空间与转发接口。
- * - 协作对象：通过 IMapController 接口与 PlayerController/ToolSystem，以及 ChestController/FurnaceController 等模块协作。
- */
 class RoomMapController : public Controllers::IMapController {
 public:
     // 构造：绑定世界节点。

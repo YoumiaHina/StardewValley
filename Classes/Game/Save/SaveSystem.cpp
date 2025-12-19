@@ -177,7 +177,7 @@ bool saveToFile(const std::string& fullPath) {
     std::ofstream out(path, std::ios::trunc);
     if (!out) return false;
     auto& ws = globalState();
-    out << "SDV_SAVE 6" << '\n';
+    out << "SDV_SAVE 7" << '\n';
     out << ws.seasonIndex << ' ' << ws.dayOfSeason << ' '
         << ws.timeHour << ' ' << ws.timeMinute << ' '
         << ws.timeAccum << ' '
@@ -195,7 +195,13 @@ bool saveToFile(const std::string& fullPath) {
         << ws.lastSaveSlot << ' '
         << (ws.isRaining ? 1 : 0) << ' '
         << ws.weatherSeasonIndex << ' '
-        << ws.weatherDayOfSeason << '\n';
+        << ws.weatherDayOfSeason << ' '
+        << ws.playerShirt << ' '
+        << ws.playerPants << ' '
+        << ws.playerHair << ' '
+        << ws.playerHairR << ' '
+        << ws.playerHairG << ' '
+        << ws.playerHairB << '\n';
     out << ws.farmCols << ' ' << ws.farmRows << '\n';
     std::size_t tilesCount = ws.farmTiles.size();
     out << tilesCount << '\n';
@@ -241,7 +247,7 @@ bool loadFromFile(const std::string& fullPath) {
     int version = 0;
     in >> magic >> version;
     in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-    if (!in || magic != "SDV_SAVE" || version < 1 || version > 6) {
+    if (!in || magic != "SDV_SAVE" || version != 7) {
         return false;
     }
     auto& ws = globalState();
@@ -271,6 +277,14 @@ bool loadFromFile(const std::string& fullPath) {
     }
     if (version >= 6) {
         in >> ws.weatherSeasonIndex >> ws.weatherDayOfSeason;
+    }
+    if (version >= 7) {
+        in >> ws.playerShirt
+           >> ws.playerPants
+           >> ws.playerHair
+           >> ws.playerHairR
+           >> ws.playerHairG
+           >> ws.playerHairB;
     }
     in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     ws.grantedSwordAtEntrance = (granted != 0);

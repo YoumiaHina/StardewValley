@@ -1,3 +1,9 @@
+/**
+ * TownMapController：城镇地图控制器。
+ * - 职责：提供城镇场景的尺寸/原点、碰撞夹紧、门与交互区域检测、瓦片坐标换算与光标选择、掉落与箱子表现刷新。
+ * - 职责边界：不在此处实现耕地/作物等农场业务逻辑，仅对外暴露地图级接口。
+ * - 协作对象：通过 IMapController 接口与 PlayerController/ToolSystem/UIController/DropSystem 等模块协作。
+ */
 #pragma once
 
 #include "Controllers/Map/IMapController.h"
@@ -8,12 +14,6 @@ namespace Controllers {
 
 class FurnaceController;
 
-/**
- * TownMapController：城镇地图控制器。
- * - 职责：提供城镇场景的尺寸/原点、碰撞夹紧、门与交互区域检测、瓦片坐标换算与光标选择、掉落与箱子表现刷新。
- * - 职责边界：不在此处实现耕地/作物等农场业务逻辑，仅对外暴露地图级接口。
- * - 协作对象：通过 IMapController 接口与 PlayerController/ToolSystem/UIController/DropSystem 等模块协作。
- */
 class TownMapController : public IMapController {
 public:
     // 构造：绑定 TownMap 与世界节点，并初始化地图原点/瓦片网格/交互系统。

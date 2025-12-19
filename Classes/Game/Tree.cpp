@@ -1,8 +1,21 @@
 #include "Game/Tree.h"
+#include <algorithm>
 
 using namespace cocos2d;
 
 namespace Game {
+
+namespace {
+    const char* seasonName(int seasonIndex) {
+        switch ((seasonIndex % 4 + 4) % 4) {
+            case 0: return "spring";
+            case 1: return "summer";
+            case 2: return "fall";
+            case 3: return "winter";
+        }
+        return "spring";
+    }
+}
 
 Tree* Tree::create(const std::string& texture) {
     Tree* t = new (std::nothrow) Tree();
@@ -22,6 +35,38 @@ bool Tree::initWithTexture(const std::string& texture) {
         }
     }
     return true;
+}
+
+void Tree::setKind(TreeKind kind) {
+    _kind = kind;
+    if (_sprite) {
+        _sprite->setTexture(texturePath(_kind, _seasonIndex));
+        if (_sprite->getTexture()) {
+            _sprite->getTexture()->setAliasTexParameters();
+        }
+    }
+}
+
+TreeKind Tree::kind() const { return _kind; }
+
+void Tree::setSeasonIndex(int seasonIndex) {
+    int normalized = (seasonIndex % 4 + 4) % 4;
+    if (_seasonIndex == normalized) return;
+    _seasonIndex = normalized;
+    if (_sprite) {
+        _sprite->setTexture(texturePath(_kind, _seasonIndex));
+        if (_sprite->getTexture()) {
+            _sprite->getTexture()->setAliasTexParameters();
+        }
+    }
+}
+
+int Tree::seasonIndex() const { return _seasonIndex; }
+
+std::string Tree::texturePath(TreeKind kind, int seasonIndex) {
+    const char* sn = seasonName(seasonIndex);
+    const char* base = (kind == TreeKind::Tree2) ? "FarmEnvironment/tree2_" : "FarmEnvironment/tree1_";
+    return std::string(base) + sn + ".png";
 }
 
 void Tree::applyDamage(int amount) {

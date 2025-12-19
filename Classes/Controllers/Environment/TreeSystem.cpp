@@ -11,19 +11,37 @@ using namespace Game;
 
 namespace Controllers {
 
+namespace {
+    Game::TreeKind randomTreeKind() {
+        static std::mt19937 rng{ std::random_device{}() };
+        static std::uniform_int_distribution<int> dist(0, 1);
+        return (dist(rng) == 0) ? Game::TreeKind::Tree1 : Game::TreeKind::Tree2;
+    }
+}
+
 void TreeSystem::attachTo(Node* root) {
     _root = root;
+    _cachedSeasonIndex = -1;
 }
 
 bool TreeSystem::spawnFromTile(int c, int r, const Vec2& tileCenter,
                                MapBase* map, int tileSize) {
+    return spawnFromTileWithKind(c, r, tileCenter, map, tileSize, randomTreeKind());
+}
+
+bool TreeSystem::spawnFromTileWithKind(int c, int r, const Vec2& tileCenter,
+                                       MapBase* map, int tileSize,
+                                       Game::TreeKind kind) {
     if (!_root) return false;
     float s = static_cast<float>(tileSize);
     Vec2 footCenter = tileCenter + Vec2(0, -s * 0.5f);
     bool blocked = map && map->collides(footCenter, 8.0f);
     if (blocked) return false;
-    auto tree = Tree::create("Tree/tree.png");
+    int seasonIndex = Game::globalState().seasonIndex;
+    auto tree = Tree::create(Tree::texturePath(kind, seasonIndex));
     if (!tree) return false;
+    tree->setKind(kind);
+    tree->setSeasonIndex(seasonIndex);
     tree->setPosition(footCenter);
     _root->addChild(tree, 0);
     long long key = (static_cast<long long>(r) << 32) | static_cast<unsigned long long>(c);
@@ -50,8 +68,12 @@ void TreeSystem::spawnRandom(int count, int cols, int rows,
         if (map && map->inBuildingArea(footCenter)) continue;
         bool blocked = map && map->collides(footCenter, 8.0f);
         if (blocked) continue;
-        auto tree = Tree::create("Tree/tree.png");
+        int seasonIndex = Game::globalState().seasonIndex;
+        auto kind = randomTreeKind();
+        auto tree = Tree::create(Tree::texturePath(kind, seasonIndex));
         if (!tree) continue;
+        tree->setKind(kind);
+        tree->setSeasonIndex(seasonIndex);
         tree->setPosition(footCenter);
         _root->addChild(tree, 0);
         long long key = (static_cast<long long>(r) << 32) | static_cast<unsigned long long>(c);
@@ -112,6 +134,13 @@ bool TreeSystem::damageAt(int c, int r, int amount,
 }
 
 void TreeSystem::sortTrees() {
+    int seasonIndex = Game::globalState().seasonIndex;
+    if (_cachedSeasonIndex != seasonIndex) {
+        _cachedSeasonIndex = seasonIndex;
+        for (auto& kv : _trees) {
+            if (kv.second) kv.second->setSeasonIndex(seasonIndex);
+        }
+    }
     for (auto& kv : _trees) {
         if (kv.second) kv.second->setLocalZOrder(static_cast<int>(-kv.second->getPositionY()));
     }
@@ -128,7 +157,9 @@ std::vector<Game::TreePos> TreeSystem::getAllTreeTiles() const {
         long long k = kv.first;
         int r = static_cast<int>(k >> 32);
         int c = static_cast<int>(k & 0xFFFFFFFF);
-        out.push_back(Game::TreePos{c, r});
+        Game::TreeKind kind = Game::TreeKind::Tree1;
+        if (kv.second) kind = kv.second->kind();
+        out.push_back(Game::TreePos{c, r, kind});
     }
     return out;
 }

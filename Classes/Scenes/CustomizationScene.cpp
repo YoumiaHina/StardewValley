@@ -1,6 +1,7 @@
 #include "CustomizationScene.h"
 #include "Scenes/RoomScene.h"
 #include "ui/CocosGUI.h"
+#include "Game/WorldState.h"
 
 USING_NS_CC;
 
@@ -32,17 +33,20 @@ bool CustomizationScene::init() {
     _character->setDirection(Game::IPlayerView::Direction::DOWN);
     this->addChild(_character);
 
-    auto def = UserDefault::getInstance();
-    _currentShirt = def->getIntegerForKey("player_shirt", 0);
-    _currentPants = def->getIntegerForKey("player_pants", 0);
-    _currentHair = def->getIntegerForKey("player_hair", 0);
-    int r = def->getIntegerForKey("player_hair_r", 255);
-    int g = def->getIntegerForKey("player_hair_g", 255);
-    int b = def->getIntegerForKey("player_hair_b", 255);
+    auto& ws = Game::globalState();
+    _currentShirt = ws.playerShirt;
+    _currentPants = ws.playerPants;
+    _currentHair = ws.playerHair;
+    int r = ws.playerHairR;
+    int g = ws.playerHairG;
+    int b = ws.playerHairB;
 
     int maxShirt = Game::PlayerView::getMaxShirtStyles();
+    int maxPants = Game::PlayerView::getMaxPantsStyles();
+    int maxHair = Game::PlayerView::getMaxHairStyles();
     if (_currentShirt < 0 || _currentShirt >= maxShirt) _currentShirt = 0;
-    _currentPants = 0;
+    if (_currentPants < 0 || _currentPants >= maxPants) _currentPants = 0;
+    if (_currentHair < 0 || _currentHair >= maxHair) _currentHair = 0;
 
     _character->setShirtStyle(_currentShirt);
     _character->setPantsStyle(_currentPants);
@@ -165,15 +169,14 @@ void CustomizationScene::updateLabels() {
 }
 
 void CustomizationScene::onStartGame(Ref* sender) {
-    auto def = UserDefault::getInstance();
-    def->setIntegerForKey("player_shirt", _character->getShirtStyle());
-    def->setIntegerForKey("player_pants", 0);
-    def->setIntegerForKey("player_hair", _character->getHairStyle());
+    auto& ws = Game::globalState();
+    ws.playerShirt = _character->getShirtStyle();
+    ws.playerPants = _character->getPantsStyle();
+    ws.playerHair = _character->getHairStyle();
     auto color = _character->getHairColor();
-    def->setIntegerForKey("player_hair_r", color.r);
-    def->setIntegerForKey("player_hair_g", color.g);
-    def->setIntegerForKey("player_hair_b", color.b);
-    def->flush();
+    ws.playerHairR = color.r;
+    ws.playerHairG = color.g;
+    ws.playerHairB = color.b;
 
     // Transition
     Director::getInstance()->replaceScene(TransitionFade::create(1.0, RoomScene::createScene()));

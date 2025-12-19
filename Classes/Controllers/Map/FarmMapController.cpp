@@ -183,13 +183,19 @@ void FarmMapController::init() {
 
     if (_treeSystem && _treeSystem->isEmpty()) {
         if (!ws.farmTrees.empty()) {
+            auto treeSystemConcrete = static_cast<Controllers::TreeSystem*>(_treeSystem);
             for (const auto& tp : ws.farmTrees) {
                 auto center = tileToWorld(tp.c, tp.r);
-                _treeSystem->spawnFromTile(tp.c, tp.r, center, _farmMap, GameConfig::TILE_SIZE);
+                if (treeSystemConcrete) {
+                    treeSystemConcrete->spawnFromTileWithKind(tp.c, tp.r, center, _farmMap, GameConfig::TILE_SIZE, tp.kind);
+                } else {
+                    _treeSystem->spawnFromTile(tp.c, tp.r, center, _farmMap, GameConfig::TILE_SIZE);
+                }
             }
         } else {
             std::vector<Game::TreePos> saved;
             int created = 0;
+            auto treeSystemConcrete = static_cast<Controllers::TreeSystem*>(_treeSystem);
             for (int r = 0; r < _rows; ++r) {
                 for (int c = 0; c < _cols; ++c) {
                     if (getTile(c, r) == Game::TileType::Tree) {
@@ -199,7 +205,12 @@ void FarmMapController::init() {
                         if (skip) continue;
                         if (_treeSystem->spawnFromTile(c, r, center, _farmMap, GameConfig::TILE_SIZE)) {
                             setTile(c, r, Game::TileType::Soil);
-                            saved.push_back(Game::TreePos{c, r});
+                            Game::TreeKind kind = Game::TreeKind::Tree1;
+                            if (treeSystemConcrete) {
+                                auto tree = treeSystemConcrete->findTreeAt(c, r);
+                                if (tree) kind = tree->kind();
+                            }
+                            saved.push_back(Game::TreePos{c, r, kind});
                             created++;
                         }
                     }
@@ -226,7 +237,6 @@ void FarmMapController::init() {
                     _farmMap, GameConfig::TILE_SIZE,
                     [safe](int c, int r){ return safe(c, r); }
                 );
-                auto treeSystemConcrete = static_cast<Controllers::TreeSystem*>(_treeSystem);
                 if (treeSystemConcrete) {
                     saved = treeSystemConcrete->getAllTreeTiles();
                 }
@@ -237,19 +247,30 @@ void FarmMapController::init() {
 
     if (_rockSystem && _rockSystem->isEmpty()) {
         if (!ws.farmRocks.empty()) {
+            auto rockSystemConcrete = static_cast<Controllers::RockSystem*>(_rockSystem);
             for (const auto& rp : ws.farmRocks) {
                 auto center = tileToWorld(rp.c, rp.r);
-                _rockSystem->spawnFromTile(rp.c, rp.r, center, _farmMap, GameConfig::TILE_SIZE);
+                if (rockSystemConcrete) {
+                    rockSystemConcrete->spawnFromTileWithKind(rp.c, rp.r, center, _farmMap, GameConfig::TILE_SIZE, rp.kind);
+                } else {
+                    _rockSystem->spawnFromTile(rp.c, rp.r, center, _farmMap, GameConfig::TILE_SIZE);
+                }
             }
         } else {
             std::vector<Game::RockPos> savedRocks;
+            auto rockSystemConcrete = static_cast<Controllers::RockSystem*>(_rockSystem);
             for (int r = 0; r < _rows; ++r) {
                 for (int c = 0; c < _cols; ++c) {
                     if (getTile(c, r) == Game::TileType::Rock) {
                         auto center = tileToWorld(c, r);
                         if (_rockSystem->spawnFromTile(c, r, center, _farmMap, GameConfig::TILE_SIZE)) {
                             setTile(c, r, Game::TileType::Soil);
-                            savedRocks.push_back(Game::RockPos{c, r});
+                            Game::RockKind kind = Game::RockKind::Rock1;
+                            if (rockSystemConcrete) {
+                                auto rock = rockSystemConcrete->findRockAt(c, r);
+                                if (rock) kind = rock->kind();
+                            }
+                            savedRocks.push_back(Game::RockPos{c, r, kind});
                         }
                     }
                 }

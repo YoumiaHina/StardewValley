@@ -25,16 +25,21 @@ bool SceneBase::initBase(float worldScale, bool buildCraftPanel, bool enableTool
     // 角色外观
     auto pv = Game::PlayerView::create();
     _player = pv;
-    auto def = UserDefault::getInstance();
-    int shirt = def->getIntegerForKey("player_shirt", 0);
-    int hair  = def->getIntegerForKey("player_hair", 0);
-    int r = def->getIntegerForKey("player_hair_r", 255);
-    int g = def->getIntegerForKey("player_hair_g", 255);
-    int b = def->getIntegerForKey("player_hair_b", 255);
+    auto &ws = Game::globalState();
+    int shirt = ws.playerShirt;
+    int pants = ws.playerPants;
+    int hair  = ws.playerHair;
+    int r = ws.playerHairR;
+    int g = ws.playerHairG;
+    int b = ws.playerHairB;
     int maxShirt = Game::PlayerView::getMaxShirtStyles();
+    int maxPants = Game::PlayerView::getMaxPantsStyles();
+    int maxHair = Game::PlayerView::getMaxHairStyles();
     if (shirt < 0 || shirt >= maxShirt) shirt = 0;
+    if (pants < 0 || pants >= maxPants) pants = 0;
+    if (hair < 0 || hair >= maxHair) hair = 0;
     pv->setShirtStyle(shirt);
-    pv->setPantsStyle(0);
+    pv->setPantsStyle(pants);
     pv->setHairStyle(hair);
     pv->setHairColor(Color3B(r, g, b));
     positionPlayerInitial();
@@ -43,7 +48,6 @@ bool SceneBase::initBase(float worldScale, bool buildCraftPanel, bool enableTool
     _mapController->addActorToMap(_player, 20);
 
     // 共享背包
-    auto &ws = Game::globalState();
     if (!ws.inventory) {
         ws.inventory = std::make_shared<Game::Inventory>(GameConfig::TOOLBAR_SLOTS);
         ws.inventory->setTool(0, Game::makeTool(Game::ToolKind::Axe));

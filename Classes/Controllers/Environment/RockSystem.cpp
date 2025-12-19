@@ -11,19 +11,34 @@ using namespace Game;
 
 namespace Controllers {
 
+namespace {
+    Game::RockKind randomRockKind() {
+        static std::mt19937 rng{ std::random_device{}() };
+        static std::uniform_int_distribution<int> dist(0, 1);
+        return (dist(rng) == 0) ? Game::RockKind::Rock1 : Game::RockKind::Rock2;
+    }
+}
+
 void RockSystem::attachTo(Node* root) {
     _root = root;
 }
 
 bool RockSystem::spawnFromTile(int c, int r, const Vec2& tileCenter,
                                MapBase* map, int tileSize) {
+    return spawnFromTileWithKind(c, r, tileCenter, map, tileSize, randomRockKind());
+}
+
+bool RockSystem::spawnFromTileWithKind(int c, int r, const Vec2& tileCenter,
+                                       MapBase* map, int tileSize,
+                                       Game::RockKind kind) {
     if (!_root) return false;
     float s = static_cast<float>(tileSize);
     Vec2 footCenter = tileCenter + Vec2(0, -s * 0.5f);
     bool blocked = map && map->collides(footCenter, 8.0f);
     if (blocked) return false;
-    auto rock = Rock::create("FarmEnvironment/rock.png");
+    auto rock = Rock::create(Rock::texturePath(kind));
     if (!rock) return false;
+    rock->setKind(kind);
     rock->setBrokenTexture("FarmEnvironment/rock_broken.png");
     rock->setPosition(footCenter);
     _root->addChild(rock, 0);
@@ -50,8 +65,10 @@ void RockSystem::spawnRandom(int count, int cols, int rows,
         Vec2 footCenter = center + Vec2(0, -s * 0.5f);
         bool blocked = map && map->collides(footCenter, 8.0f);
         if (blocked) continue;
-        auto rock = Rock::create("FarmEnvironment/rock.png");
+        auto kind = randomRockKind();
+        auto rock = Rock::create(Rock::texturePath(kind));
         if (!rock) continue;
+        rock->setKind(kind);
         rock->setBrokenTexture("FarmEnvironment/rock_broken.png");
         rock->setPosition(footCenter);
         _root->addChild(rock, 0);
@@ -128,7 +145,9 @@ std::vector<Game::RockPos> RockSystem::getAllRockTiles() const {
         long long k = kv.first;
         int r = static_cast<int>(k >> 32);
         int c = static_cast<int>(k & 0xFFFFFFFF);
-        out.push_back(Game::RockPos{c, r});
+        Game::RockKind kind = Game::RockKind::Rock1;
+        if (kv.second) kind = kv.second->kind();
+        out.push_back(Game::RockPos{c, r, kind});
     }
     return out;
 }

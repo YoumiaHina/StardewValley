@@ -85,6 +85,14 @@ struct WorldState {
     // 热键选中槽位索引
     int selectedIndex = 0;
 
+    // 玩家外观（捏脸）：用于存档持久化与跨场景还原
+    int playerShirt = 0;
+    int playerPants = 0;
+    int playerHair = 0;
+    int playerHairR = 255;
+    int playerHairG = 255;
+    int playerHairB = 255;
+
     // 时间系统：四季与天数（每季 30 天）
     int seasonIndex = 0;   // 0: Spring, 1: Summer, 2: Fall, 3: Winter
     int dayOfSeason = 1;   // 1..30

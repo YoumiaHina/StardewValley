@@ -17,6 +17,11 @@ public:
     bool spawnFromTile(int c, int r, const cocos2d::Vec2& tileCenter,
                        Game::MapBase* map, int tileSize) override;
 
+    // 在指定瓦片位置生成指定种类的石头（用于从存档还原）。
+    bool spawnFromTileWithKind(int c, int r, const cocos2d::Vec2& tileCenter,
+                               Game::MapBase* map, int tileSize,
+                               Game::RockKind kind);
+
     void spawnRandom(int count, int cols, int rows,
                      const std::function<cocos2d::Vec2(int,int)>& tileToWorld,
                      Game::MapBase* map, int tileSize,
