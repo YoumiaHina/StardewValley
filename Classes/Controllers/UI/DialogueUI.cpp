@@ -5,6 +5,18 @@ using namespace cocos2d::ui;
 
 namespace Controllers {
 
+namespace {
+
+std::string npcDialogueBgPath(const std::string& npcName) {
+  if (npcName == "Abigail") return "NPC/Abigail/Abigail-DialogBox.png";
+  if (npcName == "Willy") return "NPC/Willy/Willy-DialoBox.png";
+  if (npcName == "Robin") return "NPC/Robin/Robin-DialoBox.png";
+  if (npcName == "Pierre") return "NPC/Pierre/Pierre-DialoBox.png";
+  return "";
+}
+
+}  // namespace
+
 void DialogueUI::show(const std::string& npc_name,
                       const std::string& text,
                       const std::vector<std::string>& options,
@@ -12,28 +24,17 @@ void DialogueUI::show(const std::string& npc_name,
                       std::function<void()> on_advance) {
   on_option_ = std::move(on_option);
   on_advance_ = std::move(on_advance);
+  auto visible = Director::getInstance()->getVisibleSize();
+  auto origin = Director::getInstance()->getVisibleOrigin();
+  float targetW = visible.width * 0.8f;
+  float fallbackH = visible.height * 0.25f;
   if (!panel_) {
     panel_ = Node::create();
     if (scene_) scene_->addChild(panel_, 6);
-    auto visible = Director::getInstance()->getVisibleSize();
-    auto origin = Director::getInstance()->getVisibleOrigin();
-    panel_->setPosition(Vec2(origin.x + visible.width * 0.5f,
-                             origin.y + visible.height * 0.15f));
-    auto bg = DrawNode::create();
-    float w = visible.width * 0.8f;
-    float h = visible.height * 0.25f;
-    Vec2 v[4] = {Vec2(-w * 0.5f, 0), Vec2(w * 0.5f, 0),
-                 Vec2(w * 0.5f, h), Vec2(-w * 0.5f, h)};
-    bg->drawSolidPoly(v, 4, Color4F(0.f, 0.f, 0.f, 0.7f));
-    panel_->addChild(bg);
-    name_label_ = Label::createWithTTF("", "fonts/Marker Felt.ttf", 20);
-    name_label_->setAnchorPoint(Vec2(0, 0.5f));
-    name_label_->setPosition(Vec2(-w * 0.5f + 20.f, h - 24.f));
-    panel_->addChild(name_label_);
-    text_label_ = Label::createWithTTF("", "fonts/Marker Felt.ttf", 18);
+    fallback_bg_ = DrawNode::create();
+    if (fallback_bg_) panel_->addChild(fallback_bg_, -1);
+    text_label_ = Label::createWithTTF("", "fonts/Marker Felt.ttf", 30);
     text_label_->setAnchorPoint(Vec2(0, 1));
-    text_label_->setWidth(w - 40.f);
-    text_label_->setPosition(Vec2(-w * 0.5f + 20.f, h - 60.f));
     panel_->addChild(text_label_);
     auto listener = EventListenerTouchOneByOne::create();
     listener->setSwallowTouches(true);
@@ -50,33 +51,120 @@ void DialogueUI::show(const std::string& npc_name,
         listener, panel_);
   }
   if (!panel_) return;
-  panel_->setVisible(true);
-  name_label_->setString(npc_name);
-  text_label_->setString(text);
-  for (auto* b : option_buttons_) {
-    if (b && b->getParent()) b->removeFromParent();
-  }
-  option_buttons_.clear();
-  if (!options.empty()) {
-    float startY = 20.f;
-    float gapX = 120.f;
-    int count = static_cast<int>(options.size());
-    float baseX = -gapX * (count - 1) * 0.5f;
-    for (int i = 0; i < count; ++i) {
-      auto btn = Button::create("CloseNormal.png", "CloseSelected.png");
-      btn->setTitleText(options[i]);
-      btn->setTitleFontSize(18);
-      btn->setScale9Enabled(true);
-      btn->setContentSize(Size(110.f, 32.f));
-      btn->setPosition(Vec2(baseX + i * gapX, startY));
-      int idx = i;
-      btn->addClickEventListener([this, idx](Ref*) {
-        if (on_option_) on_option_(idx);
-      });
-      panel_->addChild(btn);
-      option_buttons_.push_back(btn);
+
+  std::string nextBg = npcDialogueBgPath(npc_name);
+  if (!nextBg.empty() && (!bg_ || bg_path_ != nextBg)) {
+    if (bg_) {
+      bg_->removeFromParent();
+      bg_ = nullptr;
+    }
+    bg_ = Sprite::create(nextBg);
+    bg_path_ = nextBg;
+    if (bg_) {
+      bg_->setAnchorPoint(Vec2(0.5f, 0.f));
+      bg_->setPosition(Vec2(0, 0));
+      panel_->addChild(bg_, -1);
     }
   }
+
+  bool hasBg = (!nextBg.empty() && bg_ != nullptr);
+  if (!hasBg && bg_) {
+    bg_->setVisible(false);
+  }
+
+  float bgScale = 1.0f;
+  float bgW = targetW;
+  float bgH = fallbackH;
+  if (hasBg) {
+    auto s = bg_->getContentSize();
+    if (s.width > 1e-3f) {
+      bgScale = targetW / s.width;
+      bgW = s.width * bgScale;
+      bgH = s.height * bgScale;
+    }
+  }
+
+  panel_->setPosition(Vec2(origin.x + visible.width * 0.5f,
+                           origin.y + visible.height * 0.15f));
+  panel_->setContentSize(Size(bgW, bgH));
+
+  if (hasBg) {
+    bg_->setScale(bgScale);
+    bg_->setVisible(true);
+  }
+
+  if (fallback_bg_) {
+    fallback_bg_->setVisible(!hasBg);
+    fallback_bg_->clear();
+    Vec2 v[4] = {Vec2(-bgW * 0.5f, 0), Vec2(bgW * 0.5f, 0),
+                 Vec2(bgW * 0.5f, bgH), Vec2(-bgW * 0.5f, bgH)};
+    fallback_bg_->drawSolidPoly(v, 4, Color4F(0.f, 0.f, 0.f, 0.7f));
+  }
+
+  float uiScale = std::max(0.85f, std::min(1.35f, bgScale));
+  float padX = bgW * 0.06f;
+  float padTop = bgH * 0.14f;
+  float padBottom = bgH * 0.10f;
+
+  if (text_label_) {
+    text_label_->setScale(uiScale);
+    float textTopY = bgH - padTop - 8.0f * uiScale;
+    text_label_->setWidth(std::max(40.0f, (bgW - 2.0f * padX) / uiScale));
+    text_label_->setPosition(Vec2(-bgW * 0.5f + padX, textTopY));
+  }
+
+  if (options.empty()) {
+    for (auto* b : option_buttons_) {
+      if (b && b->getParent()) b->removeFromParent();
+    }
+    option_buttons_.clear();
+  } else {
+    float gapX = 16.0f * uiScale;
+    float btnH = 48.0f * uiScale;
+    int count = static_cast<int>(options.size());
+    float availableW = std::max(60.0f, bgW - 2.0f * padX);
+    float btnW = (availableW - gapX * (count - 1)) / static_cast<float>(count);
+    btnW = std::max(80.0f * uiScale, std::min(180.0f * uiScale, btnW));
+    float totalW = btnW * count + gapX * (count - 1);
+    float baseX = -totalW * 0.5f + btnW * 0.5f - 200.0f;
+    float y = padBottom + btnH * 0.5f;
+
+    while (static_cast<int>(option_buttons_.size()) > count) {
+      auto* b = option_buttons_.back();
+      if (b && b->getParent()) b->removeFromParent();
+      option_buttons_.pop_back();
+    }
+
+    for (int i = 0; i < count; ++i) {
+      Button* btn = nullptr;
+      if (i < static_cast<int>(option_buttons_.size())) {
+        btn = option_buttons_[i];
+      }
+      if (!btn) {
+        btn = Button::create("CloseNormal.png", "CloseSelected.png");
+        if (btn) {
+          btn->addClickEventListener([this](Ref* r) {
+            auto* n = dynamic_cast<Node*>(r);
+            int idx = n ? n->getTag() : 0;
+            if (on_option_) on_option_(idx);
+          });
+          panel_->addChild(btn);
+          option_buttons_.push_back(btn);
+        }
+      }
+      if (!btn) continue;
+      btn->setTag(i);
+      btn->setTitleText(options[i]);
+      btn->setTitleFontSize(18.0f * uiScale);
+      btn->setScale9Enabled(true);
+      btn->setContentSize(Size(btnW, btnH));
+      btn->setPosition(Vec2(baseX + i * (btnW + gapX), y));
+    }
+  }
+
+  panel_->setVisible(true);
+  text_label_->setString(text);
+  text_label_->setTextColor(Color4B(139, 69, 19, 255));
 }
 
 void DialogueUI::hide() {
@@ -88,4 +176,3 @@ bool DialogueUI::isVisible() const {
 }
 
 }  // namespace Controllers
-

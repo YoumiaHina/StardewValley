@@ -26,7 +26,9 @@ class DialogueUI {
  private:
   cocos2d::Scene* scene_ = nullptr;
   cocos2d::Node* panel_ = nullptr;
-  cocos2d::Label* name_label_ = nullptr;
+  cocos2d::DrawNode* fallback_bg_ = nullptr;
+  cocos2d::Sprite* bg_ = nullptr;
+  std::string bg_path_;
   cocos2d::Label* text_label_ = nullptr;
   std::vector<cocos2d::ui::Button*> option_buttons_;
   std::function<void(int)> on_option_;
