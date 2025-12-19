@@ -236,6 +236,9 @@ void PlayerController::registerCommonInputHandlers(
         if (dialogueOpen) {
             return;
         }
+        if (Game::globalState().fishingActive) {
+            return;
+        }
         if (_ui && _ui->handleHotbarMouseDown(e)) return;
         if (chestOpen || storeOpen) return;
         if (_map && _player) {
@@ -272,6 +275,9 @@ void PlayerController::registerCommonInputHandlers(
         }
     };
     _mouseListener->onMouseScroll = [this](EventMouse* e) {
+        if (Game::globalState().fishingActive) {
+            return;
+        }
         if (_ui) {
             _ui->handleHotbarScroll(e->getScrollY());
         }
@@ -280,6 +286,9 @@ void PlayerController::registerCommonInputHandlers(
 
     _touchListener = EventListenerTouchOneByOne::create();
     _touchListener->onTouchBegan = [this](Touch* t, Event*) {
+        if (Game::globalState().fishingActive) {
+            return false;
+        }
         if (!_ui) return false;
         return _ui->handleHotbarAtPoint(t->getLocation());
     };

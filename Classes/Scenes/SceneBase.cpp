@@ -130,11 +130,12 @@ void SceneBase::update(float dt) {
         return;
     }
     _stateController->update(dt);
-    bool blockMove = _uiController && (_uiController->isDialogueVisible()
-                                       || _uiController->isNpcSocialVisible()
-                                       || _uiController->isChestPanelVisible()
-                                       || _uiController->isStorePanelVisible()
-                                       || _uiController->isAnimalStorePanelVisible());
+    bool blockMove = ws.fishingActive
+                     || (_uiController && (_uiController->isDialogueVisible()
+                                           || _uiController->isNpcSocialVisible()
+                                           || _uiController->isChestPanelVisible()
+                                           || _uiController->isStorePanelVisible()
+                                           || _uiController->isAnimalStorePanelVisible()));
     if (_playerController) {
         _playerController->setMovementLocked(blockMove);
         _playerController->update(dt);

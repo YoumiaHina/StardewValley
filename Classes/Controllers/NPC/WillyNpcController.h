@@ -33,6 +33,7 @@ class WillyNpcController : public NpcControllerBase {
   std::unique_ptr<Game::NpcBase> npc_;
   cocos2d::Sprite* sprite_ = nullptr;
   bool was_near_ = false;
+  bool paused_by_interaction_ = false;
   NpcDialogueManager* dialogue_ = nullptr;
 
   float tile_ = 0.0f;

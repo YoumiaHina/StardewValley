@@ -163,6 +163,28 @@ int AbigailNpcController::friendshipGainForGift() const {
 void AbigailNpcController::update(const cocos2d::Vec2& player_pos) {
   if (!ui_ || !map_) return;
   if (sprite_) map_->sortActorWithEnvironment(sprite_);
+  bool interacting = ui_->isDialogueVisible()
+                     || ui_->isNpcSocialVisible()
+                     || ui_->isStorePanelVisible()
+                     || ui_->isAnimalStorePanelVisible();
+  if (interacting) {
+    if (!paused_by_interaction_) {
+      if (sprite_) {
+        sprite_->stopActionByTag(kPatrolActionTag);
+        setStanding(facing_dir_);
+      }
+      paused_by_interaction_ = true;
+    }
+    if (was_near_) {
+      ui_->showNpcPrompt(false, cocos2d::Vec2::ZERO, "");
+      was_near_ = false;
+    }
+    return;
+  }
+  if (paused_by_interaction_) {
+    startPatrol();
+    paused_by_interaction_ = false;
+  }
   float max_dist = map_->tileSize() * 1.5f;
   cocos2d::Vec2 pos;
   bool is_near = isNear(player_pos, max_dist, pos);

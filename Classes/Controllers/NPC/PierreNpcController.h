@@ -32,6 +32,7 @@ class PierreNpcController : public NpcControllerBase {
   std::unique_ptr<Game::NpcBase> npc_;
   cocos2d::Sprite* sprite_ = nullptr;
   bool was_near_ = false;
+  bool paused_by_interaction_ = false;
 
   float tile_ = 0.0f;
   cocos2d::Vec2 patrol_base_pos_;
@@ -51,4 +52,3 @@ class PierreNpcController : public NpcControllerBase {
 };
 
 }  // namespace Controllers
-
