@@ -1,9 +1,65 @@
-/**
- * Inventory implementation.
- */
 #include "Game/Inventory.h"
+#include "Game/WorldState.h"
 
 namespace Game {
+
+namespace {
+int addToExistingStacks(std::vector<Slot>& slots, ItemType type, int qty) {
+    if (qty <= 0) return 0;
+    for (auto& s : slots) {
+        if (s.kind == SlotKind::Item && s.itemType == type && s.itemQty < ItemStack::MAX_STACK) {
+            int canAdd = ItemStack::MAX_STACK - s.itemQty;
+            int add = qty < canAdd ? qty : canAdd;
+            s.itemQty += add;
+            qty -= add;
+            if (qty <= 0) return 0;
+        }
+    }
+    return qty;
+}
+
+int addToEmptySlots(std::vector<Slot>& slots, ItemType type, int qty) {
+    if (qty <= 0) return 0;
+    for (auto& s : slots) {
+        if (s.kind == SlotKind::Empty) {
+            s.kind = SlotKind::Item;
+            s.itemType = type;
+            int add = qty < ItemStack::MAX_STACK ? qty : ItemStack::MAX_STACK;
+            s.itemQty = add;
+            qty -= add;
+            if (qty <= 0) return 0;
+        }
+    }
+    return qty;
+}
+
+int countInSlots(const std::vector<Slot>& slots, ItemType type) {
+    int total = 0;
+    for (auto const& s : slots) {
+        if (s.kind == SlotKind::Item && s.itemType == type) {
+            total += s.itemQty;
+        }
+    }
+    return total;
+}
+
+void removeFromSlots(std::vector<Slot>& slots, ItemType type, int& qty) {
+    if (qty <= 0) return;
+    for (auto& s : slots) {
+        if (qty <= 0) break;
+        if (s.kind == SlotKind::Item && s.itemType == type && s.itemQty > 0) {
+            int take = (s.itemQty >= qty) ? qty : s.itemQty;
+            s.itemQty -= take;
+            qty -= take;
+            if (s.itemQty <= 0) {
+                s.kind = SlotKind::Empty;
+                s.itemType = ItemType::Wood;
+                s.itemQty = 0;
+            }
+        }
+    }
+}
+}
 
 Inventory::Inventory(std::size_t slots) : _slots(slots) {}
 
@@ -52,59 +108,51 @@ bool Inventory::isTool(std::size_t index) const {
 
 int Inventory::addItems(ItemType type, int qty) {
     if (qty <= 0) return 0;
-    // 1) fill existing stacks
-    for (auto &s : _slots) {
-        if (s.kind == SlotKind::Item && s.itemType == type && s.itemQty < ItemStack::MAX_STACK) {
-            int canAdd = ItemStack::MAX_STACK - s.itemQty;
-            int add = qty < canAdd ? qty : canAdd;
-            s.itemQty += add;
-            qty -= add;
-            if (qty <= 0) return 0;
+    auto& ws = globalState();
+    Inventory* wsInv = ws.inventory.get();
+    bool useChest = (this == wsInv);
+    std::vector<Slot>* chestSlots = nullptr;
+    if (useChest) {
+        auto& chest = ws.globalChest;
+        if (chest.slots.empty()) {
+            chest.slots.resize(static_cast<std::size_t>(Chest::CAPACITY));
         }
+        chestSlots = &chest.slots;
     }
-    // 2) create new stacks in empty slots
-    for (auto &s : _slots) {
-        if (s.kind == SlotKind::Empty) {
-            s.kind = SlotKind::Item;
-            s.itemType = type;
-            int add = qty < ItemStack::MAX_STACK ? qty : ItemStack::MAX_STACK;
-            s.itemQty = add;
-            qty -= add;
-            if (qty <= 0) return 0;
-        }
+    qty = addToExistingStacks(_slots, type, qty);
+    if (useChest && qty > 0 && chestSlots) {
+        qty = addToExistingStacks(*chestSlots, type, qty);
     }
-    // return remaining that couldn't fit
+    qty = addToEmptySlots(_slots, type, qty);
+    if (useChest && qty > 0 && chestSlots) {
+        qty = addToEmptySlots(*chestSlots, type, qty);
+    }
     return qty;
 }
 
 int Inventory::countItems(ItemType type) const {
-    int total = 0;
-    for (auto const& s : _slots) {
-        if (s.kind == SlotKind::Item && s.itemType == type) {
-            total += s.itemQty;
-        }
+    int total = countInSlots(_slots, type);
+    auto& ws = globalState();
+    const Inventory* wsInv = ws.inventory.get();
+    if (this == wsInv) {
+        total += countInSlots(ws.globalChest.slots, type);
     }
     return total;
 }
 
 bool Inventory::removeItems(ItemType type, int qty) {
     if (qty <= 0) return true;
-    // First pass: compute availability
-    int have = countItems(type);
+    auto& ws = globalState();
+    Inventory* wsInv = ws.inventory.get();
+    bool useChest = (this == wsInv);
+    int have = countInSlots(_slots, type);
+    if (useChest) {
+        have += countInSlots(ws.globalChest.slots, type);
+    }
     if (have < qty) return false;
-    // Second pass: consume from stacks front to back
-    for (auto &s : _slots) {
-        if (qty <= 0) break;
-        if (s.kind == SlotKind::Item && s.itemType == type && s.itemQty > 0) {
-            int take = (s.itemQty >= qty) ? qty : s.itemQty;
-            s.itemQty -= take;
-            qty -= take;
-            if (s.itemQty <= 0) {
-                s.kind = SlotKind::Empty;
-                s.itemType = ItemType::Wood;
-                s.itemQty = 0;
-            }
-        }
+    removeFromSlots(_slots, type, qty);
+    if (useChest && qty > 0) {
+        removeFromSlots(ws.globalChest.slots, type, qty);
     }
     return qty <= 0;
 }

@@ -116,9 +116,6 @@
     <ClCompile Include="..\Classes\Game\Inventory.cpp">
       <Filter>Classes\Game</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\Game\Bag.cpp">
-      <Filter>Classes\Game</Filter>
-    </ClCompile>
     <!-- Controllers -->
     <ClCompile Include="..\Classes\Controllers\Input\PlayerController.cpp">
       <Filter>Classes\Controllers\Input</Filter>
@@ -447,9 +444,6 @@
     </ClInclude>
     <ClInclude Include="..\Classes\Scenes\RoomScene.h">
       <Filter>Classes\Scenes</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Classes\Game\Bag.h">
-      <Filter>Classes\Game</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\Game\Cheat.h">
       <Filter>Classes\Game</Filter>
