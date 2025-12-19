@@ -10,10 +10,10 @@
 #include "Controllers/Map/IMapController.h"
 #include "Game/GameConfig.h"
 #include "Game/Map/MineMap.h"
-#include "Game/Drop.h"
 #include "Controllers/Interact/TileSelector.h"
 #include "Controllers/Environment/MineralSystem.h"
 #include "Controllers/Environment/StairSystem.h"
+#include "Controllers/Systems/DropSystem.h"
 
 namespace Controllers {
 
@@ -97,9 +97,7 @@ private:
     std::vector<cocos2d::Vec2> _extraStairs;
     std::unordered_set<int> _elevatorFloors; // 已激活楼层（5的倍数）
     std::vector<Game::Chest> _emptyChests; // 深渊内无箱子，返回空引用
-    std::vector<Game::Drop> _drops;
-    cocos2d::DrawNode* _dropsDraw = nullptr;
-    cocos2d::Node* _dropsRoot = nullptr;
+    Controllers::DropSystem _dropSystem;
     Game::MineMap* _entrance = nullptr;
     Game::MineMap* _floorMap = nullptr;
     cocos2d::Node* _mapNode = nullptr;

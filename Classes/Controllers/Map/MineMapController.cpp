@@ -3,7 +3,6 @@
 #include "Game/WorldState.h"
 #include "Game/Tool/ToolFactory.h"
 #include "Game/Map/MapBase.h"
-#include "Game/Drop.h"
 
 using namespace cocos2d;
 
@@ -240,45 +239,15 @@ void MineMapController::refreshMapVisuals() {
 }
 
 void MineMapController::refreshDropsVisuals() {
-    cocos2d::Node* parent = nullptr;
-    if (_entrance && _entrance->getTMX()) {
-        parent = _entrance->getTMX();
-    } else if (_floorMap && _floorMap->getTMX()) {
-        parent = _floorMap->getTMX();
-    } else if (_worldNode) {
-        parent = _worldNode;
-    }
-    if (parent) {
-        if (!_dropsDraw) {
-            _dropsDraw = DrawNode::create();
-            parent->addChild(_dropsDraw, 19);
-        } else if (!_dropsDraw->getParent()) {
-            _dropsDraw->removeFromParent();
-            _dropsDraw = DrawNode::create();
-            parent->addChild(_dropsDraw, 19);
-        }
-        if (!_dropsRoot) {
-            _dropsRoot = Node::create();
-            parent->addChild(_dropsRoot, 19);
-        } else if (!_dropsRoot->getParent()) {
-            _dropsRoot->removeFromParent();
-            _dropsRoot = Node::create();
-            parent->addChild(_dropsRoot, 19);
-        }
-    }
-    Game::Drop::renderDrops(_drops, _dropsRoot, _dropsDraw);
+    _dropSystem.refreshVisuals();
 }
 
 void MineMapController::spawnDropAt(int c, int r, int itemType, int qty) {
-    if (!inBounds(c, r) || qty <= 0) return;
-    Game::Drop d{ static_cast<Game::ItemType>(itemType), tileToWorld(c, r), qty };
-    _drops.push_back(d);
+    _dropSystem.spawnDropAt(this, c, r, itemType, qty);
 }
 
 void MineMapController::collectDropsNear(const cocos2d::Vec2& playerWorldPos, Game::Inventory* inv) {
-    if (!inv) return;
-    Game::Drop::collectDropsNear(playerWorldPos, _drops, inv);
-    refreshDropsVisuals();
+    _dropSystem.collectDropsNear(playerWorldPos, inv);
 }
 
 void MineMapController::addActorToMap(cocos2d::Node* node, int zOrder) {
@@ -298,15 +267,7 @@ void MineMapController::generateFloor(int floorIndex) {
         _cursor->removeFromParent();
         _cursor = nullptr;
     }
-    _drops.clear();
-    if (_dropsDraw) {
-        _dropsDraw->removeFromParent();
-        _dropsDraw = nullptr;
-    }
-    if (_dropsRoot) {
-        _dropsRoot->removeFromParent();
-        _dropsRoot = nullptr;
-    }
+    _dropSystem.clear();
     _extraStairs.clear();
     _stairSystem.reset();
     _minerals.clear();
@@ -420,15 +381,7 @@ void MineMapController::loadEntrance() {
         _cursor->removeFromParent();
         _cursor = nullptr;
     }
-    _drops.clear();
-    if (_dropsDraw) {
-        _dropsDraw->removeFromParent();
-        _dropsDraw = nullptr;
-    }
-    if (_dropsRoot) {
-        _dropsRoot->removeFromParent();
-        _dropsRoot = nullptr;
-    }
+    _dropSystem.clear();
     _extraStairs.clear();
     _stairSystem.reset();
     _minerals.clear();
@@ -457,6 +410,20 @@ void MineMapController::loadEntrance() {
         _mineralSystem.attachTo(_entrance->getTMX());
         _mineralSystem.bindRuntimeStorage(&_minerals);
         _stairSystem.attachTo(_entrance->getTMX());
+        _dropSystem.configureTargetProvider([this]() -> Controllers::DropSystem::AttachTarget {
+            Controllers::DropSystem::AttachTarget tgt;
+            if (_entrance && _entrance->getTMX()) {
+                tgt.parent = _entrance->getTMX();
+                tgt.zOrder = 19;
+            } else if (_floorMap && _floorMap->getTMX()) {
+                tgt.parent = _floorMap->getTMX();
+                tgt.zOrder = 19;
+            } else if (_worldNode) {
+                tgt.parent = _worldNode;
+                tgt.zOrder = 19;
+            }
+            return tgt;
+        });
         refreshMapVisuals();
 
         // 首次进入矿洞0层：仅赠送一次剑（控制器内处理，避免场景包含业务逻辑）

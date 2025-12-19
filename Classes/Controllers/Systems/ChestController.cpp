@@ -260,36 +260,12 @@ bool placeChestInRoom(Controllers::RoomMapController* room,
     return placeChestCommon(center, ui, inventory, chs, blocked, nullptr, room, syncWorld);
 }
 
+// 室外地图（Town/Beach）不支持放置 Chest
 bool placeChestOnOutdoorMap(Controllers::IMapController* map,
                             Controllers::UIController* ui,
                             std::shared_ptr<Game::Inventory> inventory,
                             const Vec2& playerPos) {
-    if (!map || !ui || !inventory) return false;
-    auto* town = dynamic_cast<Controllers::TownMapController*>(map);
-    auto* beach = dynamic_cast<Controllers::BeachMapController*>(map);
-    if (!town && !beach) {
-        return false;
-    }
-    Vec2 center;
-    bool okCenter = Controllers::PlaceablePlacementBase::selectOutdoorCenter(map, playerPos, center);
-    if (!okCenter) return false;
-    auto& ws = Game::globalState();
-    std::vector<Game::Chest>* container = nullptr;
-    ChestSyncFunc syncWorld;
-    if (town) {
-        container = &ws.townChests;
-        syncWorld = [&ws](const std::vector<Game::Chest>& out) {
-            ws.townChests = out;
-        };
-    } else {
-        container = &ws.beachChests;
-        syncWorld = [&ws](const std::vector<Game::Chest>& out) {
-            ws.beachChests = out;
-        };
-    }
-    auto& chs = *container;
-    auto blocked = [](const Rect&) { return false; };
-    return placeChestCommon(center, ui, inventory, chs, blocked, map, nullptr, syncWorld);
+    return false;
 }
 
 void transferChestCell(Game::Chest& chest,

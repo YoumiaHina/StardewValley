@@ -99,6 +99,7 @@ list(APPEND GAME_SOURCE
      Classes/Controllers/AbyssElevatorController.cpp
      Classes/Controllers/Store/StoreController.cpp
      Classes/Controllers/Store/StoreController.h
+     Classes/Controllers/Systems/DropSystem.cpp
      )
 list(APPEND GAME_HEADER
      Classes/AppDelegate.h
@@ -123,6 +124,7 @@ list(APPEND GAME_HEADER
      Classes/Game/Tool/FishingRod.h
      Classes/Game/Tool/ToolFactory.h
      Classes/Game/GameConfig.h
+     Classes/Controllers/Systems/DropSystem.h
      )
 
 if(ANDROID)

@@ -122,14 +122,6 @@ void PlayerController::registerCommonInputHandlers(
                     _ui->popTextAt(_map->getPlayerPosition(_player->getPosition()), "Saved", Color3B::WHITE);
                 }
             } break;
-            case EventKeyboard::KeyCode::KEY_F6: {
-                if (chestOpen || storeOpen) break;
-                Game::Cheat::grantProduce(_inventory, Game::CropType::Eggplant, 5);
-                if (_ui) _ui->refreshHotbar();
-                if (_player && _map && _ui) {
-                    _ui->popTextAt(_map->getPlayerPosition(_player->getPosition()), "Eggplant x5", Color3B::YELLOW);
-                }
-            } break;
             case EventKeyboard::KeyCode::KEY_E: {
                 if (chestOpen || storeOpen) break;
                 openGlobalChest(_ui);
@@ -262,12 +254,19 @@ void PlayerController::registerCommonInputHandlers(
                 }
             }
         }
+        bool consumed = false;
         if (e->getMouseButton() == EventMouse::MouseButton::BUTTON_RIGHT) {
-            if (_ui && _map) {
-                _ui->handleChestRightClick(e, _map->chests());
+            if (_ui && _map && _player) {
+                Vec2 p = _player->getPosition();
+                Vec2 dir = lastDir();
+                if (openChestNearPlayer(_map, _ui, p, dir)) {
+                    consumed = true;
+                } else if (_ui->handleChestRightClick(e, _map->chests())) {
+                    consumed = true;
+                }
             }
         }
-        if (_onMouseDownHook) {
+        if (!consumed && _onMouseDownHook) {
             _onMouseDownHook(e);
         }
         if (_map) {

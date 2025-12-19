@@ -37,6 +37,18 @@ TownMapController::TownMapController(Game::TownMap* map, cocos2d::Node* worldNod
     if (_furnaceController && furnaceParent) {
         _furnaceController->attachTo(furnaceParent, 19);
     }
+
+    _dropSystem.configureTargetProvider([this]() -> Controllers::DropSystem::AttachTarget {
+        Controllers::DropSystem::AttachTarget tgt;
+        if (_map && _map->getTMX()) {
+            tgt.parent = _map->getTMX();
+            tgt.zOrder = 19;
+        } else if (_worldNode) {
+            tgt.parent = _worldNode;
+            tgt.zOrder = 19;
+        }
+        return tgt;
+    });
 }
 
 Vec2 TownMapController::getPlayerPosition(const Vec2& playerMapLocalPos) const {
@@ -178,44 +190,15 @@ void TownMapController::refreshMapVisuals() {
 }
 
 void TownMapController::refreshDropsVisuals() {
-    cocos2d::Node* parent = nullptr;
-    if (_map && _map->getTMX()) {
-        parent = _map->getTMX();
-    } else if (_worldNode) {
-        parent = _worldNode;
-    }
-    if (parent) {
-        if (!_dropsDraw) {
-            _dropsDraw = DrawNode::create();
-            parent->addChild(_dropsDraw, 19);
-        } else if (!_dropsDraw->getParent()) {
-            _dropsDraw->removeFromParent();
-            _dropsDraw = DrawNode::create();
-            parent->addChild(_dropsDraw, 19);
-        }
-        if (!_dropsRoot) {
-            _dropsRoot = Node::create();
-            parent->addChild(_dropsRoot, 19);
-        } else if (!_dropsRoot->getParent()) {
-            _dropsRoot->removeFromParent();
-            _dropsRoot = Node::create();
-            parent->addChild(_dropsRoot, 19);
-        }
-    }
-    Game::Drop::renderDrops(_drops, _dropsRoot, _dropsDraw);
+    _dropSystem.refreshVisuals();
 }
 
 void TownMapController::spawnDropAt(int c, int r, int itemType, int qty) {
-    if (!_map || qty <= 0) return;
-    if (!inBounds(c, r)) return;
-    Game::Drop d{ static_cast<Game::ItemType>(itemType), tileToWorld(c, r), qty };
-    _drops.push_back(d);
+    _dropSystem.spawnDropAt(this, c, r, itemType, qty);
 }
 
 void TownMapController::collectDropsNear(const cocos2d::Vec2& playerWorldPos, Game::Inventory* inv) {
-    if (!inv) return;
-    Game::Drop::collectDropsNear(playerWorldPos, _drops, inv);
-    refreshDropsVisuals();
+    _dropSystem.collectDropsNear(playerWorldPos, inv);
 }
 
 } // namespace Controllers

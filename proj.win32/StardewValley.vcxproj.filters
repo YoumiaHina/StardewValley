@@ -708,6 +708,9 @@
     <ClInclude Include="..\Classes\Game\PlaceableItemBase.h">
       <Filter>Classes\Game</Filter>
     </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\Interact\PlacementInteractor.h">
+      <Filter>Classes\Controllers\Interact</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="game.rc">

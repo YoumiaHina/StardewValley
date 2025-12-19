@@ -2,7 +2,7 @@
 
 #include "Controllers/Map/IMapController.h"
 #include "Game/Map/BeachMap.h"
-#include "Game/Drop.h"
+#include "Controllers/Systems/DropSystem.h"
 
 namespace Controllers {
 
@@ -70,12 +70,10 @@ private:
     Game::BeachMap* _map = nullptr;
     cocos2d::Node* _worldNode = nullptr;
     cocos2d::Vec2 _origin = cocos2d::Vec2::ZERO;
-    cocos2d::DrawNode* _cursor = nullptr;
     std::vector<Game::Chest> _chests;
+    cocos2d::DrawNode* _cursor = nullptr;
     cocos2d::DrawNode* _chestDraw = nullptr;
-    std::vector<Game::Drop> _drops;
-    cocos2d::DrawNode* _dropsDraw = nullptr;
-    cocos2d::Node* _dropsRoot = nullptr;
+    Controllers::DropSystem _dropSystem;
     cocos2d::Vec2 _lastClickWorldPos = cocos2d::Vec2::ZERO;
     bool _hasLastClick = false;
     Controllers::FurnaceController* _furnaceController = nullptr;

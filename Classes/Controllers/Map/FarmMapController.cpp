@@ -116,19 +116,21 @@ void FarmMapController::init() {
         _mapNode->addChild(_cursor, 1);
     }
 
-    _drops = ws.farmDrops;
-    _dropsDraw = DrawNode::create();
-    if (_farmMap && _farmMap->getTMX()) {
-        _farmMap->getTMX()->addChild(_dropsDraw, 19);
-    } else {
-        _worldNode->addChild(_dropsDraw, 1);
-    }
-    _dropsRoot = Node::create();
-    if (_farmMap && _farmMap->getTMX()) {
-        _farmMap->getTMX()->addChild(_dropsRoot, 19);
-    } else {
-        _worldNode->addChild(_dropsRoot, 1);
-    }
+    _dropSystem.configureTargetProvider([this]() -> Controllers::DropSystem::AttachTarget {
+        Controllers::DropSystem::AttachTarget tgt;
+        if (_farmMap && _farmMap->getTMX()) {
+            tgt.parent = _farmMap->getTMX();
+            tgt.zOrder = 19;
+        } else if (_worldNode) {
+            tgt.parent = _worldNode;
+            tgt.zOrder = 1;
+        }
+        return tgt;
+    });
+    _dropSystem.setOnDropsChanged([](const std::vector<Game::Drop>& drops) {
+        Game::globalState().farmDrops = drops;
+    });
+    _dropSystem.setDrops(ws.farmDrops);
     if (!_chestController) {
         _chestController = new Controllers::ChestController(true);
     }
@@ -759,21 +761,15 @@ void FarmMapController::refreshCropsVisuals() {
 }
 
 void FarmMapController::refreshDropsVisuals() {
-    Game::Drop::renderDrops(_drops, _dropsRoot, _dropsDraw);
+    _dropSystem.refreshVisuals();
 }
 
 void FarmMapController::spawnDropAt(int c, int r, int itemType, int qty) {
-    if (!inBounds(c,r) || qty <= 0) return;
-    Game::Drop d{ static_cast<Game::ItemType>(itemType), tileToWorld(c,r), qty };
-    _drops.push_back(d);
-    Game::globalState().farmDrops = _drops;
+    _dropSystem.spawnDropAt(this, c, r, itemType, qty);
 }
 
 void FarmMapController::collectDropsNear(const cocos2d::Vec2& playerWorldPos, Game::Inventory* inv) {
-    if (!inv) return;
-    Game::Drop::collectDropsNear(playerWorldPos, _drops, inv);
-    Game::globalState().farmDrops = _drops;
-    refreshDropsVisuals();
+    _dropSystem.collectDropsNear(playerWorldPos, inv);
 }
 
 void FarmMapController::setAllPlantableTilesWatered() {

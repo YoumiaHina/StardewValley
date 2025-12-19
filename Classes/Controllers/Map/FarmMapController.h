@@ -12,7 +12,6 @@
 #include "Game/GameConfig.h"
 #include "Game/Map/FarmMap.h"
 #include "Game/Chest.h"
-#include "Game/Drop.h"
 #include "Game/WorldState.h"
 #include "Controllers/Environment/TreeSystem.h"
 #include "Controllers/Environment/RockSystem.h"
@@ -20,6 +19,7 @@
 #include "Controllers/Interact/TileSelector.h"
 #include "Controllers/Systems/ChestController.h"
 #include "Controllers/Systems/FurnaceController.h"
+#include "Controllers/Systems/DropSystem.h"
 
 namespace Controllers {
 
@@ -102,9 +102,7 @@ private:
     cocos2d::Rect _farmDoorRect;
 
     // Drops / Chests / Crops
-    std::vector<Game::Drop> _drops;
-    cocos2d::DrawNode* _dropsDraw = nullptr;
-    cocos2d::Node* _dropsRoot = nullptr;
+    Controllers::DropSystem _dropSystem;
     Controllers::ChestController* _chestController = nullptr;
     Controllers::FurnaceController* _furnaceController = nullptr;
     cocos2d::DrawNode* _cropsDraw = nullptr;

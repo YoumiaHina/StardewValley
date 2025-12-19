@@ -13,8 +13,6 @@ void ChestInteractor::onLeftClick() {
     if (!_map || !_ui || !_inventory || !_getPlayerPos) return;
     Vec2 p = _getPlayerPos();
     Vec2 lastDir = _getLastDir ? _getLastDir() : Vec2(0,-1);
-    bool opened = openChestNearPlayer(_map, _ui, p, lastDir);
-    if (opened) return;
     if (_inventory->selectedKind() != Game::SlotKind::Item) return;
     const auto& slot = _inventory->selectedSlot();
     if (slot.itemType == Game::ItemType::Chest) {

@@ -133,7 +133,6 @@ inline std::string itemIconPath(ItemType t) {
     }
 }
 
-// 是否可食用（占位规则：纤维可食用，用于演示）
 inline bool itemEdible(ItemType t) {
     return t == ItemType::Fiber || t == ItemType::Parsnip || t == ItemType::Blueberry || t == ItemType::Eggplant || t == ItemType::Corn || t == ItemType::Strawberry || t == ItemType::Fish || t == ItemType::Egg || t == ItemType::Milk;
 }
@@ -172,9 +171,6 @@ inline int itemPrice(ItemType t) {
         case ItemType::Egg: return 50;
         case ItemType::Milk: return 125;
         case ItemType::Wool: return 340;
-        // 种子本身也可以有售价，通常低于买入价，或者不可卖出。
-        // 这里暂时定义种子售价为 0 或者一半？用户只说了买入25。
-        // 假设卖出价格：
         default: return 0;
     }
 }
