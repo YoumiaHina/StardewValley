@@ -322,7 +322,7 @@ void HotbarUI::selectHotbarIndex(int idx) {
 bool HotbarUI::handleHotbarMouseDown(EventMouse* e) {
     if (!_hotbarNode || !_inventory) return false;
     if (e->getMouseButton() != EventMouse::MouseButton::BUTTON_LEFT) return false;
-    auto p = e->getLocation();
+    auto p = Director::getInstance()->convertToGL(e->getLocation());
     auto local = _hotbarNode->convertToNodeSpace(p);
     int slots = static_cast<int>(_inventory->size());
     if (slots <= 0) return false;
