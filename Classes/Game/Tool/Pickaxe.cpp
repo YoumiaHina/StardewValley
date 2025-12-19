@@ -59,13 +59,6 @@ std::string Pickaxe::use(Controllers::IMapController* map,
     std::string msg = std::string("Nothing");
     if (hit) {
         msg = std::string("Mine!");
-    } else {
-        auto current = map->getTile(tc, tr);
-        if (current == Game::TileType::Rock) {
-            map->setTile(tc, tr, Game::TileType::Soil);
-            map->spawnDropAt(tc, tr, static_cast<int>(Game::ItemType::Stone), 1);
-            msg = std::string("Mine!");
-        }
     }
     ws.energy = std::max(0, ws.energy - need);
     if (!ui) {
