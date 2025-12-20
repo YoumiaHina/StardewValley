@@ -12,8 +12,8 @@ using namespace cocos2d;
 
 namespace Controllers {
 
-FarmMapController::FarmMapController(cocos2d::Node* worldNode)
-: _worldNode(worldNode) {}
+FarmMapController::FarmMapController(Game::FarmMap* map, cocos2d::Node* worldNode)
+: _worldNode(worldNode), _farmMap(map) {}
 
 EnvironmentObstacleSystemBase* FarmMapController::obstacleSystem(ObstacleKind kind) {
     if (kind == ObstacleKind::Tree) return _treeSystem;
@@ -46,10 +46,14 @@ void FarmMapController::setLastClickWorldPos(const cocos2d::Vec2& p) {
 
 void FarmMapController::init() {
     if (!_worldNode) return;
-    _mapNode = Node::create();
-    _worldNode->addChild(_mapNode, 0);
+    if (!_mapNode) {
+        _mapNode = Node::create();
+        _worldNode->addChild(_mapNode, 0);
+    }
 
-    _farmMap = Game::FarmMap::create("Maps/spring_outdoors/spring_outdoors.tmx");
+    if (!_farmMap) {
+        _farmMap = Game::FarmMap::create("Maps/farm_outdoors/spring_outdoors.tmx");
+    }
     if (!_farmMap) return;
     Size content = _farmMap->getContentSize();
     auto visibleSize = Director::getInstance()->getVisibleSize();
@@ -58,7 +62,9 @@ void FarmMapController::init() {
                       origin.y + (visibleSize.height - content.height) * 0.5f);
     _farmMap->setAnchorPoint(Vec2(0,0));
     _farmMap->setPosition(_mapOrigin);
-    _mapNode->addChild(_farmMap, 0);
+    if (!_farmMap->getParent()) {
+        _mapNode->addChild(_farmMap, 0);
+    }
     _cols = static_cast<int>(_farmMap->getMapSize().width);
     _rows = static_cast<int>(_farmMap->getMapSize().height);
 
@@ -527,6 +533,9 @@ void FarmMapController::worldToTileIndex(const Vec2& p, int& c, int& r) const {
 
 void FarmMapController::refreshMapVisuals() {
     if (!_tileRoot) return;
+    const bool isWinter = (Game::globalState().seasonIndex == 3);
+    const char* dirtFile = isWinter ? "hoeDirtSnow.png" : "hoeDirt.png";
+    auto* dirtTex = cocos2d::Director::getInstance()->getTextureCache()->addImage(dirtFile);
     float s = tileSize();
     std::unordered_set<long long> alive;
     std::unordered_set<long long> aliveWater;
@@ -538,12 +547,15 @@ void FarmMapController::refreshMapVisuals() {
                 cocos2d::Sprite* spr = nullptr;
                 auto it = _tileSprites.find(key);
                 if (it == _tileSprites.end()) {
-                    spr = cocos2d::Sprite::create("hoeDirt.png");
+                    spr = cocos2d::Sprite::create(dirtFile);
                     spr->setAnchorPoint(cocos2d::Vec2(0.5f, 0.5f));
                     _tileRoot->addChild(spr, 0);
                     _tileSprites[key] = spr;
                 } else {
                     spr = it->second;
+                }
+                if (spr && dirtTex && spr->getTexture() != dirtTex) {
+                    spr->setTexture(dirtTex);
                 }
                 int tw = 16, th = 16;
                 bool up = false, down = false, left = false, right = false;
@@ -607,12 +619,15 @@ void FarmMapController::refreshMapVisuals() {
                     cocos2d::Sprite* sprW = nullptr;
                     auto itW = _waterSprites.find(key);
                     if (itW == _waterSprites.end()) {
-                        sprW = cocos2d::Sprite::create("hoeDirt.png");
+                        sprW = cocos2d::Sprite::create(dirtFile);
                         sprW->setAnchorPoint(cocos2d::Vec2(0.5f, 0.5f));
                         _tileRoot->addChild(sprW, 1);
                         _waterSprites[key] = sprW;
                     } else {
                         sprW = itW->second;
+                    }
+                    if (sprW && dirtTex && sprW->getTexture() != dirtTex) {
+                        sprW->setTexture(dirtTex);
                     }
                     bool upW = false, downW = false, leftW = false, rightW = false;
                     if (r + 1 < _rows) {

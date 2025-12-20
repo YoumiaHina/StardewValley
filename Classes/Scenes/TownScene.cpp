@@ -10,6 +10,16 @@
 using namespace cocos2d;
 using namespace Controllers;
 
+static const char* seasonKeyFromIndex(int seasonIndex) {
+    switch (seasonIndex) {
+        case 0: return "spring";
+        case 1: return "summer";
+        case 2: return "fall";
+        case 3: return "winter";
+        default: return "spring";
+    }
+}
+
 Scene* TownScene::createScene() { return TownScene::create(); }
 
 bool TownScene::init() {
@@ -53,7 +63,28 @@ bool TownScene::init() {
 }
 
 IMapController* TownScene::createMapController(Node* worldNode) {
-    auto map = Game::TownMap::create("Maps/town/town.tmx");
+    const auto& ws = Game::globalState();
+    std::string key;
+    switch (ws.seasonIndex)
+    {
+        case 0:
+            key = "spring";
+            break;
+        case 1:
+            key = "summer";
+            break;
+        case 2:
+            key = "fall";
+            break;
+        case 3:
+            key = "winter";
+            break;
+        default:
+            key = "spring";
+            break;
+    }
+    const std::string tmxPath = "Maps/town/" + key + "_town.tmx";
+    auto map = Game::TownMap::create(tmxPath);
     _townMap = new TownMapController(map, worldNode);
     return _townMap;
 }

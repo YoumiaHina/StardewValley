@@ -113,7 +113,29 @@ void FarmScene::setSpawnAtFarmTownDoor() {
 
 // SceneBase overrides
 Controllers::IMapController* FarmScene::createMapController(Node* worldNode) {
-    _farmMap = new Controllers::FarmMapController(worldNode);
+    const auto& ws = Game::globalState();
+    std::string key;
+    switch (ws.seasonIndex)
+    {
+        case 0:
+            key = "spring";
+            break;
+        case 1:
+            key = "summer";
+            break;
+        case 2:
+            key = "fall";
+            break;
+        case 3:
+            key = "winter";
+            break;
+        default:
+            key = "spring";
+            break;
+    }
+    const std::string tmxPath = "Maps/farm_outdoors/" + key + "_outdoors.tmx";
+    auto map = Game::FarmMap::create(tmxPath);
+    _farmMap = new Controllers::FarmMapController(map, worldNode);
     _farmMap->init();
     return _farmMap;
 }
