@@ -8,6 +8,72 @@ using namespace cocos2d;
 
 namespace Controllers {
 
+namespace {
+    std::mt19937& rng() {
+        static std::mt19937 eng{ std::random_device{}() };
+        return eng;
+    }
+
+    int randomSlimeVariantForFloor(int floor) {
+        int f = floor;
+        if (f < 1) f = 1;
+        if (f > 50) f = 50;
+        float t = 0.0f;
+        if (f > 1) {
+            t = static_cast<float>(f - 1) / 49.0f;
+        }
+        float green = 0.5f * (1.0f - t);
+        float blue = 0.3f;
+        float red = 1.0f - green - blue;
+        if (red < 0.0f) red = 0.0f;
+        std::uniform_real_distribution<float> dist(0.0f, 1.0f);
+        float r = dist(rng());
+        if (r < green) return 0;
+        if (r < green + blue) return 1;
+        return 2;
+    }
+
+    void applySlimeStatsForVariant(Game::Monster& m, int variant) {
+        int baseHp = m.maxHp > 0 ? m.maxHp : m.hp;
+        int baseDmg = m.dmg;
+        float hpMul = 1.0f;
+        float dmgMul = 1.0f;
+        if (variant == 2) {
+            hpMul = 5.0f;
+            dmgMul = 5.0f;
+            m.name = "Red Slime";
+        } else if (variant == 1) {
+            hpMul = 3.0f;
+            dmgMul = 3.0f;
+            m.name = "Blue Slime";
+        } else {
+            m.name = "Green Slime";
+        }
+        m.hp = static_cast<int>(baseHp * hpMul);
+        m.maxHp = m.hp;
+        m.dmg = static_cast<int>(baseDmg * dmgMul);
+    }
+
+    Game::Monster::Type randomMonsterTypeForFloor(int floor) {
+        int f = floor;
+        if (f < 1) f = 1;
+        if (f > 50) f = 50;
+        float t = 0.0f;
+        if (f > 1) {
+            t = static_cast<float>(f - 1) / 49.0f;
+        }
+        float ghost = 0.02f + 0.18f * t;
+        float bug = 0.38f - 0.08f * t;
+        float slime = 1.0f - ghost - bug;
+        if (slime < 0.0f) slime = 0.0f;
+        std::uniform_real_distribution<float> dist(0.0f, 1.0f);
+        float r = dist(rng());
+        if (r < slime) return Game::Monster::Type::RockSlime;
+        if (r < slime + bug) return Game::Monster::Type::Bug;
+        return Game::Monster::Type::Ghost;
+    }
+}
+
 MineMonsterController::~MineMonsterController() {
     for (auto& m : _monsters) {
         if (m.sprite && m.sprite->getParent()) {
@@ -29,11 +95,18 @@ void MineMonsterController::generateInitialWave() {
         refreshVisuals();
         return;
     }
-    int variant = _map ? Game::slimeVariantForFloor(_map->currentFloor()) : 0;
+    int floor = _map ? _map->currentFloor() : 1;
     for (const auto& pt : spawns) {
-        Monster m = Game::makeMonsterForType(Monster::Type::RockSlime);
+        Game::Monster::Type type = randomMonsterTypeForFloor(floor);
+        Monster m = Game::makeMonsterForType(type);
         m.pos = pt;
-        m.textureVariant = variant;
+        if (type == Game::Monster::Type::RockSlime) {
+            int variant = randomSlimeVariantForFloor(floor);
+            m.textureVariant = variant;
+            applySlimeStatsForVariant(m, variant);
+        } else {
+            m.textureVariant = 0;
+        }
         _monsters.push_back(m);
     }
     refreshVisuals();
@@ -47,9 +120,15 @@ void MineMonsterController::update(float dt) {
     if (_respawnAccum >= 30.0f) {
         _respawnAccum = 0.0f;
         if (_monsters.size() < 8) {
-            Monster m = Game::makeMonsterForType(Monster::Type::RockSlime);
-            if (_map) {
-                m.textureVariant = Game::slimeVariantForFloor(_map->currentFloor());
+            int floor = _map ? _map->currentFloor() : 1;
+            Game::Monster::Type type = randomMonsterTypeForFloor(floor);
+            Monster m = Game::makeMonsterForType(type);
+            if (type == Game::Monster::Type::RockSlime) {
+                int variant = randomSlimeVariantForFloor(floor);
+                m.textureVariant = variant;
+                applySlimeStatsForVariant(m, variant);
+            } else {
+                m.textureVariant = 0;
             }
             _monsters.push_back(m);
         }
@@ -75,8 +154,10 @@ void MineMonsterController::update(float dt) {
                 Vec2 dir = delta / dist;
                 Vec2 proposed = m.pos + dir * m.moveSpeed * dt;
                 bool blocked = false;
-                if (_map && _map->collidesWithoutMonsters(proposed, monsterRadius)) {
-                    blocked = true;
+                if (_map && m.isCollisionAffected) {
+                    if (_map->collidesWithoutMonsters(proposed, monsterRadius)) {
+                        blocked = true;
+                    }
                 }
                 if (!blocked) {
                     float toPlayer = proposed.distance(playerPos);
@@ -240,9 +321,14 @@ void MineMonsterController::refreshVisuals() {
     float s = static_cast<float>(GameConfig::TILE_SIZE);
     for (auto& m : _monsters) {
         if (!m.sprite && _worldNode) {
-            std::string path = Game::slimeTexturePathForVariant(m.textureVariant);
+            std::string path = Game::monsterTexturePath(m);
             auto spr = Sprite::create(path);
             if (spr) {
+                float scale = 1.0f;
+                if (m.type == Game::Monster::Type::Bug || m.type == Game::Monster::Type::Ghost) {
+                    scale = 0.3f;
+                }
+                spr->setScale(scale);
                 spr->setAnchorPoint(Vec2(0.5f, 0.0f));
                 spr->setPosition(m.pos);
                 _worldNode->addChild(spr, 3);

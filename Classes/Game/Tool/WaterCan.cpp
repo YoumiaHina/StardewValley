@@ -2,6 +2,7 @@
 #include "Controllers/Map/IMapController.h"
 #include "Controllers/UI/UIController.h"
 #include "Controllers/Systems/CropSystem.h"
+#include "Controllers/Interact/TileSelector.h"
 #include "Game/WorldState.h"
 #include "Game/GameConfig.h"
 #include "Game/Tile.h"
@@ -87,22 +88,47 @@ std::string WaterCan::use(Controllers::IMapController* map,
         return std::string("");
     }
     Vec2 lastDir = getLastDir ? getLastDir() : Vec2(0,-1);
-    auto tgt = map->targetTile(playerPos, lastDir);
-    int tc = tgt.first, tr = tgt.second;
-    if (!map->inBounds(tc, tr)) return std::string("");
-    auto current = map->getTile(tc, tr);
+    bool useFan = (level() >= 3 && ws.toolRangeModifier);
+    std::vector<std::pair<int,int>> tiles;
+    if (useFan && map) {
+        Controllers::TileSelector::collectForwardFanTiles(
+            playerPos,
+            lastDir,
+            [map](const Vec2& p, int& c, int& r) { map->worldToTileIndex(p, c, r); },
+            [map](int c, int r) { return map->inBounds(c, r); },
+            map->tileSize(),
+            false,
+            tiles);
+    } else if (map) {
+        auto tgt = map->targetTile(playerPos, lastDir);
+        if (map->inBounds(tgt.first, tgt.second)) {
+            tiles.push_back(tgt);
+        }
+    }
+    if (tiles.empty()) return std::string("");
     std::string msg;
-    if (current == Game::TileType::Tilled) {
+    int remaining = ws.water;
+    int wateredCount = 0;
+    for (const auto& tile : tiles) {
+        int tc = tile.first;
+        int tr = tile.second;
+        auto current = map->getTile(tc, tr);
+        if (current == Game::TileType::Tilled && remaining > 0) {
+            map->setTile(tc, tr, Game::TileType::Watered);
+            if (crop) { crop->markWateredAt(tc, tr); }
+            remaining = std::max(0, remaining - GameConfig::WATERING_CAN_CONSUME);
+            ++wateredCount;
+        }
+    }
+    ws.water = remaining;
+    if (wateredCount > 0) {
+        msg = std::string("Water! (") + std::to_string(ws.water) + std::string("/") + std::to_string(ws.maxWater) + std::string(")");
+    } else {
         if (ws.water <= 0) {
             msg = nearLake ? std::string("Refill first") : std::string("No water");
         } else {
-            map->setTile(tc, tr, Game::TileType::Watered);
-            if (crop) { crop->markWateredAt(tc, tr); }
-            ws.water = std::max(0, ws.water - GameConfig::WATERING_CAN_CONSUME);
-            msg = std::string("Water! (") + std::to_string(ws.water) + std::string("/") + std::to_string(ws.maxWater) + std::string(")");
+            msg = nearLake ? std::string("Hold to Refill") : std::string("Nothing");
         }
-    } else {
-        msg = nearLake ? std::string("Hold to Refill") : std::string("Nothing");
     }
     ws.energy = std::max(0, ws.energy - need);
     if (ui) {

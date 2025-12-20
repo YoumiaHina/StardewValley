@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="30" height="30" tilewidth="16" tileheight="16" infinite="0" nextlayerid="8" nextobjectid="17">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="30" height="30" tilewidth="16" tileheight="16" infinite="0" nextlayerid="8" nextobjectid="35">
  <tileset firstgid="1" source="mine.tsx"/>
  <layer id="1" name="background" width="30" height="30">
   <data encoding="base64">
@@ -57,6 +57,60 @@
  </objectgroup>
  <objectgroup id="7" name="Appear">
   <object id="16" x="138.333" y="110.333">
+   <point/>
+  </object>
+  <object id="17" x="286.667" y="207.333">
+   <point/>
+  </object>
+  <object id="18" x="223.667" y="163">
+   <point/>
+  </object>
+  <object id="19" x="136.333" y="198.333">
+   <point/>
+  </object>
+  <object id="20" x="163" y="255.667">
+   <point/>
+  </object>
+  <object id="21" x="271" y="283.667">
+   <point/>
+  </object>
+  <object id="22" x="382.333" y="242">
+   <point/>
+  </object>
+  <object id="23" x="416.333" y="158.333">
+   <point/>
+  </object>
+  <object id="24" x="291.333" y="152.667">
+   <point/>
+  </object>
+  <object id="25" x="226.667" y="219.333">
+   <point/>
+  </object>
+  <object id="26" x="147.333" y="197.667">
+   <point/>
+  </object>
+  <object id="27" x="127" y="141">
+   <point/>
+  </object>
+  <object id="28" x="92.3333" y="183">
+   <point/>
+  </object>
+  <object id="29" x="98.3333" y="239.333">
+   <point/>
+  </object>
+  <object id="30" x="116.333" y="273.333">
+   <point/>
+  </object>
+  <object id="31" x="282" y="289">
+   <point/>
+  </object>
+  <object id="32" x="354" y="241">
+   <point/>
+  </object>
+  <object id="33" x="392" y="171.667">
+   <point/>
+  </object>
+  <object id="34" x="247.333" y="272.333">
    <point/>
   </object>
  </objectgroup>

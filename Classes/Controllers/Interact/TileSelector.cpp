@@ -155,4 +155,44 @@ void TileSelector::drawFanCursor(
     }
 }
 
+// collectForwardFanTiles：基于玩家位置与朝向，构建前方 3x3 扇形候选格并输出到 outTiles。
+void TileSelector::collectForwardFanTiles(
+    const cocos2d::Vec2& playerPos,
+    const cocos2d::Vec2& lastDir,
+    const std::function<void(const cocos2d::Vec2&, int&, int&)>& worldToTileIndex,
+    const std::function<bool(int,int)>& inBounds,
+    float tileSize,
+    bool includeSelf,
+    std::vector<std::pair<int,int>>& outTiles)
+{
+    // 清空输出容器，避免残留上一次调用的结果。
+    outTiles.clear();
+    int pc = 0;
+    int pr = 0;
+    // 通过回调把玩家世界坐标（略微向下偏移，贴近脚底）转换为瓦片索引。
+    if (worldToTileIndex) {
+        cocos2d::Vec2 basisPos = playerPos;
+        if (tileSize > 0.0f) {
+            basisPos = playerPos + cocos2d::Vec2(0, -tileSize * 0.75f);
+        }
+        worldToTileIndex(basisPos, pc, pr);
+    }
+    // 若最近朝向几乎为零向量，则默认使用“向上”作为朝向，保证扇形稳定。
+    cocos2d::Vec2 dir = lastDir;
+    if (dir.lengthSquared() < 0.0001f) {
+        dir = cocos2d::Vec2(0, -1);
+    }
+    // 使用内部的 buildFront3x3Candidates 统一生成“当前格 + 前方 3x3 区域”的候选列表。
+    TileCandidate cands[10];
+    int count = buildFront3x3Candidates(pc, pr, dir, inBounds, cands, 10);
+    if (count <= 0) return;
+    // 遍历候选格，根据 includeSelf 决定是否排除玩家脚下格子，并写入输出数组。
+    for (int i = 0; i < count; ++i) {
+        int c = cands[i].c;
+        int r = cands[i].r;
+
+        outTiles.emplace_back(c, r);
+    }
+}
+
 } // namespace Controllers

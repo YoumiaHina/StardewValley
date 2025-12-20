@@ -78,6 +78,7 @@ private:
     float _moveSpeedMultiplier = 1.0f;
     cocos2d::Vec2 _lastDir = cocos2d::Vec2(0, -1);
     bool _movementLocked = false;
+    int _toolRangeModifierHeld = 0;
 };
 
 }

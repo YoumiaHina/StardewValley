@@ -443,6 +443,12 @@ void PlayerController::onKeyPressed(EventKeyboard::KeyCode code) {
         case EventKeyboard::KeyCode::KEY_LEFT_ARROW:  _left = true; break;
         case EventKeyboard::KeyCode::KEY_D:
         case EventKeyboard::KeyCode::KEY_RIGHT_ARROW: _right = true; break;
+        case EventKeyboard::KeyCode::KEY_CTRL:
+        case EventKeyboard::KeyCode::KEY_RIGHT_CTRL: {
+            ++_toolRangeModifierHeld;
+            auto& ws = Game::globalState();
+            ws.toolRangeModifier = (_toolRangeModifierHeld > 0);
+        } break;
         default: break;
     }
 }
@@ -457,6 +463,14 @@ void PlayerController::onKeyReleased(EventKeyboard::KeyCode code) {
         case EventKeyboard::KeyCode::KEY_LEFT_ARROW:  _left = false; break;
         case EventKeyboard::KeyCode::KEY_D:
         case EventKeyboard::KeyCode::KEY_RIGHT_ARROW: _right = false; break;
+        case EventKeyboard::KeyCode::KEY_CTRL:
+        case EventKeyboard::KeyCode::KEY_RIGHT_CTRL: {
+            if (_toolRangeModifierHeld > 0) {
+                --_toolRangeModifierHeld;
+            }
+            auto& ws = Game::globalState();
+            ws.toolRangeModifier = (_toolRangeModifierHeld > 0);
+        } break;
         default: break;
     }
 }
