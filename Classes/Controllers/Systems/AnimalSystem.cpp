@@ -3,6 +3,7 @@
 #include "Game/WorldState.h"
 #include "Game/Crops/crop/CropBase.h"
 #include "Game/Item.h"
+#include "Game/SkillTree/SkillTreeSystem.h"
 #include <random>
 #include <cmath>
 
@@ -55,6 +56,11 @@ namespace {
         if (animal.isAdult && animal.fedToday) {
             Game::ItemType prod = productFor(animal.type);
             int qty = productQty(animal.type);
+            {
+                auto& skill = Game::SkillTreeSystem::getInstance();
+                qty = skill.adjustAnimalProductQuantityForHusbandry(prod, qty);
+                skill.addXp(Game::SkillTreeType::AnimalHusbandry, skill.xpForAnimalProduct(prod, qty));
+            }
             if (producedDrop) {
                 producedDrop->type = prod;
                 producedDrop->qty = qty;
@@ -401,6 +407,10 @@ bool AnimalSystem::tryFeedAnimal(const cocos2d::Vec2& playerPos, Game::ItemType 
     if (!best) return false;
     best->animal.fedToday = true;
     consumedQty = 1;
+    {
+        auto& skill = Game::SkillTreeSystem::getInstance();
+        skill.addXp(Game::SkillTreeType::AnimalHusbandry, 6);
+    }
     auto& ws = Game::globalState();
     ws.farmAnimals.clear();
     for (const auto& it : _animals) {

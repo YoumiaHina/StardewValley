@@ -7,6 +7,7 @@
 #include <vector>
 #include <unordered_set>
 #include <unordered_map>
+#include <array>
 #include <string>
 #include "Game/Inventory.h"
 #include "Game/Tile.h"
@@ -131,6 +132,16 @@ struct WorldState {
     bool isRaining = false;
     int weatherSeasonIndex = -1;
     int weatherDayOfSeason = -1;
+
+    // 技能树存档进度：
+    // - 作为所有技能树经验/点数/解锁节点的唯一持久化来源。
+    // - 与 SkillTreeSystem 协作：系统层负责把业务加经验与 UI 查询统一到这些字段。
+    struct SkillTreeProgress {
+        int totalXp = 0;
+        int unspentPoints = 0;
+        std::vector<int> unlockedNodeIds;
+    };
+    std::array<SkillTreeProgress, 4> skillTrees;
 
     int lastScene = static_cast<int>(SceneKind::Room);
     float lastPlayerX = 0.0f;

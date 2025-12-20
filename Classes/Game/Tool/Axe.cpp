@@ -5,6 +5,7 @@
 #include "Controllers/Environment/EnvironmentObstacleSystemBase.h"
 #include "Game/WorldState.h"
 #include "Game/GameConfig.h"
+#include "Game/SkillTree/SkillTreeSystem.h"
 #include "Game/Tile.h"
 #include "cocos2d.h"
 
@@ -42,9 +43,18 @@ std::string Axe::use(Controllers::IMapController* map,
             tc,
             tr,
             1,
-            [map](int c, int r, int itemType) {
+            [map, ui](int c, int r, int itemType) {
                 if (!map) return;
-                map->spawnDropAt(c, r, itemType, 3);
+                int qty = 3;
+                if (itemType == static_cast<int>(Game::ItemType::Wood)) {
+                    auto& skill = Game::SkillTreeSystem::getInstance();
+                    qty = skill.adjustWoodDropQuantityForForestry(qty);
+                    skill.addXp(Game::SkillTreeType::Forestry, skill.xpForForestryChop(qty));
+                    if (ui && ui->isSkillTreePanelVisible()) {
+                        ui->refreshSkillTreePanel();
+                    }
+                }
+                map->spawnDropAt(c, r, itemType, qty);
                 map->refreshDropsVisuals();
             },
             [map](int c, int r, Game::TileType t) {

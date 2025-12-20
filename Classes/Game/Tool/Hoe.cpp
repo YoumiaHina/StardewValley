@@ -8,6 +8,7 @@
 #include "Game/GameConfig.h"
 #include "Game/Crops/crop/CropBase.h"
 #include "Game/Item.h"
+#include "Game/SkillTree/SkillTreeSystem.h"
 #include "cocos2d.h"
 #include <random>
 
@@ -66,6 +67,12 @@ std::string Hoe::use(Controllers::IMapController* map,
                         std::uniform_int_distribution<int> dist(minQty, maxQty);
                         static std::mt19937 eng{ std::random_device{}() };
                         qty = dist(eng);
+                    }
+                    auto& skill = Game::SkillTreeSystem::getInstance();
+                    qty = skill.adjustHarvestQuantityForFarming(produce, qty);
+                    skill.addXp(Game::SkillTreeType::Farming, skill.xpForFarmingHarvest(produce, qty));
+                    if (ui && ui->isSkillTreePanelVisible()) {
+                        ui->refreshSkillTreePanel();
                     }
                     int leftover = 0;
                     if (ws.inventory) {

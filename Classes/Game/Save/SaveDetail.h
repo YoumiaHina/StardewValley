@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <array>
 #include <vector>
 #include <limits>
 #include <string>
@@ -388,6 +389,37 @@ void readAnimals(std::istream& in, std::vector<Game::Animal>& animals) {
         a.isAdult = (isAdult != 0);
         a.fedToday = (fedToday != 0);
         animals.push_back(a);
+    }
+}
+
+void writeSkillTrees(std::ostream& out, const std::array<Game::WorldState::SkillTreeProgress, 4>& skillTrees) {
+    for (const auto& st : skillTrees) {
+        out << st.totalXp << ' ' << st.unspentPoints << ' ' << st.unlockedNodeIds.size() << '\n';
+        for (std::size_t i = 0; i < st.unlockedNodeIds.size(); ++i) {
+            out << st.unlockedNodeIds[i];
+            if (i + 1 < st.unlockedNodeIds.size()) out << ' ';
+        }
+        out << '\n';
+    }
+}
+
+void readSkillTrees(std::istream& in, std::array<Game::WorldState::SkillTreeProgress, 4>& skillTrees) {
+    for (auto& st : skillTrees) {
+        int totalXp = 0;
+        int unspentPoints = 0;
+        std::size_t nodeCount = 0;
+        in >> totalXp >> unspentPoints >> nodeCount;
+        in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        st.totalXp = totalXp;
+        st.unspentPoints = unspentPoints;
+        st.unlockedNodeIds.clear();
+        st.unlockedNodeIds.reserve(nodeCount);
+        for (std::size_t i = 0; i < nodeCount; ++i) {
+            int id = 0;
+            in >> id;
+            st.unlockedNodeIds.push_back(id);
+        }
+        in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     }
 }
 

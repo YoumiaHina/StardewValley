@@ -59,6 +59,9 @@
     <Filter Include="Classes\Game\Animals">
       <UniqueIdentifier>{25582af3-0273-4778-93a4-46599db44ab8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Classes\Game\SkillTree">
+      <UniqueIdentifier>{c1b3f6df-2c4e-4d8e-9b10-0d6e0a1b3d62}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Classes\Controllers\Audio">
       <UniqueIdentifier>{97173fcc-cfa9-4362-b4c6-ace5890cf9e5}</UniqueIdentifier>
     </Filter>
@@ -297,6 +300,27 @@
     </ClCompile>
     <ClCompile Include="..\Classes\Game\Animals\SheepAnimal.cpp">
       <Filter>Classes\Game\Animals</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\SkillTree\SkillTreeBase.cpp">
+      <Filter>Classes\Game\SkillTree</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\SkillTree\FarmingSkillTree.cpp">
+      <Filter>Classes\Game\SkillTree</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\SkillTree\AnimalHusbandrySkillTree.cpp">
+      <Filter>Classes\Game\SkillTree</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\SkillTree\ForestrySkillTree.cpp">
+      <Filter>Classes\Game\SkillTree</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\SkillTree\FishingSkillTree.cpp">
+      <Filter>Classes\Game\SkillTree</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\SkillTree\SkillTreeSystem.cpp">
+      <Filter>Classes\Game\SkillTree</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\UI\SkillTreePanelUI.cpp">
+      <Filter>Classes\Controllers\UI</Filter>
     </ClCompile>
     <ClCompile Include="..\Classes\Controllers\Managers\AudioManager.cpp">
       <Filter>Classes\Controllers\Audio</Filter>
@@ -612,8 +636,17 @@
     <ClInclude Include="..\Classes\Game\Animals\AnimalBase.h">
       <Filter>Classes\Game\Animals</Filter>
     </ClInclude>
+    <ClInclude Include="..\Classes\Game\SkillTree\SkillTreeBase.h">
+      <Filter>Classes\Game\SkillTree</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\SkillTree\SkillTreeSystem.h">
+      <Filter>Classes\Game\SkillTree</Filter>
+    </ClInclude>
     <ClInclude Include="..\Classes\Controllers\Systems\AnimalSystem.h">
       <Filter>Classes\Game\Animals</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\UI\SkillTreePanelUI.h">
+      <Filter>Classes\Controllers\UI</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\Controllers\Managers\AudioManager.h">
       <Filter>Classes\Controllers\Audio</Filter>

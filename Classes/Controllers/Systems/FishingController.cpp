@@ -1,6 +1,7 @@
 #include "Controllers/Systems/FishingController.h"
 #include "Game/GameConfig.h"
 #include "Game/Item.h"
+#include "Game/SkillTree/SkillTreeSystem.h"
 #include "Game/WorldState.h"
 
 using namespace cocos2d;
@@ -210,7 +211,13 @@ void FishingController::onSuccess(const Vec2& worldPos) {
     destroyOverlay();
     if (_setMovementLocked) { _setMovementLocked(false); }
     if (_inventory) {
-        _inventory->addItems(Game::ItemType::Fish, 1);
+        auto& skill = Game::SkillTreeSystem::getInstance();
+        int qty = skill.adjustFishCatchQuantityForFishing(1);
+        _inventory->addItems(Game::ItemType::Fish, qty);
+        skill.addXp(Game::SkillTreeType::Fishing, skill.xpForFishingCatch(qty));
+        if (_ui && _ui->isSkillTreePanelVisible()) {
+            _ui->refreshSkillTreePanel();
+        }
     }
     Game::globalState().fishingActive = false;
     _cooldown = 2.0f;

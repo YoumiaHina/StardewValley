@@ -15,6 +15,7 @@
 #include "Controllers/UI/ChestPanelUI.h"
 #include "Controllers/UI/CraftPanelUI.h"
 #include "Controllers/UI/StorePanelUI.h"
+#include "Controllers/UI/SkillTreePanelUI.h"
 #include "Controllers/UI/DialogueUI.h"
 #include "Controllers/UI/NpcSocialPanelUI.h"
 #include "ui/CocosGUI.h"
@@ -34,6 +35,7 @@ public:
         delete _chestPanel; _chestPanel = nullptr;
         delete _craftPanel; _craftPanel = nullptr;
         delete _storePanel; _storePanel = nullptr;
+        delete _skillTreePanel; _skillTreePanel = nullptr;
         delete _dialogueUI; _dialogueUI = nullptr;
         delete _socialPanel; _socialPanel = nullptr;
     }
@@ -102,6 +104,15 @@ public:
     bool isAnimalStorePanelVisible() const;
     void setAnimalStoreHandler(const std::function<bool(Game::AnimalType)>& handler);
 
+    // 技能等级面板：构建 UI 节点。
+    void buildSkillTreePanel();
+    // 技能等级面板：刷新展示内容。
+    void refreshSkillTreePanel();
+    // 技能等级面板：显示/隐藏。
+    void toggleSkillTreePanel(bool visible);
+    // 技能等级面板是否可见。
+    bool isSkillTreePanelVisible() const;
+
 private:
     cocos2d::Scene* _scene = nullptr;
     cocos2d::Node* _worldNode = nullptr;
@@ -112,6 +123,7 @@ private:
     ChestPanelUI* _chestPanel = nullptr;
     CraftPanelUI* _craftPanel = nullptr;
     StorePanelUI* _storePanel = nullptr;
+    SkillTreePanelUI* _skillTreePanel = nullptr;
     AnimalStorePanelUI* _animalStorePanel = nullptr;
     DialogueUI* _dialogueUI = nullptr;
     NpcSocialPanelUI* _socialPanel = nullptr;

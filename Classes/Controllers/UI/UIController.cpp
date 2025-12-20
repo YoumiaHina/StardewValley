@@ -232,6 +232,29 @@ bool UIController::isStorePanelVisible() const {
     return _storePanel && _storePanel->isVisible();
 }
 
+void UIController::buildSkillTreePanel() {
+    if (!_skillTreePanel) _skillTreePanel = new SkillTreePanelUI(_scene);
+    _skillTreePanel->buildSkillTreePanel();
+}
+
+void UIController::refreshSkillTreePanel() {
+    if (_skillTreePanel) _skillTreePanel->refreshSkillTreePanel();
+}
+
+void UIController::toggleSkillTreePanel(bool visible) {
+    if (visible) {
+        buildSkillTreePanel();
+        refreshSkillTreePanel();
+        if (_skillTreePanel) _skillTreePanel->toggleSkillTreePanel(true);
+    } else {
+        if (_skillTreePanel) _skillTreePanel->toggleSkillTreePanel(false);
+    }
+}
+
+bool UIController::isSkillTreePanelVisible() const {
+    return _skillTreePanel && _skillTreePanel->isVisible();
+}
+
 void UIController::buildAnimalStorePanel() {
     if (!_animalStorePanel) _animalStorePanel = new AnimalStorePanelUI(_scene);
     _animalStorePanel->buildAnimalStorePanel();

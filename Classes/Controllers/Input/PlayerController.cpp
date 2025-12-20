@@ -9,6 +9,7 @@
 #include "Game/Tool/ToolBase.h"
 #include "Game/Drop.h"
 #include "Game/Save/SaveSystem.h"
+#include "Game/SkillTree/SkillTreeSystem.h"
 #include "Scenes/MainMenuScene.h"
 #include "cocos2d.h"
 #include <algorithm>
@@ -60,6 +61,7 @@ void PlayerController::registerCommonInputHandlers(
     _kbListener->onKeyPressed = [this](EventKeyboard::KeyCode code, Event*) {
         bool chestOpen = _ui && _ui->isChestPanelVisible();
         bool storeOpen = _ui && (_ui->isStorePanelVisible() || _ui->isAnimalStorePanelVisible());
+        bool skillOpen = _ui && _ui->isSkillTreePanelVisible();
         bool dialogueOpen = _ui && _ui->isDialogueVisible();
         bool socialOpen = _ui && _ui->isNpcSocialVisible();
 
@@ -68,10 +70,11 @@ void PlayerController::registerCommonInputHandlers(
                 if (_ui->isChestPanelVisible()) _ui->toggleChestPanel(false);
                 if (_ui->isStorePanelVisible()) _ui->toggleStorePanel(false);
                 if (_ui->isAnimalStorePanelVisible()) _ui->toggleAnimalStorePanel(false);
+                if (_ui->isSkillTreePanelVisible()) _ui->toggleSkillTreePanel(false);
                 if (_ui->isDialogueVisible()) _ui->hideDialogue();
                 if (_ui->isNpcSocialVisible()) _ui->hideNpcSocial();
             }
-            if (chestOpen || storeOpen || dialogueOpen || socialOpen) {
+            if (chestOpen || storeOpen || skillOpen || dialogueOpen || socialOpen) {
                 return;
             }
             auto& ws = Game::globalState();
@@ -90,6 +93,38 @@ void PlayerController::registerCommonInputHandlers(
 
         if (socialOpen) {
             return;
+        }
+        if (skillOpen) {
+            if (code == EventKeyboard::KeyCode::KEY_1
+                || code == EventKeyboard::KeyCode::KEY_2
+                || code == EventKeyboard::KeyCode::KEY_3
+                || code == EventKeyboard::KeyCode::KEY_4) {
+                auto& skill = Game::SkillTreeSystem::getInstance();
+                Game::SkillTreeType type = Game::SkillTreeType::Farming;
+                if (code == EventKeyboard::KeyCode::KEY_2) type = Game::SkillTreeType::AnimalHusbandry;
+                if (code == EventKeyboard::KeyCode::KEY_3) type = Game::SkillTreeType::Forestry;
+                if (code == EventKeyboard::KeyCode::KEY_4) type = Game::SkillTreeType::Fishing;
+
+                int unlockedId = 0;
+                bool ok = skill.unlockFirstAvailableNode(type, &unlockedId);
+                if (_ui && _player && _map) {
+                    std::string msg;
+                    if (ok && unlockedId != 0) {
+                        const auto& def = skill.definition(type);
+                        const auto* node = def.findNode(unlockedId);
+                        msg = node ? (std::string("已解锁：") + node->displayName) : std::string("已解锁节点");
+                        _ui->refreshSkillTreePanel();
+                    } else {
+                        int pts = skill.unspentPoints(type);
+                        msg = (pts <= 0) ? std::string("无可用点数") : std::string("无可解锁节点（等级不足或已全解锁）");
+                    }
+                    _ui->popTextAt(_map->getPlayerPosition(_player->getPosition()), msg, ok ? Color3B::GREEN : Color3B::YELLOW);
+                }
+                return;
+            }
+            if (code != EventKeyboard::KeyCode::KEY_L) {
+                return;
+            }
         }
 
         onKeyPressed(code);
@@ -124,11 +159,18 @@ void PlayerController::registerCommonInputHandlers(
                 }
             } break;
             case EventKeyboard::KeyCode::KEY_E: {
-                if (chestOpen || storeOpen) break;
+                if (chestOpen || storeOpen || skillOpen) break;
                 openGlobalChest(_ui);
             } break;
-            case EventKeyboard::KeyCode::KEY_X: {
+            case EventKeyboard::KeyCode::KEY_L: {
                 if (chestOpen || storeOpen) break;
+                if (_ui) {
+                    bool show = !_ui->isSkillTreePanelVisible();
+                    _ui->toggleSkillTreePanel(show);
+                }
+            } break;
+            case EventKeyboard::KeyCode::KEY_X: {
+                if (chestOpen || storeOpen || skillOpen) break;
                 int tc = 0, tr = 0;
                 if (_player && _map) {
                     Vec2 playerPos = _player->getPosition();
@@ -144,7 +186,7 @@ void PlayerController::registerCommonInputHandlers(
                 }
             } break;
             case EventKeyboard::KeyCode::KEY_F: {
-                if (chestOpen || storeOpen) break;
+                if (chestOpen || storeOpen || skillOpen) break;
                 auto& ws = Game::globalState();
                 if (_inventory && _inventory->selectedKind() == Game::SlotKind::Item) {
                     auto slot = _inventory->selectedSlot();
@@ -167,7 +209,7 @@ void PlayerController::registerCommonInputHandlers(
                 }
             } break;
             case EventKeyboard::KeyCode::KEY_Q: {
-                if (chestOpen || storeOpen) break;
+                if (chestOpen || storeOpen || skillOpen) break;
                 if (!_inventory || !_player || !_map) break;
                 Vec2 playerPos = _player->getPosition();
                 Vec2 dir = lastDir();
@@ -234,7 +276,7 @@ void PlayerController::registerCommonInputHandlers(
                 }
             } break;
             case EventKeyboard::KeyCode::KEY_SPACE: {
-                if (chestOpen || storeOpen) break;
+                if (chestOpen || storeOpen || skillOpen) break;
                 if (Game::globalState().fishingActive) break;
                 if (_onSpacePressed) {
                     _onSpacePressed();
@@ -245,7 +287,8 @@ void PlayerController::registerCommonInputHandlers(
                                 || _ui->isNpcSocialVisible()
                                 || _ui->isChestPanelVisible()
                                 || _ui->isStorePanelVisible()
-                                || _ui->isAnimalStorePanelVisible();
+                                || _ui->isAnimalStorePanelVisible()
+                                || _ui->isSkillTreePanelVisible();
                 }
                 if (blockTool) break;
                 if (_enableToolOnSpace) {
@@ -289,6 +332,7 @@ void PlayerController::registerCommonInputHandlers(
     _mouseListener->onMouseDown = [this](EventMouse* e) {
         bool chestOpen = _ui && _ui->isChestPanelVisible();
         bool storeOpen = _ui && (_ui->isStorePanelVisible() || _ui->isAnimalStorePanelVisible());
+        bool skillOpen = _ui && _ui->isSkillTreePanelVisible();
         bool dialogueOpen = _ui && _ui->isDialogueVisible();
         if (_ui && _ui->isNpcSocialVisible()) {
             return;
@@ -300,7 +344,7 @@ void PlayerController::registerCommonInputHandlers(
             return;
         }
         if (_ui && _ui->handleHotbarMouseDown(e)) return;
-        if (chestOpen || storeOpen) return;
+        if (chestOpen || storeOpen || skillOpen) return;
         if (_map && _player) {
             Vec2 clickScene = e->getLocation();
 			clickScene.y = Director::getInstance()->getVisibleSize().height - clickScene.y;
