@@ -25,6 +25,10 @@ static bool ensureWeatherChosenForToday() {
 
 void GameStateController::update(float dt) {
     auto &ws = Game::globalState();
+    if (ws.pendingPassOut) {
+        if (_ui) _ui->refreshHUD();
+        return;
+    }
     ensureWeatherChosenForToday();
     bool timeChanged = false;
     bool dayChanged = false;
@@ -36,10 +40,11 @@ void GameStateController::update(float dt) {
             ws.timeMinute = 0;
             ws.timeHour += 1;
             if (ws.timeHour >= 24) {
-                ws.timeHour = 0;
-                ws.dayOfSeason += 1;
-                if (ws.dayOfSeason > 30) { ws.dayOfSeason = 1; ws.seasonIndex = (ws.seasonIndex + 1) % 4; }
-                dayChanged = true;
+                ws.timeHour = 24;
+                ws.pendingPassOut = true;
+                timeChanged = true;
+                ws.timeAccum = 0.0f;
+                break;
             }
         }
         timeChanged = true;

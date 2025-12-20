@@ -169,6 +169,23 @@ void PlayerController::registerCommonInputHandlers(
                     _ui->toggleSkillTreePanel(show);
                 }
             } break;
+            case EventKeyboard::KeyCode::KEY_T: {
+                if (chestOpen || storeOpen || skillOpen) break;
+                auto& ws = Game::globalState();
+                if (ws.pendingPassOut) break;
+                ws.timeHour += 1;
+                if (ws.timeHour >= 24) {
+                    ws.timeHour = 24;
+                    ws.pendingPassOut = true;
+                    ws.timeAccum = 0.0f;
+                }
+                if (_ui) {
+                    _ui->refreshHUD();
+                }
+                if (_ui && _player && _map) {
+                    _ui->popTextAt(_map->getPlayerPosition(_player->getPosition()), "time +1h", Color3B::WHITE);
+                }
+            } break;
             case EventKeyboard::KeyCode::KEY_X: {
                 if (chestOpen || storeOpen || skillOpen) break;
                 int tc = 0, tr = 0;
