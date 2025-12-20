@@ -179,6 +179,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClCompile Include="..\Classes\Controllers\Systems\DropSystem.cpp" />
     <ClCompile Include="..\Classes\Controllers\Systems\FurnaceController.cpp" />
     <ClCompile Include="..\Classes\Controllers\Systems\WeatherController.cpp" />
+    <ClCompile Include="..\Classes\Controllers\Systems\RainLayer.cpp" />
     <ClCompile Include="..\Classes\Controllers\UI\ChestPanelUI.cpp" />
     <ClCompile Include="..\Classes\Controllers\UI\CraftPanelUI.cpp" />
     <ClCompile Include="..\Classes\Controllers\UI\DialogueUI.cpp" />
@@ -300,6 +301,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClInclude Include="..\Classes\Controllers\Systems\DropSystem.h" />
     <ClInclude Include="..\Classes\Controllers\Systems\FurnaceController.h" />
     <ClInclude Include="..\Classes\Controllers\Systems\WeatherController.h" />
+    <ClInclude Include="..\Classes\Controllers\Systems\RainLayer.h" />
     <ClInclude Include="..\Classes\Controllers\Systems\PlaceableItemSystemBase.h" />
     <ClInclude Include="..\Classes\Controllers\UI\ChestPanelUI.h" />
     <ClInclude Include="..\Classes\Controllers\UI\CraftPanelUI.h" />
