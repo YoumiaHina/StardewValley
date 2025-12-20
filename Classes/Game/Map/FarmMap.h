@@ -39,6 +39,7 @@ public:
     cocos2d::Vec2 doorToTownCenter() const;
     bool inBuildingArea(const cocos2d::Vec2& p) const;
     bool inWallArea(const cocos2d::Vec2& p) const;
+    void setDebugVisible(bool visible);
 
 private:
     cocos2d::TMXLayer* _bgLayer = nullptr;

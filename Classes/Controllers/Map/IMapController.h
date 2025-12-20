@@ -104,6 +104,8 @@ public:
 
     // Type check
     virtual bool isFarm() const { return false; }
+
+    virtual void setCollisionDebugVisible(bool visible) {}
 };
 
 } // namespace Controllers

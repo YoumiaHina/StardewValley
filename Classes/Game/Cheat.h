@@ -14,8 +14,33 @@ namespace Game {
 struct Cheat {
     static void grantBasic(const std::shared_ptr<Inventory>& inv) {
         if (!inv) return;
-        for (auto t : { ItemType::Wood, ItemType::Stone, ItemType::Furnace, ItemType::Chest,
-                        ItemType::Parsnip }) {
+        for (auto t : {
+                 ItemType::Wood,
+                 ItemType::Stone,
+                 ItemType::Fiber,
+                 ItemType::Chest,
+                 ItemType::Parsnip,
+                 ItemType::ParsnipSeed,
+                 ItemType::Blueberry,
+                 ItemType::BlueberrySeed,
+                 ItemType::Eggplant,
+                 ItemType::EggplantSeed,
+                 ItemType::Corn,
+                 ItemType::CornSeed,
+                 ItemType::Strawberry,
+                 ItemType::StrawberrySeed,
+                 ItemType::Fish,
+                 ItemType::Coal,
+                 ItemType::CopperGrain,
+                 ItemType::CopperIngot,
+                 ItemType::IronGrain,
+                 ItemType::IronIngot,
+                 ItemType::GoldGrain,
+                 ItemType::GoldIngot,
+                 ItemType::Egg,
+                 ItemType::Milk,
+                 ItemType::Wool,
+                 ItemType::Furnace }) {
             inv->addItems(t, 99);
         }
     }

@@ -132,6 +132,7 @@ struct WorldState {
     bool isRaining = false;
     int weatherSeasonIndex = -1;
     int weatherDayOfSeason = -1;
+    bool showCollisionDebug = false;
 
     // 技能树存档进度：
     // - 作为所有技能树经验/点数/解锁节点的唯一持久化来源。
