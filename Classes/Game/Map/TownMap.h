@@ -20,6 +20,7 @@ public:
 
     bool nearDoorToFarm(const cocos2d::Vec2& p) const;
     cocos2d::Vec2 doorToFarmCenter() const;
+    bool nearToolUpdateArea(const cocos2d::Vec2& p) const;
 
 private:
     cocos2d::TMXLayer* _bgLayer = nullptr;
@@ -34,10 +35,14 @@ private:
     std::vector<cocos2d::Vec2> _doorToFarmPoints;
     cocos2d::DrawNode* _doorDebug = nullptr;
 
+    std::vector<cocos2d::Rect> _toolUpdateRects;
+    std::vector<cocos2d::Vec2> _toolUpdatePoints;
+    cocos2d::DrawNode* _toolUpdateDebug = nullptr;
+
     void parseWalls();
     void parseDoorToFarm();
+    void parseToolUpdateArea();
     void setupLayerOrder();
 };
 
 } // namespace Game
-

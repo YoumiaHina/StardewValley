@@ -24,6 +24,7 @@ bool TownMap::initWithFile(const std::string& tmxFile) {
     setupLayerOrder();
     parseWalls();
     parseDoorToFarm();
+    parseToolUpdateArea();
     return true;
 }
 
@@ -39,6 +40,12 @@ bool TownMap::nearDoorToFarm(const Vec2& p) const {
 
 Vec2 TownMap::doorToFarmCenter() const {
     return MapBase::centerFromRectsPoints(_doorToFarmRects, _doorToFarmPoints);
+}
+
+bool TownMap::nearToolUpdateArea(const Vec2& p) const {
+    float r2 = (GameConfig::TILE_SIZE * 0.6f);
+    r2 *= r2;
+    return MapBase::nearRectOrPoints(p, _toolUpdateRects, _toolUpdatePoints, r2);
 }
 
 void TownMap::parseWalls() {
@@ -75,6 +82,33 @@ void TownMap::parseDoorToFarm() {
     }
 }
 
+void TownMap::parseToolUpdateArea() {
+    _toolUpdateRects.clear();
+    _toolUpdatePoints.clear();
+    if (!_tmx) return;
+    if (_toolUpdateDebug) { _toolUpdateDebug->removeFromParent(); _toolUpdateDebug = nullptr; }
+    _toolUpdateDebug = DrawNode::create();
+    _tmx->addChild(_toolUpdateDebug, 999);
+    auto group = _tmx->getObjectGroup("ToolUpdateArea");
+    if (!group) return;
+    auto objects = group->getObjects();
+    for (auto& val : objects) {
+        auto dict = val.asValueMap();
+        float x = dict.at("x").asFloat();
+        float y = dict.at("y").asFloat();
+        if (dict.find("width") != dict.end() && dict.find("height") != dict.end()) {
+            float w = dict.at("width").asFloat();
+            float h = dict.at("height").asFloat();
+            Rect r(x, y, w, h);
+            _toolUpdateRects.push_back(r);
+            _toolUpdateDebug->drawRect(r.origin, r.origin + r.size, Color4F(0, 1, 0, 0.8f));
+        } else {
+            _toolUpdatePoints.emplace_back(x, y);
+            _toolUpdateDebug->drawDot(Vec2(x, y), 3.0f, Color4F(0, 1, 0, 0.8f));
+        }
+    }
+}
+
 void TownMap::setupLayerOrder() {
     if (!_tmx) return;
     _bgLayer = _tmx->getLayer("Background");
@@ -87,4 +121,3 @@ void TownMap::setupLayerOrder() {
 }
 
 } // namespace Game
-

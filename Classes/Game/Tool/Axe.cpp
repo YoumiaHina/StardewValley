@@ -52,10 +52,11 @@ std::string Axe::use(Controllers::IMapController* map,
 
     bool acted = false;
     if (auto* sys = map->obstacleSystem(Controllers::ObstacleKind::Tree)) {
+        int dmg = 1 + std::max(0, level());
         acted = sys->damageAt(
             tc,
             tr,
-            1,
+            dmg,
             [map, ui](int c, int r, int itemType) {
                 if (!map) return;
                 int qty = 3;

@@ -9,6 +9,21 @@
 
 using namespace cocos2d;
 
+namespace {
+
+int waterCanMaxForLevel(int lv) {
+    int capped = lv;
+    if (capped < 0) capped = 0;
+    if (capped > 3) capped = 3;
+    int cap = GameConfig::WATERING_CAN_MAX;
+    for (int i = 0; i < capped; ++i) {
+        cap *= 2;
+    }
+    return cap;
+}
+
+}
+
 namespace Game {
 
 WaterCan::~WaterCan() {
@@ -37,6 +52,13 @@ std::string WaterCan::use(Controllers::IMapController* map,
                           std::function<Vec2()> getLastDir,
                           Controllers::UIController* ui) {
     auto& ws = Game::globalState();
+    int desiredMax = waterCanMaxForLevel(level());
+    if (ws.maxWater != desiredMax) {
+        if (ws.water > desiredMax) {
+            ws.water = desiredMax;
+        }
+        ws.maxWater = desiredMax;
+    }
     int need = GameConfig::ENERGY_COST_WATER;
     Vec2 playerPos = getPlayerPos ? getPlayerPos() : Vec2();
     float s = map->tileSize();
@@ -132,6 +154,13 @@ void WaterCan::refreshHotbarOverlay() {
     _waterBarNode->setPosition(cocos2d::Vec2(pos.x, pos.y + iconH/2 + marginY));
 
     auto &ws = Game::globalState();
+    int desiredMax = waterCanMaxForLevel(level());
+    if (ws.maxWater != desiredMax) {
+        if (ws.water > desiredMax) {
+            ws.water = desiredMax;
+        }
+        ws.maxWater = desiredMax;
+    }
     float bw = _cellW;
     float bh = 8.0f;
     _waterBarFill->clear();

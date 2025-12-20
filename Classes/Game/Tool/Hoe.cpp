@@ -82,6 +82,10 @@ std::string Hoe::use(Controllers::IMapController* map,
                         static std::mt19937 eng{ std::random_device{}() };
                         qty = dist(eng);
                     }
+                    int lv = std::max(0, level());
+                    if (lv > 0) {
+                        qty += lv;
+                    }
                     auto& skill = Game::SkillTreeSystem::getInstance();
                     qty = skill.adjustHarvestQuantityForFarming(produce, qty);
                     skill.addXp(Game::SkillTreeType::Farming, skill.xpForFarmingHarvest(produce, qty));

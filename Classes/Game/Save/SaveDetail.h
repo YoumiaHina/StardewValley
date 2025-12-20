@@ -49,12 +49,14 @@ void writeInventory(std::ostream& out, const std::shared_ptr<Game::Inventory>& i
     for (std::size_t i = 0; i < sz; ++i) {
         int kind = 0;
         int tk = 0;
+        int tl = 0;
         int itemType = 0;
         int qty = 0;
         if (inv->isTool(i)) {
             kind = 1;
             if (auto t = inv->toolAt(i)) {
                 tk = static_cast<int>(t->kind());
+                tl = t->level();
             }
         } else if (inv->isItem(i)) {
             kind = 2;
@@ -62,7 +64,7 @@ void writeInventory(std::ostream& out, const std::shared_ptr<Game::Inventory>& i
             itemType = static_cast<int>(stack.type);
             qty = stack.quantity;
         }
-        out << kind << ' ' << tk << ' ' << itemType << ' ' << qty << '\n';
+        out << kind << ' ' << tk << ' ' << tl << ' ' << itemType << ' ' << qty << '\n';
     }
 }
 
@@ -78,13 +80,17 @@ std::shared_ptr<Game::Inventory> readInventory(std::istream& in) {
     for (int i = 0; i < sz; ++i) {
         int kind = 0;
         int tk = 0;
+        int tl = 0;
         int itemType = 0;
         int qty = 0;
-        in >> kind >> tk >> itemType >> qty;
+        in >> kind >> tk >> tl >> itemType >> qty;
         in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         if (!in) break;
         if (kind == 1) {
             auto tool = Game::makeTool(static_cast<Game::ToolKind>(tk));
+            if (tool) {
+                tool->setLevel(tl);
+            }
             inv->setTool(static_cast<std::size_t>(i), tool);
         } else if (kind == 2) {
             int remaining = inv->addItems(static_cast<Game::ItemType>(itemType), qty);
@@ -99,12 +105,14 @@ void writeChest(std::ostream& out, const Game::Chest& chest) {
     for (const auto& s : chest.slots) {
         int kind = static_cast<int>(s.kind);
         int tk = 0;
+        int tl = 0;
         if (s.tool) {
             tk = static_cast<int>(s.tool->kind());
+            tl = s.tool->level();
         }
         int itemType = static_cast<int>(s.itemType);
         int qty = s.itemQty;
-        out << kind << ' ' << tk << ' ' << itemType << ' ' << qty << '\n';
+        out << kind << ' ' << tk << ' ' << tl << ' ' << itemType << ' ' << qty << '\n';
     }
 }
 
@@ -122,9 +130,10 @@ Game::Chest readChest(std::istream& in) {
     for (int i = 0; i < slots; ++i) {
         int kind = 0;
         int tk = 0;
+        int tl = 0;
         int itemType = 0;
         int qty = 0;
-        in >> kind >> tk >> itemType >> qty;
+        in >> kind >> tk >> tl >> itemType >> qty;
         in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         if (!in) break;
         auto& s = chest.slots[static_cast<std::size_t>(i)];
@@ -134,6 +143,9 @@ Game::Chest readChest(std::istream& in) {
         s.tool.reset();
         if (s.kind == Game::SlotKind::Tool) {
             s.tool = Game::makeTool(static_cast<Game::ToolKind>(tk));
+            if (s.tool) {
+                s.tool->setLevel(tl);
+            }
         }
     }
     return chest;

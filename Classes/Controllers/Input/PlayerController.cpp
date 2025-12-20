@@ -60,7 +60,9 @@ void PlayerController::registerCommonInputHandlers(
     _kbListener = EventListenerKeyboard::create();
     _kbListener->onKeyPressed = [this](EventKeyboard::KeyCode code, Event*) {
         bool chestOpen = _ui && _ui->isChestPanelVisible();
-        bool storeOpen = _ui && (_ui->isStorePanelVisible() || _ui->isAnimalStorePanelVisible());
+        bool storeOpen = _ui && (_ui->isStorePanelVisible()
+                                 || _ui->isAnimalStorePanelVisible()
+                                 || _ui->isToolUpgradePanelVisible());
         bool skillOpen = _ui && _ui->isSkillTreePanelVisible();
         bool dialogueOpen = _ui && _ui->isDialogueVisible();
         bool socialOpen = _ui && _ui->isNpcSocialVisible();
@@ -71,6 +73,7 @@ void PlayerController::registerCommonInputHandlers(
                 if (_ui->isStorePanelVisible()) _ui->toggleStorePanel(false);
                 if (_ui->isAnimalStorePanelVisible()) _ui->toggleAnimalStorePanel(false);
                 if (_ui->isSkillTreePanelVisible()) _ui->toggleSkillTreePanel(false);
+                if (_ui->isToolUpgradePanelVisible()) _ui->toggleToolUpgradePanel(false);
                 if (_ui->isDialogueVisible()) _ui->hideDialogue();
                 if (_ui->isNpcSocialVisible()) _ui->hideNpcSocial();
             }
@@ -298,7 +301,8 @@ void PlayerController::registerCommonInputHandlers(
                 }
             } break;
             case EventKeyboard::KeyCode::KEY_SPACE: {
-                if (chestOpen || storeOpen || skillOpen) break;
+                bool toolUpgradeOpen = _ui && _ui->isToolUpgradePanelVisible();
+                if (chestOpen || ((!toolUpgradeOpen) && (storeOpen || skillOpen))) break;
                 if (Game::globalState().fishingActive) break;
                 if (_onSpacePressed) {
                     _onSpacePressed();
@@ -310,6 +314,7 @@ void PlayerController::registerCommonInputHandlers(
                                 || _ui->isChestPanelVisible()
                                 || _ui->isStorePanelVisible()
                                 || _ui->isAnimalStorePanelVisible()
+                                || _ui->isToolUpgradePanelVisible()
                                 || _ui->isSkillTreePanelVisible();
                 }
                 if (blockTool) break;
