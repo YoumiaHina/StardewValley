@@ -31,13 +31,11 @@ int toInt(Game::TileType t) {
 
 Game::TileType tileFromInt(int v) {
     switch (v) {
-        case 0: return Game::TileType::Soil;
-        case 1: return Game::TileType::Tilled;
-        case 2: return Game::TileType::Watered;
-        case 5: return Game::TileType::NotSoil;
-        case 3: return Game::TileType::Soil;
-        case 4: return Game::TileType::Soil;
-        default: return Game::TileType::Soil;
+        case 1: return Game::TileType::Soil;
+        case 2: return Game::TileType::Tilled;
+        case 3: return Game::TileType::Watered;
+        case 0: return Game::TileType::NotSoil;
+        default: return Game::TileType::NotSoil;
     }
 }
 

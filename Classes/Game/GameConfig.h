@@ -21,6 +21,13 @@ namespace GameConfig {
     static const int MAP_COLS = 120;
     static const int MAP_ROWS = 80;
 
+    // 农场环境障碍夜间补充生成
+    // - 当数量低于阈值（按面积除以 divisor 计算）时，每晚补充生成固定数量。
+    static const int FARM_TREE_REGEN_THRESHOLD_DIV = 60;
+    static const int FARM_ROCK_REGEN_THRESHOLD_DIV = 30;
+    static const int FARM_WEED_REGEN_THRESHOLD_DIV = 50;
+    static const int FARM_NIGHTLY_REGEN_COUNT = 2;
+
     // 掉落与拾取相关参数
     static const float DROP_DRAW_RADIUS = 8.0f;   // 掉落渲染圆点半径
     static const float DROP_PICK_RADIUS = 20.0f;  // 玩家拾取距离阈值

@@ -93,6 +93,42 @@ void WeedSystem::generateInitial(int cols, int rows,
     }
 }
 
+int WeedSystem::regrowNightlyWorldOnly(int cols, int rows,
+                                       const std::function<Game::TileType(int,int)>& getTile,
+                                       const std::function<bool(int,int)>& isOccupiedTile,
+                                       const std::function<void(int,int)>& markOccupiedTile) {
+    auto& ws = Game::globalState();
+    if (cols <= 0 || rows <= 0) return 0;
+    int area = cols * rows;
+    int thresholdDiv = GameConfig::FARM_WEED_REGEN_THRESHOLD_DIV;
+    if (thresholdDiv <= 0) thresholdDiv = 1;
+    int threshold = std::max(1, area / thresholdDiv);
+    if (static_cast<int>(ws.farmWeeds.size()) >= threshold) return 0;
+
+    int target = GameConfig::FARM_NIGHTLY_REGEN_COUNT;
+    if (target <= 0) return 0;
+
+    std::mt19937 rng(static_cast<unsigned>(std::time(nullptr)));
+    std::uniform_int_distribution<int> distC(0, cols - 1);
+    std::uniform_int_distribution<int> distR(0, rows - 1);
+
+    int created = 0;
+    int attempts = 0;
+    int maxAttempts = std::max(target * 30, 64);
+    while (created < target && attempts < maxAttempts) {
+        attempts++;
+        int c = distC(rng);
+        int r = distR(rng);
+        if (c < 0 || r < 0 || c >= cols || r >= rows) continue;
+        if (getTile && getTile(c, r) != Game::TileType::Soil) continue;
+        if (isOccupiedTile && isOccupiedTile(c, r)) continue;
+        ws.farmWeeds.push_back(Game::WeedPos{c, r});
+        if (markOccupiedTile) markOccupiedTile(c, r);
+        created++;
+    }
+    return created;
+}
+
 Game::Weed* WeedSystem::findWeedAt(int c, int r) const {
     long long k = (static_cast<long long>(r) << 32) | static_cast<unsigned long long>(c);
     auto it = _weeds.find(k);
