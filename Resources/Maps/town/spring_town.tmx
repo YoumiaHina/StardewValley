@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="50" height="50" tilewidth="16" tileheight="16" infinite="0" nextlayerid="9" nextobjectid="20">
  <tileset firstgid="1" source="spring_town.tsx"/>
- <tileset firstgid="2305" source="../spring_outdoors/spring_outdoors.tsx"/>
+ <tileset firstgid="2305" source="../farm_outdoors/spring_outdoors.tsx"/>
  <tileset firstgid="4280" source="festival.tsx"/>
  <layer id="1" name="Background" width="50" height="50">
   <data encoding="csv">

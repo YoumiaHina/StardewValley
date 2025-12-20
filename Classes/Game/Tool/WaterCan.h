@@ -6,6 +6,7 @@ namespace Game {
 
 class WaterCan : public ToolBase {
 public:
+    ~WaterCan() override;
     ToolKind kind() const override;
     std::string displayName() const override;
     std::string use(Controllers::IMapController* map,

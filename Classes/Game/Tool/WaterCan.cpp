@@ -11,6 +11,10 @@ using namespace cocos2d;
 
 namespace Game {
 
+WaterCan::~WaterCan() {
+    detachHotbarOverlay();
+}
+
 ToolKind WaterCan::kind() const { return ToolKind::WaterCan; }
 std::string WaterCan::displayName() const { return std::string("Water Can"); }
 
@@ -140,6 +144,9 @@ void WaterCan::refreshHotbarOverlay() {
 }
 
 void WaterCan::detachHotbarOverlay() {
+    if (_waterBarNode) {
+        _waterBarNode->removeFromParent();
+    }
     _waterBarNode = nullptr;
     _waterBarBg = nullptr;
     _waterBarFill = nullptr;
