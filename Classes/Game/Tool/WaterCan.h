@@ -14,6 +14,8 @@ public:
                     std::function<cocos2d::Vec2()> getLastDir,
                     Controllers::UIController* ui) override;
 
+    std::string iconPath() const override;
+
     void attachHotbarOverlay(cocos2d::Sprite* iconSprite, float cellW, float cellH) override;
     void refreshHotbarOverlay() override;
     void detachHotbarOverlay() override;

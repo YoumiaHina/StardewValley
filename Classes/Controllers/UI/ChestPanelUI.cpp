@@ -211,20 +211,8 @@ void ChestPanelUI::refreshChestPanel(Game::Chest* chest) {
                     nameLabel->setString(name);
                     nameLabel->setVisible(true);
                 } else if (slot.kind == Game::SlotKind::Tool && slot.tool) {
-                    std::string path;
                     auto t = slot.tool.get();
-                    if (t) {
-                        switch (t->kind()) {
-                            case Game::ToolKind::Axe:        path = "Tool/Axe.png"; break;
-                            case Game::ToolKind::Hoe:        path = "Tool/Hoe.png"; break;
-                            case Game::ToolKind::Pickaxe:    path = "Tool/Pickaxe.png"; break;
-                            case Game::ToolKind::WaterCan:   path = "Tool/WaterCan.png"; break;
-                            case Game::ToolKind::FishingRod: path = "Tool/FishingRod.png"; break;
-                            case Game::ToolKind::Sword:      path = "Weapon/sword.png"; break;
-                            case Game::ToolKind::Scythe:     path = "Tool/Scythe.png"; break;
-                            default: break;
-                        }
-                    }
+                    std::string path = t ? t->iconPath() : std::string();
                     if (!path.empty()) {
                         icon->setTexture(path);
                     }
@@ -376,20 +364,8 @@ void ChestPanelUI::refreshChestPanel(Game::Chest* chest) {
                     nameLabel->setString(name);
                     nameLabel->setVisible(true);
                 } else if (slot.kind == Game::SlotKind::Tool && slot.tool) {
-                    std::string path;
                     auto t = slot.tool.get();
-                    if (t) {
-                        switch (t->kind()) {
-                            case Game::ToolKind::Axe:        path = "Tool/Axe.png"; break;
-                            case Game::ToolKind::Hoe:        path = "Tool/Hoe.png"; break;
-                            case Game::ToolKind::Pickaxe:    path = "Tool/Pickaxe.png"; break;
-                            case Game::ToolKind::WaterCan:   path = "Tool/WaterCan.png"; break;
-                            case Game::ToolKind::FishingRod: path = "Tool/FishingRod.png"; break;
-                            case Game::ToolKind::Sword:      path = "Weapon/sword.png"; break;
-                            case Game::ToolKind::Scythe:     path = "Tool/Scythe.png"; break;
-                            default: break;
-                        }
-                    }
+                    std::string path = t ? t->iconPath() : std::string();
                     if (!path.empty()) {
                         icon->setTexture(path);
                     }
@@ -482,7 +458,12 @@ void ChestPanelUI::onInventorySlotClicked(int invIndex) {
         auto t = slotChest.tool.get();
         if (!t) return;
         Game::ToolKind tk = t->kind();
-        _inventory->setTool(static_cast<std::size_t>(invIndex), Game::makeTool(tk));
+        int level = t->level();
+        auto tool = Game::makeTool(tk);
+        if (tool) {
+            tool->setLevel(level);
+        }
+        _inventory->setTool(static_cast<std::size_t>(invIndex), tool);
         slotChest.tool.reset();
         slotChest.kind = Game::SlotKind::Empty;
         slotChest.itemQty = 0;
@@ -526,16 +507,7 @@ void ChestPanelUI::onInventorySlotClicked(int invIndex) {
                 std::string path;
                 auto t = slot.tool.get();
                 if (t) {
-                    switch (t->kind()) {
-                        case Game::ToolKind::Axe:        path = "Tool/Axe.png"; break;
-                        case Game::ToolKind::Hoe:        path = "Tool/Hoe.png"; break;
-                        case Game::ToolKind::Pickaxe:    path = "Tool/Pickaxe.png"; break;
-                        case Game::ToolKind::WaterCan:   path = "Tool/WaterCan.png"; break;
-                        case Game::ToolKind::FishingRod: path = "Tool/FishingRod.png"; break;
-                        case Game::ToolKind::Sword:      path = "Weapon/sword.png"; break;
-                        case Game::ToolKind::Scythe:     path = "Tool/Scythe.png"; break;
-                        default: break;
-                    }
+                    path = t->iconPath();
                 }
                 if (!path.empty()) {
                     icon->setTexture(path);

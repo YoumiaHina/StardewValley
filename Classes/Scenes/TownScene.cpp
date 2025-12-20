@@ -103,3 +103,12 @@ void TownScene::onMouseDown(EventMouse* e) {
         }
     }
 }
+
+void TownScene::onKeyPressedHook(EventKeyboard::KeyCode code) {
+    if (code == EventKeyboard::KeyCode::KEY_U) {
+        if (_uiController) {
+            bool visible = _uiController->isToolUpgradePanelVisible();
+            _uiController->toggleToolUpgradePanel(!visible);
+        }
+    }
+}

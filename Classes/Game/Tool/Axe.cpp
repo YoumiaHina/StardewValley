@@ -16,6 +16,19 @@ namespace Game {
 ToolKind Axe::kind() const { return ToolKind::Axe; }
 std::string Axe::displayName() const { return std::string("Axe"); }
 
+std::string Axe::iconPath() const {
+    int lv = level();
+    std::string prefix;
+    if (lv == 1) {
+        prefix = "copper_";
+    } else if (lv == 2) {
+        prefix = "iron_";
+    } else if (lv >= 3) {
+        prefix = "gold_";
+    }
+    return std::string("Tool/") + prefix + "Axe.png";
+}
+
 std::string Axe::use(Controllers::IMapController* map,
                      Controllers::CropSystem* /*crop*/,
                      std::function<Vec2()> getPlayerPos,

@@ -16,6 +16,8 @@ public:
                     std::function<cocos2d::Vec2()> getLastDir,
                     Controllers::UIController* ui) override;
 
+    std::string iconPath() const override;
+
     static int baseDamage();
     static void buildHitTiles(Controllers::IMapController* map,
                               const cocos2d::Vec2& playerPos,

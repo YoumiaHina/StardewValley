@@ -286,9 +286,10 @@ void PlayerController::registerCommonInputHandlers(
                     const Game::ToolBase* tConst = _inventory->toolAt(static_cast<std::size_t>(selected));
                     if (!tConst) break;
                     Game::ToolKind tk = tConst->kind();
+                    int level = tConst->level();
                     bool cleared = _inventory->clearSlot(static_cast<std::size_t>(selected));
                     if (!cleared) break;
-                    int raw = Game::toolDropRaw(tk);
+                    int raw = Game::toolDropRaw(tk, level);
                     _map->spawnDropAt(dropC, dropR, raw, 1);
                     _map->refreshDropsVisuals();
                     if (_ui) {

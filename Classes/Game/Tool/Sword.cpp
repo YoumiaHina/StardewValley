@@ -14,6 +14,10 @@ namespace Game {
 ToolKind Sword::kind() const { return ToolKind::Sword; }
 std::string Sword::displayName() const { return std::string("Sword"); }
 
+std::string Sword::iconPath() const {
+    return std::string("Weapon/sword.png");
+}
+
 std::string Sword::use(Controllers::IMapController* map,
                        Controllers::CropSystem* /*crop*/,
                        std::function<Vec2()> getPlayerPos,

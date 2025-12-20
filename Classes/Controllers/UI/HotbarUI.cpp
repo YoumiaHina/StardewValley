@@ -184,17 +184,7 @@ void HotbarUI::refreshHotbar() {
             auto t = _inventory->toolAtMutable(i);
             if (label) label->setVisible(false);
             if (icon) {
-                std::string path;
-                switch (tConst->kind()) {
-                    case Game::ToolKind::Axe:        path = "Tool/Axe.png"; break;
-                    case Game::ToolKind::Hoe:        path = "Tool/Hoe.png"; break;
-                    case Game::ToolKind::Pickaxe:    path = "Tool/Pickaxe.png"; break;
-                    case Game::ToolKind::WaterCan:   path = "Tool/WaterCan.png"; break;
-                    case Game::ToolKind::FishingRod: path = "Tool/FishingRod.png"; break;
-                    case Game::ToolKind::Sword:      path = "Weapon/sword.png"; break;
-                    case Game::ToolKind::Scythe:     path = "Tool/Scythe.png"; break;
-                    default: path.clear(); break;
-                }
+                std::string path = tConst->iconPath();
                 if (!path.empty()) {
                     icon->setTexture(path);
                     if (icon->getTexture()) {

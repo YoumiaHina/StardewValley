@@ -15,6 +15,10 @@ namespace Game {
 ToolKind Scythe::kind() const { return ToolKind::Scythe; }
 std::string Scythe::displayName() const { return std::string("Scythe"); }
 
+std::string Scythe::iconPath() const {
+    return std::string("Tool/Scythe.png");
+}
+
 std::string Scythe::use(Controllers::IMapController* map,
                         Controllers::CropSystem* /*crop*/,
                         std::function<Vec2()> getPlayerPos,
@@ -68,4 +72,3 @@ std::string Scythe::use(Controllers::IMapController* map,
 }
 
 }
-

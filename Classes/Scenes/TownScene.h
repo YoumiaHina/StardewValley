@@ -19,6 +19,7 @@ protected:
     void onSpacePressed() override;
     const char* doorPromptText() const override;
     void onMouseDown(cocos2d::EventMouse* e) override;
+    void onKeyPressedHook(cocos2d::EventKeyboard::KeyCode code) override;
 
 private:
     Controllers::TownMapController* _townMap = nullptr;

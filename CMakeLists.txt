@@ -100,6 +100,7 @@ list(APPEND GAME_SOURCE
      Classes/Controllers/Store/StoreController.cpp
      Classes/Controllers/Store/StoreController.h
      Classes/Controllers/Systems/DropSystem.cpp
+     Classes/Controllers/Systems/ToolUpgradeSystem.cpp
      )
 list(APPEND GAME_HEADER
      Classes/AppDelegate.h
@@ -125,6 +126,7 @@ list(APPEND GAME_HEADER
      Classes/Game/Tool/ToolFactory.h
      Classes/Game/GameConfig.h
      Classes/Controllers/Systems/DropSystem.h
+     Classes/Controllers/Systems/ToolUpgradeSystem.h
      )
 
 if(ANDROID)

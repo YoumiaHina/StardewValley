@@ -12,6 +12,7 @@
 #include "Game/Chest.h"
 #include "Game/Map/RoomMap.h"
 #include "Controllers/Systems/ChestController.h"
+#include "Controllers/Systems/DropSystem.h"
 
 namespace Controllers {
 
@@ -92,6 +93,10 @@ public:
     // 获取熔炉控制器指针（由房间控制器持有/挂接）。
     Controllers::FurnaceController* furnaceController() const { return _furnaceController; }
 
+    void refreshDropsVisuals() override;
+    void spawnDropAt(int c, int r, int itemType, int qty) override;
+    void collectDropsNear(const cocos2d::Vec2& playerWorldPos, Game::Inventory* inv) override;
+
 private:
     cocos2d::Node* _worldNode = nullptr;
     cocos2d::DrawNode* _roomDraw = nullptr;
@@ -107,6 +112,7 @@ private:
     cocos2d::Rect _bedRect;
     Controllers::ChestController* _chestController = nullptr;
     Controllers::FurnaceController* _furnaceController = nullptr;
+    Controllers::DropSystem _dropSystem;
 };
 
 }

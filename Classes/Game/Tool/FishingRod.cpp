@@ -15,6 +15,10 @@ std::string FishingRod::displayName() const { return std::string("Fishing Rod");
 
 void FishingRod::setFishingStarter(std::function<void(const cocos2d::Vec2&)> cb) { _onStartFishing = std::move(cb); }
 
+std::string FishingRod::iconPath() const {
+    return std::string("Tool/FishingRod.png");
+}
+
 std::string FishingRod::use(Controllers::IMapController* map,
                             Controllers::CropSystem* /*crop*/,
                             std::function<Vec2()> getPlayerPos,
