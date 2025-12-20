@@ -23,8 +23,15 @@ public:
                                  Game::Inventory* inv);
 };
 
+inline int toolDropRaw(Game::ToolKind tk, int level) {
+    if (level < 0) level = 0;
+    if (level > 3) level = 3;
+    int base = static_cast<int>(tk);
+    return 10000 + level * 100 + base;
+}
+
 inline int toolDropRaw(Game::ToolKind tk) {
-    return 10000 + static_cast<int>(tk);
+    return toolDropRaw(tk, 0);
 }
 
 inline bool isToolDropRaw(int raw) {
@@ -32,7 +39,18 @@ inline bool isToolDropRaw(int raw) {
 }
 
 inline Game::ToolKind toolKindFromDropRaw(int raw) {
-    return static_cast<Game::ToolKind>(raw - 10000);
+    int base = raw - 10000;
+    int kindInt = base % 100;
+    return static_cast<Game::ToolKind>(kindInt);
 }
+
+inline int toolLevelFromDropRaw(int raw) {
+    int base = raw - 10000;
+    int lv = base / 100;
+    if (lv < 0) lv = 0;
+    if (lv > 3) lv = 3;
+    return lv;
+}
+
 
 } // namespace Game

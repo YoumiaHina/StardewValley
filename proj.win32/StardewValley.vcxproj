@@ -179,6 +179,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClCompile Include="..\Classes\Controllers\Systems\DropSystem.cpp" />
     <ClCompile Include="..\Classes\Controllers\Systems\FurnaceController.cpp" />
     <ClCompile Include="..\Classes\Controllers\Systems\WeatherController.cpp" />
+    <ClCompile Include="..\Classes\Controllers\Systems\ToolUpgradeSystem.cpp" />
     <ClCompile Include="..\Classes\Controllers\UI\ChestPanelUI.cpp" />
     <ClCompile Include="..\Classes\Controllers\UI\CraftPanelUI.cpp" />
     <ClCompile Include="..\Classes\Controllers\UI\DialogueUI.cpp" />
@@ -187,6 +188,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClCompile Include="..\Classes\Controllers\UI\NpcSocialPanelUI.cpp" />
     <ClCompile Include="..\Classes\Controllers\UI\PromptUI.cpp" />
     <ClCompile Include="..\Classes\Controllers\UI\StorePanelUI.cpp" />
+    <ClCompile Include="..\Classes\Controllers\UI\ToolUpgradePanelUI.cpp" />
     <ClCompile Include="..\Classes\Game\Chest.cpp" />
     <ClCompile Include="..\Classes\Game\Drop.cpp" />
     <ClCompile Include="..\Classes\Game\Furnace.cpp" />
@@ -299,6 +301,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClInclude Include="..\Classes\Controllers\Systems\FurnaceController.h" />
     <ClInclude Include="..\Classes\Controllers\Systems\WeatherController.h" />
     <ClInclude Include="..\Classes\Controllers\Systems\PlaceableItemSystemBase.h" />
+    <ClInclude Include="..\Classes\Controllers\Systems\ToolUpgradeSystem.h" />
     <ClInclude Include="..\Classes\Controllers\UI\ChestPanelUI.h" />
     <ClInclude Include="..\Classes\Controllers\UI\CraftPanelUI.h" />
     <ClInclude Include="..\Classes\Controllers\UI\DialogueUI.h" />
@@ -308,6 +311,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClInclude Include="..\Classes\Controllers\UI\PromptUI.h" />
     <ClInclude Include="..\Classes\Controllers\UI\StorePanelUI.h" />
     <ClInclude Include="..\Classes\Controllers\UI\SkillTreePanelUI.h" />
+    <ClInclude Include="..\Classes\Controllers\UI\ToolUpgradePanelUI.h" />
     <ClInclude Include="..\Classes\Game\Cheat.h" />
     <ClInclude Include="..\Classes\Game\Chest.h" />
     <ClInclude Include="..\Classes\Game\EnvironmentObstacleBase.h" />

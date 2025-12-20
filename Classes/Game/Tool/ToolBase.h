@@ -12,6 +12,9 @@ enum class ToolKind { Axe, Hoe, Pickaxe, WaterCan, FishingRod, Sword, Scythe };
 
 class ToolBase {
 public:
+    int level() const { return _level; }
+    void setLevel(int lv) { _level = lv; }
+
     virtual ~ToolBase() = default;
     virtual ToolKind kind() const = 0;
     virtual std::string displayName() const = 0;
@@ -21,9 +24,14 @@ public:
                             std::function<cocos2d::Vec2()> getLastDir,
                             Controllers::UIController* ui) = 0;
 
+    virtual std::string iconPath() const { return std::string(); }
+
     virtual void attachHotbarOverlay(cocos2d::Sprite* /*iconSprite*/, float /*cellW*/, float /*cellH*/) {}
     virtual void refreshHotbarOverlay() {}
     virtual void detachHotbarOverlay() {}
+
+protected:
+    int _level = 0;
 };
 
 }

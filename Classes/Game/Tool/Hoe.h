@@ -13,7 +13,8 @@ public:
                     std::function<cocos2d::Vec2()> getPlayerPos,
                     std::function<cocos2d::Vec2()> getLastDir,
                     Controllers::UIController* ui) override;
+
+    std::string iconPath() const override;
 };
 
 }
-

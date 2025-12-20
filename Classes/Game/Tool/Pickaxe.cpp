@@ -16,6 +16,19 @@ namespace Game {
 ToolKind Pickaxe::kind() const { return ToolKind::Pickaxe; }
 std::string Pickaxe::displayName() const { return std::string("Pickaxe"); }
 
+std::string Pickaxe::iconPath() const {
+    int lv = level();
+    std::string prefix;
+    if (lv == 1) {
+        prefix = "copper_";
+    } else if (lv == 2) {
+        prefix = "iron_";
+    } else if (lv >= 3) {
+        prefix = "gold_";
+    }
+    return std::string("Tool/") + prefix + "Pickaxe.png";
+}
+
 std::string Pickaxe::use(Controllers::IMapController* map,
                          Controllers::CropSystem* crop,
                          std::function<Vec2()> getPlayerPos,

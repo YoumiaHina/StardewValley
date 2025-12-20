@@ -14,6 +14,19 @@ namespace Game {
 ToolKind WaterCan::kind() const { return ToolKind::WaterCan; }
 std::string WaterCan::displayName() const { return std::string("Water Can"); }
 
+std::string WaterCan::iconPath() const {
+    int lv = level();
+    std::string prefix;
+    if (lv == 1) {
+        prefix = "copper_";
+    } else if (lv == 2) {
+        prefix = "iron_";
+    } else if (lv >= 3) {
+        prefix = "gold_";
+    }
+    return std::string("Tool/") + prefix + "WaterCan.png";
+}
+
 std::string WaterCan::use(Controllers::IMapController* map,
                           Controllers::CropSystem* crop,
                           std::function<Vec2()> getPlayerPos,

@@ -4,11 +4,14 @@
 #pragma once
 
 #include "cocos2d.h"
-#include <vector>
+#include "ui/CocosGUI.h"
 #include <memory>
+#include <vector>
+#include <string>
 #include <functional>
 #include "Game/Inventory.h"
 #include "Game/Chest.h"
+#include "Game/Animal.h"
 #include "Controllers/UI/HUDUI.h"
 #include "Controllers/UI/HotbarUI.h"
 #include "Controllers/UI/PromptUI.h"
@@ -16,9 +19,9 @@
 #include "Controllers/UI/CraftPanelUI.h"
 #include "Controllers/UI/StorePanelUI.h"
 #include "Controllers/UI/SkillTreePanelUI.h"
+#include "Controllers/UI/ToolUpgradePanelUI.h"
 #include "Controllers/UI/DialogueUI.h"
 #include "Controllers/UI/NpcSocialPanelUI.h"
-#include "ui/CocosGUI.h"
 
 namespace Controllers {
 
@@ -113,6 +116,11 @@ public:
     // 技能等级面板是否可见。
     bool isSkillTreePanelVisible() const;
 
+    void buildToolUpgradePanel();
+    void refreshToolUpgradePanel();
+    void toggleToolUpgradePanel(bool visible);
+    bool isToolUpgradePanelVisible() const;
+
 private:
     cocos2d::Scene* _scene = nullptr;
     cocos2d::Node* _worldNode = nullptr;
@@ -124,6 +132,7 @@ private:
     CraftPanelUI* _craftPanel = nullptr;
     StorePanelUI* _storePanel = nullptr;
     SkillTreePanelUI* _skillTreePanel = nullptr;
+    ToolUpgradePanelUI* _toolUpgradePanel = nullptr;
     AnimalStorePanelUI* _animalStorePanel = nullptr;
     DialogueUI* _dialogueUI = nullptr;
     NpcSocialPanelUI* _socialPanel = nullptr;

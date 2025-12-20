@@ -7,17 +7,11 @@ using namespace cocos2d;
 
 namespace Game {
 
-static std::string toolDropIconPath(Game::ToolKind tk) {
-    switch (tk) {
-        case Game::ToolKind::Axe:        return "Tool/Axe.png";
-        case Game::ToolKind::Hoe:        return "Tool/Hoe.png";
-        case Game::ToolKind::Pickaxe:    return "Tool/Pickaxe.png";
-        case Game::ToolKind::WaterCan:   return "Tool/WaterCan.png";
-        case Game::ToolKind::FishingRod: return "Tool/FishingRod.png";
-        case Game::ToolKind::Sword:      return "Weapon/sword.png";
-        case Game::ToolKind::Scythe:     return "Tool/Scythe.png";
-        default:                         return std::string();
-    }
+static std::string toolDropIconPath(Game::ToolKind tk, int level) {
+    auto tool = makeTool(tk);
+    if (!tool) return std::string();
+    tool->setLevel(level);
+    return tool->iconPath();
 }
 
 void Drop::renderDrops(const std::vector<Drop>& drops, cocos2d::Node* root, cocos2d::DrawNode* draw) {
@@ -32,7 +26,8 @@ void Drop::renderDrops(const std::vector<Drop>& drops, cocos2d::Node* root, coco
         std::string path;
         if (isToolDropRaw(raw)) {
             Game::ToolKind tk = toolKindFromDropRaw(raw);
-            path = toolDropIconPath(tk);
+            int level = toolLevelFromDropRaw(raw);
+            path = toolDropIconPath(tk, level);
         } else {
             path = Game::itemIconPath(d.type);
         }
@@ -78,11 +73,16 @@ void Drop::collectDropsNear(const cocos2d::Vec2& playerWorldPos, std::vector<Dro
             int raw = static_cast<int>(d.type);
             if (isToolDropRaw(raw)) {
                 Game::ToolKind tk = toolKindFromDropRaw(raw);
+                int level = toolLevelFromDropRaw(raw);
                 bool placed = false;
                 std::size_t sz = inv->size();
                 for (std::size_t i = 0; i < sz; ++i) {
                     if (inv->isEmpty(i)) {
-                        inv->setTool(i, Game::makeTool(tk));
+                        auto tool = Game::makeTool(tk);
+                        if (tool) {
+                            tool->setLevel(level);
+                        }
+                        inv->setTool(i, tool);
                         placed = true;
                         break;
                     }

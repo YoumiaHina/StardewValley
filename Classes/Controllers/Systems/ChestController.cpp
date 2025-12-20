@@ -305,8 +305,12 @@ void transferChestCell(Game::Chest& chest,
         const Game::ToolBase* tConst = inventory.toolAt(static_cast<std::size_t>(invIndex));
         if (!tConst) return;
         Game::ToolKind tk = tConst->kind();
+        int level = tConst->level();
         cs.kind = Game::SlotKind::Tool;
         cs.tool = Game::makeTool(tk);
+        if (cs.tool) {
+            cs.tool->setLevel(level);
+        }
         cs.itemQty = 0;
         bool cleared = inventory.clearSlot(static_cast<std::size_t>(invIndex));
         if (!cleared) {

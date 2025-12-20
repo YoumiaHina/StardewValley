@@ -138,6 +138,18 @@ void RoomMapController::init() {
     if (_furnaceController && furnaceParent) {
         _furnaceController->attachTo(furnaceParent, 19);
     }
+
+    _dropSystem.configureTargetProvider([this]() -> Controllers::DropSystem::AttachTarget {
+        Controllers::DropSystem::AttachTarget tgt;
+        if (_roomMap && _roomMap->getTMX()) {
+            tgt.parent = _roomMap->getTMX();
+            tgt.zOrder = 19;
+        } else if (_worldNode) {
+            tgt.parent = _worldNode;
+            tgt.zOrder = 19;
+        }
+        return tgt;
+    });
 }
 
 Vec2 RoomMapController::getPlayerPosition(const Vec2& playerMapLocalPos) const {
@@ -244,6 +256,18 @@ void RoomMapController::refreshChestsVisuals() {
     if (_chestController) {
         _chestController->refreshVisuals();
     }
+}
+
+void RoomMapController::refreshDropsVisuals() {
+    _dropSystem.refreshVisuals();
+}
+
+void RoomMapController::spawnDropAt(int c, int r, int itemType, int qty) {
+    _dropSystem.spawnDropAt(this, c, r, itemType, qty);
+}
+
+void RoomMapController::collectDropsNear(const Vec2& playerWorldPos, Game::Inventory* inv) {
+    _dropSystem.collectDropsNear(playerWorldPos, inv);
 }
 
 // namespace Controllers

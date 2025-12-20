@@ -255,6 +255,34 @@ bool UIController::isSkillTreePanelVisible() const {
     return _skillTreePanel && _skillTreePanel->isVisible();
 }
 
+void UIController::buildToolUpgradePanel() {
+    if (!_toolUpgradePanel) {
+        _toolUpgradePanel = new ToolUpgradePanelUI(_scene, _inventory);
+        _toolUpgradePanel->setOnUpgraded([this]() {
+            refreshHotbar();
+        });
+    }
+    _toolUpgradePanel->buildPanel();
+}
+
+void UIController::refreshToolUpgradePanel() {
+    if (_toolUpgradePanel) _toolUpgradePanel->refreshPanel();
+}
+
+void UIController::toggleToolUpgradePanel(bool visible) {
+    if (visible) {
+        buildToolUpgradePanel();
+        refreshToolUpgradePanel();
+        if (_toolUpgradePanel) _toolUpgradePanel->togglePanel(true);
+    } else {
+        if (_toolUpgradePanel) _toolUpgradePanel->togglePanel(false);
+    }
+}
+
+bool UIController::isToolUpgradePanelVisible() const {
+    return _toolUpgradePanel && _toolUpgradePanel->isVisible();
+}
+
 void UIController::buildAnimalStorePanel() {
     if (!_animalStorePanel) _animalStorePanel = new AnimalStorePanelUI(_scene);
     _animalStorePanel->buildAnimalStorePanel();

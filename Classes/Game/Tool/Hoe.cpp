@@ -20,6 +20,19 @@ namespace Game {
 ToolKind Hoe::kind() const { return ToolKind::Hoe; }
 std::string Hoe::displayName() const { return std::string("Hoe"); }
 
+std::string Hoe::iconPath() const {
+    int lv = level();
+    std::string prefix;
+    if (lv == 1) {
+        prefix = "copper_";
+    } else if (lv == 2) {
+        prefix = "iron_";
+    } else if (lv >= 3) {
+        prefix = "gold_";
+    }
+    return std::string("Tool/") + prefix + "Hoe.png";
+}
+
 std::string Hoe::use(Controllers::IMapController* map,
                      Controllers::CropSystem* crop,
                      std::function<Vec2()> getPlayerPos,

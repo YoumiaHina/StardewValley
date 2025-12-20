@@ -15,9 +15,10 @@ public:
                     std::function<cocos2d::Vec2()> getLastDir,
                     Controllers::UIController* ui) override;
     void setFishingStarter(std::function<void(const cocos2d::Vec2&)> cb);
+
+    std::string iconPath() const override;
 private:
     std::function<void(const cocos2d::Vec2&)> _onStartFishing;
 };
 
 }
-
