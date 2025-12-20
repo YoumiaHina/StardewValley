@@ -212,23 +212,12 @@ std::pair<int,int> RoomMapController::targetTile(const Vec2& playerPos, const Ve
 }
 
 void RoomMapController::updateCursor(const Vec2& playerPos, const Vec2& lastDir) {
-    if (!_cursor) {
-        _cursor = DrawNode::create();
-        if (_roomMap && _roomMap->getTMX()) {
-            _roomMap->getTMX()->addChild(_cursor, 21);
-        } else if (_worldNode) {
-            _worldNode->addChild(_cursor, 21);
-        }
+    (void)playerPos;
+    (void)lastDir;
+    if (_cursor) {
+        _cursor->removeFromParent();
+        _cursor = nullptr;
     }
-    if (!_cursor) return;
-    TileSelector::drawFanCursor(
-        _cursor,
-        playerPos,
-        lastDir,
-        [this](const Vec2& p, int& c, int& r) { worldToTileIndex(p, c, r); },
-        [this](int c, int r) { return inBounds(c, r); },
-        [this](int c, int r) { return tileToWorld(c, r); },
-        tileSize());
 }
 
 void RoomMapController::addActorToMap(cocos2d::Node* node, int zOrder) {

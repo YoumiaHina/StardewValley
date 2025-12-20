@@ -101,7 +101,7 @@ void FarmMapController::init() {
 
     _cursor = DrawNode::create();
     if (_farmMap && _farmMap->getTMX()) {
-        _farmMap->getTMX()->addChild(_cursor, 21);
+        _farmMap->getTMX()->addChild(_cursor, 19);
     } else {
         _mapNode->addChild(_cursor, 1);
     }
