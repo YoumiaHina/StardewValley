@@ -442,10 +442,13 @@
     <ClCompile Include="..\Classes\Game\Tool\Scythe.cpp">
       <Filter>Classes\Game\Tool</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\Systems\RainLayer.cpp">
+      <Filter>Classes\Controllers\Systems</Filter>
+    </ClCompile>
     <ClCompile Include="..\Classes\Controllers\UI\ToolUpgradePanelUI.cpp">
       <Filter>Classes\Controllers\UI</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\Controllers\Systems\RainLayer.cpp">
+    <ClCompile Include="..\Classes\Controllers\Systems\ToolUpgradeSystem.cpp">
       <Filter>Classes\Controllers\Systems</Filter>
     </ClCompile>
   </ItemGroup>
@@ -771,13 +774,14 @@
     <ClInclude Include="..\Classes\Controllers\Systems\DropSystem.h">
       <Filter>Classes\Controllers\Systems</Filter>
     </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\Systems\RainLayer.h">
+      <Filter>Classes\Controllers\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\IMapController.h" />
     <ClInclude Include="..\Classes\Controllers\UI\ToolUpgradePanelUI.h">
       <Filter>Classes\Controllers\UI</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\Controllers\Map\IMapController.h">
-      <Filter>Classes\Controllers\Map</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Classes\Controllers\Systems\RainLayer.h">
+    <ClInclude Include="..\Classes\Controllers\Systems\ToolUpgradeSystem.h">
       <Filter>Classes\Controllers\Systems</Filter>
     </ClInclude>
   </ItemGroup>
