@@ -20,7 +20,13 @@
 namespace {
 
 int toInt(Game::TileType t) {
-    return static_cast<int>(t);
+    switch (t) {
+        case Game::TileType::Soil: return 1;
+        case Game::TileType::Tilled: return 2;
+        case Game::TileType::Watered: return 3;
+        case Game::TileType::NotSoil: return 0;
+        default: return 0;
+    }
 }
 
 Game::TileType tileFromInt(int v) {
@@ -28,9 +34,9 @@ Game::TileType tileFromInt(int v) {
         case 0: return Game::TileType::Soil;
         case 1: return Game::TileType::Tilled;
         case 2: return Game::TileType::Watered;
-        case 3: return Game::TileType::Rock;
-        case 4: return Game::TileType::Tree;
         case 5: return Game::TileType::NotSoil;
+        case 3: return Game::TileType::Soil;
+        case 4: return Game::TileType::Soil;
         default: return Game::TileType::Soil;
     }
 }

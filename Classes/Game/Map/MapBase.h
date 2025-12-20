@@ -27,6 +27,7 @@ public:
 
     virtual bool collides(const cocos2d::Vec2& p, float radius) const = 0;
     virtual bool inBuildingArea(const cocos2d::Vec2&) const { return false; }
+	virtual bool inWallArea(const cocos2d::Vec2&) const { return false; }
 
     static bool collidesAt(const cocos2d::Vec2& p, float radius,
                            const std::vector<cocos2d::Rect>& rects,

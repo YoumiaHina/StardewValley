@@ -4,6 +4,7 @@
 #include "Controllers/Systems/CropSystem.h"
 #include "Controllers/Environment/TreeSystem.h"
 #include "Controllers/Environment/RockSystem.h"
+#include "Controllers/Environment/WeedSystem.h"
 #include "Game/WorldState.h"
 #include "Game/GameConfig.h"
 #include "Game/Crops/crop/CropBase.h"
@@ -40,7 +41,7 @@ std::string Hoe::use(Controllers::IMapController* map,
     int tc = tgt.first, tr = tgt.second;
     if (!map->inBounds(tc, tr)) return std::string("");
     std::string msg;
-    // 仅在农场地图进行耕地/收获逻辑；矿洞/室内直接返回 Nothing，避免访问不存在的瓦片数组
+    // 仅在农场地图进行耕地/收获逻辑
     if (!map->isFarm()) {
         msg = std::string("Nothing");
     } else {
@@ -101,6 +102,12 @@ std::string Hoe::use(Controllers::IMapController* map,
                 if (auto* sys = map->obstacleSystem(Controllers::ObstacleKind::Rock)) {
                     auto* rs = dynamic_cast<Controllers::RockSystem*>(sys);
                     if (rs && rs->findRockAt(tc, tr)) blocked = true;
+                }
+            }
+            if (!blocked) {
+                if (auto* sys = map->obstacleSystem(Controllers::ObstacleKind::Weed)) {
+                    auto* rs = dynamic_cast<Controllers::WeedSystem*>(sys);
+                    if (rs && rs->findWeedAt(tc, tr)) blocked = true;
                 }
             }
             if (blocked) {

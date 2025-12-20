@@ -27,6 +27,13 @@ public:
                      Game::MapBase* map, int tileSize,
                      const std::function<bool(int,int)>& isSafe) override;
 
+    void generateInitial(int cols, int rows,
+                         const std::function<cocos2d::Vec2(int,int)>& tileToWorld,
+                         Game::MapBase* map, int tileSize,
+                         const std::function<bool(int,int)>& isBlockedTile,
+                         const std::function<bool(int,int)>& isOccupiedTile,
+                         const std::function<void(int,int)>& markOccupiedTile);
+
     Game::Rock* findRockAt(int c, int r) const;
 
     bool collides(const cocos2d::Vec2& point, float radius, int tileSize) const override;

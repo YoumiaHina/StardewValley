@@ -20,6 +20,7 @@ bool WeedSystem::spawnFromTile(int c, int r, const Vec2& tileCenter,
     if (!_root) return false;
     float s = static_cast<float>(tileSize);
     Vec2 footCenter = tileCenter + Vec2(0, -s * 0.5f);
+    if (map && (map->inBuildingArea(footCenter) || map->inWallArea(footCenter))) return false;
     bool blocked = map && map->collides(footCenter, 8.0f);
     if (blocked) return false;
     auto weed = Weed::create("FarmEnvironment/grass.png");
@@ -58,6 +59,45 @@ void WeedSystem::spawnRandom(int count, int cols, int rows,
         long long key = (static_cast<long long>(r) << 32) | static_cast<unsigned long long>(c);
         _weeds[key] = weed;
     }
+}
+
+void WeedSystem::generateInitial(int cols, int rows,
+                                 const std::function<Vec2(int,int)>& tileToWorld,
+                                 MapBase* map, int tileSize,
+                                 const std::function<bool(int,int)>& isBlockedTile,
+                                 const std::function<bool(int,int)>& isOccupiedTile,
+                                 const std::function<void(int,int)>& markOccupiedTile) {
+    if (!_root) return;
+    auto& ws = Game::globalState();
+    if (!ws.farmWeeds.empty()) return;
+    int count = (cols * rows) / 35;
+    if (count <= 0) return;
+    std::mt19937 rng(static_cast<unsigned>(std::time(nullptr)));
+    std::uniform_int_distribution<int> distC(0, cols - 1);
+    std::uniform_int_distribution<int> distR(0, rows - 1);
+    int created = 0;
+    int attempts = 0;
+    int maxAttempts = std::max(count * 10, 64);
+    while (created < count && attempts < maxAttempts) {
+        attempts++;
+        int c = distC(rng);
+        int r = distR(rng);
+        if (c < 0 || r < 0 || c >= cols || r >= rows) continue;
+        if (isBlockedTile && isBlockedTile(c, r)) continue;
+        if (isOccupiedTile && isOccupiedTile(c, r)) continue;
+        Vec2 center = tileToWorld ? tileToWorld(c, r) : Vec2::ZERO;
+        if (!spawnFromTile(c, r, center, map, tileSize)) continue;
+        ws.farmWeeds.push_back(Game::WeedPos{c, r});
+        if (markOccupiedTile) markOccupiedTile(c, r);
+        created++;
+    }
+}
+
+Game::Weed* WeedSystem::findWeedAt(int c, int r) const {
+    long long k = (static_cast<long long>(r) << 32) | static_cast<unsigned long long>(c);
+    auto it = _weeds.find(k);
+    if (it != _weeds.end()) return it->second;
+    return nullptr;
 }
 
 bool WeedSystem::collides(const Vec2& p, float radius, int) const {

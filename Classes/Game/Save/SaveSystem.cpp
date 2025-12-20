@@ -7,6 +7,7 @@
 #include <fstream>
 #include <sstream>
 #include <limits>
+#include <unordered_set>
 
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
 #include <windows.h>
@@ -302,12 +303,21 @@ bool loadFromFile(const std::string& fullPath) {
     in >> tilesCount;
     in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     ws.farmTiles.clear();
+    std::vector<long long> legacyRockTiles;
+    std::vector<long long> legacyTreeTiles;
     if (tilesCount > 0) {
         ws.farmTiles.resize(tilesCount);
         for (std::size_t i = 0; i < tilesCount; ++i) {
             int v = 0;
             in >> v;
             ws.farmTiles[i] = tileFromInt(v);
+            if (ws.farmCols > 0) {
+                int c = static_cast<int>(i % static_cast<std::size_t>(ws.farmCols));
+                int r = static_cast<int>(i / static_cast<std::size_t>(ws.farmCols));
+                long long key = (static_cast<long long>(r) << 32) | static_cast<unsigned long long>(c);
+                if (v == 3) legacyRockTiles.push_back(key);
+                if (v == 4) legacyTreeTiles.push_back(key);
+            }
         }
         in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     }
@@ -346,6 +356,28 @@ bool loadFromFile(const std::string& fullPath) {
     readCrops(in, ws.farmCrops);
     readTreePositions(in, ws.farmTrees);
     readRockPositions(in, ws.farmRocks);
+    if (ws.farmRocks.empty() && !legacyRockTiles.empty()) {
+        std::unordered_set<long long> seen;
+        ws.farmRocks.reserve(legacyRockTiles.size());
+        for (long long key : legacyRockTiles) {
+            if (seen.count(key)) continue;
+            seen.insert(key);
+            int r = static_cast<int>(key >> 32);
+            int c = static_cast<int>(key & 0xFFFFFFFF);
+            ws.farmRocks.push_back(Game::RockPos{c, r, Game::RockKind::Rock1});
+        }
+    }
+    if (ws.farmTrees.empty() && !legacyTreeTiles.empty()) {
+        std::unordered_set<long long> seen;
+        ws.farmTrees.reserve(legacyTreeTiles.size());
+        for (long long key : legacyTreeTiles) {
+            if (seen.count(key)) continue;
+            seen.insert(key);
+            int r = static_cast<int>(key >> 32);
+            int c = static_cast<int>(key & 0xFFFFFFFF);
+            ws.farmTrees.push_back(Game::TreePos{c, r, Game::TreeKind::Tree1});
+        }
+    }
     if (version >= 8) {
         readWeedPositions(in, ws.farmWeeds);
     } else {
