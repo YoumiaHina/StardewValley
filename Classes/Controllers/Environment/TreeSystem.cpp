@@ -12,6 +12,7 @@ using namespace Game;
 namespace Controllers {
 
 namespace {
+    // 随机选择树木种类（用于生成时的外观差异）。
     Game::TreeKind randomTreeKind() {
         static std::mt19937 rng{ std::random_device{}() };
         static std::uniform_int_distribution<int> dist(0, 1);
@@ -35,6 +36,7 @@ bool TreeSystem::spawnFromTileWithKind(int c, int r, const Vec2& tileCenter,
     if (!_root) return false;
     float s = static_cast<float>(tileSize);
     Vec2 footCenter = tileCenter + Vec2(0, -s * 0.5f);
+    if (map && map->inBuildingArea(footCenter)) return false;
     bool blocked = map && map->collides(footCenter, 8.0f);
     if (blocked) return false;
     int seasonIndex = Game::globalState().seasonIndex;
@@ -79,6 +81,76 @@ void TreeSystem::spawnRandom(int count, int cols, int rows,
         long long key = (static_cast<long long>(r) << 32) | static_cast<unsigned long long>(c);
         _trees[key] = tree;
     }
+}
+
+void TreeSystem::generateInitial(int cols, int rows,
+                                 const std::function<Vec2(int,int)>& tileToWorld,
+                                 MapBase* map, int tileSize,
+                                 const std::function<bool(int,int)>& isBlockedTile,
+                                 const std::function<bool(int,int)>& isOccupiedTile,
+                                 const std::function<void(int,int)>& markOccupiedTile) {
+    if (!_root) return;
+    auto& ws = Game::globalState();
+    if (!ws.farmTrees.empty()) return;
+    int count = (cols * rows) / 40;
+    if (count <= 0) return;
+    std::mt19937 rng(static_cast<unsigned>(std::time(nullptr)));
+    std::uniform_int_distribution<int> distC(0, cols - 1);
+    std::uniform_int_distribution<int> distR(0, rows - 1);
+    int created = 0;
+    int attempts = 0;
+    int maxAttempts = std::max(count * 10, 64);
+    while (created < count && attempts < maxAttempts) {
+        attempts++;
+        int c = distC(rng);
+        int r = distR(rng);
+        if (c < 0 || r < 0 || c >= cols || r >= rows) continue;
+        if (isBlockedTile && isBlockedTile(c, r)) continue;
+        if (isOccupiedTile && isOccupiedTile(c, r)) continue;
+        Vec2 center = tileToWorld ? tileToWorld(c, r) : Vec2::ZERO;
+        auto kind = randomTreeKind();
+        if (!spawnFromTileWithKind(c, r, center, map, tileSize, kind)) continue;
+        ws.farmTrees.push_back(Game::TreePos{c, r, kind});
+        if (markOccupiedTile) markOccupiedTile(c, r);
+        created++;
+    }
+}
+
+int TreeSystem::regrowNightlyWorldOnly(int cols, int rows,
+                                      const std::function<Game::TileType(int,int)>& getTile,
+                                      const std::function<bool(int,int)>& isOccupiedTile,
+                                      const std::function<void(int,int)>& markOccupiedTile) {
+    auto& ws = Game::globalState();
+    if (cols <= 0 || rows <= 0) return 0;
+    int area = cols * rows;
+    int thresholdDiv = GameConfig::FARM_TREE_REGEN_THRESHOLD_DIV;
+    if (thresholdDiv <= 0) thresholdDiv = 1;
+    int threshold = std::max(1, area / thresholdDiv);
+    if (static_cast<int>(ws.farmTrees.size()) >= threshold) return 0;
+
+    int target = GameConfig::FARM_NIGHTLY_REGEN_COUNT;
+    if (target <= 0) return 0;
+
+    std::mt19937 rng(static_cast<unsigned>(std::time(nullptr)));
+    std::uniform_int_distribution<int> distC(0, cols - 1);
+    std::uniform_int_distribution<int> distR(0, rows - 1);
+
+    int created = 0;
+    int attempts = 0;
+    int maxAttempts = std::max(target * 30, 64);
+    while (created < target && attempts < maxAttempts) {
+        attempts++;
+        int c = distC(rng);
+        int r = distR(rng);
+        if (c < 0 || r < 0 || c >= cols || r >= rows) continue;
+        if (getTile && getTile(c, r) != Game::TileType::Soil) continue;
+        if (isOccupiedTile && isOccupiedTile(c, r)) continue;
+        auto kind = randomTreeKind();
+        ws.farmTrees.push_back(Game::TreePos{c, r, kind});
+        if (markOccupiedTile) markOccupiedTile(c, r);
+        created++;
+    }
+    return created;
 }
 
 Game::Tree* TreeSystem::findTreeAt(int c, int r) const {

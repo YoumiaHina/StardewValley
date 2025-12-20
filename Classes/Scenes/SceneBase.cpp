@@ -1,14 +1,49 @@
 #include "Scenes/SceneBase.h"
 #include "cocos2d.h"
 #include "Game/Tool/ToolFactory.h"
+#include <algorithm>
 #include <string>
 #include "Scenes/RoomScene.h"
 #include "Game/Chest.h"
+#include "Game/Map/RoomMap.h"
 #include "Controllers/Systems/FishingController.h"
 #include "Controllers/Systems/WeatherController.h"
 #include "Game/Tool/FishingRod.h"
 
 using namespace cocos2d;
+
+namespace {
+
+cocos2d::Vec2 computeRoomBedCenter() {
+    auto* roomMap = Game::RoomMap::create("Maps/farm_room/farm_room.tmx");
+    if (roomMap) {
+        const auto& beds = roomMap->bedRects();
+        cocos2d::Rect bedRect;
+        if (!beds.empty()) {
+            float minX = beds[0].getMinX(), minY = beds[0].getMinY();
+            float maxX = beds[0].getMaxX(), maxY = beds[0].getMaxY();
+            for (std::size_t i = 1; i < beds.size(); ++i) {
+                minX = std::min(minX, beds[i].getMinX());
+                minY = std::min(minY, beds[i].getMinY());
+                maxX = std::max(maxX, beds[i].getMaxX());
+                maxY = std::max(maxY, beds[i].getMaxY());
+            }
+            bedRect = cocos2d::Rect(minX, minY, maxX - minX, maxY - minY);
+        } else {
+            cocos2d::Size cs = roomMap->getContentSize();
+            cocos2d::Rect roomRect(0, 0, cs.width, cs.height);
+            float bedW = 120.0f;
+            float bedH = 60.0f;
+            bedRect = cocos2d::Rect(roomRect.getMinX() + 24.0f,
+                                    roomRect.getMaxY() - bedH - 24.0f,
+                                    bedW, bedH);
+        }
+        return cocos2d::Vec2(bedRect.getMidX(), bedRect.getMidY());
+    }
+    return cocos2d::Vec2(60.0f, 60.0f);
+}
+
+} // namespace
 
 bool SceneBase::initBase(float worldScale, bool buildCraftPanel, bool enableToolOnSpace, bool enableToolOnLeftClick) {
     if (!Scene::init()) return false;
@@ -17,6 +52,14 @@ bool SceneBase::initBase(float worldScale, bool buildCraftPanel, bool enableTool
     _worldNode = Node::create();
     _worldNode->setScale(worldScale);
     this->addChild(_worldNode, 0);
+
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    auto origin = Director::getInstance()->getVisibleOrigin();
+    _dayNightOverlay = LayerColor::create(Color4B(0, 0, 0, 0), visibleSize.width, visibleSize.height);
+    if (_dayNightOverlay) {
+        _dayNightOverlay->setPosition(origin);
+        this->addChild(_dayNightOverlay, 1);
+    }
 
     // 地图控制器由子类提供
     _mapController = createMapController(_worldNode);
@@ -134,15 +177,43 @@ void SceneBase::update(float dt) {
         ws.lastPlayerX = p.x;
         ws.lastPlayerY = p.y;
     }
-    if (ws.hp <= 0) {
+    if (ws.hp <= 0 || ws.pendingPassOut) {
+        ws.pendingPassOut = false;
+        cocos2d::Vec2 bed = computeRoomBedCenter();
+        ws.lastScene = static_cast<int>(Game::SceneKind::Room);
+        ws.lastPlayerX = bed.x;
+        ws.lastPlayerY = bed.y;
         ws.gold = ws.gold > 0 ? ws.gold / 2 : 0;
         ws.hp = ws.maxHp;
         auto room = RoomScene::create();
         auto trans = TransitionFade::create(0.6f, room);
         Director::getInstance()->replaceScene(trans);
+        if (_stateController) {
+            _stateController->sleepToNextMorning();
+        }
         return;
     }
     _stateController->update(dt);
+    if (_dayNightOverlay) {
+        if (_mapController && _mapController->supportsWeather()) {
+            int minutes = ws.timeHour * 60 + ws.timeMinute;
+            const int start = 17 * 60 + 30;
+            const int end = 19 * 60;
+            const int maxOpacity = 120;
+            int opacity = 0;
+            if (minutes >= end) {
+                opacity = maxOpacity;
+            } else if (minutes > start) {
+                float t = static_cast<float>(minutes - start) / static_cast<float>(end - start);
+                opacity = static_cast<int>(static_cast<float>(maxOpacity) * t);
+            }
+            _dayNightOverlay->setOpacity(static_cast<GLubyte>(std::max(0, std::min(255, opacity))));
+            _dayNightOverlay->setVisible(true);
+        } else {
+            _dayNightOverlay->setOpacity(0);
+            _dayNightOverlay->setVisible(false);
+        }
+    }
     bool blockMove = ws.fishingActive
                      || (_uiController && (_uiController->isDialogueVisible()
                                            || _uiController->isNpcSocialVisible()

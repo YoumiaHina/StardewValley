@@ -1,4 +1,5 @@
 #include "Controllers/Systems/WeatherController.h"
+#include "Controllers/Systems/RainLayer.h"
 #include "Controllers/Map/IMapController.h"
 #include "Controllers/Input/PlayerController.h"
 #include "Game/WorldState.h"
@@ -13,7 +14,7 @@ WeatherController::WeatherController(IMapController* map, cocos2d::Node* worldNo
     _appliedDayOfSeason = ws.dayOfSeason;
 }
 
-void WeatherController::update(float) {
+void WeatherController::update(float dt) {
     auto& ws = Game::globalState();
     bool isNewDay = (ws.seasonIndex != _appliedSeasonIndex) || (ws.dayOfSeason != _appliedDayOfSeason);
 
@@ -23,6 +24,13 @@ void WeatherController::update(float) {
         _appliedSeasonIndex = ws.seasonIndex;
         _appliedDayOfSeason = ws.dayOfSeason;
         syncFromWorldState(isNewDay || _weather == WeatherKind::Rainy);
+    }
+
+    if (_weather == WeatherKind::Rainy && _map && _worldNode && _map->supportsWeather()) {
+        if (_rainLayer) {
+            _rainLayer->setPosition(_map->getOrigin());
+            _rainLayer->setArea(_map->getContentSize());
+        }
     }
 }
 
@@ -51,12 +59,15 @@ void WeatherController::syncFromWorldState(bool forceApplyRainWatering) {
     if (_weather == WeatherKind::Rainy) {
         ensureDimLayer();
         if (_dimLayer) _dimLayer->setVisible(true);
+        ensureRainLayer();
+        if (_rainLayer) _rainLayer->setActive(true);
 
         if (forceApplyRainWatering) {
             _map->setAllPlantableTilesWatered();
         }
     } else {
         if (_dimLayer) _dimLayer->setVisible(false);
+        if (_rainLayer) _rainLayer->setActive(false);
     }
 }
 
@@ -69,6 +80,17 @@ void WeatherController::ensureDimLayer() {
     _dimLayer->setAnchorPoint(cocos2d::Vec2(0, 0));
     _dimLayer->setPosition(_map->getOrigin());
     _worldNode->addChild(_dimLayer, 999);
+}
+
+void WeatherController::ensureRainLayer() {
+    if (_rainLayer || !_worldNode || !_map) return;
+    cocos2d::Size s = _map->getContentSize();
+    if (s.width <= 0.0f || s.height <= 0.0f) return;
+    _rainLayer = RainLayer::create(s);
+    if (!_rainLayer) return;
+    _rainLayer->setAnchorPoint(cocos2d::Vec2(0, 0));
+    _rainLayer->setPosition(_map->getOrigin());
+    _worldNode->addChild(_rainLayer, 1000);
 }
 
 } // namespace Controllers

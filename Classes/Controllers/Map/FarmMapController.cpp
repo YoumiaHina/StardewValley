@@ -66,27 +66,6 @@ void FarmMapController::init() {
     if (ws.farmTiles.empty()) {
         _tiles.assign(_cols * _rows, Game::TileType::Soil);
         applyStaticNotSoilMask();
-        int cx = _cols / 2;
-        int cy = _rows / 2;
-        auto safe = [cx, cy](int c, int r){ return std::abs(c - cx) <= 4 && std::abs(r - cy) <= 4; };
-        std::mt19937 rng(static_cast<unsigned>(std::time(nullptr)));
-        std::uniform_int_distribution<int> distC(0, _cols - 1);
-        std::uniform_int_distribution<int> distR(0, _rows - 1);
-        auto placeIfSoil = [this, &safe](int c, int r, Game::TileType t){
-            if (!inBounds(c,r)) return;
-            if (safe(c,r)) return;
-            if (getTile(c,r) != Game::TileType::Soil) return;
-            if (t == Game::TileType::Tree && _farmMap) {
-                auto center = this->tileToWorld(c, r);
-                cocos2d::Vec2 footCenter = center + cocos2d::Vec2(0, -static_cast<float>(GameConfig::TILE_SIZE) * 0.5f);
-                if (_farmMap->inBuildingArea(footCenter)) return;
-            }
-            setTile(c, r, t);
-        };
-        int rocks = (_cols * _rows) / 22;
-        int trees = (_cols * _rows) / 40;
-        for (int i = 0; i < rocks; ++i) { placeIfSoil(distC(rng), distR(rng), Game::TileType::Rock); }
-        for (int i = 0; i < trees; ++i) { placeIfSoil(distC(rng), distR(rng), Game::TileType::Tree); }
         ws.farmTiles = _tiles;
         ws.farmCols = _cols;
         ws.farmRows = _rows;
@@ -185,9 +164,21 @@ void FarmMapController::init() {
     refreshDropsVisuals();
     refreshCropsVisuals();
 
+    std::unordered_set<long long> occupied;
+    occupied.reserve(static_cast<std::size_t>(_cols * _rows) / 8);
+    auto keyOf = [](int c, int r) -> long long {
+        return (static_cast<long long>(r) << 32) | static_cast<unsigned long long>(c);
+    };
+    auto markOccupied = [&occupied, &keyOf](int c, int r) {
+        occupied.insert(keyOf(c, r));
+    };
+    for (const auto& tp : ws.farmTrees) markOccupied(tp.c, tp.r);
+    for (const auto& rp : ws.farmRocks) markOccupied(rp.c, rp.r);
+    for (const auto& wp : ws.farmWeeds) markOccupied(wp.c, wp.r);
+
     if (_treeSystem && _treeSystem->isEmpty()) {
+        auto treeSystemConcrete = static_cast<Controllers::TreeSystem*>(_treeSystem);
         if (!ws.farmTrees.empty()) {
-            auto treeSystemConcrete = static_cast<Controllers::TreeSystem*>(_treeSystem);
             for (const auto& tp : ws.farmTrees) {
                 auto center = tileToWorld(tp.c, tp.r);
                 if (treeSystemConcrete) {
@@ -197,61 +188,31 @@ void FarmMapController::init() {
                 }
             }
         } else {
-            std::vector<Game::TreePos> saved;
-            int created = 0;
-            auto treeSystemConcrete = static_cast<Controllers::TreeSystem*>(_treeSystem);
-            for (int r = 0; r < _rows; ++r) {
-                for (int c = 0; c < _cols; ++c) {
-                    if (getTile(c, r) == Game::TileType::Tree) {
-                        auto center = tileToWorld(c, r);
-                        Vec2 footCenter = center + Vec2(0, -static_cast<float>(GameConfig::TILE_SIZE) * 0.5f);
-                        bool skip = _farmMap && _farmMap->inBuildingArea(footCenter);
-                        if (skip) continue;
-                        if (_treeSystem->spawnFromTile(c, r, center, _farmMap, GameConfig::TILE_SIZE)) {
-                            setTile(c, r, Game::TileType::Soil);
-                            Game::TreeKind kind = Game::TreeKind::Tree1;
-                            if (treeSystemConcrete) {
-                                auto tree = treeSystemConcrete->findTreeAt(c, r);
-                                if (tree) kind = tree->kind();
-                            }
-                            saved.push_back(Game::TreePos{c, r, kind});
-                            created++;
-                        }
-                    }
-                }
-            }
-            if (created == 0) {
-                int cx = _cols / 2;
-                int cy = _rows / 2;
-                auto safe = [this, cx, cy](int c, int r){
-                    if (std::abs(c - cx) <= 4 && std::abs(r - cy) <= 4) return true;
-                    if (!inBounds(c, r)) return true;
-                    auto t = getTile(c, r);
-                    if (t == Game::TileType::NotSoil) return true;
-                    if (_farmMap) {
-                        auto center = this->tileToWorld(c, r);
-                        Vec2 footCenter = center + Vec2(0, -static_cast<float>(GameConfig::TILE_SIZE) * 0.5f);
-                        if (_farmMap->inBuildingArea(footCenter)) return true;
-                    }
-                    return false;
-                };
-                int trees = (_cols * _rows) / 40;
-                _treeSystem->spawnRandom(trees, _cols, _rows,
+            int cx = _cols / 2;
+            int cy = _rows / 2;
+            auto isBlocked = [this, cx, cy](int c, int r) {
+                if (std::abs(c - cx) <= 4 && std::abs(r - cy) <= 4) return true;
+                if (!inBounds(c, r)) return true;
+                auto t = getTile(c, r);
+                return (t == Game::TileType::NotSoil);
+            };
+            auto isOccupied = [&occupied, &keyOf](int c, int r) {
+                return occupied.count(keyOf(c, r)) != 0;
+            };
+            if (treeSystemConcrete) {
+                treeSystemConcrete->generateInitial(
+                    _cols, _rows,
                     [this](int c, int r){ return this->tileToWorld(c, r); },
                     _farmMap, GameConfig::TILE_SIZE,
-                    [safe](int c, int r){ return safe(c, r); }
+                    isBlocked, isOccupied, markOccupied
                 );
-                if (treeSystemConcrete) {
-                    saved = treeSystemConcrete->getAllTreeTiles();
-                }
             }
-            ws.farmTrees = saved;
         }
     }
 
     if (_rockSystem && _rockSystem->isEmpty()) {
+        auto rockSystemConcrete = static_cast<Controllers::RockSystem*>(_rockSystem);
         if (!ws.farmRocks.empty()) {
-            auto rockSystemConcrete = static_cast<Controllers::RockSystem*>(_rockSystem);
             for (const auto& rp : ws.farmRocks) {
                 auto center = tileToWorld(rp.c, rp.r);
                 if (rockSystemConcrete) {
@@ -261,33 +222,37 @@ void FarmMapController::init() {
                 }
             }
         } else {
-            std::vector<Game::RockPos> savedRocks;
-            auto rockSystemConcrete = static_cast<Controllers::RockSystem*>(_rockSystem);
-            for (int r = 0; r < _rows; ++r) {
-                for (int c = 0; c < _cols; ++c) {
-                    if (getTile(c, r) == Game::TileType::Rock) {
-                        auto center = tileToWorld(c, r);
-                        if (_rockSystem->spawnFromTile(c, r, center, _farmMap, GameConfig::TILE_SIZE)) {
-                            setTile(c, r, Game::TileType::Soil);
-                            Game::RockKind kind = Game::RockKind::Rock1;
-                            if (rockSystemConcrete) {
-                                auto rock = rockSystemConcrete->findRockAt(c, r);
-                                if (rock) kind = rock->kind();
-                            }
-                            savedRocks.push_back(Game::RockPos{c, r, kind});
-                        }
-                    }
-                }
+            int cx = _cols / 2;
+            int cy = _rows / 2;
+            auto isBlocked = [this, cx, cy](int c, int r) {
+                if (std::abs(c - cx) <= 4 && std::abs(r - cy) <= 4) return true;
+                if (!inBounds(c, r)) return true;
+                auto t = getTile(c, r);
+                return (t == Game::TileType::NotSoil);
+            };
+            auto isOccupied = [&occupied, &keyOf](int c, int r) {
+                return occupied.count(keyOf(c, r)) != 0;
+            };
+            if (rockSystemConcrete) {
+                rockSystemConcrete->generateInitial(
+                    _cols, _rows,
+                    [this](int c, int r){ return this->tileToWorld(c, r); },
+                    _farmMap, GameConfig::TILE_SIZE,
+                    isBlocked, isOccupied, markOccupied
+                );
             }
-            ws.farmRocks = savedRocks;
         }
     }
 
     if (_weedSystem && _weedSystem->isEmpty()) {
         auto weedSystemConcrete = static_cast<Controllers::WeedSystem*>(_weedSystem);
-        auto rockSystemConcrete = static_cast<Controllers::RockSystem*>(_rockSystem);
         if (!ws.farmWeeds.empty()) {
+            auto treeSystemConcrete = static_cast<Controllers::TreeSystem*>(_treeSystem);
+            auto rockSystemConcrete = static_cast<Controllers::RockSystem*>(_rockSystem);
             for (const auto& wp : ws.farmWeeds) {
+                if (treeSystemConcrete && treeSystemConcrete->findTreeAt(wp.c, wp.r)) {
+                    continue;
+                }
                 if (rockSystemConcrete && rockSystemConcrete->findRockAt(wp.c, wp.r)) {
                     continue;
                 }
@@ -297,25 +262,23 @@ void FarmMapController::init() {
         } else {
             int cx = _cols / 2;
             int cy = _rows / 2;
-            auto safe = [this, cx, cy, rockSystemConcrete](int c, int r){
+            auto isBlocked = [this, cx, cy](int c, int r) {
                 if (std::abs(c - cx) <= 4 && std::abs(r - cy) <= 4) return true;
                 if (!inBounds(c, r)) return true;
                 auto t = getTile(c, r);
-                if (t == Game::TileType::NotSoil) return true;
-                if (rockSystemConcrete && rockSystemConcrete->findRockAt(c, r)) return true;
-                if (_farmMap) {
-                    auto center = this->tileToWorld(c, r);
-                    Vec2 footCenter = center + Vec2(0, -static_cast<float>(GameConfig::TILE_SIZE) * 0.5f);
-                    if (_farmMap->inBuildingArea(footCenter) || _farmMap->inWallArea(footCenter)) return true;
-                }
-                return false;
+                return (t == Game::TileType::NotSoil);
             };
-            int weeds = (_cols * _rows) / 35;
-            _weedSystem->spawnRandom(weeds, _cols, _rows,
-                [this](int c, int r){ return this->tileToWorld(c, r); },
-                _farmMap, GameConfig::TILE_SIZE,
-                [safe](int c, int r){ return safe(c, r); }
-            );
+            auto isOccupied = [&occupied, &keyOf](int c, int r) {
+                return occupied.count(keyOf(c, r)) != 0;
+            };
+            if (weedSystemConcrete) {
+                weedSystemConcrete->generateInitial(
+                    _cols, _rows,
+                    [this](int c, int r){ return this->tileToWorld(c, r); },
+                    _farmMap, GameConfig::TILE_SIZE,
+                    isBlocked, isOccupied, markOccupied
+                );
+            }
         }
         if (weedSystemConcrete) {
             ws.farmWeeds = weedSystemConcrete->getAllWeedTiles();

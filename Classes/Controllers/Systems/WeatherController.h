@@ -11,6 +11,8 @@ namespace Controllers {
 
 class IMapController;
 class PlayerController;
+class RainLayer;
+
 
 enum class WeatherKind {
     Sunny = 0,
@@ -34,12 +36,14 @@ public:
 private:
     void syncFromWorldState(bool forceApplyRainWatering);
     void ensureDimLayer();
+    void ensureRainLayer();
 
 private:
     IMapController* _map = nullptr;
     cocos2d::Node* _worldNode = nullptr;
     PlayerController* _playerController = nullptr;
     cocos2d::LayerColor* _dimLayer = nullptr;
+    RainLayer* _rainLayer = nullptr;
 
     WeatherKind _weather = WeatherKind::Sunny;
     int _appliedSeasonIndex = -1;

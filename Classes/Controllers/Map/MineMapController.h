@@ -1,6 +1,8 @@
 /**
- * MineMapController: 矿洞地图控制器（120层，三阶段主题）。
- * 管理楼层、主题、地形绘制、楼梯/电梯、障碍与可视。
+ * MineMapController：矿洞地图控制器。
+ * - 职责：管理矿洞楼层与主题、加载入口/楼层 TMX、提供瓦片/坐标换算、碰撞与位置夹紧、楼梯/电梯/出口等交互区域判定，并转发掉落与环境障碍系统刷新。
+ * - 职责边界：不在此处实现采矿/掉落的业务规则细节；矿石/楼梯等环境实体状态由对应 System 作为唯一来源维护。
+ * - 协作对象：通过 IMapController 接口与 PlayerController/ToolSystem/DropSystem，以及 MineralSystem/StairSystem 等模块协作。
  */
 #pragma once
 
@@ -17,12 +19,6 @@
 
 namespace Controllers {
 
-/**
- * MineMapController：矿洞地图控制器。
- * - 职责：管理矿洞楼层与主题、加载入口/楼层 TMX、提供瓦片/坐标换算、碰撞与位置夹紧、楼梯/电梯/出口等交互区域判定，并转发掉落与环境障碍系统刷新。
- * - 职责边界：不在此处实现采矿/掉落的业务规则细节；矿石/楼梯等环境实体状态由对应 System 作为唯一来源维护。
- * - 协作对象：通过 IMapController 接口与 PlayerController/ToolSystem/DropSystem，以及 MineralSystem/StairSystem 等模块协作。
- */
 class MineMapController : public Controllers::IMapController {
 public:
     enum class Theme { Rock, Ice, Lava };

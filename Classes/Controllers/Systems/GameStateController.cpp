@@ -1,8 +1,12 @@
 #include "Controllers/Systems/GameStateController.h"
 #include "Controllers/Systems/AnimalSystem.h"
+#include "Controllers/Environment/TreeSystem.h"
+#include "Controllers/Environment/RockSystem.h"
+#include "Controllers/Environment/WeedSystem.h"
 #include "Game/GameConfig.h"
 #include "Game/WorldState.h"
 #include "Game/Save/SaveSystem.h"
+#include <unordered_set>
 
 namespace Controllers {
 
@@ -25,6 +29,10 @@ static bool ensureWeatherChosenForToday() {
 
 void GameStateController::update(float dt) {
     auto &ws = Game::globalState();
+    if (ws.pendingPassOut) {
+        if (_ui) _ui->refreshHUD();
+        return;
+    }
     ensureWeatherChosenForToday();
     bool timeChanged = false;
     bool dayChanged = false;
@@ -36,10 +44,11 @@ void GameStateController::update(float dt) {
             ws.timeMinute = 0;
             ws.timeHour += 1;
             if (ws.timeHour >= 24) {
-                ws.timeHour = 0;
-                ws.dayOfSeason += 1;
-                if (ws.dayOfSeason > 30) { ws.dayOfSeason = 1; ws.seasonIndex = (ws.seasonIndex + 1) % 4; }
-                dayChanged = true;
+                ws.timeHour = 24;
+                ws.pendingPassOut = true;
+                timeChanged = true;
+                ws.timeAccum = 0.0f;
+                break;
             }
         }
         timeChanged = true;
@@ -83,6 +92,37 @@ void GameStateController::sleepToNextMorning() {
         _crop->advanceCropsDaily(nullptr);
     }
     advanceAnimalsDailyWorldOnly();
+    if (!ws.farmTiles.empty() && ws.farmCols > 0 && ws.farmRows > 0) {
+        const int cols = ws.farmCols;
+        const int rows = ws.farmRows;
+
+        auto keyOf = [](int c, int r) -> long long {
+            return (static_cast<long long>(r) << 32) | static_cast<unsigned long long>(c);
+        };
+
+        std::unordered_set<long long> occupied;
+        occupied.reserve(static_cast<size_t>(ws.farmTrees.size() + ws.farmRocks.size() + ws.farmWeeds.size()) + 16u);
+        for (const auto& tp : ws.farmTrees) occupied.insert(keyOf(tp.c, tp.r));
+        for (const auto& rp : ws.farmRocks) occupied.insert(keyOf(rp.c, rp.r));
+        for (const auto& wp : ws.farmWeeds) occupied.insert(keyOf(wp.c, wp.r));
+
+        auto getTile = [&ws, cols, rows](int c, int r) -> Game::TileType {
+            if (c < 0 || r < 0 || c >= cols || r >= rows) return Game::TileType::NotSoil;
+            size_t idx = static_cast<size_t>(r) * static_cast<size_t>(cols) + static_cast<size_t>(c);
+            if (idx >= ws.farmTiles.size()) return Game::TileType::NotSoil;
+            return ws.farmTiles[idx];
+        };
+        auto isOccupiedTile = [&occupied, &keyOf](int c, int r) -> bool {
+            return occupied.count(keyOf(c, r)) != 0;
+        };
+        auto markOccupiedTile = [&occupied, &keyOf](int c, int r) {
+            occupied.insert(keyOf(c, r));
+        };
+
+        TreeSystem::regrowNightlyWorldOnly(cols, rows, getTile, isOccupiedTile, markOccupiedTile);
+        RockSystem::regrowNightlyWorldOnly(cols, rows, getTile, isOccupiedTile, markOccupiedTile);
+        WeedSystem::regrowNightlyWorldOnly(cols, rows, getTile, isOccupiedTile, markOccupiedTile);
+    }
     if (_ui) _ui->refreshHUD();
     std::string path = Game::currentSavePath();
     if (path.empty()) {

@@ -37,8 +37,8 @@ public:
     cocos2d::Vec2 doorToRoomCenter() const;
     cocos2d::Vec2 doorToBeachCenter() const;
     cocos2d::Vec2 doorToTownCenter() const;
-    bool inBuildingArea(const cocos2d::Vec2& p) const;
-    bool inWallArea(const cocos2d::Vec2& p) const;
+    bool inBuildingArea(const cocos2d::Vec2& p) const override;
+    bool inWallArea(const cocos2d::Vec2& p) const override;
     void setDebugVisible(bool visible);
 
 private:

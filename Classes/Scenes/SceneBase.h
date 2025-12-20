@@ -76,4 +76,5 @@ protected:
 
 private:
     std::vector<std::function<void(float)>> _extraUpdates;
+    cocos2d::LayerColor* _dayNightOverlay = nullptr;
 };

@@ -149,6 +149,8 @@ struct WorldState {
     float lastPlayerY = 0.0f;
     int lastMineFloor = 0;
     int lastSaveSlot = 1;
+
+    bool pendingPassOut = false;
 };
 
 // 获取全局状态（惰性初始化由调用方保证）
