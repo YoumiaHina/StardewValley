@@ -61,6 +61,16 @@ public:
     // 养殖经验：一次动物产物生成应获得的经验。
     int xpForAnimalProduct(Game::ItemType product, int qty) const;
 
+    // 挖矿加成：矿石/石头掉落时根据技能树概率额外 +1 掉落数量。
+    int adjustMiningDropQuantityForMining(Game::ItemType drop, int baseQty) const;
+    // 挖矿经验：一次成功挖碎矿石/石头应获得的经验。
+    int xpForMiningBreak(Game::ItemType drop, int baseQty) const;
+
+    // 战斗加成：击杀怪物时根据技能树概率额外获得金币（在基础奖励上追加）。
+    long long adjustGoldRewardForCombat(long long baseGold) const;
+    // 战斗经验：一次击杀怪物应获得的经验。
+    int xpForCombatKill(long long baseGold) const;
+
 private:
     SkillTreeSystem() = default;
     std::size_t indexFromType(SkillTreeType type) const;
@@ -69,6 +79,8 @@ private:
     float forestryExtraWoodChance() const;
     float fishingExtraFishChance() const;
     float husbandryExtraProductChance() const;
+    float miningExtraDropChance() const;
+    float combatExtraGoldChance() const;
 };
 
 }

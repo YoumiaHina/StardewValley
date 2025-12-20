@@ -21,6 +21,8 @@ std::size_t SkillTreeSystem::indexFromType(SkillTreeType type) const {
         case SkillTreeType::AnimalHusbandry: return 1;
         case SkillTreeType::Forestry: return 2;
         case SkillTreeType::Fishing: return 3;
+        case SkillTreeType::Mining: return 4;
+        case SkillTreeType::Combat: return 5;
     }
     return 0;
 }
@@ -188,28 +190,60 @@ float SkillTreeSystem::husbandryExtraProductChance() const {
     return chance;
 }
 
+float SkillTreeSystem::miningExtraDropChance() const {
+    int lvl = level(SkillTreeType::Mining);
+    float chance = std::min(0.22f, 0.018f * static_cast<float>(lvl));
+    if (isNodeUnlocked(SkillTreeType::Mining, 501)) {
+        chance += 0.12f;
+    }
+    if (chance < 0.0f) chance = 0.0f;
+    if (chance > 0.60f) chance = 0.60f;
+    return chance;
+}
+
+float SkillTreeSystem::combatExtraGoldChance() const {
+    int lvl = level(SkillTreeType::Combat);
+    float chance = std::min(0.20f, 0.015f * static_cast<float>(lvl));
+    if (isNodeUnlocked(SkillTreeType::Combat, 601)) {
+        chance += 0.12f;
+    }
+    if (chance < 0.0f) chance = 0.0f;
+    if (chance > 0.60f) chance = 0.60f;
+    return chance;
+}
+
 std::string SkillTreeSystem::bonusDescription(SkillTreeType type) const {
     if (type == SkillTreeType::Farming) {
         float c = farmingExtraProduceChance();
         int pct = static_cast<int>(c * 100.0f + 0.5f);
-        return std::string("收获额外+1概率 ") + std::to_string(pct) + "%";
+        return std::string("Chance of +1 harvest: ") + std::to_string(pct) + "%";
     }
     if (type == SkillTreeType::Forestry) {
         float c = forestryExtraWoodChance();
         int pct = static_cast<int>(c * 100.0f + 0.5f);
-        return std::string("木材额外+1概率 ") + std::to_string(pct) + "%";
+        return std::string("Chance of +1 wood: ") + std::to_string(pct) + "%";
     }
     if (type == SkillTreeType::Fishing) {
         float c = fishingExtraFishChance();
         int pct = static_cast<int>(c * 100.0f + 0.5f);
-        return std::string("额外+1鱼概率 ") + std::to_string(pct) + "%";
+        return std::string("Chance of +1 fish: ") + std::to_string(pct) + "%";
     }
     if (type == SkillTreeType::AnimalHusbandry) {
         float c = husbandryExtraProductChance();
         int pct = static_cast<int>(c * 100.0f + 0.5f);
-        return std::string("产物额外+1概率 ") + std::to_string(pct) + "%";
+        return std::string("Chance of +1 product: ") + std::to_string(pct) + "%";
     }
-    return std::string("暂无加成");
+    if (type == SkillTreeType::Mining) {
+        float c = miningExtraDropChance();
+        int pct = static_cast<int>(c * 100.0f + 0.5f);
+        return std::string("Chance of +1 mining drop: ") + std::to_string(pct) + "%";
+    }
+    if (type == SkillTreeType::Combat) {
+        float c = combatExtraGoldChance();
+        int pct = static_cast<int>(c * 100.0f + 0.5f);
+        return std::string("Chance of bonus gold: ") + std::to_string(pct) + "%";
+    }
+    return std::string("No bonus");
 }
 
 int SkillTreeSystem::adjustHarvestQuantityForFarming(Game::ItemType, int baseQty) const {
@@ -286,6 +320,47 @@ int SkillTreeSystem::adjustAnimalProductQuantityForHusbandry(Game::ItemType, int
 int SkillTreeSystem::xpForAnimalProduct(Game::ItemType, int qty) const {
     int n = std::max(0, qty);
     return 10 + n * 2;
+}
+
+int SkillTreeSystem::adjustMiningDropQuantityForMining(Game::ItemType, int baseQty) const {
+    if (baseQty <= 0) return baseQty;
+    float chance = miningExtraDropChance();
+    if (chance <= 0.0001f) return baseQty;
+
+    static std::mt19937 rng{ std::random_device{}() };
+    std::uniform_real_distribution<float> dist(0.0f, 1.0f);
+    float roll = dist(rng);
+    if (roll < chance) {
+        return baseQty + 1;
+    }
+    return baseQty;
+}
+
+int SkillTreeSystem::xpForMiningBreak(Game::ItemType, int baseQty) const {
+    int qty = std::max(0, baseQty);
+    return 10 + qty * 1;
+}
+
+long long SkillTreeSystem::adjustGoldRewardForCombat(long long baseGold) const {
+    if (baseGold <= 0) return baseGold;
+    float chance = combatExtraGoldChance();
+    if (chance <= 0.0001f) return baseGold;
+
+    static std::mt19937 rng{ std::random_device{}() };
+    std::uniform_real_distribution<float> dist(0.0f, 1.0f);
+    float roll = dist(rng);
+    if (roll < chance) {
+        long long bonus = std::max(1LL, baseGold / 2);
+        if (isNodeUnlocked(SkillTreeType::Combat, 602)) {
+            bonus += std::max(1LL, baseGold / 2);
+        }
+        return baseGold + bonus;
+    }
+    return baseGold;
+}
+
+int SkillTreeSystem::xpForCombatKill(long long) const {
+    return 16;
 }
 
 }

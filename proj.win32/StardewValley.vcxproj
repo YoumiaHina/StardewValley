@@ -251,6 +251,8 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClCompile Include="..\Classes\Game\SkillTree\AnimalHusbandrySkillTree.cpp" />
     <ClCompile Include="..\Classes\Game\SkillTree\ForestrySkillTree.cpp" />
     <ClCompile Include="..\Classes\Game\SkillTree\FishingSkillTree.cpp" />
+    <ClCompile Include="..\Classes\Game\SkillTree\MiningSkillTree.cpp" />
+    <ClCompile Include="..\Classes\Game\SkillTree\CombatSkillTree.cpp" />
     <ClCompile Include="..\Classes\Game\SkillTree\SkillTreeSystem.cpp" />
     <ClCompile Include="..\Classes\Game\Crops\crop\CropBase.cpp" />
     <ClCompile Include="..\Classes\Game\Crops\crop\ParsnipCrop.cpp" />

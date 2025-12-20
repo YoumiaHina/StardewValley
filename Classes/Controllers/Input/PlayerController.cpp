@@ -98,12 +98,16 @@ void PlayerController::registerCommonInputHandlers(
             if (code == EventKeyboard::KeyCode::KEY_1
                 || code == EventKeyboard::KeyCode::KEY_2
                 || code == EventKeyboard::KeyCode::KEY_3
-                || code == EventKeyboard::KeyCode::KEY_4) {
+                || code == EventKeyboard::KeyCode::KEY_4
+                || code == EventKeyboard::KeyCode::KEY_5
+                || code == EventKeyboard::KeyCode::KEY_6) {
                 auto& skill = Game::SkillTreeSystem::getInstance();
                 Game::SkillTreeType type = Game::SkillTreeType::Farming;
                 if (code == EventKeyboard::KeyCode::KEY_2) type = Game::SkillTreeType::AnimalHusbandry;
                 if (code == EventKeyboard::KeyCode::KEY_3) type = Game::SkillTreeType::Forestry;
                 if (code == EventKeyboard::KeyCode::KEY_4) type = Game::SkillTreeType::Fishing;
+                if (code == EventKeyboard::KeyCode::KEY_5) type = Game::SkillTreeType::Mining;
+                if (code == EventKeyboard::KeyCode::KEY_6) type = Game::SkillTreeType::Combat;
 
                 int unlockedId = 0;
                 bool ok = skill.unlockFirstAvailableNode(type, &unlockedId);
@@ -112,11 +116,11 @@ void PlayerController::registerCommonInputHandlers(
                     if (ok && unlockedId != 0) {
                         const auto& def = skill.definition(type);
                         const auto* node = def.findNode(unlockedId);
-                        msg = node ? (std::string("已解锁：") + node->displayName) : std::string("已解锁节点");
+                        msg = node ? (std::string("Unlocked: ") + node->displayName) : std::string("Unlocked");
                         _ui->refreshSkillTreePanel();
                     } else {
                         int pts = skill.unspentPoints(type);
-                        msg = (pts <= 0) ? std::string("无可用点数") : std::string("无可解锁节点（等级不足或已全解锁）");
+                        msg = (pts <= 0) ? std::string("No skill points") : std::string("No unlockable node");
                     }
                     _ui->popTextAt(_map->getPlayerPosition(_player->getPosition()), msg, ok ? Color3B::GREEN : Color3B::YELLOW);
                 }

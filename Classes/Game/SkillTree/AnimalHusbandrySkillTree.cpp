@@ -8,14 +8,14 @@ public:
     // 返回技能树类型。
     SkillTreeType type() const override { return SkillTreeType::AnimalHusbandry; }
     // 返回显示名称。
-    const char* displayName() const override { return "养殖"; }
+    const char* displayName() const override { return "Husbandry"; }
     // 返回节点列表（引用长期有效）。
     const std::vector<SkillNode>& nodes() const override {
         static const std::vector<SkillNode> kNodes = {
-            {201, "快速成长", 1},
-            {202, "双倍产物", 4},
-            {203, "节省饲料", 6},
-            {204, "亲和驯养", 8},
+            {201, "Fast Growth", 1},
+            {202, "Double Produce", 4},
+            {203, "Feed Saver", 6},
+            {204, "Animal Friend", 8},
         };
         return kNodes;
     }
@@ -28,4 +28,3 @@ const SkillTreeBase& animalHusbandrySkillTree() {
 }
 
 }
-

@@ -10,7 +10,9 @@ enum class SkillTreeType {
     Farming,
     AnimalHusbandry,
     Forestry,
-    Fishing
+    Fishing,
+    Mining,
+    Combat
 };
 
 // 技能节点定义：
@@ -79,7 +81,8 @@ const SkillTreeBase& farmingSkillTree();
 const SkillTreeBase& animalHusbandrySkillTree();
 const SkillTreeBase& forestrySkillTree();
 const SkillTreeBase& fishingSkillTree();
+const SkillTreeBase& miningSkillTree();
+const SkillTreeBase& combatSkillTree();
 const SkillTreeBase& skillTreeByType(SkillTreeType t);
 
 }
-

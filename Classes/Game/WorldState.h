@@ -142,7 +142,7 @@ struct WorldState {
         int unspentPoints = 0;
         std::vector<int> unlockedNodeIds;
     };
-    std::array<SkillTreeProgress, 4> skillTrees;
+    std::array<SkillTreeProgress, 6> skillTrees;
 
     int lastScene = static_cast<int>(SceneKind::Room);
     float lastPlayerX = 0.0f;

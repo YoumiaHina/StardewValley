@@ -316,6 +316,12 @@
     <ClCompile Include="..\Classes\Game\SkillTree\FishingSkillTree.cpp">
       <Filter>Classes\Game\SkillTree</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\Game\SkillTree\MiningSkillTree.cpp">
+      <Filter>Classes\Game\SkillTree</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\SkillTree\CombatSkillTree.cpp">
+      <Filter>Classes\Game\SkillTree</Filter>
+    </ClCompile>
     <ClCompile Include="..\Classes\Game\SkillTree\SkillTreeSystem.cpp">
       <Filter>Classes\Game\SkillTree</Filter>
     </ClCompile>

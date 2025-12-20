@@ -8,18 +8,19 @@ public:
     // 返回技能树类型。
     SkillTreeType type() const override { return SkillTreeType::Fishing; }
     // 返回显示名称。
-    const char* displayName() const override { return "钓鱼"; }
+    const char* displayName() const override { return "Fishing"; }
     // 返回节点列表（引用长期有效）。
     const std::vector<SkillNode>& nodes() const override {
         static const std::vector<SkillNode> kNodes = {
-            {401, "抛竿距离", 1},
-            {402, "咬钩率", 3},
-            {403, "收线速度", 5},
-            {404, "宝箱概率", 7},
+            {401, "Cast Distance", 1},
+            {402, "Bite Rate", 3},
+            {403, "Reel Speed", 5},
+            {404, "Treasure Chance", 7},
         };
         return kNodes;
     }
 };
+
 
 // 获取钓鱼技能树单例：由上层通过 skillTreeByType 或直接引用使用。
 const SkillTreeBase& fishingSkillTree() {
@@ -28,4 +29,3 @@ const SkillTreeBase& fishingSkillTree() {
 }
 
 }
-

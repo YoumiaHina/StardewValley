@@ -177,7 +177,7 @@ bool saveToFile(const std::string& fullPath) {
     std::ofstream out(path, std::ios::trunc);
     if (!out) return false;
     auto& ws = globalState();
-    out << "SDV_SAVE 9" << '\n';
+    out << "SDV_SAVE 10" << '\n';
     out << ws.seasonIndex << ' ' << ws.dayOfSeason << ' '
         << ws.timeHour << ' ' << ws.timeMinute << ' '
         << ws.timeAccum << ' '
@@ -249,7 +249,7 @@ bool loadFromFile(const std::string& fullPath) {
     int version = 0;
     in >> magic >> version;
     in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-    if (!in || magic != "SDV_SAVE" || version < 7 || version > 9) {
+    if (!in || magic != "SDV_SAVE" || version < 7 || version > 10) {
         return false;
     }
     auto& ws = globalState();
@@ -352,8 +352,10 @@ bool loadFromFile(const std::string& fullPath) {
         ws.farmWeeds.clear();
     }
     readAnimals(in, ws.farmAnimals);
-    if (version >= 9) {
+    if (version >= 10) {
         readSkillTrees(in, ws.skillTrees);
+    } else if (version >= 9) {
+        readSkillTreesV4(in, ws.skillTrees);
     } else {
         for (auto& st : ws.skillTrees) {
             st.totalXp = 0;

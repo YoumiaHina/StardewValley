@@ -8,14 +8,14 @@ public:
     // 返回技能树类型。
     SkillTreeType type() const override { return SkillTreeType::Forestry; }
     // 返回显示名称。
-    const char* displayName() const override { return "砍树"; }
+    const char* displayName() const override { return "Forestry"; }
     // 返回节点列表（引用长期有效）。
     const std::vector<SkillNode>& nodes() const override {
         static const std::vector<SkillNode> kNodes = {
-            {301, "木材加成", 1},
-            {302, "树液产量", 3},
-            {303, "耐久斧", 5},
-            {304, "稀有掉落", 7},
+            {301, "Extra Wood", 1},
+            {302, "Sap Yield", 3},
+            {303, "Durable Axe", 5},
+            {304, "Rare Drop", 7},
         };
         return kNodes;
     }
@@ -28,4 +28,3 @@ const SkillTreeBase& forestrySkillTree() {
 }
 
 }
-
