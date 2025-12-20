@@ -5,6 +5,7 @@
 #include "Controllers/Environment/TreeSystem.h"
 #include "Controllers/Environment/RockSystem.h"
 #include "Controllers/Environment/WeedSystem.h"
+#include "Controllers/Interact/TileSelector.h"
 #include "Game/WorldState.h"
 #include "Game/GameConfig.h"
 #include "Game/Crops/crop/CropBase.h"
@@ -50,90 +51,115 @@ std::string Hoe::use(Controllers::IMapController* map,
     }
     Vec2 playerPos = getPlayerPos ? getPlayerPos() : Vec2();
     Vec2 lastDir = getLastDir ? getLastDir() : Vec2(0,-1);
-    auto tgt = map->targetTile(playerPos, lastDir);
-    int tc = tgt.first, tr = tgt.second;
-    if (!map->inBounds(tc, tr)) return std::string("");
+    bool useFan = (level() >= 3 && ws.toolRangeModifier);
+    std::vector<std::pair<int,int>> tiles;
+    if (useFan && map) {
+        Controllers::TileSelector::collectForwardFanTiles(
+            playerPos,
+            lastDir,
+            [map](const Vec2& p, int& c, int& r) { map->worldToTileIndex(p, c, r); },
+            [map](int c, int r) { return map->inBounds(c, r); },
+            map->tileSize(),
+            false,
+            tiles);
+    } else if (map) {
+        auto tgt = map->targetTile(playerPos, lastDir);
+        if (map->inBounds(tgt.first, tgt.second)) {
+            tiles.push_back(tgt);
+        }
+    }
+    if (tiles.empty()) return std::string("");
     std::string msg;
-    // 仅在农场地图进行耕地/收获逻辑
     if (!map->isFarm()) {
         msg = std::string("Nothing");
     } else {
-        auto current = map->getTile(tc, tr);
-        int idx = crop ? crop->findCropIndex(tc, tr) : -1;
-        if (idx >= 0) {
-            const auto& cp = crop->crops()[idx];
-            bool canHarvest = crop->canHarvestAt(tc, tr);
-            if (canHarvest) {
-                bool yields = crop->yieldsOnHarvestAt(tc, tr);
-                if (yields) {
-                    auto produce = Game::produceItemFor(cp.type);
-                    int minQty = 1;
-                    int maxQty = 1;
-                    if (produce == Game::ItemType::Parsnip) {
-                        minQty = 3;
-                        maxQty = 8;
-                    } else {
-                        minQty = 1;
-                        maxQty = 5;
+        bool anyAction = false;
+        for (const auto& tile : tiles) {
+            int tc = tile.first;
+            int tr = tile.second;
+            auto current = map->getTile(tc, tr);
+            int idx = crop ? crop->findCropIndex(tc, tr) : -1;
+            if (idx >= 0) {
+                const auto& cp = crop->crops()[idx];
+                bool canHarvest = crop->canHarvestAt(tc, tr);
+                if (canHarvest) {
+                    bool yields = crop->yieldsOnHarvestAt(tc, tr);
+                    if (yields) {
+                        auto produce = Game::produceItemFor(cp.type);
+                        int minQty = 1;
+                        int maxQty = 1;
+                        if (produce == Game::ItemType::Parsnip) {
+                            minQty = 3;
+                            maxQty = 8;
+                        } else {
+                            minQty = 1;
+                            maxQty = 5;
+                        }
+                        int qty = minQty;
+                        if (maxQty > minQty) {
+                            std::uniform_int_distribution<int> dist(minQty, maxQty);
+                            static std::mt19937 eng{ std::random_device{}() };
+                            qty = dist(eng);
+                        }
+                        int lv = std::max(0, level());
+                        if (lv > 0) {
+                            qty += lv;
+                        }
+                        auto& skill = Game::SkillTreeSystem::getInstance();
+                        qty = skill.adjustHarvestQuantityForFarming(produce, qty);
+                        skill.addXp(Game::SkillTreeType::Farming, skill.xpForFarmingHarvest(produce, qty));
+                        if (ui && ui->isSkillTreePanelVisible()) {
+                            ui->refreshSkillTreePanel();
+                        }
+                        int leftover = 0;
+                        if (ws.inventory) {
+                            leftover = ws.inventory->addItems(produce, qty);
+                        }
+                        if (leftover > 0) {
+                            map->spawnDropAt(tc, tr, static_cast<int>(produce), leftover);
+                            map->refreshDropsVisuals();
+                        }
                     }
-                    int qty = minQty;
-                    if (maxQty > minQty) {
-                        std::uniform_int_distribution<int> dist(minQty, maxQty);
-                        static std::mt19937 eng{ std::random_device{}() };
-                        qty = dist(eng);
-                    }
-                    int lv = std::max(0, level());
-                    if (lv > 0) {
-                        qty += lv;
-                    }
-                    auto& skill = Game::SkillTreeSystem::getInstance();
-                    qty = skill.adjustHarvestQuantityForFarming(produce, qty);
-                    skill.addXp(Game::SkillTreeType::Farming, skill.xpForFarmingHarvest(produce, qty));
-                    if (ui && ui->isSkillTreePanelVisible()) {
-                        ui->refreshSkillTreePanel();
-                    }
-                    int leftover = 0;
-                    if (ws.inventory) {
-                        leftover = ws.inventory->addItems(produce, qty);
-                    }
-                    if (leftover > 0) {
-                        map->spawnDropAt(tc, tr, static_cast<int>(produce), leftover);
-                        map->refreshDropsVisuals();
+                    if (crop) { crop->harvestCropAt(tc, tr); }
+                    map->refreshCropsVisuals();
+                    if (ui) { ui->refreshHotbar(); }
+                    msg = yields ? std::string("Harvest!") : std::string("Uproot!");
+                    anyAction = true;
+                } else {
+                    if (msg.empty()) {
+                        msg = std::string("Not ready");
                     }
                 }
-                // 执行收获（可能拔除或转为成熟占位）
-                if (crop) { crop->harvestCropAt(tc, tr); }
-                map->refreshCropsVisuals();
-                if (ui) { ui->refreshHotbar(); }
-                msg = yields ? std::string("Harvest!") : std::string("Uproot!");
-            } else {
-                msg = std::string("Not ready");
-            }
-        } else if (current == Game::TileType::Soil) {
-            bool blocked = false;
-            if (auto* sys = map->obstacleSystem(Controllers::ObstacleKind::Tree)) {
-                auto* ts = dynamic_cast<Controllers::TreeSystem*>(sys);
-                if (ts && ts->findTreeAt(tc, tr)) blocked = true;
-            }
-            if (!blocked) {
-                if (auto* sys = map->obstacleSystem(Controllers::ObstacleKind::Rock)) {
-                    auto* rs = dynamic_cast<Controllers::RockSystem*>(sys);
-                    if (rs && rs->findRockAt(tc, tr)) blocked = true;
+            } else if (current == Game::TileType::Soil) {
+                bool blocked = false;
+                if (auto* sys = map->obstacleSystem(Controllers::ObstacleKind::Tree)) {
+                    auto* ts = dynamic_cast<Controllers::TreeSystem*>(sys);
+                    if (ts && ts->findTreeAt(tc, tr)) blocked = true;
+                }
+                if (!blocked) {
+                    if (auto* sys = map->obstacleSystem(Controllers::ObstacleKind::Rock)) {
+                        auto* rs = dynamic_cast<Controllers::RockSystem*>(sys);
+                        if (rs && rs->findRockAt(tc, tr)) blocked = true;
+                    }
+                }
+                if (!blocked) {
+                    if (auto* sys = map->obstacleSystem(Controllers::ObstacleKind::Weed)) {
+                        auto* rs = dynamic_cast<Controllers::WeedSystem*>(sys);
+                        if (rs && rs->findWeedAt(tc, tr)) blocked = true;
+                    }
+                }
+                if (blocked) {
+                    if (msg.empty()) {
+                        msg = std::string("Nothing");
+                    }
+                } else {
+                    map->setTile(tc, tr, ws.isRaining ? Game::TileType::Watered : Game::TileType::Tilled);
+                    msg = std::string("Till!");
+                    anyAction = true;
                 }
             }
-            if (!blocked) {
-                if (auto* sys = map->obstacleSystem(Controllers::ObstacleKind::Weed)) {
-                    auto* rs = dynamic_cast<Controllers::WeedSystem*>(sys);
-                    if (rs && rs->findWeedAt(tc, tr)) blocked = true;
-                }
-            }
-            if (blocked) {
-                msg = std::string("Nothing");
-            } else {
-                map->setTile(tc, tr, ws.isRaining ? Game::TileType::Watered : Game::TileType::Tilled);
-                msg = std::string("Till!");
-            }
-        } else {
+        }
+        if (!anyAction && msg.empty()) {
             msg = std::string("Nothing");
         }
     }

@@ -19,6 +19,7 @@ Monster makeMonsterForType(Monster::Type type) {
     m.type = type;
     switch (type) {
         case Monster::Type::RockSlime:
+            m.isCollisionAffected = true;
             m.hp = 24;
             m.maxHp = 24;
             m.dmg = 5;
@@ -27,8 +28,40 @@ Monster makeMonsterForType(Monster::Type type) {
             m.moveSpeed = 40.0f;
             m.name = "Green Slime";
             break;
+        case Monster::Type::Bug:
+            m.isCollisionAffected = false;
+            m.hp = 16;
+            m.maxHp = 16;
+            m.dmg = 3;
+            m.def = 0;
+            m.searchRangeTiles = 6;
+            m.moveSpeed = 100.0f;
+            m.name = "Bug";
+            break;
+        case Monster::Type::Ghost:
+            m.isCollisionAffected = false;
+            m.hp = 80;
+            m.maxHp = 80;
+            m.dmg = 15;
+            m.def = 2;
+            m.searchRangeTiles = 20;
+            m.moveSpeed = 400.0f;
+            m.name = "Ghost";
+            break;
     }
     return m;
+}
+
+std::string monsterTexturePath(const Monster& m) {
+    switch (m.type) {
+        case Monster::Type::RockSlime:
+            return slimeTexturePathForVariant(m.textureVariant);
+        case Monster::Type::Bug:
+            return "Monster/Bug.png";
+        case Monster::Type::Ghost:
+            return "Monster/Ghost.png";
+    }
+    return slimeTexturePathForVariant(m.textureVariant);
 }
 
 } // namespace Game

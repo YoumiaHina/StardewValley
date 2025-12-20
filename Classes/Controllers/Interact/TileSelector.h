@@ -3,6 +3,7 @@
 #include "cocos2d.h"
 #include <functional>
 #include <utility>
+#include <vector>
 
 namespace Controllers {
 
@@ -26,6 +27,15 @@ public:
         const std::function<bool(int,int)>& inBounds,
         const std::function<cocos2d::Vec2(int,int)>& tileToWorld,
         float tileSize);
+
+    static void collectForwardFanTiles(
+        const cocos2d::Vec2& playerPos,
+        const cocos2d::Vec2& lastDir,
+        const std::function<void(const cocos2d::Vec2&, int&, int&)>& worldToTileIndex,
+        const std::function<bool(int,int)>& inBounds,
+        float tileSize,
+        bool includeSelf,
+        std::vector<std::pair<int,int>>& outTiles);
 };
 
 }
