@@ -29,8 +29,9 @@ namespace Controllers {
 
 class FarmMapController : public Controllers::IMapController {
 public:
-    // 构造：绑定世界节点。
-    FarmMapController(cocos2d::Node* worldNode);
+
+    // 构造：绑定 FarmMap 与世界节点。
+    FarmMapController(Game::FarmMap* map, cocos2d::Node* worldNode);
 
     // 初始化：创建 TMX、挂接渲染节点与系统，并同步存档状态。
     void init();

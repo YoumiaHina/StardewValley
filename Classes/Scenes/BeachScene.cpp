@@ -6,6 +6,7 @@
 #include "Controllers/Interact/ChestInteractor.h"
 #include "Controllers/NPC/WillyNpcController.h"
 #include "Controllers/NPC/NpcControllerBase.h"
+#include "string"
 
 using namespace cocos2d;
 using namespace Controllers;
@@ -53,7 +54,28 @@ bool BeachScene::init() {
 }
 
 IMapController* BeachScene::createMapController(Node* worldNode) {
-    auto map = Game::BeachMap::create("Maps/beach/beach.tmx");
+    const auto& ws = Game::globalState();
+    std::string key;
+    switch (ws.seasonIndex)
+    {
+        case 0:
+			key = "spring";
+			break;
+		case 1:
+			key = "summer";
+			break;
+        case 2:
+            key = "fall";
+            break;
+        case 3:
+			key = "winter";
+			break;
+        default:
+			key = "spring";
+            break;
+    }
+	const std::string tmxPath = "Maps/beach/" + key + "_beach.tmx";
+    auto map = Game::BeachMap::create(tmxPath);
     _beachMap = new BeachMapController(map, worldNode);
     return _beachMap;
 }
