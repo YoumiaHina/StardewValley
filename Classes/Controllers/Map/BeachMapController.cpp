@@ -138,9 +138,9 @@ void BeachMapController::updateCursor(const Vec2& playerPos, const Vec2& lastDir
     if (!_cursor) {
         _cursor = DrawNode::create();
         if (_map && _map->getTMX()) {
-            _map->getTMX()->addChild(_cursor, 21);
+            _map->getTMX()->addChild(_cursor, 19);
         } else if (_worldNode) {
-            _worldNode->addChild(_cursor, 21);
+            _worldNode->addChild(_cursor, 19);
         }
     }
     if (!_cursor) return;
@@ -206,7 +206,7 @@ void BeachMapController::refreshMapVisuals() {
     for (const auto& ch : _chests) {
         auto r = Game::chestRect(ch);
         Vec2 center(r.getMidX(), r.getMidY());
-        auto spr = Sprite::create("PlaceableItem/Chest.png");
+        auto spr = Sprite::create("Chest.png");
         if (spr && spr->getTexture()) {
             auto cs = spr->getContentSize();
             if (cs.width > 0.0f && cs.height > 0.0f) {
