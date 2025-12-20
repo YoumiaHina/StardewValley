@@ -35,7 +35,6 @@ void GameStateController::update(float dt) {
     }
     ensureWeatherChosenForToday();
     bool timeChanged = false;
-    bool dayChanged = false;
     ws.timeAccum += dt;
     while (ws.timeAccum >= GameConfig::REAL_SECONDS_PER_GAME_MINUTE) {
         ws.timeAccum -= GameConfig::REAL_SECONDS_PER_GAME_MINUTE;
@@ -54,26 +53,6 @@ void GameStateController::update(float dt) {
         timeChanged = true;
     }
     if (timeChanged && _ui) _ui->refreshHUD();
-    if (dayChanged) {
-        ensureWeatherChosenForToday();
-        if (_map) {
-            if (_crop) { _crop->advanceCropsDaily(_map); }
-            if (_animals) { _animals->advanceAnimalsDaily(); }
-            _map->refreshMapVisuals();
-            _map->refreshCropsVisuals();
-        } else {
-            if (_crop) { _crop->advanceCropsDaily(nullptr); }
-            if (_animals) { _animals->advanceAnimalsDaily(); }
-        }
-        if (_ui) _ui->refreshHUD();
-        std::string path = Game::currentSavePath();
-        if (path.empty()) {
-            if (ws.lastSaveSlot < 1) ws.lastSaveSlot = 1;
-            if (ws.lastSaveSlot > 50) ws.lastSaveSlot = 50;
-            path = Game::savePathForSlot(ws.lastSaveSlot);
-        }
-        Game::saveToFile(path);
-    }
 }
 
 void GameStateController::sleepToNextMorning() {
@@ -89,9 +68,12 @@ void GameStateController::sleepToNextMorning() {
     ws.timeAccum = 0.0f;
     ensureWeatherChosenForToday();
     if (_crop) {
-        _crop->advanceCropsDaily(nullptr);
+        _crop->advanceCropsDaily(_map);
     }
-    advanceAnimalsDailyWorldOnly();
+    if (_animals) {
+        _animals->advanceAnimalsDaily();
+    }
+	advanceAnimalsDailyWorldOnly();
     if (!ws.farmTiles.empty() && ws.farmCols > 0 && ws.farmRows > 0) {
         const int cols = ws.farmCols;
         const int rows = ws.farmRows;
