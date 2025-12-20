@@ -436,6 +436,9 @@
     <ClCompile Include="..\Classes\Game\Weed.cpp">
       <Filter>Classes\Game</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\Systems\RainLayer.cpp">
+      <Filter>Classes\Controllers\Systems</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <!-- Header Files -->
@@ -693,9 +696,6 @@
     <ClInclude Include="..\Classes\Controllers\Environment\RockSystem.h">
       <Filter>Classes\Controllers\Environment</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\Controllers\IMapController.h">
-      <Filter>Classes\Controllers\Map</Filter>
-    </ClInclude>
     <ClInclude Include="..\Classes\Controllers\Environment\EnvironmentObstacleSystemBase.h">
       <Filter>Classes\Controllers\Environment</Filter>
     </ClInclude>
@@ -761,6 +761,12 @@
     </ClInclude>
     <ClInclude Include="..\Classes\Controllers\Environment\WeedSystem.h">
       <Filter>Classes\Controllers\Environment</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\Map\IMapController.h">
+      <Filter>Classes\Controllers\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\Systems\RainLayer.h">
+      <Filter>Classes\Controllers\Systems</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
