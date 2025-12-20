@@ -27,6 +27,8 @@ private:
         cocos2d::Label* levelLabel = nullptr;
         cocos2d::Label* buttonLabel = nullptr;
         Game::ToolKind kind = Game::ToolKind::Axe;
+        bool canUpgrade = false;
+        std::vector<cocos2d::Sprite*> materialIcons;
     };
 
     cocos2d::Scene* _scene = nullptr;
@@ -37,4 +39,3 @@ private:
 };
 
 }
-

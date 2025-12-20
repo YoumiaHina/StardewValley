@@ -53,6 +53,8 @@ public:
 
     // 是否靠近通往农场的门。
     bool isNearDoor(const cocos2d::Vec2& p) const override;
+    // 是否靠近工具升级交互区域。
+    bool isNearToolUpdateArea(const cocos2d::Vec2& p) const;
     // 是否靠近矿洞门（城镇不支持）。
     bool isNearMineDoor(const cocos2d::Vec2&) const override { return false; }
     // 是否靠近任意箱子。

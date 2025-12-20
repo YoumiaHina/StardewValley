@@ -54,10 +54,11 @@ std::string Pickaxe::use(Controllers::IMapController* map,
 
     bool hit = false;
     if (auto* sys = map->obstacleSystem(Controllers::ObstacleKind::Rock)) {
+        int dmg = 1 + std::max(0, level());
         hit = sys->damageAt(
             tc,
             tr,
-            1,
+            dmg,
             [map](int c, int r, int itemType) {
                 if (!map) return;
                 auto& skill = Game::SkillTreeSystem::getInstance();

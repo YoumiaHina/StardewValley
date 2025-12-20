@@ -219,7 +219,8 @@ void SceneBase::update(float dt) {
                                            || _uiController->isNpcSocialVisible()
                                            || _uiController->isChestPanelVisible()
                                            || _uiController->isStorePanelVisible()
-                                           || _uiController->isAnimalStorePanelVisible()));
+                                           || _uiController->isAnimalStorePanelVisible()
+                                           || _uiController->isToolUpgradePanelVisible()));
     if (_playerController) {
         _playerController->setMovementLocked(blockMove);
         _playerController->update(dt);

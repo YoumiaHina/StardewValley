@@ -171,6 +171,10 @@ bool TownMapController::isNearDoor(const Vec2& p) const {
     return _map ? _map->nearDoorToFarm(p) : false;
 }
 
+bool TownMapController::isNearToolUpdateArea(const Vec2& p) const {
+    return _map ? _map->nearToolUpdateArea(p) : false;
+}
+
 Game::TileType TownMapController::getTile(int c, int r) const {
     if (c < 0 || r < 0 || c >= _cols || r >= _rows) return Game::TileType::NotSoil;
     size_t idx = static_cast<size_t>(r) * static_cast<size_t>(_cols) + static_cast<size_t>(c);

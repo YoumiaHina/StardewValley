@@ -1,5 +1,6 @@
 #include "Controllers/UI/ToolUpgradePanelUI.h"
 #include "Controllers/Systems/ToolUpgradeSystem.h"
+#include "Game/WorldState.h"
 
 using namespace cocos2d;
 
@@ -42,13 +43,13 @@ void ToolUpgradePanelUI::buildPanel() {
     _panelNode->setVisible(false);
 
     auto bg = DrawNode::create();
-    float w = 420.f * UPGRADE_UI_SCALE;
-    float h = 220.f * UPGRADE_UI_SCALE;
+    float w = 420.f * UPGRADE_UI_SCALE * 2.0f;
+    float h = 220.f * UPGRADE_UI_SCALE * 2.0f;
     Vec2 v[4] = { Vec2(-w/2, -h/2), Vec2(w/2, -h/2), Vec2(w/2, h/2), Vec2(-w/2, h/2) };
     bg->drawSolidPoly(v, 4, Color4F(0.f, 0.f, 0.f, 0.85f));
     _panelNode->addChild(bg);
 
-    auto title = Label::createWithTTF("Tool Upgrade (U)", "fonts/arial.ttf", 22 * UPGRADE_UI_SCALE);
+    auto title = Label::createWithTTF("Tool Upgrade", "fonts/arial.ttf", 22 * UPGRADE_UI_SCALE);
     if (title) {
         title->setPosition(Vec2(0, h/2 - 26 * UPGRADE_UI_SCALE));
         _panelNode->addChild(title);
@@ -61,8 +62,8 @@ void ToolUpgradePanelUI::buildPanel() {
         Game::ToolKind::Axe,
         Game::ToolKind::WaterCan
     };
-    float startY = h/2 - 70 * UPGRADE_UI_SCALE;
-    float gapY = 40 * UPGRADE_UI_SCALE;
+    float startY = h/2 - 90 * UPGRADE_UI_SCALE;
+    float gapY = 70 * UPGRADE_UI_SCALE;
     for (int i = 0; i < 4; ++i) {
         float y = startY - i * gapY;
         RowWidgets row;
@@ -71,7 +72,7 @@ void ToolUpgradePanelUI::buildPanel() {
         auto nameLabel = Label::createWithTTF(toolDisplayName(kinds[i]), "fonts/arial.ttf", 18 * UPGRADE_UI_SCALE);
         if (nameLabel) {
             nameLabel->setAnchorPoint(Vec2(0.f, 0.5f));
-            nameLabel->setPosition(Vec2(-w/2 + 20 * UPGRADE_UI_SCALE, y));
+            nameLabel->setPosition(Vec2(-w/2 + 40 * UPGRADE_UI_SCALE, y));
             _panelNode->addChild(nameLabel);
         }
         row.nameLabel = nameLabel;
@@ -79,15 +80,28 @@ void ToolUpgradePanelUI::buildPanel() {
         auto levelLabel = Label::createWithTTF("", "fonts/arial.ttf", 18 * UPGRADE_UI_SCALE);
         if (levelLabel) {
             levelLabel->setAnchorPoint(Vec2(0.f, 0.5f));
-            levelLabel->setPosition(Vec2(-w/2 + 160 * UPGRADE_UI_SCALE, y));
+            levelLabel->setPosition(Vec2(-w/2 + 220 * UPGRADE_UI_SCALE, y));
             _panelNode->addChild(levelLabel);
         }
         row.levelLabel = levelLabel;
 
+        float iconStartX = -w/2 + 380.f * UPGRADE_UI_SCALE;
+        float iconGapX = 30.f * UPGRADE_UI_SCALE;
+        for (int j = 0; j < 5; ++j) {
+            auto icon = Sprite::create();
+            if (icon) {
+                icon->setAnchorPoint(Vec2(0.5f, 0.5f));
+                icon->setPosition(Vec2(iconStartX + iconGapX * static_cast<float>(j), y));
+                icon->setVisible(false);
+                _panelNode->addChild(icon);
+                row.materialIcons.push_back(icon);
+            }
+        }
+
         auto buttonLabel = Label::createWithTTF("[Upgrade]", "fonts/arial.ttf", 18 * UPGRADE_UI_SCALE);
         if (buttonLabel) {
             buttonLabel->setAnchorPoint(Vec2(0.5f, 0.5f));
-            buttonLabel->setPosition(Vec2(w/2 - 70 * UPGRADE_UI_SCALE, y));
+            buttonLabel->setPosition(Vec2(w/2 - 90 * UPGRADE_UI_SCALE, y));
             buttonLabel->setColor(Color3B::YELLOW);
             _panelNode->addChild(buttonLabel);
 
@@ -106,6 +120,12 @@ void ToolUpgradePanelUI::buildPanel() {
             };
             listener->onTouchEnded = [this, kinds, i, buttonLabel](Touch* t, Event* e) {
                 buttonLabel->setScale(1.0f);
+                if (i < 0 || i >= static_cast<int>(_rows.size())) {
+                    return;
+                }
+                if (!_rows[static_cast<std::size_t>(i)].canUpgrade) {
+                    return;
+                }
                 bool ok = ToolUpgradeSystem::getInstance().upgradeToolOnce(_inventory, kinds[i]);
                 if (ok) {
                     refreshPanel();
@@ -125,9 +145,102 @@ void ToolUpgradePanelUI::buildPanel() {
 void ToolUpgradePanelUI::refreshPanel() {
     if (!_panelNode) return;
     for (auto& row : _rows) {
-        int lv = ToolUpgradeSystem::getInstance().toolLevel(_inventory, row.kind);
+        row.canUpgrade = false;
+        bool hasTool = false;
+        int lv = 0;
+        if (_inventory) {
+            std::size_t sz = _inventory->size();
+            for (std::size_t i = 0; i < sz; ++i) {
+                const Game::ToolBase* t = _inventory->toolAt(i);
+                if (t && t->kind() == row.kind) {
+                    hasTool = true;
+                    lv = t->level();
+                    break;
+                }
+            }
+            if (!hasTool) {
+                auto& ws = Game::globalState();
+                const Game::Inventory* wsInv = ws.inventory.get();
+                if (_inventory.get() == wsInv) {
+                    for (const auto& s : ws.globalChest.slots) {
+                        if (s.kind == Game::SlotKind::Tool && s.tool && s.tool->kind() == row.kind) {
+                            hasTool = true;
+                            lv = s.tool->level();
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        if (!hasTool) {
+            if (row.levelLabel) {
+                row.levelLabel->setString("No Tool");
+            }
+            if (row.buttonLabel) {
+                row.buttonLabel->setString("[No Tool]");
+                row.buttonLabel->setColor(Color3B(150, 150, 150));
+            }
+            for (auto* icon : row.materialIcons) {
+                if (icon) icon->setVisible(false);
+            }
+            continue;
+        }
         if (row.levelLabel) {
             row.levelLabel->setString(levelText(lv));
+        }
+        long long goldCost = 0;
+        Game::ItemType materialType = Game::ItemType::CopperIngot;
+        int materialQty = 0;
+        bool affordable = false;
+        bool hasNext = ToolUpgradeSystem::getInstance().nextUpgradeCost(_inventory,
+                                                                        row.kind,
+                                                                        goldCost,
+                                                                        materialType,
+                                                                        materialQty,
+                                                                        affordable);
+        row.canUpgrade = hasNext && affordable;
+        if (row.buttonLabel) {
+            if (!hasNext) {
+                row.buttonLabel->setString("[Max]");
+                row.buttonLabel->setColor(Color3B(150, 150, 150));
+            } else {
+                std::string text = StringUtils::format("[Upgrade %lldG]", goldCost);
+                row.buttonLabel->setString(text);
+                if (row.canUpgrade) {
+                    row.buttonLabel->setColor(Color3B::YELLOW);
+                } else {
+                    row.buttonLabel->setColor(Color3B(150, 150, 150));
+                }
+            }
+        }
+        std::string iconPath;
+        if (hasNext) {
+            switch (materialType) {
+                case Game::ItemType::CopperIngot: iconPath = "Mineral/copperIngot.png"; break;
+                case Game::ItemType::IronIngot:   iconPath = "Mineral/ironIngot.png"; break;
+                case Game::ItemType::GoldIngot:   iconPath = "Mineral/goldIngot.png"; break;
+                default: break;
+            }
+        }
+        for (std::size_t idx = 0; idx < row.materialIcons.size(); ++idx) {
+            auto* icon = row.materialIcons[idx];
+            if (!icon) continue;
+            if (!hasNext || iconPath.empty() || idx >= static_cast<std::size_t>(materialQty)) {
+                icon->setVisible(false);
+                continue;
+            }
+            icon->setTexture(iconPath);
+            if (icon->getTexture()) {
+                Size cs = icon->getContentSize();
+                float target = 26.f * UPGRADE_UI_SCALE;
+                float sx = cs.width > 0 ? target / cs.width : 1.0f;
+                float sy = cs.height > 0 ? target / cs.height : 1.0f;
+                float s = std::min(sx, sy);
+                icon->setScale(s);
+                icon->setVisible(true);
+            } else {
+                icon->setVisible(false);
+            }
         }
     }
 }
