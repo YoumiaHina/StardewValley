@@ -4,6 +4,7 @@
 #include "Controllers/Systems/CropSystem.h"
 #include "Controllers/Environment/EnvironmentObstacleSystemBase.h"
 #include "Game/WorldState.h"
+#include "Game/SkillTree/SkillTreeSystem.h"
 #include "Game/GameConfig.h"
 #include "Game/Tile.h"
 #include "Game/Drop.h"
@@ -59,7 +60,11 @@ std::string Pickaxe::use(Controllers::IMapController* map,
             1,
             [map](int c, int r, int itemType) {
                 if (!map) return;
-                map->spawnDropAt(c, r, itemType, 1);
+                auto& skill = Game::SkillTreeSystem::getInstance();
+                Game::ItemType drop = static_cast<Game::ItemType>(itemType);
+                int qty = skill.adjustMiningDropQuantityForMining(drop, 1);
+                map->spawnDropAt(c, r, itemType, qty);
+                skill.addXp(Game::SkillTreeType::Mining, skill.xpForMiningBreak(drop, qty));
                 map->refreshDropsVisuals();
             },
             [map](int c, int r, Game::TileType t) {

@@ -316,6 +316,12 @@
     <ClCompile Include="..\Classes\Game\SkillTree\FishingSkillTree.cpp">
       <Filter>Classes\Game\SkillTree</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\Game\SkillTree\MiningSkillTree.cpp">
+      <Filter>Classes\Game\SkillTree</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\SkillTree\CombatSkillTree.cpp">
+      <Filter>Classes\Game\SkillTree</Filter>
+    </ClCompile>
     <ClCompile Include="..\Classes\Game\SkillTree\SkillTreeSystem.cpp">
       <Filter>Classes\Game\SkillTree</Filter>
     </ClCompile>
@@ -438,6 +444,9 @@
     </ClCompile>
     <ClCompile Include="..\Classes\Controllers\UI\ToolUpgradePanelUI.cpp">
       <Filter>Classes\Controllers\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\Systems\RainLayer.cpp">
+      <Filter>Classes\Controllers\Systems</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -696,9 +705,6 @@
     <ClInclude Include="..\Classes\Controllers\Environment\RockSystem.h">
       <Filter>Classes\Controllers\Environment</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\Controllers\IMapController.h">
-      <Filter>Classes\Controllers\Map</Filter>
-    </ClInclude>
     <ClInclude Include="..\Classes\Controllers\Environment\EnvironmentObstacleSystemBase.h">
       <Filter>Classes\Controllers\Environment</Filter>
     </ClInclude>
@@ -767,6 +773,12 @@
     </ClInclude>
     <ClInclude Include="..\Classes\Controllers\UI\ToolUpgradePanelUI.h">
       <Filter>Classes\Controllers\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\Map\IMapController.h">
+      <Filter>Classes\Controllers\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\Systems\RainLayer.h">
+      <Filter>Classes\Controllers\Systems</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

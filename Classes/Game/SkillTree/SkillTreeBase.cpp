@@ -121,9 +121,12 @@ const SkillTreeBase& skillTreeByType(SkillTreeType t) {
             return forestrySkillTree();
         case SkillTreeType::Fishing:
             return fishingSkillTree();
+        case SkillTreeType::Mining:
+            return miningSkillTree();
+        case SkillTreeType::Combat:
+            return combatSkillTree();
     }
     return farmingSkillTree();
 }
 
 }
-

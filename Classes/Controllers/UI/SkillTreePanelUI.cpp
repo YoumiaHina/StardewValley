@@ -50,19 +50,19 @@ void SkillTreePanelUI::buildSkillTreePanel() {
 
     auto bg = DrawNode::create();
     float w = 520.f * SKILL_UI_SCALE;
-    float h = 260.f * SKILL_UI_SCALE;
+    float h = 340.f * SKILL_UI_SCALE;
     Vec2 v[4] = { Vec2(-w / 2, -h / 2), Vec2(w / 2, -h / 2), Vec2(w / 2, h / 2), Vec2(-w / 2, h / 2) };
     bg->drawSolidPoly(v, 4, Color4F(0.f, 0.f, 0.f, 0.85f));
     _panelNode->addChild(bg);
 
-    _titleLabel = createCnLabel("技能等级 (L)  1-4 解锁节点", 24 * SKILL_UI_SCALE);
+    _titleLabel = createCnLabel("Skills (L)  1-6 Unlock", 24 * SKILL_UI_SCALE);
     _titleLabel->setPosition(Vec2(0, h / 2 - 26 * SKILL_UI_SCALE));
     _panelNode->addChild(_titleLabel);
 
     _rows.clear();
     float startY = h / 2 - 70 * SKILL_UI_SCALE;
-    float rowGap = 45 * SKILL_UI_SCALE;
-    for (int i = 0; i < 4; ++i) {
+    float rowGap = 42 * SKILL_UI_SCALE;
+    for (int i = 0; i < 6; ++i) {
         auto* lb = createCnLabel("", 18 * SKILL_UI_SCALE);
         lb->setAnchorPoint(Vec2(0.0f, 0.5f));
         lb->setPosition(Vec2(-w / 2 + 22 * SKILL_UI_SCALE, startY - rowGap * i));
@@ -75,14 +75,16 @@ void SkillTreePanelUI::refreshSkillTreePanel() {
     if (!_panelNode) return;
     auto& sys = Game::SkillTreeSystem::getInstance();
 
-    const Game::SkillTreeType types[4] = {
+    const Game::SkillTreeType types[6] = {
         Game::SkillTreeType::Farming,
         Game::SkillTreeType::AnimalHusbandry,
         Game::SkillTreeType::Forestry,
-        Game::SkillTreeType::Fishing
+        Game::SkillTreeType::Fishing,
+        Game::SkillTreeType::Mining,
+        Game::SkillTreeType::Combat
     };
 
-    for (int i = 0; i < 4 && i < static_cast<int>(_rows.size()); ++i) {
+    for (int i = 0; i < 6 && i < static_cast<int>(_rows.size()); ++i) {
         auto t = types[i];
         const auto& def = sys.definition(t);
         int lvl = sys.level(t);
@@ -95,7 +97,7 @@ void SkillTreePanelUI::refreshSkillTreePanel() {
             + " Lv" + std::to_string(lvl)
             + " | XP " + std::to_string(xp)
             + " | Next " + std::to_string(toNext)
-            + " | 点数 " + std::to_string(pts)
+            + " | Points " + std::to_string(pts)
             + " | " + bonus;
         _rows[i]->setString(line);
     }

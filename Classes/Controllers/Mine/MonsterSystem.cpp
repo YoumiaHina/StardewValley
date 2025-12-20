@@ -1,5 +1,6 @@
 #include "Controllers/Mine/MonsterSystem.h"
 #include "cocos2d.h"
+#include "Game/SkillTree/SkillTreeSystem.h"
 #include <algorithm>
 #include <string>
 
@@ -162,6 +163,14 @@ void MineMonsterController::applyDamageAt(const Vec2& worldPos, int baseDamage) 
         int dmg = std::max(0, baseDamage - def);
         _monsters[idx].hp -= dmg;
         if (_monsters[idx].hp <= 0) {
+            {
+                auto& ws = Game::globalState();
+                auto& skill = Game::SkillTreeSystem::getInstance();
+                long long baseGold = 10;
+                long long reward = skill.adjustGoldRewardForCombat(baseGold);
+                ws.gold += reward;
+                skill.addXp(Game::SkillTreeType::Combat, skill.xpForCombatKill(baseGold));
+            }
             // 掉落：简化为添加对应主题碎片 1 个
             auto theme = _map->currentTheme();
             Game::ItemType drop = Game::ItemType::Fiber; // placeholder
@@ -196,6 +205,14 @@ void MineMonsterController::applyAreaDamage(const std::vector<std::pair<int,int>
         int dmg = std::max(0, baseDamage - m.def);
         m.hp -= dmg;
         if (m.hp <= 0) {
+            {
+                auto& ws = Game::globalState();
+                auto& skill = Game::SkillTreeSystem::getInstance();
+                long long baseGold = 10;
+                long long reward = skill.adjustGoldRewardForCombat(baseGold);
+                ws.gold += reward;
+                skill.addXp(Game::SkillTreeType::Combat, skill.xpForCombatKill(baseGold));
+            }
             auto theme = _map->currentTheme();
             Game::ItemType drop = Game::ItemType::Fiber;
             if (theme == MineMapController::Theme::Ice) drop = Game::ItemType::ParsnipSeed;
