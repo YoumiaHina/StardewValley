@@ -7,6 +7,7 @@
 #include "cocos2d.h"
 #include "Game/GameConfig.h"
 #include <vector>
+#include <string>
 
 namespace Game {
 
@@ -44,7 +45,8 @@ public:
     static void parseWalls(cocos2d::TMXTiledMap* tmx,
                            std::vector<cocos2d::Rect>& outRects,
                            std::vector<std::vector<cocos2d::Vec2>>& outPolys,
-                           cocos2d::DrawNode* debugTarget);
+                           cocos2d::DrawNode* debugTarget,
+                           const std::vector<std::string>& groupNames);
 
 protected:
     cocos2d::TMXTiledMap* _tmx = nullptr;

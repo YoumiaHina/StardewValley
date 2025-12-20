@@ -50,7 +50,7 @@ void MineMap::parseCollision() {
     if (_debugNode) { _debugNode->removeFromParent(); _debugNode = nullptr; }
     _debugNode = DrawNode::create();
     _tmx->addChild(_debugNode, 999);
-    MapBase::parseWalls(_tmx, _collisionRects, _collisionPolygons, _debugNode);
+    MapBase::parseWalls(_tmx, _collisionRects, _collisionPolygons, _debugNode, { "Wall","wall" });
 }
 
 void MineMap::parseStairs() {

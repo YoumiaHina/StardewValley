@@ -24,6 +24,9 @@ bool BeachMap::initWithFile(const std::string& tmxFile) {
     parseWalls();
     parseWater();
     parseDoorToFarm();
+    _festivalLayer = _tmx ? _tmx->getLayer("Festival") : nullptr;
+    _festivalActive = true;
+    setFestivalActive(false);
     return true;
 }
 
@@ -62,11 +65,17 @@ Vec2 BeachMap::doorToFarmCenter() const {
     return MapBase::centerFromRectsPoints(_doorToFarmRects, _doorToFarmPoints);
 }
 
+void BeachMap::setFestivalActive(bool active) {
+    if (_festivalActive == active) return;
+    _festivalActive = active;
+    if (_festivalLayer) _festivalLayer->setVisible(_festivalActive);
+}
+
 void BeachMap::parseWalls() {
     if (_wallDebug) { _wallDebug->removeFromParent(); _wallDebug = nullptr; }
     _wallDebug = DrawNode::create();
     _tmx->addChild(_wallDebug, 999);
-    MapBase::parseWalls(_tmx, _wallRects, _wallPolys, _wallDebug);
+    MapBase::parseWalls(_tmx, _wallRects, _wallPolys, _wallDebug, { "Wall","wall" });
 }
 
 void BeachMap::parseWater() {

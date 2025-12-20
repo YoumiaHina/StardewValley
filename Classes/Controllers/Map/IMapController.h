@@ -61,6 +61,9 @@ public:
     virtual bool supportsWeather() const { return false; }
     virtual void setAllPlantableTilesWatered() {}
 
+    // 节日系统：默认不支持（仅 Beach/Town 需要图层/碰撞切换）
+    virtual void setFestivalActive(bool) {}
+
     virtual EnvironmentObstacleSystemBase* obstacleSystem(ObstacleKind) { return nullptr; }
     virtual const EnvironmentObstacleSystemBase* obstacleSystem(ObstacleKind) const { return nullptr; }
 

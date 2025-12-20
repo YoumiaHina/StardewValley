@@ -95,14 +95,16 @@ bool MapBase::nearRectOrPoints(const Vec2& p,
 void MapBase::parseWalls(TMXTiledMap* tmx,
                          std::vector<Rect>& outRects,
                          std::vector<std::vector<Vec2>>& outPolys,
-                         DrawNode* debugTarget) {
+                         DrawNode* debugTarget,
+                         const std::vector<std::string>& groupNames) {
     outRects.clear();
     outPolys.clear();
     if (!tmx) return;
-    auto group = tmx->getObjectGroup("Wall");
-    if (!group) group = tmx->getObjectGroup("wall");
-    if (!group) group = tmx->getObjectGroup("Collision");
-    if (!group) group = tmx->getObjectGroup("collision");
+    TMXObjectGroup* group = nullptr;
+    for (const auto& n : groupNames) {
+        group = tmx->getObjectGroup(n);
+        if (group) break;
+    }
     if (!group) return;
     auto objects = group->getObjects();
     for (auto &val : objects) {

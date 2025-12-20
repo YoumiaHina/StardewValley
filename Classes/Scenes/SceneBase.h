@@ -27,6 +27,7 @@
 
 namespace Controllers { class FishingController; }
 namespace Controllers { class WeatherController; }
+namespace Controllers { class FestivalController; }
 
 class SceneBase : public cocos2d::Scene {
 public:
@@ -59,8 +60,8 @@ protected:
     Controllers::CropSystem* _cropSystem = nullptr;
     Controllers::FishingController* _fishingController = nullptr;
     Controllers::WeatherController* _weatherController = nullptr;
+    Controllers::FestivalController* _festivalController = nullptr;
 
-protected:
     // 允许子类注册额外的更新回调（用于 Monster/Mining/Combat 等控制器调度）。
     void addUpdateCallback(const std::function<void(float)>& cb);
     // 子类可覆盖的键盘钩子（默认空），用于处理自定义按键（如快速进矿洞 K）。

@@ -48,6 +48,9 @@ namespace GameConfig {
     // Kept for reference if hour-based mapping is needed elsewhere
     static const float REAL_SECONDS_PER_GAME_HOUR = 60.0f;
 
+    // 节日：每个季节的第几天为节日（1..30）。
+    static const int FESTIVAL_DAY = 15;
+
     // Tileset 配置（spring_outdoors）
     static const int SPRING_OUTDOORS_COLUMNS = 25; // tileset 列数（tsx 定义为 25）
 

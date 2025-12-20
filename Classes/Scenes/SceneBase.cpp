@@ -8,6 +8,7 @@
 #include "Game/Map/RoomMap.h"
 #include "Controllers/Systems/FishingController.h"
 #include "Controllers/Systems/WeatherController.h"
+#include "Controllers/Systems/FestivalController.h"
 #include "Game/Tool/FishingRod.h"
 
 using namespace cocos2d;
@@ -120,6 +121,13 @@ bool SceneBase::initBase(float worldScale, bool buildCraftPanel, bool enableTool
         _weatherController = new Controllers::WeatherController(_mapController, _worldNode, _playerController);
         addUpdateCallback([this](float dt) {
             if (_weatherController) _weatherController->update(dt);
+        });
+    }
+
+    if (_mapController) {
+        _festivalController = new Controllers::FestivalController(_mapController);
+        addUpdateCallback([this](float dt) {
+            if (_festivalController) _festivalController->update(dt);
         });
     }
 

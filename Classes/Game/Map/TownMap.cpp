@@ -25,10 +25,14 @@ bool TownMap::initWithFile(const std::string& tmxFile) {
     parseWalls();
     parseDoorToFarm();
     parseToolUpdateArea();
+    setFestivalActive(false);
     return true;
 }
 
 bool TownMap::collides(const Vec2& p, float radius) const {
+    if (_festivalActive) {
+        if (MapBase::collidesAt(p, radius, _festivalWallRects, _festivalWallPolys)) return true;
+    }
     if (MapBase::collidesAt(p, radius, _wallRects, _wallPolys)) return true;
     return false;
 }
@@ -48,11 +52,18 @@ bool TownMap::nearToolUpdateArea(const Vec2& p) const {
     return MapBase::nearRectOrPoints(p, _toolUpdateRects, _toolUpdatePoints, r2);
 }
 
+void TownMap::setFestivalActive(bool active) {
+    if (_festivalActive == active) return;
+    _festivalActive = active;
+    if (_festivalLayer) _festivalLayer->setVisible(_festivalActive);
+    if (_festivalActive) MapBase::parseWalls(_tmx, _festivalWallRects, _festivalWallPolys, _wallDebug, { "FestivalWall", "FestivalWall" });
+}
+
 void TownMap::parseWalls() {
     if (_wallDebug) { _wallDebug->removeFromParent(); _wallDebug = nullptr; }
     _wallDebug = DrawNode::create();
     _tmx->addChild(_wallDebug, 999);
-    MapBase::parseWalls(_tmx, _wallRects, _wallPolys, _wallDebug);
+    MapBase::parseWalls(_tmx, _wallRects, _wallPolys, _wallDebug, { "Wall","wall" });
 }
 
 void TownMap::parseDoorToFarm() {
@@ -114,10 +125,12 @@ void TownMap::setupLayerOrder() {
     _bgLayer = _tmx->getLayer("Background");
     _houseBodyLayer = _tmx->getLayer("HouseBody");
     _houseTopLayer = _tmx->getLayer("HouseTop");
+    _festivalLayer = _tmx->getLayer("Festival");
 
     if (_bgLayer) _tmx->reorderChild(_bgLayer, 0);
     if (_houseBodyLayer) _tmx->reorderChild(_houseBodyLayer, 10);
     if (_houseTopLayer) _tmx->reorderChild(_houseTopLayer, 30);
+    if (_festivalLayer) _festivalLayer->setVisible(false);
 }
 
 } // namespace Game

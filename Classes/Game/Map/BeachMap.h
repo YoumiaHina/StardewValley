@@ -23,7 +23,13 @@ public:
 
     bool nearWater(const cocos2d::Vec2& p, float radius) const;
 
+    // 设置节日开关：控制 Festival 图层显示。
+    void setFestivalActive(bool active);
+
 private:
+    cocos2d::TMXLayer* _festivalLayer = nullptr;
+    bool _festivalActive = false;
+
     std::vector<cocos2d::Rect> _wallRects;
     std::vector<std::vector<cocos2d::Vec2>> _wallPolys;
     cocos2d::DrawNode* _wallDebug = nullptr;

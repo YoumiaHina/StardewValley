@@ -46,7 +46,7 @@ void FarmMap::parseWalls() {
     if (_debugNode) { _debugNode->removeFromParent(); _debugNode = nullptr; }
     _debugNode = cocos2d::DrawNode::create();
     _tmx->addChild(_debugNode, 999);
-    MapBase::parseWalls(_tmx, _wallRects, _wallPolygons, _debugNode);
+    MapBase::parseWalls(_tmx, _wallRects, _wallPolygons, _debugNode,{"Wall", "wall"});
 }
 
 bool FarmMap::collides(const cocos2d::Vec2& p, float radius) const {

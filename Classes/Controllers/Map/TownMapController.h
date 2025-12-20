@@ -35,6 +35,9 @@ public:
     // 将所有可种植瓦片设为已浇水（城镇无种植逻辑，保持空实现）。
     void setAllPlantableTilesWatered() override {}
 
+    // 节日开关：转发到 TownMap 控制 Festival 图层与碰撞切换。
+    void setFestivalActive(bool active) override;
+
     // 获取瓦片尺寸（像素）。
     float tileSize() const override { return _map ? _map->getTileSize().width : 0.0f; }
     // 世界坐标转换为瓦片索引。

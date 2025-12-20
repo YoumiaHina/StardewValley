@@ -56,6 +56,10 @@ TownMapController::TownMapController(Game::TownMap* map, cocos2d::Node* worldNod
     });
 }
 
+void TownMapController::setFestivalActive(bool active) {
+    if (_map) _map->setFestivalActive(active);
+}
+
 Vec2 TownMapController::getPlayerPosition(const Vec2& playerMapLocalPos) const {
     if (!_worldNode) return playerMapLocalPos;
     Node* ref = (_map && _map->getTMX()) ? _map->getTMX() : _worldNode;

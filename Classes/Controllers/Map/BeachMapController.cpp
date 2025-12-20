@@ -56,6 +56,10 @@ BeachMapController::BeachMapController(Game::BeachMap* map, cocos2d::Node* world
     });
 }
 
+void BeachMapController::setFestivalActive(bool active) {
+    if (_map) _map->setFestivalActive(active);
+}
+
 Vec2 BeachMapController::getPlayerPosition(const Vec2& playerMapLocalPos) const {
     if (!_worldNode) return playerMapLocalPos;
     Node* ref = (_map && _map->getTMX()) ? _map->getTMX() : _worldNode;

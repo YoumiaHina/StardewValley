@@ -22,14 +22,21 @@ public:
     cocos2d::Vec2 doorToFarmCenter() const;
     bool nearToolUpdateArea(const cocos2d::Vec2& p) const;
 
+    // 设置节日开关：控制 Festival 图层显示，并切换碰撞对象层来源。
+    void setFestivalActive(bool active);
+
 private:
     cocos2d::TMXLayer* _bgLayer = nullptr;
     cocos2d::TMXLayer* _houseBodyLayer = nullptr;
     cocos2d::TMXLayer* _houseTopLayer = nullptr;
+    cocos2d::TMXLayer* _festivalLayer = nullptr;
 
     std::vector<cocos2d::Rect> _wallRects;
     std::vector<std::vector<cocos2d::Vec2>> _wallPolys;
+    std::vector<cocos2d::Rect> _festivalWallRects;
+    std::vector<std::vector<cocos2d::Vec2>> _festivalWallPolys;
     cocos2d::DrawNode* _wallDebug = nullptr;
+    bool _festivalActive = false;
 
     std::vector<cocos2d::Rect> _doorToFarmRects;
     std::vector<cocos2d::Vec2> _doorToFarmPoints;
