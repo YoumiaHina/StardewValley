@@ -306,8 +306,13 @@ bool MineMapController::isNearStairs(const Vec2& p) const {
                 }
             }
         }
-        if (!mainCovered && _floorMap->nearStairs(p, radius)) {
-            return true;
+        if (!mainCovered) {
+            if (_floorMap->nearStairs(p, radius)) {
+                return true;
+            }
+            if (_floor > 0 && (_floor % 5 == 0) && _floorMap->nearElestair(p)) {
+                return true;
+            }
         }
         for (const auto& stairPos : _extraStairs) {
             if (p.distance(stairPos) <= radius) {

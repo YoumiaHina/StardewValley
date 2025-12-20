@@ -54,7 +54,7 @@ void ChestController::refreshVisuals() {
     for (const auto& ch : _chests) {
         auto r = Game::chestRect(ch);
         Vec2 center(r.getMidX(), r.getMidY());
-        auto spr = Sprite::create("Chest.png");
+        auto spr = Sprite::create("PlaceableItem/Chest.png");
         if (spr && spr->getTexture()) {
             auto cs = spr->getContentSize();
             if (cs.width > 0 && cs.height > 0) {

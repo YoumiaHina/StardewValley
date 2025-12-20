@@ -206,7 +206,7 @@ void BeachMapController::refreshMapVisuals() {
     for (const auto& ch : _chests) {
         auto r = Game::chestRect(ch);
         Vec2 center(r.getMidX(), r.getMidY());
-        auto spr = Sprite::create("Chest.png");
+        auto spr = Sprite::create("PlaceableItem/Chest.png");
         if (spr && spr->getTexture()) {
             auto cs = spr->getContentSize();
             if (cs.width > 0.0f && cs.height > 0.0f) {
