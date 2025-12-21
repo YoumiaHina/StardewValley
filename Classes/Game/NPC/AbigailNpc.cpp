@@ -29,7 +29,7 @@ int Abigail::friendshipGainForGift(ItemType itemType) const {
     case ItemType::Lobster:
     case ItemType::Shrimp:
       return 40;
-    case ItemType::Blueberry: return 35;
+    case ItemType::Blueberry: return 45;
     default: return 20;
   }
 }

@@ -28,8 +28,8 @@ int Willy::friendshipGainForGift(ItemType itemType) const {
     case ItemType::Lobster:
     case ItemType::Shrimp:
       return 60;
-    case ItemType::Corn: return 25;
-    default: return 20;
+    case ItemType::Corn: return 45;
+    default: return 30;
   }
 }
 
