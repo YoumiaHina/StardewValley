@@ -23,7 +23,7 @@ public:
 
 private:
     struct RowWidgets {
-        cocos2d::Label* nameLabel = nullptr;
+        cocos2d::Sprite* toolIcon = nullptr;
         cocos2d::Label* levelLabel = nullptr;
         cocos2d::Label* buttonLabel = nullptr;
         Game::ToolKind kind = Game::ToolKind::Axe;
