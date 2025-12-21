@@ -198,9 +198,9 @@ void FishingController::update(float dt) {
     if (_barCatchPos > _barHeight) { _barCatchPos = _barHeight; _barCatchVel = 0; }
 
     // fish movement (random jitter)
-    float fishAccel = ((std::rand() % 200) - 100) * 8.0f;
+    float fishAccel = ((std::rand() % 200) - 100) * 4.0f;
     _fishVel += fishAccel * dt;
-    _fishVel = std::max(-360.0f, std::min(360.0f, _fishVel));
+    _fishVel = std::max(-200.0f, std::min(200.0f, _fishVel));
     _fishPos += _fishVel * dt;
     if (_fishPos < 20) { _fishPos = 20; _fishVel = std::abs(_fishVel); }
     if (_fishPos > _barHeight - 20) { _fishPos = _barHeight - 20; _fishVel = -std::abs(_fishVel); }
