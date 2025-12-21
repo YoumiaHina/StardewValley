@@ -189,7 +189,7 @@ void HotbarUI::refreshHotbar() {
     Vec2 c(x + half,  half);
     Vec2 d(x - half,  half);
 
-    Color4F col(1.f, 0.9f, 0.2f, 1.f);
+    Color4F col(1.f, 0.f, 0.f, 1.f);
     _hotbarHighlight->drawLine(a, b, col);
     _hotbarHighlight->drawLine(b, c, col);
     _hotbarHighlight->drawLine(c, d, col);

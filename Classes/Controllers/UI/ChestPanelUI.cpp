@@ -68,7 +68,7 @@ void ChestPanelUI::refreshChestPanel(Game::Chest* chest) {
     float startX = 0.f;
     float firstRowY = 0.f;
     float rowGap = cellH;
-    auto templateSprite = Sprite::create("inventory.png");
+    auto templateSprite = Sprite::create("inventory1.png");
     bool useTemplate = false;
     if (templateSprite && templateSprite->getTexture()) {
         auto cs = templateSprite->getContentSize();
@@ -80,7 +80,7 @@ void ChestPanelUI::refreshChestPanel(Game::Chest* chest) {
             float totalH = pieceH * 3.0f;
             auto bgRoot = Node::create();
             for (int i = 0; i < 3; ++i) {
-                auto bg = Sprite::create("inventory.png");
+                auto bg = Sprite::create("inventory1.png");
                 if (!bg || !bg->getTexture()) continue;
                 bg->setScale(s);
                 float y = -totalH * 0.5f + pieceH * 0.5f + i * pieceH;
@@ -154,8 +154,9 @@ void ChestPanelUI::refreshChestPanel(Game::Chest* chest) {
             icon->setPosition(Vec2(0, 0));
             icon->setVisible(false);
             cellNode->addChild(icon);
-            auto countLabel = Label::createWithTTF("", "fonts/arial.ttf", 14);
+            auto countLabel = Label::createWithTTF("", "fonts/arial.ttf", 18);
             countLabel->setAnchorPoint(Vec2(1.f, 0.f));
+            countLabel->setColor(Color3B::BLACK);
             countLabel->setPosition(Vec2(cellW * 0.5f - 6.f, -cellH * 0.5f + 4.f));
             countLabel->setVisible(false);
             cellNode->addChild(countLabel);
@@ -178,6 +179,7 @@ void ChestPanelUI::refreshChestPanel(Game::Chest* chest) {
                     return;
                 }
                 const auto& slot = chestPtr->slots[static_cast<std::size_t>(flatIndex)];
+                nameLabel->setVisible(false);
                 if (slot.kind == Game::SlotKind::Item && slot.itemQty > 0) {
                     std::string path = Game::itemIconPath(slot.itemType);
                     if (path.empty()) {
@@ -207,11 +209,12 @@ void ChestPanelUI::refreshChestPanel(Game::Chest* chest) {
                     } else {
                         icon->setVisible(false);
                     }
+                if (slot.itemQty > 1) {
                     countLabel->setString(StringUtils::format("%d", slot.itemQty));
                     countLabel->setVisible(true);
-                    std::string name = Game::itemName(slot.itemType);
-                    nameLabel->setString(name);
-                    nameLabel->setVisible(true);
+                } else {
+                    countLabel->setVisible(false);
+                }
                 } else if (slot.kind == Game::SlotKind::Tool && slot.tool) {
                     auto t = slot.tool.get();
                     std::string path = t ? t->iconPath() : std::string();
@@ -231,13 +234,7 @@ void ChestPanelUI::refreshChestPanel(Game::Chest* chest) {
                         icon->setVisible(false);
                     }
                     countLabel->setVisible(false);
-                    std::string name = t ? t->displayName() : std::string();
-                    if (!name.empty()) {
-                        nameLabel->setString(name);
-                        nameLabel->setVisible(true);
-                    } else {
-                        nameLabel->setVisible(false);
-                    }
+                    nameLabel->setVisible(false);
                 } else {
                     icon->setVisible(false);
                     countLabel->setVisible(false);
@@ -329,11 +326,16 @@ void ChestPanelUI::refreshChestPanel(Game::Chest* chest) {
                     } else {
                         icon->setVisible(false);
                     }
-                    countLabel->setString(StringUtils::format("%d", slot.itemQty));
-                    countLabel->setVisible(true);
-                    std::string name = Game::itemName(slot.itemType);
-                    nameLabel->setString(name);
-                    nameLabel->setVisible(true);
+                    if (slot.itemQty > 1) {
+                        countLabel->setString(StringUtils::format("%d", slot.itemQty));
+                        float offsetX = cellW * 0.5f - 6.f;
+                        float offsetY = -cellH * 0.5f + 4.f;
+                        countLabel->setPosition(Vec2(offsetX, offsetY));
+                        countLabel->setVisible(true);
+                    } else {
+                        countLabel->setVisible(false);
+                    }
+                    nameLabel->setVisible(false);
                 } else if (slot.kind == Game::SlotKind::Tool && slot.tool) {
                     auto t = slot.tool.get();
                     std::string path = t ? t->iconPath() : std::string();
@@ -353,13 +355,7 @@ void ChestPanelUI::refreshChestPanel(Game::Chest* chest) {
                         icon->setVisible(false);
                     }
                     countLabel->setVisible(false);
-                    std::string name = t ? t->displayName() : std::string();
-                    if (!name.empty()) {
-                        nameLabel->setString(name);
-                        nameLabel->setVisible(true);
-                    } else {
-                        nameLabel->setVisible(false);
-                    }
+                    nameLabel->setVisible(false);
                 } else {
                     icon->setVisible(false);
                     countLabel->setVisible(false);
@@ -382,7 +378,7 @@ void ChestPanelUI::refreshChestPanel(Game::Chest* chest) {
         Vec2 b(hitCx + hw, hitCyHit - hh);
         Vec2 c(hitCx + hw, hitCyHit + hh);
         Vec2 d(hitCx - hw, hitCyHit + hh);
-        Color4F color(0.f, 0.f, 0.f, 1.f);
+        Color4F color(1.f, 0.f, 0.f, 1.f);
         _highlightNode->drawLine(a, b, color);
         _highlightNode->drawLine(b, c, color);
         _highlightNode->drawLine(c, d, color);
@@ -439,11 +435,13 @@ void ChestPanelUI::onInventorySlotClicked(int invIndex) {
                 } else {
                     icon->setVisible(false);
                 }
-                countLabel->setString(StringUtils::format("%d", slot.itemQty));
-                countLabel->setVisible(true);
-                std::string name = Game::itemName(slot.itemType);
-                nameLabel->setString(name);
-                nameLabel->setVisible(true);
+                if (slot.itemQty > 1) {
+                    countLabel->setString(StringUtils::format("%d", slot.itemQty));
+                    countLabel->setVisible(true);
+                } else {
+                    countLabel->setVisible(false);
+                }
+                nameLabel->setVisible(false);
             } else if (slot.kind == Game::SlotKind::Tool && slot.tool) {
                 std::string path;
                 auto t = slot.tool.get();
@@ -459,13 +457,7 @@ void ChestPanelUI::onInventorySlotClicked(int invIndex) {
                     icon->setVisible(false);
                 }
                 countLabel->setVisible(false);
-                std::string name = t ? t->displayName() : std::string();
-                if (!name.empty()) {
-                    nameLabel->setString(name);
-                    nameLabel->setVisible(true);
-                } else {
-                    nameLabel->setVisible(false);
-                }
+                nameLabel->setVisible(false);
             } else {
                 icon->setVisible(false);
                 countLabel->setVisible(false);

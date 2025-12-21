@@ -137,21 +137,6 @@ void PlayerController::registerCommonInputHandlers(
                     _ui->popTextAt(_map->getPlayerPosition(_player->getPosition()), "Saved", Color3B::WHITE);
                 }
             } break;
-            case EventKeyboard::KeyCode::KEY_F6: {
-                if (chestOpen || craftOpen || storeOpen || skillOpen || dialogueOpen || socialOpen) break;
-                auto& ws = Game::globalState();
-                ws.seasonIndex = 1;
-                ws.dayOfSeason = GameConfig::FESTIVAL_DAY;
-                ws.timeHour = 6;
-                ws.timeMinute = 0;
-                ws.timeAccum = 0.0f;
-                ws.pendingPassOut = false;
-                ws.weatherSeasonIndex = -1;
-                ws.weatherDayOfSeason = -1;
-                if (_ui) {
-                    _ui->refreshHUD();
-                }
-            } break;
             case EventKeyboard::KeyCode::KEY_E: {
                 if (chestOpen || craftOpen || storeOpen || skillOpen) break;
                 openGlobalChest(_ui);
