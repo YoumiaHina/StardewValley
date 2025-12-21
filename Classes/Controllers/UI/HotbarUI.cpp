@@ -29,7 +29,7 @@ void HotbarUI::setInventoryBackground(const std::string& path) {
                 float sx = targetW / cs.width;
                 float sy = targetH / cs.height;
                 float s = std::min(sx, sy);
-                s *= 0.8f;
+                s *= 1.2f;
                 _hotbarBgSprite->setScale(s);
             }
         }
@@ -66,7 +66,7 @@ void HotbarUI::buildHotbar() {
                 float sx = targetW / cs.width;
                 float sy = targetH / cs.height;
                 float s = std::min(sx, sy);
-                s *= 0.8f;
+                s *= 1.2f;
                 _hotbarBgSprite->setScale(s);
             }
             useImageBg = true;
@@ -116,7 +116,7 @@ void HotbarUI::buildHotbar() {
         qtyLabel->setAnchorPoint(Vec2(1.0f, 0.0f));
         qtyLabel->setColor(Color3B::BLACK);
         float offsetX = slotW * 0.5f - 6.0f;
-        float offsetY = -slotH * 0.5f + 12.0f;
+        float offsetY = -slotH * 0.5f + 4.0f;
         qtyLabel->setPosition(Vec2(x + offsetX, offsetY));
         qtyLabel->setVisible(false);
         _hotbarNode->addChild(qtyLabel, 3);
@@ -165,16 +165,19 @@ void HotbarUI::refreshHotbar() {
     float totalWidth = slots * slotW + (slots - 1) * padding;
     bool imageBg = (_hotbarBgSprite != nullptr);
     float bgScaledW = 0.0f, bgScaledH = 0.0f;
+    float innerW = 0.0f, innerH = 0.0f;
     if (imageBg) {
         auto cs = _hotbarBgSprite->getContentSize();
         bgScaledW = cs.width * _hotbarBgSprite->getScaleX();
         bgScaledH = cs.height * _hotbarBgSprite->getScaleY();
+        innerW = bgScaledW * 0.96f;
+        innerH = bgScaledH * (64.0f / 96.0f);
     }
-    float cellW = imageBg ? (bgScaledW / std::max(1, slots)) : slotW;
-    float cellH = imageBg ? bgScaledH : slotH;
+    float cellW = imageBg ? (innerW / std::max(1, slots)) : slotW;
+    float cellH = imageBg ? innerH : slotH;
     int sel = _inventory->selectedIndex();
     float x = imageBg
-        ? (-bgScaledW/2 + (sel + 0.5f) * cellW)
+        ? (-innerW/2 + (sel + 0.5f) * cellW)
         : (-totalWidth/2 + sel * (slotW + padding) + slotW/2);
     _hotbarHighlight->clear();
     // 选一个正方形边长（用较小的那个，避免越出槽位太多）
@@ -200,7 +203,7 @@ void HotbarUI::refreshHotbar() {
         auto icon = (i < static_cast<int>(_hotbarIcons.size())) ? _hotbarIcons[i] : nullptr;
         auto qtyLabel = (i < static_cast<int>(_hotbarQtyLabels.size())) ? _hotbarQtyLabels[i] : nullptr;
         float cx = imageBg
-            ? (-bgScaledW/2 + (i + 0.5f) * cellW)
+            ? (-innerW/2 + (i + 0.5f) * cellW)
             : (-totalWidth/2 + i * (slotW + padding) + slotW/2);
 
         if (auto tConst = _inventory->toolAt(i)) {
@@ -266,7 +269,7 @@ void HotbarUI::refreshHotbar() {
                 if (st.quantity > 1) {
                     qtyLabel->setString(StringUtils::format("%d", st.quantity));
                     float offsetX = cellW * 0.5f - 6.0f;
-                    float offsetY = -cellH * 0.5f + 12.0f;
+                    float offsetY = -cellH * 0.5f + 4.0f;
                     qtyLabel->setPosition(Vec2(cx + offsetX, offsetY));
                     qtyLabel->setVisible(true);
                 } else {
