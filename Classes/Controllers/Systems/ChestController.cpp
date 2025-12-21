@@ -349,4 +349,139 @@ void transferChestCell(Game::Chest& chest,
     }
 }
 
+bool transferInventoryToChest(Game::Chest& chest,
+                              int flatIndex,
+                              Game::Inventory& inventory,
+                              bool moveAll) {
+    if (flatIndex < 0) return false;
+    if (chest.slots.empty()) {
+        chest.slots.resize(static_cast<std::size_t>(Game::Chest::CAPACITY));
+    }
+    if (flatIndex >= static_cast<int>(chest.slots.size())) return false;
+
+    int invIndex = inventory.selectedIndex();
+    if (invIndex < 0 || invIndex >= static_cast<int>(inventory.size())) return false;
+
+    int maxMoves = moveAll ? Game::ItemStack::MAX_STACK : 1;
+    bool movedAny = false;
+
+    for (int i = 0; i < maxMoves; ++i) {
+        Game::Slot beforeChest = chest.slots[static_cast<std::size_t>(flatIndex)];
+        Game::ItemStack beforeInvStack = inventory.itemAt(static_cast<std::size_t>(invIndex));
+        bool beforeInvEmpty = inventory.isEmpty(static_cast<std::size_t>(invIndex));
+        bool beforeInvIsTool = inventory.isTool(static_cast<std::size_t>(invIndex));
+
+        transferChestCell(chest, flatIndex, inventory);
+
+        Game::Slot afterChest = chest.slots[static_cast<std::size_t>(flatIndex)];
+        Game::ItemStack afterInvStack = inventory.itemAt(static_cast<std::size_t>(invIndex));
+        bool afterInvEmpty = inventory.isEmpty(static_cast<std::size_t>(invIndex));
+        bool afterInvIsTool = inventory.isTool(static_cast<std::size_t>(invIndex));
+
+        bool chestSame = (beforeChest.kind == afterChest.kind &&
+                          beforeChest.itemType == afterChest.itemType &&
+                          beforeChest.itemQty == afterChest.itemQty);
+        bool invSame = (beforeInvEmpty == afterInvEmpty &&
+                        beforeInvIsTool == afterInvIsTool &&
+                        beforeInvStack.type == afterInvStack.type &&
+                        beforeInvStack.quantity == afterInvStack.quantity);
+
+        if (chestSame && invSame) {
+            break;
+        }
+        movedAny = true;
+        if (!moveAll) break;
+    }
+
+    return movedAny;
+}
+
+bool transferChestToInventory(Game::Chest& chest,
+                              int flatIndex,
+                              Game::Inventory& inventory,
+                              int invIndex,
+                              bool moveAll) {
+    if (flatIndex < 0 || invIndex < 0) return false;
+    if (chest.slots.empty()) {
+        chest.slots.resize(static_cast<std::size_t>(Game::Chest::CAPACITY));
+    }
+    if (flatIndex >= static_cast<int>(chest.slots.size())) return false;
+    if (invIndex >= static_cast<int>(inventory.size())) return false;
+    Game::Slot& slotChest = chest.slots[static_cast<std::size_t>(flatIndex)];
+
+    bool movedAny = false;
+
+    if (slotChest.kind == Game::SlotKind::Item && slotChest.itemQty > 0) {
+        Game::ItemType type = slotChest.itemType;
+        bool invEmpty = inventory.isEmpty(static_cast<std::size_t>(invIndex));
+        bool invIsItem = inventory.isItem(static_cast<std::size_t>(invIndex));
+        Game::ItemStack st = inventory.itemAt(static_cast<std::size_t>(invIndex));
+        bool sameType = invIsItem && st.type == type;
+        int currentQty = (invEmpty || !invIsItem) ? 0 : st.quantity;
+        int space = Game::ItemStack::MAX_STACK - currentQty;
+        bool canReceive = (invEmpty || sameType) && (space > 0);
+        if (!canReceive) return false;
+        int moveCount = moveAll ? std::min(space, slotChest.itemQty) : 1;
+        for (int i = 0; i < moveCount; ++i) {
+            bool okAdd = inventory.addOneItemToSlot(static_cast<std::size_t>(invIndex), type);
+            if (!okAdd) break;
+            if (slotChest.itemQty <= 0) break;
+            slotChest.itemQty -= 1;
+            movedAny = true;
+            if (slotChest.itemQty <= 0) {
+                slotChest.kind = Game::SlotKind::Empty;
+                slotChest.itemQty = 0;
+                break;
+            }
+        }
+    } else if (slotChest.kind == Game::SlotKind::Tool && slotChest.tool) {
+        bool invEmpty = inventory.isEmpty(static_cast<std::size_t>(invIndex));
+        if (!invEmpty) return false;
+        auto t = slotChest.tool.get();
+        if (!t) return false;
+        Game::ToolKind tk = t->kind();
+        int level = t->level();
+        auto tool = Game::makeTool(tk);
+        if (tool) {
+            tool->setLevel(level);
+        }
+        inventory.setTool(static_cast<std::size_t>(invIndex), tool);
+        slotChest.tool.reset();
+        slotChest.kind = Game::SlotKind::Empty;
+        slotChest.itemQty = 0;
+        movedAny = true;
+    } else {
+        return false;
+    }
+
+    if (!movedAny) return false;
+
+    auto& ws = Game::globalState();
+    for (auto& ch : ws.farmChests) {
+        if (ch.pos.equals(chest.pos)) {
+            ch = chest;
+        }
+    }
+    for (auto& ch : ws.houseChests) {
+        if (ch.pos.equals(chest.pos)) {
+            ch = chest;
+        }
+    }
+    for (auto& ch : ws.townChests) {
+        if (ch.pos.equals(chest.pos)) {
+            ch = chest;
+        }
+    }
+    for (auto& ch : ws.beachChests) {
+        if (ch.pos.equals(chest.pos)) {
+            ch = chest;
+        }
+    }
+    if (&chest == &ws.globalChest) {
+        ws.globalChest = chest;
+    }
+
+    return true;
+}
+
 }

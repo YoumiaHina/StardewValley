@@ -63,13 +63,7 @@ bool UIController::handleHotbarMouseDown(EventMouse* e) {
 
 bool UIController::handleHotbarAtPoint(const Vec2& screenPoint) {
     if (!_hotbar || !_inventory) return false;
-    bool handled = _hotbar->handleHotbarAtPoint(screenPoint);
-    if (!handled) return false;
-    if (_chestPanel && _chestPanel->isVisible()) {
-        int idx = _inventory->selectedIndex();
-        _chestPanel->onInventorySlotClicked(idx);
-    }
-    return true;
+    return _hotbar->handleHotbarAtPoint(screenPoint);
 }
 
 void UIController::handleHotbarScroll(float dy) { if (_hotbar) _hotbar->handleHotbarScroll(dy); }
