@@ -14,7 +14,7 @@ void MineElevatorController::buildPanel() {
     // 中央面板
     Size vs = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
-    _panel->setContentSize(Size(360, 320));
+    _panel->setContentSize(Size(960, 400));
     _panel->setAnchorPoint(Vec2(0.5f, 0.5f));
     _panel->setPosition(origin + Vec2(vs.width/2, vs.height/2));
     _panel->setVisible(false);
@@ -38,24 +38,27 @@ void MineElevatorController::_refreshButtons() {
     _panel->removeAllChildren();
     auto floors = _map->getActivatedElevatorFloors();
     // 小方块网格排布
-    int cols = 4;
-    float cell = 64.0f;
-    float padding = 12.0f;
+    int cols = 8;
+    float cell = 80.0f;
+    float padding = 16.0f;
     float w = _panel->getContentSize().width;
     float h = _panel->getContentSize().height;
     // 标题
-    auto title = Label::createWithTTF("Elevator", "fonts/arial.ttf", 22);
-    title->setPosition(Vec2(w/2, h - 22));
+    auto title = Label::createWithTTF("Elevator", "fonts/arial.ttf", 26);
+    title->setPosition(Vec2(w/2, h - 28));
     _panel->addChild(title);
+    float totalWidth = cols * cell + (cols - 1) * padding;
+    float startX = (w - totalWidth) * 0.5f + cell * 0.5f;
     int i = 0;
     for (int f : floors) {
         int col = i % cols;
         int row = i / cols;
-        float x = padding + cell/2 + col * (cell + padding);
+        float x = startX + col * (cell + padding);
         float y = h - (padding + cell/2 + row * (cell + padding) + 48.0f); // 留出标题空间
         auto btn = Button::create();
         btn->setTitleText(StringUtils::format("%d", f));
-        btn->setTitleFontSize(20);
+        btn->setTitleFontName("fonts/arial.ttf");
+        btn->setTitleFontSize(22);
         btn->setContentSize(Size(cell, cell));
         btn->setScale9Enabled(true);
         btn->setColor(Color3B(240, 200, 120));

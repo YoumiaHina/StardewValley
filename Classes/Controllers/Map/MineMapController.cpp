@@ -87,6 +87,7 @@ cocos2d::Vec2 MineMapController::clampPosition(const Vec2& current, const Vec2& 
 bool MineMapController::isNearDoor(const Vec2& playerWorldPos) const {
     // 用楼梯位置代替“门”提示
     float s = static_cast<float>(GameConfig::TILE_SIZE);
+    if (_floor >= 120) return false;
     if (_entrance) return _entrance->nearStairs(playerWorldPos, s * 0.8f);
     if (_floorMap) return _floorMap->nearStairs(playerWorldPos, s * 0.8f);
     return playerWorldPos.distance(_stairsPos) <= s * 0.8f;
@@ -287,6 +288,9 @@ void MineMapController::unlockElevatorIfNeeded() {
 bool MineMapController::isNearStairs(const Vec2& p) const {
     float s = static_cast<float>(GameConfig::TILE_SIZE);
     float radius = s * 1.2f;
+    if (_floor >= 120) {
+        return false;
+    }
     if (_entrance) {
         return _entrance->nearStairs(p, radius);
     }
@@ -469,6 +473,7 @@ void MineMapController::loadFloorTMX(int floorIndex) {
         if (stairRoot) {
             _stairSystem.attachTo(stairRoot);
         }
+        bool isBottom = (floorIndex >= 120);
         std::vector<Vec2> candidates;
         candidates.reserve(static_cast<std::size_t>(_cols * _rows));
         float s = static_cast<float>(GameConfig::TILE_SIZE);
@@ -482,7 +487,7 @@ void MineMapController::loadFloorTMX(int floorIndex) {
                 }
             }
         }
-        if (!candidates.empty()) {
+        if (!isBottom && !candidates.empty()) {
             _stairSystem.generateStairs(candidates, 2, 4, _extraStairs);
         }
         std::vector<Vec2> stairWorldPos;

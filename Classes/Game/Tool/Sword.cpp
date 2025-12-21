@@ -16,6 +16,19 @@ ToolKind Sword::kind() const { return ToolKind::Sword; }
 std::string Sword::displayName() const { return std::string("Sword"); }
 
 std::string Sword::iconPath() const {
+    auto& ws = Game::globalState();
+    if (ws.abyssElevatorFloors.empty()) {
+        return std::string("Weapon/sword.png");
+    }
+    int maxFloor = 0;
+    for (int f : ws.abyssElevatorFloors) {
+        if (f > maxFloor) {
+            maxFloor = f;
+        }
+    }
+    if (maxFloor > 0 && maxFloor % 5 == 0) {
+        return StringUtils::format("Weapon/sword_%d.png", maxFloor);
+    }
     return std::string("Weapon/sword.png");
 }
 
@@ -48,7 +61,10 @@ std::string Sword::use(Controllers::IMapController* map,
 }
 
 int Sword::baseDamage() {
-    return 8;
+    auto& ws = Game::globalState();
+    std::size_t upgrades = ws.abyssElevatorFloors.size();
+    int bonus = static_cast<int>(upgrades) * 2;
+    return 8 + bonus;
 }
 
 void Sword::buildHitTiles(Controllers::IMapController* map,
