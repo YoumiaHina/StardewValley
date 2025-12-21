@@ -17,6 +17,8 @@ namespace Controllers {
 // - 协作对象：IMapController 提供瓦片/坐标与掉落刷新；UI/工具通过该系统查询与操作作物。
 class CropSystem {
 public:
+    // 锄头收获：若可收获则计算产物数量（含技能树加成）并执行收获；返回是否发生收获动作。
+    bool harvestByHoeAt(int c, int r, int toolLevel, Game::ItemType& outProduce, int& outQty, bool& outYields);
     // 构造并从 WorldState 同步加载作物列表。
     CropSystem();
     // 只读访问作物列表（运行时状态由系统维护）。

@@ -1,7 +1,6 @@
 #include "Controllers/Systems/AnimalSystem.h"
 #include "Game/Animals/AnimalBase.h"
 #include "Game/WorldState.h"
-#include "Game/Crops/crop/CropBase.h"
 #include "Game/Item.h"
 #include "Game/SkillTree/SkillTreeSystem.h"
 #include <random>
@@ -154,7 +153,6 @@ AnimalSystem::AnimalSystem(Controllers::IMapController* map, cocos2d::Node* worl
     for (const auto& a : ws.farmAnimals) {
         Instance inst;
         inst.animal = a;
-        inst.velocity = Vec2::ZERO;
         inst.idleTimer = randomFloat(0.5f, 2.0f);
         _animals.push_back(inst);
     }
@@ -239,15 +237,10 @@ void AnimalSystem::spawnAnimal(Game::AnimalType type, const cocos2d::Vec2& pos) 
     inst.animal.ageDays = 0;
     inst.animal.isAdult = false;
     inst.animal.fedToday = false;
-    inst.velocity = Vec2::ZERO;
     inst.idleTimer = randomFloat(0.5f, 2.0f);
     _animals.push_back(inst);
     ensureSprite(_animals.back());
-    auto& ws = Game::globalState();
-    ws.farmAnimals.clear();
-    for (const auto& it : _animals) {
-        ws.farmAnimals.push_back(it.animal);
-    }
+    syncSave();
 }
 
 // 购买动物：
@@ -269,6 +262,8 @@ bool AnimalSystem::buyAnimal(Game::AnimalType type, const cocos2d::Vec2& pos, lo
 // - 每帧把动物列表回写到 WorldState，确保存档与系统外读取的一致性。
 void AnimalSystem::update(float dt) {
     if (!_map) return;
+    auto& ws = Game::globalState();
+    if (ws.lastScene != static_cast<int>(Game::SceneKind::Farm)) return;
     float s = _map->tileSize();
     for (auto& inst : _animals) {
         ensureSprite(inst);
@@ -334,53 +329,33 @@ void AnimalSystem::update(float dt) {
         }
         updateGrowthLabel(inst);
     }
-    auto& ws = Game::globalState();
-    ws.farmAnimals.clear();
-    for (const auto& it : _animals) {
-        ws.farmAnimals.push_back(it.animal);
-    }
+    syncSave();
 }
 
-// 每日推进（在线版本）：
-// - 对当前系统内的动物逐只执行 advanceAnimalOneDay。
-// - 若产出：将世界坐标转换为瓦片坐标，并通过地图生成掉落。
-// - 末尾写回 WorldState，并刷新掉落可视化。
-void AnimalSystem::advanceAnimalsDaily() {
-    if (!_map) return;
+void advanceAnimalsDaily(Controllers::IMapController* map) {
     auto& ws = Game::globalState();
-    for (auto& inst : _animals) {
-        ProducedDrop drop;
-        bool produced = advanceAnimalOneDay(inst.animal, &drop);
-        if (produced) {
-            int c = 0;
-            int r = 0;
-            _map->worldToTileIndex(drop.pos, c, r);
-            if (_map->inBounds(c, r)) {
-                _map->spawnDropAt(c, r, static_cast<int>(drop.type), drop.qty);
-            }
-        }
-    }
-    ws.farmAnimals.clear();
-    for (const auto& it : _animals) {
-        ws.farmAnimals.push_back(it.animal);
-    }
-    if (_map) {
-        _map->refreshDropsVisuals();
-    }
-}
-
-// 每日推进（离线版本）：
-// - 仅依赖 WorldState.farmAnimals 推进成长与产物。
-// - 产物写入 WorldState.farmDrops（不需要地图与渲染环境）。
-void advanceAnimalsDailyWorldOnly() {
-    auto& ws = Game::globalState();
+    Controllers::IMapController* dropMap = (map && map->isFarm()) ? map : nullptr;
+    float tileSize = dropMap ? dropMap->tileSize() : 0.0f;
     for (auto& a : ws.farmAnimals) {
         ProducedDrop drop;
         bool produced = advanceAnimalOneDay(a, &drop);
-        if (produced) {
-            Game::Drop d{ drop.type, drop.pos, drop.qty };
-            ws.farmDrops.push_back(d);
+        if (!produced) continue;
+
+        auto appendWorldDrop = [&ws, &drop]() {
+            ws.farmDrops.push_back(Game::Drop{ drop.type, drop.pos, drop.qty });
+        };
+
+        if (!dropMap || tileSize <= 0.0f) {
+            appendWorldDrop();
+            continue;
         }
+
+        int c = 0;
+        int r = 0;
+        cocos2d::Vec2 clamped = dropMap->clampPosition(drop.pos, drop.pos, tileSize * 0.1f);
+        dropMap->worldToTileIndex(clamped, c, r);
+        if (dropMap->inBounds(c, r)) dropMap->spawnDropAt(c, r, static_cast<int>(drop.type), drop.qty);
+        else appendWorldDrop();
     }
 }
 
@@ -411,12 +386,17 @@ bool AnimalSystem::tryFeedAnimal(const cocos2d::Vec2& playerPos, Game::ItemType 
         auto& skill = Game::SkillTreeSystem::getInstance();
         skill.addXp(Game::SkillTreeType::AnimalHusbandry, 6);
     }
+    syncSave();
+    return true;
+}
+
+void AnimalSystem::syncSave() {
     auto& ws = Game::globalState();
     ws.farmAnimals.clear();
+    ws.farmAnimals.reserve(_animals.size());
     for (const auto& it : _animals) {
         ws.farmAnimals.push_back(it.animal);
     }
-    return true;
 }
 
 }
