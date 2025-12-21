@@ -70,10 +70,7 @@ void GameStateController::sleepToNextMorning() {
     if (_crop) {
         _crop->advanceCropsDaily(_map);
     }
-    if (_animals) {
-        _animals->advanceAnimalsDaily();
-    }
-	advanceAnimalsDailyWorldOnly();
+    advanceAnimalsDaily(_map);
     if (!ws.farmTiles.empty() && ws.farmCols > 0 && ws.farmRows > 0) {
         const int cols = ws.farmCols;
         const int rows = ws.farmRows;

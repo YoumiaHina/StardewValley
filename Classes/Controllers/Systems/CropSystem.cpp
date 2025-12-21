@@ -4,6 +4,8 @@
 #include "Controllers/Systems/CropSystem.h"
 #include <algorithm>
 #include <cstdlib>
+#include <random>
+#include "Game/SkillTree/SkillTreeSystem.h"
 
 namespace Controllers {
 
@@ -11,6 +13,43 @@ namespace Controllers {
 CropSystem::CropSystem() { syncLoad(); }
 const std::vector<Game::Crop>& CropSystem::crops() const { return _crops; }
 std::vector<Game::Crop>& CropSystem::crops() { return _crops; }
+
+bool CropSystem::harvestByHoeAt(int c, int r, int toolLevel, Game::ItemType& outProduce, int& outQty, bool& outYields) {
+    outProduce = Game::ItemType::Parsnip;
+    outQty = 0;
+    outYields = false;
+    int idx = findCropIndex(c, r);
+    if (idx < 0) return false;
+    if (!canHarvestAt(c, r)) return false;
+    const auto& cp = _crops[static_cast<std::size_t>(idx)];
+    outYields = yieldsOnHarvestAt(c, r);
+    if (outYields) {
+        outProduce = Game::produceItemFor(cp.type);
+        int minQty = 1;
+        int maxQty = 1;
+        if (outProduce == Game::ItemType::Parsnip) {
+            minQty = 3;
+            maxQty = 8;
+        } else {
+            minQty = 1;
+            maxQty = 5;
+        }
+        int qty = minQty;
+        if (maxQty > minQty) {
+            std::uniform_int_distribution<int> dist(minQty, maxQty);
+            static std::mt19937 eng{ std::random_device{}() };
+            qty = dist(eng);
+        }
+        int lv = std::max(0, toolLevel);
+        if (lv > 0) qty += lv;
+        auto& skill = Game::SkillTreeSystem::getInstance();
+        qty = skill.adjustHarvestQuantityForFarming(outProduce, qty);
+        skill.addXp(Game::SkillTreeType::Farming, skill.xpForFarmingHarvest(outProduce, qty));
+        outQty = qty;
+    }
+    harvestCropAt(c, r);
+    return true;
+}
 
 // 根据网格坐标查找作物索引；未找到返回 -1
 int CropSystem::findCropIndex(int c, int r) const {

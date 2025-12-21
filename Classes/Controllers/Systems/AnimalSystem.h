@@ -21,10 +21,6 @@ public:
     // - dt 为秒；内部速度单位与地图坐标系一致。
     void update(float dt);
 
-    // 每日推进：根据喂食与成长规则更新动物，并在地图上生成当日产物掉落。
-    // - 会重置每只动物的 fedToday，用于隔日重新喂食判定。
-    void advanceAnimalsDaily();
-
     // 尝试喂食：在玩家附近选取可交互动物，满足饲料规则则消耗物品并标记 fedToday。
     // - consumedQty 为建议消耗数量（当前固定为 1）；背包扣除由上层执行以避免系统直接耦合 Inventory。
     bool tryFeedAnimal(const cocos2d::Vec2& playerPos, Game::ItemType feedType, int& consumedQty);
@@ -41,7 +37,6 @@ private:
     struct Instance {
         Game::Animal animal;
         cocos2d::Sprite* sprite = nullptr;
-        cocos2d::Vec2 velocity;
         cocos2d::Label* growthLabel = nullptr;
         float idleTimer = 0.0f;
     };
@@ -50,13 +45,15 @@ private:
     cocos2d::Node* _worldNode = nullptr;
     std::vector<Instance> _animals;
 
+    void syncSave();
+
     // 确保实例拥有精灵与状态标签，并完成挂载与缩放。
     void ensureSprite(Instance& inst);
     // 刷新实例头顶文本（Adult/剩余天数 + Full/Hungry）并更新显示位置。
     void updateGrowthLabel(Instance& inst);
 };
 
-// 离线每日推进：仅基于 WorldState 推进动物成长，并把产物写入 farmDrops。
-void advanceAnimalsDailyWorldOnly();
+// 每日推进：推进动物成长与产物；若 map 为 Farm 则生成地图掉落，否则写入 farmDrops。
+void advanceAnimalsDaily(Controllers::IMapController* map);
 
 }
