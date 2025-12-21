@@ -25,7 +25,7 @@ void FestivalController::update(float) {
 
 bool FestivalController::isFestivalToday() const {
     const auto& ws = Game::globalState();
-    return ws.dayOfSeason == GameConfig::FESTIVAL_DAY;
+    return ws.seasonIndex == 1 && ws.dayOfSeason == GameConfig::FESTIVAL_DAY;
 }
 
 void FestivalController::syncToMap(bool force) {

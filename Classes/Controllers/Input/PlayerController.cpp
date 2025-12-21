@@ -151,18 +151,33 @@ void PlayerController::registerCommonInputHandlers(
                 Game::Cheat::grantBasic(_inventory);
                 if (_ui) _ui->refreshHotbar();
             } break;
-        case EventKeyboard::KeyCode::KEY_F5: {
-            if (chestOpen || storeOpen) break;
-            auto& ws = Game::globalState();
-            std::string path = Game::currentSavePath();
-            if (path.empty()) {
-                if (ws.lastSaveSlot < 1) ws.lastSaveSlot = 1;
-                if (ws.lastSaveSlot > 50) ws.lastSaveSlot = 50;
-                path = Game::savePathForSlot(ws.lastSaveSlot);
-            }
+            case EventKeyboard::KeyCode::KEY_F5: {
+                if (chestOpen || storeOpen) break;
+                auto& ws = Game::globalState();
+                std::string path = Game::currentSavePath();
+                if (path.empty()) {
+                    if (ws.lastSaveSlot < 1) ws.lastSaveSlot = 1;
+                    if (ws.lastSaveSlot > 50) ws.lastSaveSlot = 50;
+                    path = Game::savePathForSlot(ws.lastSaveSlot);
+                }
                 Game::saveToFile(path);
                 if (_ui && _player && _map) {
                     _ui->popTextAt(_map->getPlayerPosition(_player->getPosition()), "Saved", Color3B::WHITE);
+                }
+            } break;
+            case EventKeyboard::KeyCode::KEY_F6: {
+                if (chestOpen || storeOpen || skillOpen || dialogueOpen || socialOpen) break;
+                auto& ws = Game::globalState();
+                ws.seasonIndex = 1;
+                ws.dayOfSeason = GameConfig::FESTIVAL_DAY;
+                ws.timeHour = 6;
+                ws.timeMinute = 0;
+                ws.timeAccum = 0.0f;
+                ws.pendingPassOut = false;
+                ws.weatherSeasonIndex = -1;
+                ws.weatherDayOfSeason = -1;
+                if (_ui) {
+                    _ui->refreshHUD();
                 }
             } break;
             case EventKeyboard::KeyCode::KEY_E: {
