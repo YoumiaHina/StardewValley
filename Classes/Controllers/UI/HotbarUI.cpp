@@ -258,7 +258,7 @@ void HotbarUI::refreshHotbar() {
                     label->setString(text);
                     label->setPosition(Vec2(cx, 0));
                     label->setVisible(true);
-                    if (st.type == Game::ItemType::Fish) {
+                    if (Game::isFish(st.type)) {
                         label->setColor(Color3B(64, 200, 255));
                     } else {
                         label->setColor(Color3B::WHITE);
@@ -280,7 +280,7 @@ void HotbarUI::refreshHotbar() {
                 if (st.quantity > 0) {
                     std::string path = Game::itemIconPath(st.type);
                     if (path.empty()) {
-                        if (st.type == Game::ItemType::Fish) {
+                        if (Game::isFish(st.type)) {
                             path = "fish/globefish.png";
                         } else {
                             switch (st.type) {

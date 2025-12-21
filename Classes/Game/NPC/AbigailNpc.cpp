@@ -9,7 +9,6 @@ const char* Abigail::texturePath() const { return "NPC/Abigail/Abigail-standing.
 int Abigail::friendshipGainForGift(ItemType itemType) const {
   switch (itemType) {
     case ItemType::Strawberry: return 55;
-    case ItemType::Fish:
     case ItemType::Carp:
     case ItemType::BreamFish:
     case ItemType::Sardine:

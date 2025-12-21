@@ -261,7 +261,7 @@ void FishingController::onSuccess(const Vec2& worldPos) {
     if (_inventory) {
         auto& skill = Game::SkillTreeSystem::getInstance();
         int qty = skill.adjustFishCatchQuantityForFishing(1);
-        Game::ItemType itemType = Game::ItemType::Fish;
+        Game::ItemType itemType = Game::ItemType::BreamFish;
         if (isFishingFestivalToday() && _festivalFishIndex >= 0) {
             int count = static_cast<int>(sizeof(kFestivalFish) / sizeof(kFestivalFish[0]));
             if (_festivalFishIndex < count) {

@@ -8,7 +8,6 @@ const char* Willy::texturePath() const { return "NPC/Willy/Willy-standing.png"; 
 
 int Willy::friendshipGainForGift(ItemType itemType) const {
   switch (itemType) {
-    case ItemType::Fish:
     case ItemType::Carp:
     case ItemType::BreamFish:
     case ItemType::Sardine:

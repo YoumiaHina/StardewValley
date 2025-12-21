@@ -21,7 +21,6 @@ enum class ItemType {
     CornSeed = 11,
     Strawberry = 12,
     StrawberrySeed = 13,
-    Fish = 100,
     Carp = 101,
     BreamFish = 102,
     Sardine = 103,
@@ -77,7 +76,6 @@ inline const char* itemName(ItemType t) {
         case ItemType::CornSeed: return "Corn Seed";
         case ItemType::Strawberry: return "Strawberry";
         case ItemType::StrawberrySeed: return "Strawberry Seed";
-        case ItemType::Fish: return "Fish";
         case ItemType::Carp: return "Carp";
         case ItemType::BreamFish: return "Bream";
         case ItemType::Sardine: return "Sardine";
@@ -136,7 +134,6 @@ inline cocos2d::Color4F itemColor(ItemType t) {
         case ItemType::CornSeed: return Color4F(0.95f, 0.90f, 0.25f, 0.8f);
         case ItemType::Strawberry: return Color4F(0.95f, 0.20f, 0.25f, 1.0f);
         case ItemType::StrawberrySeed: return Color4F(0.95f, 0.20f, 0.25f, 0.8f);
-        case ItemType::Fish: return Color4F(0.25f, 0.55f, 1.0f, 1.0f);
         case ItemType::Carp: return Color4F(0.25f, 0.55f, 1.0f, 1.0f);
         case ItemType::BreamFish: return Color4F(0.25f, 0.55f, 1.0f, 1.0f);
         case ItemType::Sardine: return Color4F(0.25f, 0.55f, 1.0f, 1.0f);
@@ -211,7 +208,6 @@ inline std::string itemIconPath(ItemType t) {
         case ItemType::Tortilla: return "Food/Tortilla.png";
         case ItemType::BlueberryTart: return "Food/Blueberry_Tart.png";
         case ItemType::EggplantParmesan: return "Food/Eggplant_Parmesan.png";
-        case ItemType::Fish: return "fish/Bream.png";
         case ItemType::Carp: return "fish/carp.png";
         case ItemType::BreamFish: return "fish/Bream.png";
         case ItemType::Sardine: return "fish/Sardine.png";
@@ -248,7 +244,6 @@ inline bool itemEdible(ItemType t) {
         || t == ItemType::Tortilla
         || t == ItemType::BlueberryTart
         || t == ItemType::EggplantParmesan
-        || t == ItemType::Fish
         || t == ItemType::Carp
         || t == ItemType::BreamFish
         || t == ItemType::Sardine
@@ -288,7 +283,6 @@ inline bool isCookedFood(ItemType t) {
 
 inline bool isFish(ItemType t) {
     switch (t) {
-        case ItemType::Fish:
         case ItemType::Carp:
         case ItemType::BreamFish:
         case ItemType::Sardine:
@@ -328,7 +322,6 @@ inline int itemEnergyRestore(ItemType t) {
         case ItemType::Tortilla: return 83;
         case ItemType::BlueberryTart: return 347;
         case ItemType::EggplantParmesan: return 132;
-        case ItemType::Fish: return 15;
         case ItemType::Carp: return 15;
         case ItemType::BreamFish: return 15;
         case ItemType::Sardine: return 15;
@@ -361,7 +354,6 @@ inline int itemPrice(ItemType t) {
         case ItemType::Eggplant: return 60;
         case ItemType::Corn: return 50;
         case ItemType::Strawberry: return 120;
-        case ItemType::Fish: return 75;
         case ItemType::Carp: return 400;
         case ItemType::BreamFish: return 450;
         case ItemType::Sardine: return 300;
@@ -409,7 +401,6 @@ inline int itemHpRestore(ItemType t) {
         case ItemType::Tortilla: return 10;
         case ItemType::BlueberryTart: return 20;
         case ItemType::EggplantParmesan: return 24;
-        case ItemType::Fish: return 3;
         case ItemType::Carp: return 3;
         case ItemType::BreamFish: return 3;
         case ItemType::Sardine: return 2;
