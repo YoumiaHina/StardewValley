@@ -202,7 +202,7 @@ void AbigailNpcController::startPatrol() {
   sprite_->stopActionByTag(kPatrolActionTag);
 
   const float speed = tile_ * 1.0f;
-  const float pause = 0.25f;
+  const float pause = 5.0f;
   const float radius = 8.0f;
 
   auto buildPatrolActions = [&](const std::vector<cocos2d::Vec2>& offsets) {
