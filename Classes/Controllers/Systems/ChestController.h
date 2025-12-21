@@ -76,4 +76,15 @@ void transferChestCell(Game::Chest& chest,
                        int flatIndex,
                        Game::Inventory& inventory);
 
+bool transferChestToInventory(Game::Chest& chest,
+                              int flatIndex,
+                              Game::Inventory& inventory,
+                              int invIndex,
+                              bool moveAll);
+
+bool transferInventoryToChest(Game::Chest& chest,
+                              int flatIndex,
+                              Game::Inventory& inventory,
+                              bool moveAll);
+
 }

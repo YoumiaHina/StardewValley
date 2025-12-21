@@ -288,41 +288,7 @@ void ChestPanelUI::refreshChestPanel(Game::Chest* chest) {
         }
         if (hitIndex < 0) return;
         _selectedIndex = hitIndex;
-        if (_shiftDown) {
-            int invIndex = _inventory->selectedIndex();
-            if (invIndex >= 0 && invIndex < static_cast<int>(_inventory->size())) {
-                int maxMoves = Game::ItemStack::MAX_STACK;
-                for (int i = 0; i < maxMoves; ++i) {
-                    if (hitIndex < 0 || hitIndex >= static_cast<int>(_currentChest->slots.size())) {
-                        break;
-                    }
-                    Game::Slot beforeChest = _currentChest->slots[static_cast<std::size_t>(hitIndex)];
-                    Game::ItemStack beforeInvStack = _inventory->itemAt(static_cast<std::size_t>(invIndex));
-                    bool beforeInvEmpty = _inventory->isEmpty(static_cast<std::size_t>(invIndex));
-                    bool beforeInvIsTool = _inventory->isTool(static_cast<std::size_t>(invIndex));
-                    transferChestCell(*_currentChest, hitIndex, *_inventory);
-                    if (hitIndex < 0 || hitIndex >= static_cast<int>(_currentChest->slots.size())) {
-                        break;
-                    }
-                    const Game::Slot& afterChest = _currentChest->slots[static_cast<std::size_t>(hitIndex)];
-                    Game::ItemStack afterInvStack = _inventory->itemAt(static_cast<std::size_t>(invIndex));
-                    bool afterInvEmpty = _inventory->isEmpty(static_cast<std::size_t>(invIndex));
-                    bool afterInvIsTool = _inventory->isTool(static_cast<std::size_t>(invIndex));
-                    bool chestSame = (beforeChest.kind == afterChest.kind &&
-                                      beforeChest.itemType == afterChest.itemType &&
-                                      beforeChest.itemQty == afterChest.itemQty);
-                    bool invSame = (beforeInvEmpty == afterInvEmpty &&
-                                    beforeInvIsTool == afterInvIsTool &&
-                                    beforeInvStack.type == afterInvStack.type &&
-                                    beforeInvStack.quantity == afterInvStack.quantity);
-                    if (chestSame && invSame) {
-                        break;
-                    }
-                }
-            }
-        } else {
-            transferChestCell(*_currentChest, hitIndex, *_inventory);
-        }
+        transferInventoryToChest(*_currentChest, hitIndex, *_inventory, _shiftDown);
         if (hitIndex >= 0 && hitIndex < static_cast<int>(_cellIcons.size())) {
             auto icon = _cellIcons[hitIndex];
             auto countLabel = _cellCountLabels[hitIndex];
@@ -429,47 +395,15 @@ void ChestPanelUI::onInventorySlotClicked(int invIndex) {
     if (_selectedIndex < 0) return;
     if (invIndex < 0 || invIndex >= static_cast<int>(_inventory->size())) return;
     if (_selectedIndex < 0 || _selectedIndex >= static_cast<int>(_currentChest->slots.size())) return;
-    auto& slotChest = _currentChest->slots[static_cast<std::size_t>(_selectedIndex)];
-    if (slotChest.kind == Game::SlotKind::Item && slotChest.itemQty > 0) {
-        Game::ItemType type = slotChest.itemType;
-        bool invEmpty = _inventory->isEmpty(static_cast<std::size_t>(invIndex));
-        bool invIsItem = _inventory->isItem(static_cast<std::size_t>(invIndex));
-        Game::ItemStack st = _inventory->itemAt(static_cast<std::size_t>(invIndex));
-        bool sameType = invIsItem && st.type == type;
-        int currentQty = (invEmpty || !invIsItem) ? 0 : st.quantity;
-        int space = Game::ItemStack::MAX_STACK - currentQty;
-        bool canReceive = (invEmpty || sameType) && (space > 0);
-        if (!canReceive) return;
-        int moveCount = _shiftDown ? std::min(space, slotChest.itemQty) : 1;
-        for (int i = 0; i < moveCount; ++i) {
-            bool okAdd = _inventory->addOneItemToSlot(static_cast<std::size_t>(invIndex), type);
-            if (!okAdd) break;
-            if (slotChest.itemQty <= 0) break;
-            slotChest.itemQty -= 1;
-            if (slotChest.itemQty <= 0) {
-                slotChest.kind = Game::SlotKind::Empty;
-                slotChest.itemQty = 0;
-                break;
-            }
-        }
-    } else if (slotChest.kind == Game::SlotKind::Tool && slotChest.tool) {
-        bool invEmpty = _inventory->isEmpty(static_cast<std::size_t>(invIndex));
-        if (!invEmpty) return;
-        auto t = slotChest.tool.get();
-        if (!t) return;
-        Game::ToolKind tk = t->kind();
-        int level = t->level();
-        auto tool = Game::makeTool(tk);
-        if (tool) {
-            tool->setLevel(level);
-        }
-        _inventory->setTool(static_cast<std::size_t>(invIndex), tool);
-        slotChest.tool.reset();
-        slotChest.kind = Game::SlotKind::Empty;
-        slotChest.itemQty = 0;
-    } else {
-        return;
-    }
+
+    bool moved = transferChestToInventory(
+        *_currentChest,
+        _selectedIndex,
+        *_inventory,
+        invIndex,
+        _shiftDown);
+    if (!moved) return;
+
     if (_selectedIndex >= 0 && _selectedIndex < static_cast<int>(_cellIcons.size())) {
         auto icon = _cellIcons[_selectedIndex];
         auto countLabel = _cellCountLabels[_selectedIndex];
