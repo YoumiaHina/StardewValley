@@ -10,17 +10,6 @@ namespace {
 
 const float UPGRADE_UI_SCALE = 1.2f;
 
-std::string toolDisplayName(Game::ToolKind kind) {
-    switch (kind) {
-        case Game::ToolKind::Axe:      return "Axe";
-        case Game::ToolKind::Hoe:      return "Hoe";
-        case Game::ToolKind::Pickaxe:  return "Pickaxe";
-        case Game::ToolKind::WaterCan: return "WaterCan";
-        default: break;
-    }
-    return "";
-}
-
 std::string levelText(int level) {
     if (level <= 0) return "Lv 0 (Basic)";
     if (level == 1) return "Lv 1 (Copper)";
@@ -69,13 +58,14 @@ void ToolUpgradePanelUI::buildPanel() {
         RowWidgets row;
         row.kind = kinds[i];
 
-        auto nameLabel = Label::createWithTTF(toolDisplayName(kinds[i]), "fonts/arial.ttf", 18 * UPGRADE_UI_SCALE);
-        if (nameLabel) {
-            nameLabel->setAnchorPoint(Vec2(0.f, 0.5f));
-            nameLabel->setPosition(Vec2(-w/2 + 40 * UPGRADE_UI_SCALE, y));
-            _panelNode->addChild(nameLabel);
+        auto toolIcon = Sprite::create();
+        if (toolIcon) {
+            toolIcon->setAnchorPoint(Vec2(0.f, 0.5f));
+            toolIcon->setPosition(Vec2(-w/2 + 40 * UPGRADE_UI_SCALE, y));
+            toolIcon->setVisible(false);
+            _panelNode->addChild(toolIcon);
         }
-        row.nameLabel = nameLabel;
+        row.toolIcon = toolIcon;
 
         auto levelLabel = Label::createWithTTF("", "fonts/arial.ttf", 18 * UPGRADE_UI_SCALE);
         if (levelLabel) {
@@ -148,6 +138,7 @@ void ToolUpgradePanelUI::refreshPanel() {
         row.canUpgrade = false;
         bool hasTool = false;
         int lv = 0;
+        const Game::ToolBase* foundTool = nullptr;
         if (_inventory) {
             std::size_t sz = _inventory->size();
             for (std::size_t i = 0; i < sz; ++i) {
@@ -155,6 +146,7 @@ void ToolUpgradePanelUI::refreshPanel() {
                 if (t && t->kind() == row.kind) {
                     hasTool = true;
                     lv = t->level();
+                    foundTool = t;
                     break;
                 }
             }
@@ -166,6 +158,7 @@ void ToolUpgradePanelUI::refreshPanel() {
                         if (s.kind == Game::SlotKind::Tool && s.tool && s.tool->kind() == row.kind) {
                             hasTool = true;
                             lv = s.tool->level();
+                            foundTool = s.tool.get();
                             break;
                         }
                     }
@@ -179,6 +172,9 @@ void ToolUpgradePanelUI::refreshPanel() {
             if (row.buttonLabel) {
                 row.buttonLabel->setString("[No Tool]");
                 row.buttonLabel->setColor(Color3B(150, 150, 150));
+            }
+            if (row.toolIcon) {
+                row.toolIcon->setVisible(false);
             }
             for (auto* icon : row.materialIcons) {
                 if (icon) icon->setVisible(false);
@@ -211,6 +207,27 @@ void ToolUpgradePanelUI::refreshPanel() {
                 } else {
                     row.buttonLabel->setColor(Color3B(150, 150, 150));
                 }
+            }
+        }
+        if (row.toolIcon) {
+            if (foundTool) {
+                std::string path = foundTool->iconPath();
+                if (!path.empty()) {
+                    row.toolIcon->setTexture(path);
+                }
+                if (row.toolIcon->getTexture()) {
+                    Size cs = row.toolIcon->getContentSize();
+                    float target = 32.f * UPGRADE_UI_SCALE;
+                    float sx = cs.width > 0 ? target / cs.width : 1.0f;
+                    float sy = cs.height > 0 ? target / cs.height : 1.0f;
+                    float s = std::min(sx, sy);
+                    row.toolIcon->setScale(s);
+                    row.toolIcon->setVisible(true);
+                } else {
+                    row.toolIcon->setVisible(false);
+                }
+            } else {
+                row.toolIcon->setVisible(false);
             }
         }
         std::string iconPath;

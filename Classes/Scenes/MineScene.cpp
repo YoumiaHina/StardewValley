@@ -75,6 +75,7 @@ bool MineScene::init() {
     _elevator->setMovementLocker([this](bool locked){ if (_playerController) _playerController->setMovementLocked(locked); });
     _elevator->setOnFloorChanged([this](int floor){
         if (_uiController) _uiController->setMineFloorNumber(floor);
+        if (_uiController) _uiController->refreshHotbar();
         if (_player) _player->setPosition(_map->floorSpawnPos());
     });
     // 矿洞 HUD：在能量条正上方构建血条（红色）
@@ -124,6 +125,7 @@ void MineScene::onSpacePressed() {
         // 新楼层出生点：优先 Appear，否则楼梯中心
         _player->setPosition(_map->floorSpawnPos());
         if (_uiController) _uiController->setMineFloorNumber(_map->currentFloor());
+        if (_uiController) _uiController->refreshHotbar();
         // UI 提示：显示当前楼层
         if (_uiController && _player) {
             if (_mapController) _uiController->popTextAt(_mapController->getPlayerPosition(_player->getPosition()), StringUtils::format("Floor %d", _map->currentFloor()), Color3B::YELLOW);
@@ -185,6 +187,7 @@ void MineScene::onKeyPressedHook(EventKeyboard::KeyCode code) {
         if (_monsters) { _monsters->resetFloor(); _monsters->generateInitialWave(); }
         if (_player) _player->setPosition(_map->floorSpawnPos());
         if (_uiController) _uiController->setMineFloorNumber(_map->currentFloor());
+        if (_uiController) _uiController->refreshHotbar();
         if (_uiController && _player) {
             if (_mapController) _uiController->popTextAt(_mapController->getPlayerPosition(_player->getPosition()), StringUtils::format("Floor %d", _map->currentFloor()), Color3B::YELLOW);
         }
