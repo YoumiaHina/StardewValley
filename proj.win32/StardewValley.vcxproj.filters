@@ -83,6 +83,9 @@
     <Filter Include="Classes\Game\Recipe">
       <UniqueIdentifier>{67ba89d4-d893-43b1-ace8-395bcc15ab18}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Classes\Game\Monster">
+      <UniqueIdentifier>{627686b1-857b-4d05-8e0f-2f583034915d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <!-- Source Files -->
@@ -467,6 +470,24 @@
     <ClCompile Include="..\Classes\Game\Recipe\SimpleRecipe.cpp">
       <Filter>Classes\Game\Recipe</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\Game\Monster\BlueSlime.cpp">
+      <Filter>Classes\Game\Monster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\Monster\Bug.cpp">
+      <Filter>Classes\Game\Monster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\Monster\Ghost.cpp">
+      <Filter>Classes\Game\Monster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\Monster\GreenSlime.cpp">
+      <Filter>Classes\Game\Monster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\Monster\MonsterBase.cpp">
+      <Filter>Classes\Game\Monster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\Monster\RedSlime.cpp">
+      <Filter>Classes\Game\Monster</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <!-- Header Files -->
@@ -813,6 +834,12 @@
     </ClInclude>
     <ClInclude Include="..\Classes\Game\Recipe\SimpleRecipe.h">
       <Filter>Classes\Game\Recipe</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\Monster\MonsterBase.h">
+      <Filter>Classes\Game\Monster</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\Monster\SlimeMonsterBase.h">
+      <Filter>Classes\Game\Monster</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

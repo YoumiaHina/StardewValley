@@ -1,6 +1,7 @@
 #include "Controllers/Mine/MonsterSystem.h"
 #include "cocos2d.h"
 #include "Game/SkillTree/SkillTreeSystem.h"
+#include "Game/Monster/MonsterBase.h"
 #include <algorithm>
 #include <string>
 
@@ -14,45 +15,6 @@ namespace {
         return eng;
     }
 
-    int randomSlimeVariantForFloor(int floor) {
-        int f = floor;
-        if (f < 1) f = 1;
-        if (f > 50) f = 50;
-        float t = 0.0f;
-        if (f > 1) {
-            t = static_cast<float>(f - 1) / 49.0f;
-        }
-        float green = 0.5f * (1.0f - t);
-        float blue = 0.3f;
-        float red = 1.0f - green - blue;
-        if (red < 0.0f) red = 0.0f;
-        std::uniform_real_distribution<float> dist(0.0f, 1.0f);
-        float r = dist(rng());
-        if (r < green) return 0;
-        if (r < green + blue) return 1;
-        return 2;
-    }
-
-    void applySlimeStatsForVariant(Game::Monster& m, int variant) {
-        int baseHp = m.maxHp > 0 ? m.maxHp : m.hp;
-        int baseDmg = m.dmg;
-        float hpMul = 1.0f;
-        float dmgMul = 1.0f;
-        if (variant == 2) {
-            hpMul = 5.0f;
-            dmgMul = 5.0f;
-            m.name = "Red Slime";
-        } else if (variant == 1) {
-            hpMul = 3.0f;
-            dmgMul = 3.0f;
-            m.name = "Blue Slime";
-        } else {
-            m.name = "Green Slime";
-        }
-        m.hp = static_cast<int>(baseHp * hpMul);
-        m.maxHp = m.hp;
-        m.dmg = static_cast<int>(baseDmg * dmgMul);
-    }
 
     Game::Monster::Type randomMonsterTypeForFloor(int floor) {
         int f = floor;
@@ -66,9 +28,15 @@ namespace {
         float bug = 0.38f - 0.08f * t;
         float slime = 1.0f - ghost - bug;
         if (slime < 0.0f) slime = 0.0f;
+        float greenShare = slime * 0.5f;
+        float blueShare = slime * 0.3f;
+        float redShare = slime - greenShare - blueShare;
+        if (redShare < 0.0f) redShare = 0.0f;
         std::uniform_real_distribution<float> dist(0.0f, 1.0f);
         float r = dist(rng());
-        if (r < slime) return Game::Monster::Type::RockSlime;
+        if (r < greenShare) return Game::Monster::Type::GreenSlime;
+        if (r < greenShare + blueShare) return Game::Monster::Type::BlueSlime;
+        if (r < slime) return Game::Monster::Type::RedSlime;
         if (r < slime + bug) return Game::Monster::Type::Bug;
         return Game::Monster::Type::Ghost;
     }
@@ -100,13 +68,7 @@ void MineMonsterController::generateInitialWave() {
         Game::Monster::Type type = randomMonsterTypeForFloor(floor);
         Monster m = Game::makeMonsterForType(type);
         m.pos = pt;
-        if (type == Game::Monster::Type::RockSlime) {
-            int variant = randomSlimeVariantForFloor(floor);
-            m.textureVariant = variant;
-            applySlimeStatsForVariant(m, variant);
-        } else {
-            m.textureVariant = 0;
-        }
+        m.textureVariant = 0;
         _monsters.push_back(m);
     }
     refreshVisuals();
@@ -123,13 +85,7 @@ void MineMonsterController::update(float dt) {
             int floor = _map ? _map->currentFloor() : 1;
             Game::Monster::Type type = randomMonsterTypeForFloor(floor);
             Monster m = Game::makeMonsterForType(type);
-            if (type == Game::Monster::Type::RockSlime) {
-                int variant = randomSlimeVariantForFloor(floor);
-                m.textureVariant = variant;
-                applySlimeStatsForVariant(m, variant);
-            } else {
-                m.textureVariant = 0;
-            }
+            m.textureVariant = 0;
             _monsters.push_back(m);
         }
     }
@@ -213,6 +169,24 @@ void MineMonsterController::update(float dt) {
             m.attackCooldown = 0.8f;
         }
     }
+    if (ws.hp <= 0) {
+        for (auto& m : _monsters) {
+            if (m.sprite && m.sprite->getParent()) {
+                m.sprite->removeFromParent();
+            }
+            m.sprite = nullptr;
+        }
+        _monsters.clear();
+        _respawnAccum = 0.0f;
+        if (_map) {
+            std::vector<Rect> colliders;
+            _map->setMonsterColliders(colliders);
+        }
+        if (_monsterDraw) {
+            _monsterDraw->clear();
+        }
+        return;
+    }
     refreshVisuals();
 }
 
@@ -240,19 +214,17 @@ void MineMonsterController::applyDamageAt(const Vec2& worldPos, int baseDamage) 
         if (d < best) { best = d; idx = i; }
     }
     if (idx >= 0) {
-        int def = _monsters[idx].def;
+        Monster m = _monsters[idx];
+        int def = m.def;
         int dmg = std::max(0, baseDamage - def);
-        _monsters[idx].hp -= dmg;
-        if (_monsters[idx].hp <= 0) {
-            auto& m = _monsters[idx];
-            {
-                auto& ws = Game::globalState();
-                auto& skill = Game::SkillTreeSystem::getInstance();
-                long long baseGold = 10;
-                long long reward = skill.adjustGoldRewardForCombat(baseGold);
-                ws.gold += reward;
-                skill.addXp(Game::SkillTreeType::Combat, skill.xpForCombatKill(baseGold));
-            }
+        m.hp -= dmg;
+        if (m.hp <= 0) {
+            auto& ws = Game::globalState();
+            auto& skill = Game::SkillTreeSystem::getInstance();
+            long long baseGold = 10;
+            long long reward = skill.adjustGoldRewardForCombat(baseGold);
+            ws.gold += reward;
+            skill.addXp(Game::SkillTreeType::Combat, skill.xpForCombatKill(baseGold));
             auto drops = m.getDrops();
             if (_map) {
                 int c = 0;
@@ -262,12 +234,18 @@ void MineMonsterController::applyDamageAt(const Vec2& worldPos, int baseDamage) 
                     _map->spawnDropAt(c, r, static_cast<int>(t), 1);
                 }
             }
-            if (m.sprite && m.sprite->getParent()) {
-                m.sprite->removeFromParent();
+            cocos2d::Sprite* sprite = m.sprite;
+            if (sprite) {
+                const auto& info = Game::monsterInfoFor(m.type);
+                info.playDeathAnimation(m, sprite, [sprite]() {
+                    if (sprite->getParent()) {
+                        sprite->removeFromParent();
+                    }
+                });
             }
-            m.sprite = nullptr;
             _monsters.erase(_monsters.begin() + idx);
-            refreshVisuals();
+        } else {
+            _monsters[idx].hp = m.hp;
         }
     }
 }
@@ -283,38 +261,41 @@ void MineMonsterController::applyAreaDamage(const std::vector<std::pair<int,int>
         return false;
     };
     for (std::size_t i = 0; i < _monsters.size();) {
-        auto& m = _monsters[i];
+        Monster m = _monsters[i];
         if (!matches(m)) { ++i; continue; }
         int dmg = std::max(0, baseDamage - m.def);
         m.hp -= dmg;
         if (m.hp <= 0) {
-            {
-                auto& ws = Game::globalState();
-                auto& skill = Game::SkillTreeSystem::getInstance();
-                long long baseGold = 10;
-                long long reward = skill.adjustGoldRewardForCombat(baseGold);
-                ws.gold += reward;
-                skill.addXp(Game::SkillTreeType::Combat, skill.xpForCombatKill(baseGold));
+            auto& ws = Game::globalState();
+            auto& skill = Game::SkillTreeSystem::getInstance();
+            long long baseGold = 10;
+            long long reward = skill.adjustGoldRewardForCombat(baseGold);
+            ws.gold += reward;
+            skill.addXp(Game::SkillTreeType::Combat, skill.xpForCombatKill(baseGold));
+            auto drops = m.getDrops();
+            if (_map) {
+                int c = 0;
+                int r = 0;
+                _map->worldToTileIndex(m.pos, c, r);
+                for (auto t : drops) {
+                    _map->spawnDropAt(c, r, static_cast<int>(t), 1);
+                }
             }
-        auto drops = m.getDrops();
-        if (_map) {
-            int c = 0;
-            int r = 0;
-            _map->worldToTileIndex(m.pos, c, r);
-            for (auto t : drops) {
-                _map->spawnDropAt(c, r, static_cast<int>(t), 1);
+            cocos2d::Sprite* sprite = m.sprite;
+            if (sprite) {
+                const auto& info = Game::monsterInfoFor(m.type);
+                info.playDeathAnimation(m, sprite, [sprite]() {
+                    if (sprite->getParent()) {
+                        sprite->removeFromParent();
+                    }
+                });
             }
-        }
-            if (m.sprite && m.sprite->getParent()) {
-                m.sprite->removeFromParent();
-            }
-            m.sprite = nullptr;
             _monsters.erase(_monsters.begin() + static_cast<long>(i));
             continue;
         }
+        _monsters[i].hp = m.hp;
         ++i;
     }
-    refreshVisuals();
 }
 
 void MineMonsterController::refreshVisuals() {
@@ -329,18 +310,22 @@ void MineMonsterController::refreshVisuals() {
             std::string path = Game::monsterTexturePath(m);
             auto spr = Sprite::create(path);
             if (spr) {
-                float scale = 1.0f;
-                if (m.type == Game::Monster::Type::Bug || m.type == Game::Monster::Type::Ghost) {
-                    scale = 0.3f;
-                }
-                spr->setScale(scale);
                 spr->setAnchorPoint(Vec2(0.5f, 0.0f));
                 spr->setPosition(m.pos);
                 _worldNode->addChild(spr, 3);
                 m.sprite = spr;
             }
-        } else if (m.sprite) {
+        }
+        if (m.sprite) {
             m.sprite->setPosition(m.pos);
+            const auto& info = Game::monsterInfoFor(m.type);
+            cocos2d::Vec2 v = m.velocity;
+            float len2 = v.x * v.x + v.y * v.y;
+            if (len2 > 1e-4f) {
+                info.playMoveAnimation(m, m.sprite);
+            } else {
+                info.playStaticAnimation(m, m.sprite);
+            }
         }
     }
 }

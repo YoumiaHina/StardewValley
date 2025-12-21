@@ -8,7 +8,7 @@
 namespace Game {
 
 struct Monster {
-    enum class Type { RockSlime, Bug, Ghost };
+    enum class Type { GreenSlime, BlueSlime, RedSlime, Bug, Ghost };
     Type type;
     cocos2d::Vec2 pos;
     int hp = 0;
@@ -26,6 +26,23 @@ struct Monster {
     std::string name;
 
     std::vector<ItemType> getDrops() const;
+};
+
+struct MonsterDef {
+    int hp = 0;
+    int dmg = 0;
+    int def = 0;
+    int searchRangeTiles = 0;
+    float moveSpeed = 0.0f;
+    bool isCollisionAffected = true;
+    const char* name = nullptr;
+};
+
+class MonsterDefs {
+public:
+    static const MonsterDef& def(Monster::Type type);
+    static void initMonster(Monster& m);
+    static std::vector<ItemType> dropsFor(const Monster& m);
 };
 
 int slimeVariantForFloor(int floor);

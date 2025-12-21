@@ -192,6 +192,12 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClCompile Include="..\Classes\Controllers\UI\PromptUI.cpp" />
     <ClCompile Include="..\Classes\Controllers\UI\StorePanelUI.cpp" />
     <ClCompile Include="..\Classes\Controllers\UI\ToolUpgradePanelUI.cpp" />
+    <ClCompile Include="..\Classes\Game\Monster\BlueSlime.cpp" />
+    <ClCompile Include="..\Classes\Game\Monster\Bug.cpp" />
+    <ClCompile Include="..\Classes\Game\Monster\Ghost.cpp" />
+    <ClCompile Include="..\Classes\Game\Monster\GreenSlime.cpp" />
+    <ClCompile Include="..\Classes\Game\Monster\MonsterBase.cpp" />
+    <ClCompile Include="..\Classes\Game\Monster\RedSlime.cpp" />
     <ClCompile Include="..\Classes\Game\Recipe\RecipeBase.cpp" />
     <ClCompile Include="..\Classes\Game\Recipe\RecipeBook.cpp" />
     <ClCompile Include="..\Classes\Game\Recipe\SimpleRecipe.cpp" />
@@ -333,6 +339,8 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClInclude Include="..\Classes\Game\Map\RoomMap.h" />
     <ClInclude Include="..\Classes\Game\Map\TownMap.h" />
     <ClInclude Include="..\Classes\Game\Mineral.h" />
+    <ClInclude Include="..\Classes\Game\Monster\MonsterBase.h" />
+    <ClInclude Include="..\Classes\Game\Monster\SlimeMonsterBase.h" />
     <ClInclude Include="..\Classes\Game\NPC\AbigailNpc.h" />
     <ClInclude Include="..\Classes\Game\NPC\NpcBase.h" />
     <ClInclude Include="..\Classes\Game\NPC\WillyNpc.h" />
