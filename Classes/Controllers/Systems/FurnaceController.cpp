@@ -15,6 +15,7 @@ namespace Controllers {
 
 namespace {
 
+// 根据地图类型返回对应的熔炉容器指针（WorldState 中的 farm/house/town/beachFurnaces）。
 std::vector<Game::Furnace>* getFurnacesForMap(Controllers::IMapController* map) {
     if (!map) return nullptr;
     auto& ws = Game::globalState();
@@ -44,10 +45,12 @@ FurnaceController::FurnaceController()
 , _runtime(nullptr) {
 }
 
+// 挂接到父节点：委托基类创建 DrawNode 并挂在 parentNode 下。
 void FurnaceController::attachTo(cocos2d::Node* parentNode, int zOrder) {
     PlaceableItemSystemBase::attachTo(parentNode, zOrder);
 }
 
+// 绑定当前有效的 Map/UI/Inventory 上下文。
 void FurnaceController::bindContext(Controllers::IMapController* map,
                                     Controllers::UIController* ui,
                                     std::shared_ptr<Game::Inventory> inventory) {
@@ -65,6 +68,7 @@ void FurnaceController::bindContext(Controllers::IMapController* map,
     }
 }
 
+// 从 WorldState 拿到当前地图对应的熔炉列表，并补齐 dropOffset。
 void FurnaceController::syncLoad() {
     if (!_runtime && _map) {
         _runtime = getFurnacesForMap(_map);
@@ -79,6 +83,7 @@ void FurnaceController::syncLoad() {
     refreshVisuals();
 }
 
+// 每帧更新熔炉状态：推进 remainingSeconds，完成时生成掉落并提示。
 void FurnaceController::update(float dt) {
     if (!_runtime || !_map) return;
     bool changedState = false;
@@ -112,6 +117,7 @@ void FurnaceController::update(float dt) {
     }
 }
 
+// 重新绘制所有熔炉精灵：根据 remainingSeconds 选择冷/热贴图。
 void FurnaceController::refreshVisuals() {
     if (!_drawNode || !_runtime) return;
     _drawNode->clear();
@@ -142,22 +148,26 @@ void FurnaceController::refreshVisuals() {
     }
 }
 
+// 返回当前地图的熔炉列表（只读）。若未绑定地图，则返回静态空列表。
 const std::vector<Game::Furnace>& FurnaceController::furnaces() const {
     static const std::vector<Game::Furnace> empty;
     return _runtime ? *_runtime : empty;
 }
 
+// 返回当前地图的熔炉列表（可写）。若未绑定地图，则返回静态空列表（修改无效）。
 std::vector<Game::Furnace>& FurnaceController::furnaces() {
     static std::vector<Game::Furnace> empty;
     return _runtime ? *_runtime : empty;
 }
 
+// 对外交互入口：由 Scene/Interactor 调用，内部委托给 PlaceableItemSystemBase::InteractWithItem。
 bool FurnaceController::interactAt(const cocos2d::Vec2& playerWorldPos,
                                    const cocos2d::Vec2& lastDir) {
     if (!_map || !_ui) return false;
     return InteractWithItem(_map, _ui, _inventory, playerWorldPos, lastDir);
 }
 
+// 判断 worldPos 附近是否存在熔炉，用于工具/移动逻辑的“贴边”判断。
 bool FurnaceController::isNearFurnace(const cocos2d::Vec2& worldPos) const {
     if (!_runtime) return false;
     float s = static_cast<float>(GameConfig::TILE_SIZE);
@@ -169,6 +179,7 @@ bool FurnaceController::isNearFurnace(const cocos2d::Vec2& worldPos) const {
         margin);
 }
 
+// 判断 worldPos 是否与任一熔炉发生碰撞，用于地图控制器的障碍判定。
 bool FurnaceController::collides(const cocos2d::Vec2& worldPos) const {
     if (!_runtime) return false;
     return Game::PlaceableItemBase::collidesAny<Game::Furnace>(
@@ -177,12 +188,14 @@ bool FurnaceController::collides(const cocos2d::Vec2& worldPos) const {
         [](const Game::Furnace& f) { return f.collisionRect(); });
 }
 
+// 背包中选中“熔炉物品”且数量>0 时，允许触发放置逻辑。
 bool FurnaceController::shouldPlace(const Game::Inventory& inventory) const {
     if (inventory.selectedKind() != Game::SlotKind::Item) return false;
     const auto& slot = inventory.selectedSlot();
     return slot.itemType == Game::ItemType::Furnace && slot.itemQty > 0;
 }
 
+// 在当前地图尝试放置一个新熔炉：选择中心点、做碰撞/数量校验并扣除熔炉物品。
 bool FurnaceController::tryPlace(Controllers::IMapController* map,
                                  Controllers::UIController* ui,
                                  const std::shared_ptr<Game::Inventory>& inventory,
@@ -248,6 +261,7 @@ bool FurnaceController::tryPlace(Controllers::IMapController* map,
     return true;
 }
 
+// 在一定范围内查找离玩家最近的熔炉索引，用于交互目标选择。
 int FurnaceController::findNearestFurnace(const cocos2d::Vec2& playerWorldPos, float maxDist) const {
     if (!_runtime) return -1;
     float maxDistSq = maxDist * maxDist;
@@ -264,6 +278,7 @@ int FurnaceController::findNearestFurnace(const cocos2d::Vec2& playerWorldPos, f
     return bestIdx;
 }
 
+// 与已有熔炉交互：检查配方/材料并启动熔炼计时。
 bool FurnaceController::tryInteractExisting(Controllers::IMapController* map,
                                             Controllers::UIController* ui,
                                             const std::shared_ptr<Game::Inventory>& inventory,

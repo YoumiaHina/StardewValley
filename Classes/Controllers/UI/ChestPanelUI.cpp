@@ -10,6 +10,7 @@ using namespace cocos2d;
 
 namespace Controllers {
 
+// 构建箱子面板根节点：挂载到场景，并注册 ESC/Shift 键盘监听。
 void ChestPanelUI::buildChestPanel() {
     if (_panelNode) return;
     _panelNode = Node::create();
@@ -44,6 +45,7 @@ void ChestPanelUI::buildChestPanel() {
     }
 }
 
+// 使用指定 Chest 重建箱子 UI：包括背景、格子布局与初始图标。
 void ChestPanelUI::refreshChestPanel(Game::Chest* chest) {
     if (!chest) return;
     _currentChest = chest;
@@ -245,8 +247,10 @@ void ChestPanelUI::refreshChestPanel(Game::Chest* chest) {
             updateCell();
         }
     }
+    // 为所有格子注册点击监听：负责命中检测和触发背包->箱子转移。
     auto slotsListener = EventListenerTouchOneByOne::create();
     slotsListener->setSwallowTouches(false);
+    // onTouchBegan：只做命中测试，判断是否触碰到任意格子。
     slotsListener->onTouchBegan = [this, cols, rows, cellW, cellH, startX, firstRowY, rowGap](Touch* t, Event*){
         if (!_slotsRoot || !_panelNode || !_panelNode->isVisible()) return false;
         float offsetY = cellH * 2.0f;
@@ -264,6 +268,7 @@ void ChestPanelUI::refreshChestPanel(Game::Chest* chest) {
         }
         return false;
     };
+    // onTouchEnded：定位被点击的格子索引，并调用 transferInventoryToChest 执行背包->箱子转移。
     slotsListener->onTouchEnded = [this, cols, rows, cellW, cellH, startX, firstRowY, rowGap](Touch* t, Event*){
         if (!_currentChest || !_inventory || !_slotsRoot || !_panelNode || !_panelNode->isVisible()) return;
         float offsetY = cellH * 2.0f;
@@ -386,10 +391,12 @@ void ChestPanelUI::refreshChestPanel(Game::Chest* chest) {
     _panelNode->getEventDispatcher()->addEventListenerWithSceneGraphPriority(slotsListener, _slotsRoot);
 }
 
+// 设置背包变更回调：箱子/背包之间发生转移时由面板触发。
 void ChestPanelUI::setOnInventoryChanged(const std::function<void()>& cb) {
     _onInventoryChanged = cb;
 }
 
+// 当热键栏/背包格被点击时调用：尝试将当前选中的箱子格内容转移到指定背包格。
 void ChestPanelUI::onInventorySlotClicked(int invIndex) {
     if (!_currentChest || !_inventory) return;
     if (_selectedIndex < 0) return;
@@ -471,10 +478,12 @@ void ChestPanelUI::onInventorySlotClicked(int invIndex) {
     }
 }
 
+// 显示或隐藏箱子面板。
 void ChestPanelUI::toggleChestPanel(bool show) {
     if (_panelNode) _panelNode->setVisible(show);
 }
 
+// 返回箱子面板当前是否可见。
 bool ChestPanelUI::isVisible() const {
     return _panelNode && _panelNode->isVisible();
 }
