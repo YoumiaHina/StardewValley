@@ -52,24 +52,16 @@ void CraftPanelUI::buildCraftPanel() {
 
     _tabsNode = Node::create();
     _panelNode->addChild(_tabsNode);
-    float tabY1 = h/2 + 16 * CRAFT_UI_SCALE;
-    float tabY2 = h/2 - 8 * CRAFT_UI_SCALE;
-    float tabX1 = -170 * CRAFT_UI_SCALE;
-    float tabX2 = 0 * CRAFT_UI_SCALE;
-    float tabX3 = 170 * CRAFT_UI_SCALE;
+    float tabY = h/2 + 10 * CRAFT_UI_SCALE;
+    float tabX1 = -90 * CRAFT_UI_SCALE;
+    float tabX2 = 90 * CRAFT_UI_SCALE;
     float tabFont = 18 * CRAFT_UI_SCALE;
 
-    _tabAll = Label::createWithTTF("All", "fonts/arial.ttf", tabFont);
     _tabPlaceable = Label::createWithTTF("Placeable", "fonts/arial.ttf", tabFont);
-    _tabMineral = Label::createWithTTF("Mineral", "fonts/arial.ttf", tabFont);
     _tabFood = Label::createWithTTF("Food", "fonts/arial.ttf", tabFont);
-    _tabMaterial = Label::createWithTTF("Material", "fonts/arial.ttf", tabFont);
 
-    if (_tabAll) { _tabAll->setPosition(Vec2(tabX1, tabY1)); _tabsNode->addChild(_tabAll); }
-    if (_tabPlaceable) { _tabPlaceable->setPosition(Vec2(tabX2, tabY1)); _tabsNode->addChild(_tabPlaceable); }
-    if (_tabMineral) { _tabMineral->setPosition(Vec2(tabX3, tabY1)); _tabsNode->addChild(_tabMineral); }
-    if (_tabFood) { _tabFood->setPosition(Vec2(tabX1, tabY2)); _tabsNode->addChild(_tabFood); }
-    if (_tabMaterial) { _tabMaterial->setPosition(Vec2(tabX2, tabY2)); _tabsNode->addChild(_tabMaterial); }
+    if (_tabPlaceable) { _tabPlaceable->setPosition(Vec2(tabX1, tabY)); _tabsNode->addChild(_tabPlaceable); }
+    if (_tabFood) { _tabFood->setPosition(Vec2(tabX2, tabY)); _tabsNode->addChild(_tabFood); }
 
     auto bindTab = [this](Label* tab, Game::RecipeCategory cat) {
         if (!tab) return;
@@ -89,11 +81,8 @@ void CraftPanelUI::buildCraftPanel() {
         _tabsNode->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, tab);
     };
 
-    bindTab(_tabAll, Game::RecipeCategory::All);
     bindTab(_tabPlaceable, Game::RecipeCategory::Placeable);
-    bindTab(_tabMineral, Game::RecipeCategory::Mineral);
     bindTab(_tabFood, Game::RecipeCategory::Food);
-    bindTab(_tabMaterial, Game::RecipeCategory::Material);
     updateTabsVisual();
 
     _listNode = Node::create();
@@ -258,14 +247,11 @@ void CraftPanelUI::rebuildRecipes() {
 
 void CraftPanelUI::updateTitle() {
     if (!_titleLabel) return;
-    const char* cat = "All";
+    const char* cat = "Placeable";
     switch (_category) {
-        case Game::RecipeCategory::All: cat = "All"; break;
         case Game::RecipeCategory::Placeable: cat = "Placeable"; break;
-        case Game::RecipeCategory::Mineral: cat = "Mineral"; break;
         case Game::RecipeCategory::Food: cat = "Food"; break;
-        case Game::RecipeCategory::Material: cat = "Material"; break;
-        default: cat = "All"; break;
+        default: cat = "Placeable"; break;
     }
     _titleLabel->setString(StringUtils::format("Crafting - %s", cat));
 }
@@ -276,11 +262,8 @@ void CraftPanelUI::updateTabsVisual() {
         bool active = (_category == cat);
         tab->setColor(active ? Color3B::YELLOW : Color3B::WHITE);
     };
-    setActive(_tabAll, Game::RecipeCategory::All);
     setActive(_tabPlaceable, Game::RecipeCategory::Placeable);
-    setActive(_tabMineral, Game::RecipeCategory::Mineral);
     setActive(_tabFood, Game::RecipeCategory::Food);
-    setActive(_tabMaterial, Game::RecipeCategory::Material);
 }
 
 std::string CraftPanelUI::formatIngredientsLine(const Game::RecipeBase& recipe) const {

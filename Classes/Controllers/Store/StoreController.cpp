@@ -26,8 +26,12 @@ bool StoreController::buySeed(Game::ItemType seedType) {
 }
 
 int StoreController::getSeedPrice(Game::ItemType seedType) const {
-    // 需求：种子商店，25Gold一个
-    return 25;
+    int base = 25;
+    Game::CropType cropType = Game::cropTypeFromSeed(seedType);
+    if (Game::CropDefs::isRegrow(cropType)) {
+        return 50;
+    }
+    return base;
 }
 
 // 购买一般物品（矿物/农产品/动物产物等）：使用 Game::itemPrice 作为单价
@@ -35,7 +39,13 @@ bool StoreController::buyItem(Game::ItemType type) {
     if (Game::isFish(type)) {
         return false;
     }
+    if (Game::isCookedFood(type)) {
+        return false;
+    }
     int price = getItemPrice(type);
+    if (price <= 0) {
+        return false;
+    }
     auto& ws = Game::globalState();
     if (ws.gold >= price) {
         if (_inventory && _inventory->addItems(type, 1) == 0) {
@@ -47,18 +57,31 @@ bool StoreController::buyItem(Game::ItemType type) {
 }
 
 int StoreController::getItemPrice(Game::ItemType type) const {
-    return Game::itemPrice(type);
+    if (Game::isCookedFood(type)) {
+        return 0;
+    }
+    int base = Game::itemPrice(type);
+    if (Game::isFish(type)) {
+        return (base * 6) / 10;
+    }
+    return base;
 }
 
 bool StoreController::sellItem(Game::ItemType type, int qty) {
     if (qty <= 0) return false;
+    if (Game::isSeed(type)) return false;
+    if (Game::isCookedFood(type)) return false;
     auto& ws = Game::globalState();
-    int price = getItemPrice(type);
-    if (price <= 0) return false;
+    int buyPrice = getItemPrice(type);
+    if (buyPrice <= 0) return false;
+    int unit = buyPrice;
+    if (!Game::isFish(type)) {
+        unit = (buyPrice * 7) / 10;
+    }
     if (!_inventory) return false;
     bool removed = _inventory->removeItems(type, qty);
     if (!removed) return false;
-    ws.gold += static_cast<long long>(price) * qty;
+    ws.gold += static_cast<long long>(unit) * qty;
     return true;
 }
 

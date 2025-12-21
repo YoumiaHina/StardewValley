@@ -137,17 +137,20 @@ void FarmMapController::init() {
     }
     _cropsDraw = DrawNode::create();
     _worldNode->addChild(_cropsDraw, 1);
-    _cropsRoot = Node::create();
+    _cropsRootBack = Node::create();
+    _cropsRootFront = Node::create();
     if (_farmMap && _farmMap->getTMX()) {
-        _farmMap->getTMX()->addChild(_cropsRoot, 22);
+        _farmMap->getTMX()->addChild(_cropsRootBack, 18);
+        _farmMap->getTMX()->addChild(_cropsRootFront, 19);
     } else {
-        _worldNode->addChild(_cropsRoot, 18);
+        _worldNode->addChild(_cropsRootBack, 18);
+        _worldNode->addChild(_cropsRootFront, 19);
     }
 
     // Tile overlay root for textured tilled soil
     _tileRoot = Node::create();
     if (_farmMap && _farmMap->getTMX()) {
-        _farmMap->getTMX()->addChild(_tileRoot, 18);
+        _farmMap->getTMX()->addChild(_tileRoot, 17);
     } else {
         _worldNode->addChild(_tileRoot, 0);
     }
@@ -724,7 +727,7 @@ void FarmMapController::refreshMapVisuals() {
 }
 
 void FarmMapController::refreshCropsVisuals() {
-    if (!_cropsRoot || !_cropsDraw) return;
+    if (!_cropsRootBack || !_cropsRootFront || !_cropsDraw) return;
     float s = tileSize();
     std::unordered_set<long long> alive;
     for (const auto& cp : Game::globalState().farmCrops) {
@@ -739,7 +742,7 @@ void FarmMapController::refreshCropsVisuals() {
             sprB = cocos2d::Sprite::create("Crops/Crops.png");
             if (sprB) {
                 sprB->setAnchorPoint(cocos2d::Vec2(0.5f, 0.0f));
-                _cropsRoot->addChild(sprB, 0);
+                _cropsRootFront->addChild(sprB, 0);
                 _cropSprites[key] = sprB;
             }
         } else {
@@ -751,7 +754,7 @@ void FarmMapController::refreshCropsVisuals() {
             sprT = cocos2d::Sprite::create("Crops/Crops.png");
             if (sprT) {
                 sprT->setAnchorPoint(cocos2d::Vec2(0.5f, 0.0f));
-                _cropsRoot->addChild(sprT, 1);
+                _cropsRootBack->addChild(sprT, 0);
                 _cropSpritesTop[key] = sprT;
             }
         } else {
@@ -759,6 +762,7 @@ void FarmMapController::refreshCropsVisuals() {
         }
 
         auto center = tileToWorld(cp.c, cp.r);
+        int z = static_cast<int>(-(center.y - s * 0.5f));
         if (sprB && sprT && sprB->getTexture()) {
             float texH = sprB->getTexture()->getContentSize().height;
             cocos2d::Rect rectB = Game::cropRectBottomHalf(cp.type, cp.stage, texH);
@@ -767,6 +771,8 @@ void FarmMapController::refreshCropsVisuals() {
             sprT->setTextureRect(rectT);
             sprB->setPosition(cocos2d::Vec2(center.x, center.y - s * 0.5f));
             sprT->setPosition(cocos2d::Vec2(center.x, center.y - s * 0.5f + 16.0f));
+            sprB->setLocalZOrder(z);
+            sprT->setLocalZOrder(z);
             sprB->setVisible(true);
             sprT->setVisible(true);
         } else {

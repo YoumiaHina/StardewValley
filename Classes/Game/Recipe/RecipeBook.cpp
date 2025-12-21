@@ -6,36 +6,9 @@ namespace Game {
 
 namespace {
 
-bool isMineralLike(ItemType t) {
-    switch (t) {
-        case ItemType::Coal:
-        case ItemType::CopperGrain:
-        case ItemType::CopperIngot:
-        case ItemType::IronGrain:
-        case ItemType::IronIngot:
-        case ItemType::GoldGrain:
-        case ItemType::GoldIngot:
-            return true;
-        default:
-            return false;
-    }
-}
-
-bool isMaterialLike(ItemType t) {
-    switch (t) {
-        case ItemType::Wood:
-        case ItemType::Stone:
-        case ItemType::Fiber:
-        case ItemType::Coal:
-            return true;
-        default:
-            return false;
-    }
-}
-
 std::vector<std::shared_ptr<RecipeBase>> buildAllRecipes() {
     std::vector<std::shared_ptr<RecipeBase>> out;
-    out.reserve(16);
+    out.reserve(32);
 
     out.push_back(std::make_shared<SimpleRecipe>(
         "placeable_chest",
@@ -54,6 +27,131 @@ std::vector<std::shared_ptr<RecipeBase>> buildAllRecipes() {
         std::vector<RecipeBase::Ingredient>{
             RecipeBase::Ingredient{ ItemType::Stone, 25 },
             RecipeBase::Ingredient{ ItemType::CopperGrain, 20 }
+        }));
+
+    out.push_back(std::make_shared<SimpleRecipe>(
+        "food_omelet",
+        "Omelet",
+        ItemType::Omelet,
+        1,
+        std::vector<RecipeBase::Ingredient>{
+            RecipeBase::Ingredient{ ItemType::Egg, 3 },
+            RecipeBase::Ingredient{ ItemType::Milk, 3 }
+        }));
+
+    out.push_back(std::make_shared<SimpleRecipe>(
+        "food_parsnip_soup",
+        "Parsnip Soup",
+        ItemType::ParsnipSoup,
+        1,
+        std::vector<RecipeBase::Ingredient>{
+            RecipeBase::Ingredient{ ItemType::Parsnip, 7 },
+            RecipeBase::Ingredient{ ItemType::Milk, 1 }
+        }));
+
+    out.push_back(std::make_shared<SimpleRecipe>(
+        "food_salad_blueberry_strawberry",
+        "Salad",
+        ItemType::Salad,
+        1,
+        std::vector<RecipeBase::Ingredient>{
+            RecipeBase::Ingredient{ ItemType::Blueberry, 10 },
+            RecipeBase::Ingredient{ ItemType::Strawberry, 10 },
+            RecipeBase::Ingredient{ ItemType::Milk, 1 }
+        }));
+
+    out.push_back(std::make_shared<SimpleRecipe>(
+        "food_salad_blueberry_parsnip",
+        "Salad",
+        ItemType::Salad,
+        1,
+        std::vector<RecipeBase::Ingredient>{
+            RecipeBase::Ingredient{ ItemType::Blueberry, 10 },
+            RecipeBase::Ingredient{ ItemType::Parsnip, 10 },
+            RecipeBase::Ingredient{ ItemType::Milk, 1 }
+        }));
+
+    out.push_back(std::make_shared<SimpleRecipe>(
+        "food_salad_blueberry_eggplant",
+        "Salad",
+        ItemType::Salad,
+        1,
+        std::vector<RecipeBase::Ingredient>{
+            RecipeBase::Ingredient{ ItemType::Blueberry, 10 },
+            RecipeBase::Ingredient{ ItemType::Eggplant, 10 },
+            RecipeBase::Ingredient{ ItemType::Milk, 1 }
+        }));
+
+    out.push_back(std::make_shared<SimpleRecipe>(
+        "food_salad_strawberry_parsnip",
+        "Salad",
+        ItemType::Salad,
+        1,
+        std::vector<RecipeBase::Ingredient>{
+            RecipeBase::Ingredient{ ItemType::Strawberry, 10 },
+            RecipeBase::Ingredient{ ItemType::Parsnip, 10 },
+            RecipeBase::Ingredient{ ItemType::Milk, 1 }
+        }));
+
+    out.push_back(std::make_shared<SimpleRecipe>(
+        "food_salad_strawberry_eggplant",
+        "Salad",
+        ItemType::Salad,
+        1,
+        std::vector<RecipeBase::Ingredient>{
+            RecipeBase::Ingredient{ ItemType::Strawberry, 10 },
+            RecipeBase::Ingredient{ ItemType::Eggplant, 10 },
+            RecipeBase::Ingredient{ ItemType::Milk, 1 }
+        }));
+
+    out.push_back(std::make_shared<SimpleRecipe>(
+        "food_salad_parsnip_eggplant",
+        "Salad",
+        ItemType::Salad,
+        1,
+        std::vector<RecipeBase::Ingredient>{
+            RecipeBase::Ingredient{ ItemType::Parsnip, 10 },
+            RecipeBase::Ingredient{ ItemType::Eggplant, 10 },
+            RecipeBase::Ingredient{ ItemType::Milk, 1 }
+        }));
+
+    out.push_back(std::make_shared<SimpleRecipe>(
+        "food_fried_egg",
+        "Fried Egg",
+        ItemType::FriedEgg,
+        1,
+        std::vector<RecipeBase::Ingredient>{
+            RecipeBase::Ingredient{ ItemType::Egg, 2 }
+        }));
+
+    out.push_back(std::make_shared<SimpleRecipe>(
+        "food_tortilla",
+        "Tortilla",
+        ItemType::Tortilla,
+        1,
+        std::vector<RecipeBase::Ingredient>{
+            RecipeBase::Ingredient{ ItemType::Corn, 3 }
+        }));
+
+    out.push_back(std::make_shared<SimpleRecipe>(
+        "food_blueberry_tart",
+        "Blueberry Tart",
+        ItemType::BlueberryTart,
+        1,
+        std::vector<RecipeBase::Ingredient>{
+            RecipeBase::Ingredient{ ItemType::Milk, 1 },
+            RecipeBase::Ingredient{ ItemType::Blueberry, 10 },
+            RecipeBase::Ingredient{ ItemType::Egg, 3 }
+        }));
+
+    out.push_back(std::make_shared<SimpleRecipe>(
+        "food_eggplant_parmesan",
+        "Eggplant Parmesan",
+        ItemType::EggplantParmesan,
+        1,
+        std::vector<RecipeBase::Ingredient>{
+            RecipeBase::Ingredient{ ItemType::Milk, 2 },
+            RecipeBase::Ingredient{ ItemType::Eggplant, 4 }
         }));
 
     return out;
@@ -78,28 +176,16 @@ std::vector<std::shared_ptr<RecipeBase>> RecipeBook::filtered(const IRecipeFilte
     return out;
 }
 
-RecipeCategory RecipeBook::categoryForOutput(ItemType out) {
-    if (out == ItemType::Chest || out == ItemType::Furnace) {
-        return RecipeCategory::Placeable;
-    }
-    if (isMineralLike(out)) {
-        return RecipeCategory::Mineral;
-    }
-    if (itemEdible(out)) {
-        return RecipeCategory::Food;
-    }
-    if (isMaterialLike(out)) {
-        return RecipeCategory::Material;
-    }
-    return RecipeCategory::All;
-}
-
 bool CategoryRecipeFilter::accept(const RecipeBase& recipe) const {
-    if (_cat == RecipeCategory::All) {
-        return true;
+    auto out = recipe.outputType();
+    switch (_cat) {
+        case RecipeCategory::Placeable:
+            return out == ItemType::Chest || out == ItemType::Furnace;
+        case RecipeCategory::Food:
+            return itemEdible(out);
+        default:
+            return false;
     }
-    RecipeCategory c = RecipeBook::categoryForOutput(recipe.outputType());
-    return c == _cat;
 }
 
 } // namespace Game

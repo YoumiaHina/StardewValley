@@ -6,11 +6,8 @@ namespace Game {
 
 // RecipeCategory：配方筛选分类（用于 UI Tab/筛选器）。
 enum class RecipeCategory {
-    All = 0,
-    Placeable,
-    Mineral,
-    Food,
-    Material
+    Placeable = 0,
+    Food
 };
 
 // IRecipeFilter：配方筛选器接口。
@@ -25,7 +22,7 @@ public:
 
 // CategoryRecipeFilter：按分类筛选的默认实现。
 // - 职责：根据配方输出物品类型，将配方归入指定分类。
-// - 协作对象：RecipeBook 负责给出 categoryForOutput 的统一规则。
+// - 协作对象：RecipeBook 提供配方源；UI/Controller 通过筛选器接口过滤。
 class CategoryRecipeFilter final : public IRecipeFilter {
 public:
     // 构造：指定目标分类。
@@ -36,7 +33,7 @@ public:
     RecipeCategory category() const { return _cat; }
 
 private:
-    RecipeCategory _cat = RecipeCategory::All;
+    RecipeCategory _cat = RecipeCategory::Placeable;
 };
 
 } // namespace Game

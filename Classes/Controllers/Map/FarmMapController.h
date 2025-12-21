@@ -156,7 +156,8 @@ private:
     Controllers::ChestController* _chestController = nullptr;
     Controllers::FurnaceController* _furnaceController = nullptr;
     cocos2d::DrawNode* _cropsDraw = nullptr;
-    cocos2d::Node* _cropsRoot = nullptr;
+    cocos2d::Node* _cropsRootBack = nullptr;
+    cocos2d::Node* _cropsRootFront = nullptr;
     std::unordered_map<long long, cocos2d::Sprite*> _cropSprites;
     std::unordered_map<long long, cocos2d::Sprite*> _cropSpritesTop;
 

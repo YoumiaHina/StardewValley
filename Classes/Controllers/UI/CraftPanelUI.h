@@ -50,17 +50,14 @@ private:
     cocos2d::Node* _listNode = nullptr;
     cocos2d::Node* _tabsNode = nullptr;
     cocos2d::Label* _titleLabel = nullptr;
-    cocos2d::Label* _tabAll = nullptr;
     cocos2d::Label* _tabPlaceable = nullptr;
-    cocos2d::Label* _tabMineral = nullptr;
     cocos2d::Label* _tabFood = nullptr;
-    cocos2d::Label* _tabMaterial = nullptr;
 
     std::unique_ptr<Controllers::CraftingController> _craftingController;
     int _pageIndex = 0;
     int _pageSize = 5;
-    Game::RecipeCategory _category = Game::RecipeCategory::All;
+    Game::RecipeCategory _category = Game::RecipeCategory::Placeable;
     std::vector<std::shared_ptr<Game::RecipeBase>> _recipes;
 };
 
-}
+} // namespace Controllers

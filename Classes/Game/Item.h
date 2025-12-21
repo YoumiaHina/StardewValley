@@ -50,7 +50,14 @@ enum class ItemType {
     Egg         = 200,
     Milk        = 201,
     Wool        = 202,
-    Furnace     = 300
+    Furnace     = 300,
+    Omelet      = 400,
+    ParsnipSoup = 401,
+    Salad       = 402,
+    FriedEgg    = 403,
+    Tortilla    = 404,
+    BlueberryTart = 405,
+    EggplantParmesan = 406
 };
 
 // 英文名称（内部使用）
@@ -100,6 +107,13 @@ inline const char* itemName(ItemType t) {
         case ItemType::Milk: return "Milk";
         case ItemType::Wool: return "Wool";
         case ItemType::Furnace: return "Furnace";
+        case ItemType::Omelet: return "Omelet";
+        case ItemType::ParsnipSoup: return "Parsnip Soup";
+        case ItemType::Salad: return "Salad";
+        case ItemType::FriedEgg: return "Fried Egg";
+        case ItemType::Tortilla: return "Tortilla";
+        case ItemType::BlueberryTart: return "Blueberry Tart";
+        case ItemType::EggplantParmesan: return "Eggplant Parmesan";
         default: return "Unknown";
     }
 }
@@ -152,6 +166,13 @@ inline cocos2d::Color4F itemColor(ItemType t) {
         case ItemType::Milk: return Color4F(0.95f, 0.95f, 0.85f, 1.0f);
         case ItemType::Wool: return Color4F(0.90f, 0.90f, 0.95f, 1.0f);
         case ItemType::Furnace: return Color4F(0.80f, 0.50f, 0.20f, 1.0f);
+        case ItemType::Omelet: return Color4F(0.98f, 0.90f, 0.55f, 1.0f);
+        case ItemType::ParsnipSoup: return Color4F(0.98f, 0.85f, 0.40f, 1.0f);
+        case ItemType::Salad: return Color4F(0.35f, 0.85f, 0.45f, 1.0f);
+        case ItemType::FriedEgg: return Color4F(0.98f, 0.95f, 0.70f, 1.0f);
+        case ItemType::Tortilla: return Color4F(0.95f, 0.85f, 0.55f, 1.0f);
+        case ItemType::BlueberryTart: return Color4F(0.55f, 0.45f, 0.95f, 1.0f);
+        case ItemType::EggplantParmesan: return Color4F(0.75f, 0.65f, 0.90f, 1.0f);
         default: return Color4F(1,1,1,1);
     }
 }
@@ -183,6 +204,13 @@ inline std::string itemIconPath(ItemType t) {
         case ItemType::Egg: return "DropsAndInventory/Animal_Products/Egg.png";
         case ItemType::Milk: return "DropsAndInventory/Animal_Products/Milk.png";
         case ItemType::Wool: return "DropsAndInventory/Animal_Products/Wool.png";
+        case ItemType::Omelet: return "Food/Omelet.png";
+        case ItemType::ParsnipSoup: return "Food/Parsnip_Soup.png";
+        case ItemType::Salad: return "Food/Salad.png";
+        case ItemType::FriedEgg: return "Food/Fried_Egg.png";
+        case ItemType::Tortilla: return "Food/Tortilla.png";
+        case ItemType::BlueberryTart: return "Food/Blueberry_Tart.png";
+        case ItemType::EggplantParmesan: return "Food/Eggplant_Parmesan.png";
         case ItemType::Fish: return "fish/Bream.png";
         case ItemType::Carp: return "fish/carp.png";
         case ItemType::BreamFish: return "fish/Bream.png";
@@ -213,6 +241,13 @@ inline bool itemEdible(ItemType t) {
         || t == ItemType::Eggplant
         || t == ItemType::Corn
         || t == ItemType::Strawberry
+        || t == ItemType::Omelet
+        || t == ItemType::ParsnipSoup
+        || t == ItemType::Salad
+        || t == ItemType::FriedEgg
+        || t == ItemType::Tortilla
+        || t == ItemType::BlueberryTart
+        || t == ItemType::EggplantParmesan
         || t == ItemType::Fish
         || t == ItemType::Carp
         || t == ItemType::BreamFish
@@ -234,6 +269,21 @@ inline bool itemEdible(ItemType t) {
         || t == ItemType::Shrimp
         || t == ItemType::Egg
         || t == ItemType::Milk;
+}
+
+inline bool isCookedFood(ItemType t) {
+    switch (t) {
+        case ItemType::Omelet:
+        case ItemType::ParsnipSoup:
+        case ItemType::Salad:
+        case ItemType::FriedEgg:
+        case ItemType::Tortilla:
+        case ItemType::BlueberryTart:
+        case ItemType::EggplantParmesan:
+            return true;
+        default:
+            return false;
+    }
 }
 
 inline bool isFish(ItemType t) {
@@ -271,6 +321,13 @@ inline int itemEnergyRestore(ItemType t) {
         case ItemType::Eggplant: return 20;
         case ItemType::Corn: return 25;
         case ItemType::Strawberry: return 50;
+        case ItemType::Omelet: return 116;
+        case ItemType::ParsnipSoup: return 215;
+        case ItemType::Salad: return 850;
+        case ItemType::FriedEgg: return 33;
+        case ItemType::Tortilla: return 83;
+        case ItemType::BlueberryTart: return 347;
+        case ItemType::EggplantParmesan: return 132;
         case ItemType::Fish: return 15;
         case ItemType::Carp: return 15;
         case ItemType::BreamFish: return 15;
@@ -345,6 +402,13 @@ inline int itemHpRestore(ItemType t) {
         case ItemType::Eggplant: return 4;
         case ItemType::Corn: return 2;
         case ItemType::Strawberry: return 2;
+        case ItemType::Omelet: return 18;
+        case ItemType::ParsnipSoup: return 22;
+        case ItemType::Salad: return 14;
+        case ItemType::FriedEgg: return 8;
+        case ItemType::Tortilla: return 10;
+        case ItemType::BlueberryTart: return 20;
+        case ItemType::EggplantParmesan: return 24;
         case ItemType::Fish: return 3;
         case ItemType::Carp: return 3;
         case ItemType::BreamFish: return 3;
