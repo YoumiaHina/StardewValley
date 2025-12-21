@@ -15,13 +15,17 @@ static bool ensureWeatherChosenForToday() {
     bool mismatch = (ws.weatherSeasonIndex != ws.seasonIndex) || (ws.weatherDayOfSeason != ws.dayOfSeason);
     if (!mismatch) return false;
 
-    unsigned int seed = 0u;
-    seed ^= static_cast<unsigned int>(ws.lastSaveSlot * 73856093);
-    seed ^= static_cast<unsigned int>(ws.seasonIndex * 19349663);
-    seed ^= static_cast<unsigned int>(ws.dayOfSeason * 83492791);
-    int roll = static_cast<int>(seed % 100u);
+    if (ws.seasonIndex == 1 && ws.dayOfSeason == GameConfig::FESTIVAL_DAY) {
+        ws.isRaining = false;
+    } else {
+        unsigned int seed = 0u;
+        seed ^= static_cast<unsigned int>(ws.lastSaveSlot * 73856093);
+        seed ^= static_cast<unsigned int>(ws.seasonIndex * 19349663);
+        seed ^= static_cast<unsigned int>(ws.dayOfSeason * 83492791);
+        int roll = static_cast<int>(seed % 100u);
 
-    ws.isRaining = (roll < 30);
+        ws.isRaining = (roll < 30);
+    }
     ws.weatherSeasonIndex = ws.seasonIndex;
     ws.weatherDayOfSeason = ws.dayOfSeason;
     return true;
