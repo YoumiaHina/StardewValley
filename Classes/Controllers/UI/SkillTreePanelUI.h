@@ -25,9 +25,11 @@ public:
 private:
     cocos2d::Scene* _scene = nullptr;
     cocos2d::Node* _panelNode = nullptr;
+    cocos2d::DrawNode* _bgNode = nullptr;
     cocos2d::Label* _titleLabel = nullptr;
     std::vector<cocos2d::Label*> _rows;
+    float _panelW = 0.0f;
+    float _panelH = 0.0f;
 };
 
 }
-

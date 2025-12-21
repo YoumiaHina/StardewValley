@@ -184,6 +184,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClCompile Include="..\Classes\Controllers\Systems\RainLayer.cpp" />
     <ClCompile Include="..\Classes\Controllers\UI\ChestPanelUI.cpp" />
     <ClCompile Include="..\Classes\Controllers\UI\CraftPanelUI.cpp" />
+    <ClCompile Include="..\Classes\Controllers\Crafting\CraftingController.cpp" />
     <ClCompile Include="..\Classes\Controllers\UI\DialogueUI.cpp" />
     <ClCompile Include="..\Classes\Controllers\UI\HotbarUI.cpp" />
     <ClCompile Include="..\Classes\Controllers\UI\HUDUI.cpp" />
@@ -191,6 +192,9 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClCompile Include="..\Classes\Controllers\UI\PromptUI.cpp" />
     <ClCompile Include="..\Classes\Controllers\UI\StorePanelUI.cpp" />
     <ClCompile Include="..\Classes\Controllers\UI\ToolUpgradePanelUI.cpp" />
+    <ClCompile Include="..\Classes\Game\Recipe\RecipeBase.cpp" />
+    <ClCompile Include="..\Classes\Game\Recipe\RecipeBook.cpp" />
+    <ClCompile Include="..\Classes\Game\Recipe\SimpleRecipe.cpp" />
     <ClCompile Include="..\Classes\Game\Chest.cpp" />
     <ClCompile Include="..\Classes\Game\Drop.cpp" />
     <ClCompile Include="..\Classes\Game\Furnace.cpp" />
@@ -333,6 +337,10 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClInclude Include="..\Classes\Game\NPC\NpcBase.h" />
     <ClInclude Include="..\Classes\Game\NPC\WillyNpc.h" />
     <ClInclude Include="..\Classes\Game\PlaceableItemBase.h" />
+    <ClInclude Include="..\Classes\Game\Recipe\RecipeBase.h" />
+    <ClInclude Include="..\Classes\Game\Recipe\RecipeBook.h" />
+    <ClInclude Include="..\Classes\Game\Recipe\RecipeFilter.h" />
+    <ClInclude Include="..\Classes\Game\Recipe\SimpleRecipe.h" />
     <ClInclude Include="..\Classes\Game\Rock.h" />
     <ClInclude Include="..\Classes\Game\Weed.h" />
     <ClInclude Include="..\Classes\Game\Save\SaveDetail.h" />

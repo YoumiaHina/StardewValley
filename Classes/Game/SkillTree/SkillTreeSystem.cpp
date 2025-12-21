@@ -34,18 +34,17 @@ void SkillTreeSystem::normalizeProgress(SkillTreeType type) const {
 
     auto& p = ws.skillTrees[idx];
     if (p.totalXp < 0) p.totalXp = 0;
-    if (p.unspentPoints < 0) p.unspentPoints = 0;
+    p.unspentPoints = 0;
 
     auto& def = definition(type);
     int lvl = def.levelFromTotalXp(p.totalXp);
-    int earnedPoints = std::max(0, lvl * def.pointsPerLevel());
 
+    p.unlockedNodeIds.clear();
+    for (const auto& node : def.nodes()) {
+        if (lvl < node.requiredLevel) continue;
+        p.unlockedNodeIds.push_back(node.id);
+    }
     std::sort(p.unlockedNodeIds.begin(), p.unlockedNodeIds.end());
-    p.unlockedNodeIds.erase(std::unique(p.unlockedNodeIds.begin(), p.unlockedNodeIds.end()), p.unlockedNodeIds.end());
-
-    int spentPoints = static_cast<int>(p.unlockedNodeIds.size());
-    int expectedUnspent = std::max(0, earnedPoints - spentPoints);
-    p.unspentPoints = expectedUnspent;
 }
 
 int SkillTreeSystem::level(SkillTreeType type) const {
@@ -71,56 +70,11 @@ int SkillTreeSystem::xpToNextLevel(SkillTreeType type) const {
     return definition(type).xpToNextLevel(tmp);
 }
 
-int SkillTreeSystem::unspentPoints(SkillTreeType type) const {
-    normalizeProgress(type);
-    auto& ws = globalState();
-    return ws.skillTrees[indexFromType(type)].unspentPoints;
-}
-
 bool SkillTreeSystem::isNodeUnlocked(SkillTreeType type, int nodeId) const {
     normalizeProgress(type);
     auto& ws = globalState();
     const auto& p = ws.skillTrees[indexFromType(type)];
     return std::binary_search(p.unlockedNodeIds.begin(), p.unlockedNodeIds.end(), nodeId);
-}
-
-bool SkillTreeSystem::unlockNode(SkillTreeType type, int nodeId) {
-    normalizeProgress(type);
-    auto& ws = globalState();
-    auto& p = ws.skillTrees[indexFromType(type)];
-    const auto& def = definition(type);
-
-    int lvl = def.levelFromTotalXp(p.totalXp);
-    if (p.unspentPoints <= 0) return false;
-    if (std::binary_search(p.unlockedNodeIds.begin(), p.unlockedNodeIds.end(), nodeId)) return false;
-    const SkillNode* node = def.findNode(nodeId);
-    if (!node) return false;
-    if (lvl < node->requiredLevel) return false;
-
-    p.unlockedNodeIds.push_back(nodeId);
-    normalizeProgress(type);
-    return true;
-}
-
-bool SkillTreeSystem::unlockFirstAvailableNode(SkillTreeType type, int* outUnlockedNodeId) {
-    if (outUnlockedNodeId) *outUnlockedNodeId = 0;
-    normalizeProgress(type);
-    auto& ws = globalState();
-    auto& p = ws.skillTrees[indexFromType(type)];
-    const auto& def = definition(type);
-
-    int lvl = def.levelFromTotalXp(p.totalXp);
-    if (p.unspentPoints <= 0) return false;
-
-    for (const auto& node : def.nodes()) {
-        if (lvl < node.requiredLevel) continue;
-        if (std::binary_search(p.unlockedNodeIds.begin(), p.unlockedNodeIds.end(), node.id)) continue;
-        if (unlockNode(type, node.id)) {
-            if (outUnlockedNodeId) *outUnlockedNodeId = node.id;
-            return true;
-        }
-    }
-    return false;
 }
 
 void SkillTreeSystem::addXp(SkillTreeType type, int deltaXp, int* outLevelsGained) {

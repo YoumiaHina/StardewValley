@@ -80,6 +80,9 @@
     <Filter Include="Classes\Controllers\Mine">
       <UniqueIdentifier>{2795bbf6-7b99-4df7-a34c-f8c9c2d900c6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Classes\Game\Recipe">
+      <UniqueIdentifier>{67ba89d4-d893-43b1-ace8-395bcc15ab18}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <!-- Source Files -->
@@ -454,6 +457,16 @@
     <ClCompile Include="..\Classes\Controllers\Systems\DropSystem.cpp">
       <Filter>Classes\Controllers\Systems</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\Crafting\CraftingController.cpp" />
+    <ClCompile Include="..\Classes\Game\Recipe\RecipeBase.cpp">
+      <Filter>Classes\Game\Recipe</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\Recipe\RecipeBook.cpp">
+      <Filter>Classes\Game\Recipe</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\Recipe\SimpleRecipe.cpp">
+      <Filter>Classes\Game\Recipe</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <!-- Header Files -->
@@ -788,6 +801,18 @@
     </ClInclude>
     <ClInclude Include="..\Classes\Controllers\Systems\FestivalController.h">
       <Filter>Classes\Controllers\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\Recipe\RecipeBase.h">
+      <Filter>Classes\Game\Recipe</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\Recipe\RecipeBook.h">
+      <Filter>Classes\Game\Recipe</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\Recipe\RecipeFilter.h">
+      <Filter>Classes\Game\Recipe</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\Recipe\SimpleRecipe.h">
+      <Filter>Classes\Game\Recipe</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -74,8 +74,17 @@ list(APPEND GAME_SOURCE
      Classes/Controllers/UI/ChestPanelUI.h
      Classes/Controllers/UI/CraftPanelUI.cpp
      Classes/Controllers/UI/CraftPanelUI.h
+     Classes/Controllers/Crafting/CraftingController.cpp
+     Classes/Controllers/Crafting/CraftingController.h
      Classes/Controllers/UI/StorePanelUI.cpp
      Classes/Controllers/UI/StorePanelUI.h
+     Classes/Game/Recipe/RecipeBase.cpp
+     Classes/Game/Recipe/RecipeBase.h
+     Classes/Game/Recipe/RecipeFilter.h
+     Classes/Game/Recipe/RecipeBook.cpp
+     Classes/Game/Recipe/RecipeBook.h
+     Classes/Game/Recipe/SimpleRecipe.cpp
+     Classes/Game/Recipe/SimpleRecipe.h
      Classes/Game/Tool/Axe.cpp
      Classes/Game/Tool/Hoe.cpp
      Classes/Game/Tool/Pickaxe.cpp

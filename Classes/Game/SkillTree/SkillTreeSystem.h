@@ -25,15 +25,9 @@ public:
     int totalXp(SkillTreeType type) const;
     // 返回升到下一等级还差多少经验（满级返回 0）。
     int xpToNextLevel(SkillTreeType type) const;
-    // 返回指定技能树的可用技能点数（由等级与已解锁节点推导）。
-    int unspentPoints(SkillTreeType type) const;
 
     // 判断节点是否已解锁。
     bool isNodeUnlocked(SkillTreeType type, int nodeId) const;
-    // 尝试解锁节点：满足等级门槛且有点数则扣点并记录。
-    bool unlockNode(SkillTreeType type, int nodeId);
-    // 解锁“当前可解锁的第一个节点”（按节点列表顺序）；成功时可返回解锁的 nodeId。
-    bool unlockFirstAvailableNode(SkillTreeType type, int* outUnlockedNodeId = nullptr);
 
     // 增加指定技能树经验；会自动处理升级与点数变化。
     void addXp(SkillTreeType type, int deltaXp, int* outLevelsGained = nullptr);

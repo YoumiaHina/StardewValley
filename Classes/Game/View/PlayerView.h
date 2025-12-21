@@ -28,12 +28,21 @@ public:
     static int getMaxShirtStyles();
     static int getMaxPantsStyles();
 
+    cocos2d::Node* upperNode() const { return _upperNode; }
+    void syncUpperLayerPosition();
+    void syncUpperLayerZ();
+
 private:
     cocos2d::Sprite* _bodySprite = nullptr;
     cocos2d::Sprite* _shirtSprite = nullptr;
     cocos2d::Sprite* _pantsSprite = nullptr;
-    cocos2d::Sprite* _hairSprite = nullptr;
     cocos2d::Sprite* _armSprite = nullptr;
+    cocos2d::Node* _upperNode = nullptr;
+    cocos2d::Sprite* _bodySpriteUpper = nullptr;
+    cocos2d::Sprite* _shirtSpriteUpper = nullptr;
+    cocos2d::Sprite* _pantsSpriteUpper = nullptr;
+    cocos2d::Sprite* _hairSprite = nullptr;
+    cocos2d::Sprite* _armSpriteUpper = nullptr;
 
     int _shirtIndex = 0;
     int _pantsIndex = 0;

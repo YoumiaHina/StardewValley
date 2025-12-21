@@ -90,10 +90,10 @@ public:
     void toggleChestPanel(bool visible);
     bool isChestPanelVisible() const;
 
-    // Craft 面板（简化：显示按钮与可用状态）
+    // Craft 面板
     void buildCraftPanel();
-    void refreshCraftPanel(int woodCount);
     void toggleCraftPanel(bool visible);
+    bool isCraftPanelVisible() const;
 
     // Store 面板
     void buildStorePanel();

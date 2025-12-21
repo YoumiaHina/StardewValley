@@ -1,19 +1,66 @@
 #pragma once
 
 #include "cocos2d.h"
+#include <memory>
+#include <vector>
+#include <functional>
+#include "Game/Inventory.h"
+#include "Game/Recipe/RecipeBook.h"
+#include "Controllers/Crafting/CraftingController.h"
 
 namespace Controllers {
 
+// CraftPanelUI：合成面板 UI。
+// - 职责：创建/刷新合成列表与筛选入口，并转发点击事件到 CraftingController 执行合成。
+// - 协作对象：CraftingController 负责合成规则与背包变更；RecipeBook 提供配方列表；UIController 管理面板生命周期。
 class CraftPanelUI {
 public:
-    CraftPanelUI(cocos2d::Scene* scene) : _scene(scene) {}
+    // 构造：绑定场景与背包引用；节点在 buildCraftPanel 中创建。
+    CraftPanelUI(cocos2d::Scene* scene, std::shared_ptr<Game::Inventory> inv)
+        : _scene(scene), _inventory(std::move(inv)) {}
+    // 构建面板节点（背景、标题、筛选 Tab、列表容器、分页按钮）。
     void buildCraftPanel();
-    void refreshCraftPanel(int level);
+    // 刷新面板内容（根据筛选与分页重绘列表）。
+    void refreshCraftPanel();
+    // 显示/隐藏面板；show=true 时会确保构建并刷新。
     void toggleCraftPanel(bool show);
+    // 面板是否可见。
+    bool isVisible() const;
+    // 切换配方分类并刷新列表。
+    void setCategory(Game::RecipeCategory cat);
+    // 获取当前分类。
+    Game::RecipeCategory category() const { return _category; }
+
+    // 合成完成回调：参数表示是否成功。
+    std::function<void(bool)> onCrafted;
 
 private:
+    // 重建当前分类下的配方列表。
+    void rebuildRecipes();
+    // 更新标题文本。
+    void updateTitle();
+    // 更新 Tab 的视觉状态。
+    void updateTabsVisual();
+    // 将材料列表格式化为字符串（包含拥有数量）。
+    std::string formatIngredientsLine(const Game::RecipeBase& recipe) const;
+
     cocos2d::Scene* _scene = nullptr;
+    std::shared_ptr<Game::Inventory> _inventory;
     cocos2d::Node* _panelNode = nullptr;
+    cocos2d::Node* _listNode = nullptr;
+    cocos2d::Node* _tabsNode = nullptr;
+    cocos2d::Label* _titleLabel = nullptr;
+    cocos2d::Label* _tabAll = nullptr;
+    cocos2d::Label* _tabPlaceable = nullptr;
+    cocos2d::Label* _tabMineral = nullptr;
+    cocos2d::Label* _tabFood = nullptr;
+    cocos2d::Label* _tabMaterial = nullptr;
+
+    std::unique_ptr<Controllers::CraftingController> _craftingController;
+    int _pageIndex = 0;
+    int _pageSize = 5;
+    Game::RecipeCategory _category = Game::RecipeCategory::All;
+    std::vector<std::shared_ptr<Game::RecipeBase>> _recipes;
 };
 
 }

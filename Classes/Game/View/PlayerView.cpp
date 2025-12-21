@@ -19,10 +19,10 @@ bool PlayerView::init() {
     _bodySprite = cocos2d::Sprite::create("Farmer/farmer_base.png");
     _pantsSprite = cocos2d::Sprite::create("Farmer/pants.png");
     _shirtSprite = cocos2d::Sprite::create("Farmer/shirts.png");
-    _hairSprite = cocos2d::Sprite::create("Farmer/hairstyles.png");
     _armSprite = cocos2d::Sprite::create("Farmer/farmer_base.png");
+    _hairSprite = cocos2d::Sprite::create("Farmer/hairstyles.png");
 
-    if (!_bodySprite || !_pantsSprite || !_shirtSprite || !_hairSprite || !_armSprite) {
+    if (!_bodySprite || !_pantsSprite || !_shirtSprite || !_armSprite || !_hairSprite) {
         cocos2d::log("Error loading character textures");
         return false;
     }
@@ -33,21 +33,27 @@ bool PlayerView::init() {
     this->addChild(_armSprite, 3);
     this->addChild(_hairSprite, 4);
 
-    _bodySprite->setPosition(0, 0);
-    _pantsSprite->setPosition(0, 0);
-    _hairSprite->setPosition(0, -1);
-    _armSprite->setPosition(0, 0);
-
-    _shirtSprite->setPosition(0, -3);
     _shirtSprite->setScale(1.0f);
     _bodySprite->getTexture()->setAliasTexParameters();
     _pantsSprite->getTexture()->setAliasTexParameters();
     _shirtSprite->getTexture()->setAliasTexParameters();
-    _hairSprite->getTexture()->setAliasTexParameters();
     _armSprite->getTexture()->setAliasTexParameters();
+    _hairSprite->getTexture()->setAliasTexParameters();
 
     updateSprites();
     return true;
+}
+
+void PlayerView::syncUpperLayerPosition() {
+    if (_upperNode) {
+        _upperNode->setPosition(this->getPosition());
+    }
+}
+
+void PlayerView::syncUpperLayerZ() {
+    if (_upperNode) {
+        _upperNode->setLocalZOrder(this->getLocalZOrder() + 2);
+    }
 }
 
 void PlayerView::setShirtStyle(int index) {
@@ -104,6 +110,9 @@ void PlayerView::updateAnimation(float dt) {
                 if (_armSprite) {
                     _armSprite->setVisible(true);
                 }
+                if (_armSpriteUpper) {
+                    _armSpriteUpper->setVisible(true);
+                }
             } else {
                 updateToolSprite();
             }
@@ -125,6 +134,9 @@ void PlayerView::updateAnimation(float dt) {
 }
 
 void PlayerView::updateSprites() {
+    if (!_bodySprite || !_pantsSprite || !_shirtSprite || !_armSprite || !_hairSprite) {
+        return;
+    }
     int dirRow = 0;
     switch (_currentDir) {
         case Direction::DOWN: dirRow = 0; break;
@@ -147,7 +159,8 @@ void PlayerView::updateSprites() {
     _bodySprite->setTextureRect(bodyRect);
     _bodySprite->setFlippedX(useRightForLeft);
     int w = 16; int h = 32; int armCol = animCol + 6; float armX = armCol * w; float armY = dirRow * h;
-    _armSprite->setTextureRect(cocos2d::Rect(armX, armY, w, h));
+    cocos2d::Rect armRect(armX, armY, w, h);
+    _armSprite->setTextureRect(armRect);
     _armSprite->setFlippedX(useRightForLeft);
     cocos2d::Rect pantsRect = getPantsRect(_pantsIndex, effectiveDir, _animFrame);
     _pantsSprite->setTextureRect(pantsRect);
@@ -158,10 +171,11 @@ void PlayerView::updateSprites() {
     cocos2d::Rect hairRect = getHairRect(_hairIndex, effectiveDir, _animFrame);
     _hairSprite->setTextureRect(hairRect);
     _hairSprite->setFlippedX(useRightForLeft);
-    _shirtSprite->setPosition(0, -3 + bobY);
-    _hairSprite->setPosition(0, -1 + bobY);
-    _armSprite->setPosition(0, 0);
+    _bodySprite->setPosition(0, 0);
     _pantsSprite->setPosition(0, 0);
+    _armSprite->setPosition(0, 0);
+    _shirtSprite->setPosition(0, -3.0f + bobY);
+    _hairSprite->setPosition(0, -1.0f + bobY);
     if (_isUsingTool) {
         updateToolSprite();
     }

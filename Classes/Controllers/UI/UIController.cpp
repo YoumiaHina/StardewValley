@@ -190,11 +190,34 @@ bool UIController::isChestPanelVisible() const {
     return _chestPanel && _chestPanel->isVisible();
 }
 
-void UIController::buildCraftPanel() { if (!_craftPanel) _craftPanel = new CraftPanelUI(_scene); _craftPanel->buildCraftPanel(); }
+void UIController::buildCraftPanel() {
+    if (!_craftPanel) {
+        _craftPanel = new CraftPanelUI(_scene, _inventory);
+        _craftPanel->onCrafted = [this](bool ok) {
+            if (ok) {
+                refreshHUD();
+                refreshHotbar();
+                popTextAt(_scene->convertToWorldSpace(Vec2(0, 0)), "Crafted!", Color3B::GREEN);
+            } else {
+                popTextAt(_scene->convertToWorldSpace(Vec2(0, 0)), "Failed", Color3B::RED);
+            }
+        };
+    }
+    _craftPanel->buildCraftPanel();
+}
 
-void UIController::refreshCraftPanel(int woodCount) { if (_craftPanel) _craftPanel->refreshCraftPanel(woodCount); }
+void UIController::toggleCraftPanel(bool visible) {
+    if (visible) {
+        buildCraftPanel();
+        if (_craftPanel) _craftPanel->toggleCraftPanel(true);
+    } else {
+        if (_craftPanel) _craftPanel->toggleCraftPanel(false);
+    }
+}
 
-void UIController::toggleCraftPanel(bool visible) { if (_craftPanel) _craftPanel->toggleCraftPanel(visible); }
+bool UIController::isCraftPanelVisible() const {
+    return _craftPanel && _craftPanel->isVisible();
+}
 
 } // namespace Controllers
 
