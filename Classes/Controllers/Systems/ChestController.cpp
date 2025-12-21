@@ -1,3 +1,4 @@
+// ChestController 实现：负责箱子放置/交互逻辑以及与 WorldState 的同步。
 #include "Controllers/Systems/ChestController.h"
 #include "Game/WorldState.h"
 #include "Game/GameConfig.h"
@@ -15,10 +16,12 @@ using namespace cocos2d;
 
 namespace Controllers {
 
+// 挂接到父节点并初始化调试绘制节点（由基类完成）。
 void ChestController::attachTo(Node* parentNode, int zOrder) {
     PlaceableItemSystemBase::attachTo(parentNode, zOrder);
 }
 
+// 从 WorldState 加载当前场景对应的箱子列表。
 void ChestController::syncLoad() {
     auto& ws = Game::globalState();
     if (_isFarm) {
@@ -28,18 +31,22 @@ void ChestController::syncLoad() {
     }
 }
 
+// 只读访问箱子列表。
 const std::vector<Game::Chest>& ChestController::chests() const {
     return _chests;
 }
 
+// 可写访问箱子列表。
 std::vector<Game::Chest>& ChestController::chests() {
     return _chests;
 }
 
+// 判断给定世界坐标附近是否存在箱子（用于提示/种地避让）。
 bool ChestController::isNearChest(const Vec2& worldPos) const {
     return Game::isNearAnyChest(worldPos, _chests);
 }
 
+// 判断给定世界坐标是否与任意箱子发生碰撞（用于玩家移动/放置阻挡）。
 bool ChestController::collides(const Vec2& worldPos) const {
     return Game::PlaceableItemBase::collidesAny<Game::Chest>(
         worldPos,
@@ -47,6 +54,7 @@ bool ChestController::collides(const Vec2& worldPos) const {
         [](const Game::Chest& c) { return Game::chestCollisionRect(c); });
 }
 
+// 根据当前箱子列表刷新可视节点：优先使用 Chest.png，否则绘制实心矩形。
 void ChestController::refreshVisuals() {
     if (!_drawNode) return;
     _drawNode->clear();
@@ -76,12 +84,14 @@ void ChestController::refreshVisuals() {
     }
 }
 
+// 当前是否应该尝试放置箱子：选中格是箱子物品且数量>0 时返回 true。
 bool ChestController::shouldPlace(const Game::Inventory& inventory) const {
     if (inventory.selectedKind() != Game::SlotKind::Item) return false;
     const auto& slot = inventory.selectedSlot();
     return slot.itemType == Game::ItemType::Chest && slot.itemQty > 0;
 }
 
+// 放置箱子入口：根据地图类型分发到农场/室内/室外的具体实现。
 bool ChestController::tryPlace(Controllers::IMapController* map,
                                Controllers::UIController* ui,
                                const std::shared_ptr<Game::Inventory>& inventory,
@@ -98,6 +108,7 @@ bool ChestController::tryPlace(Controllers::IMapController* map,
     return placeChestOnOutdoorMap(map, ui, inventory, playerWorldPos);
 }
 
+// 与已有箱子交互：透传给 openChestNearPlayer 打开最近的箱子面板。
 bool ChestController::tryInteractExisting(Controllers::IMapController* map,
                                           Controllers::UIController* ui,
                                           const std::shared_ptr<Game::Inventory>& inventory,
@@ -109,8 +120,10 @@ bool ChestController::tryInteractExisting(Controllers::IMapController* map,
 
 namespace {
 
+// 将系统内部箱子列表同步回 WorldState 的回调类型。
 using ChestSyncFunc = std::function<void(const std::vector<Game::Chest>&)>;
 
+// 计算离玩家最近的箱子下标（非农场场景使用距离最近策略）。
 int nearestChestIndex(const Vec2& playerWorldPos, const std::vector<Game::Chest>& chests) {
     int idx = -1;
     float best = 1e9f;
@@ -124,6 +137,7 @@ int nearestChestIndex(const Vec2& playerWorldPos, const std::vector<Game::Chest>
     return idx;
 }
 
+// 通用放置流程：检查可放置、数量上限、同步 WorldState 并扣除背包中的箱子物品。
 bool placeChestCommon(const Vec2& center,
                       Controllers::UIController* ui,
                       const std::shared_ptr<Game::Inventory>& inventory,
@@ -175,6 +189,7 @@ bool placeChestCommon(const Vec2& center,
 
 } // anonymous namespace
 
+// 打开玩家附近的箱子：农场按朝向格子查找，其它场景按距离最近箱子处理。
 bool openChestNearPlayer(Controllers::IMapController* map,
                          Controllers::UIController* ui,
                          const Vec2& playerWorldPos,
@@ -208,6 +223,7 @@ bool openChestNearPlayer(Controllers::IMapController* map,
     return true;
 }
 
+// 打开全局箱子（类似扩展背包）。
 bool openGlobalChest(Controllers::UIController* ui) {
     if (!ui) return false;
     auto& ws = Game::globalState();
@@ -217,6 +233,7 @@ bool openGlobalChest(Controllers::UIController* ui) {
     return true;
 }
 
+// 农场放置箱子：通过 PlaceablePlacementBase 选择合适中心点并同步到 farmChests。
 bool placeChestOnFarm(Controllers::IMapController* map,
                       Controllers::UIController* ui,
                       std::shared_ptr<Game::Inventory> inventory,
@@ -238,6 +255,7 @@ bool placeChestOnFarm(Controllers::IMapController* map,
     return placeChestCommon(center, ui, inventory, chs, blocked, map, nullptr, syncWorld);
 }
 
+// 室内放置箱子：禁止挡住门/床区域，并同步到 houseChests。
 bool placeChestInRoom(Controllers::RoomMapController* room,
                       Controllers::UIController* ui,
                       std::shared_ptr<Game::Inventory> inventory,
@@ -260,7 +278,7 @@ bool placeChestInRoom(Controllers::RoomMapController* room,
     return placeChestCommon(center, ui, inventory, chs, blocked, nullptr, room, syncWorld);
 }
 
-// 室外地图（Town/Beach）不支持放置 Chest
+// 室外地图（Town/Beach）当前不支持放置 Chest，仅占位返回 false。
 bool placeChestOnOutdoorMap(Controllers::IMapController* map,
                             Controllers::UIController* ui,
                             std::shared_ptr<Game::Inventory> inventory,
@@ -268,6 +286,10 @@ bool placeChestOnOutdoorMap(Controllers::IMapController* map,
     return false;
 }
 
+// 单步转移：背包 -> 箱子指定格。
+// - 若背包选中的是物品：栈叠/创建新物品格，由 consumeSelectedItem 驱动数量变化。
+// - 若背包选中的是工具：复制工具实例并清空背包格。
+// - 每次调用后会把该 Chest 写回 WorldState 对应容器。
 void transferChestCell(Game::Chest& chest,
                        int flatIndex,
                        Game::Inventory& inventory) {
@@ -347,6 +369,143 @@ void transferChestCell(Game::Chest& chest,
     if (&chest == &ws.globalChest) {
         ws.globalChest = chest;
     }
+}
+
+// 背包 -> 箱子：支持 Shift 连续搬运，多次调用 transferChestCell 直到无法再变化。
+bool transferInventoryToChest(Game::Chest& chest,
+                              int flatIndex,
+                              Game::Inventory& inventory,
+                              bool moveAll) {
+    if (flatIndex < 0) return false;
+    if (chest.slots.empty()) {
+        chest.slots.resize(static_cast<std::size_t>(Game::Chest::CAPACITY));
+    }
+    if (flatIndex >= static_cast<int>(chest.slots.size())) return false;
+
+    int invIndex = inventory.selectedIndex();
+    if (invIndex < 0 || invIndex >= static_cast<int>(inventory.size())) return false;
+
+    int maxMoves = moveAll ? Game::ItemStack::MAX_STACK : 1;
+    bool movedAny = false;
+
+    for (int i = 0; i < maxMoves; ++i) {
+        Game::Slot beforeChest = chest.slots[static_cast<std::size_t>(flatIndex)];
+        Game::ItemStack beforeInvStack = inventory.itemAt(static_cast<std::size_t>(invIndex));
+        bool beforeInvEmpty = inventory.isEmpty(static_cast<std::size_t>(invIndex));
+        bool beforeInvIsTool = inventory.isTool(static_cast<std::size_t>(invIndex));
+
+        transferChestCell(chest, flatIndex, inventory);
+
+        Game::Slot afterChest = chest.slots[static_cast<std::size_t>(flatIndex)];
+        Game::ItemStack afterInvStack = inventory.itemAt(static_cast<std::size_t>(invIndex));
+        bool afterInvEmpty = inventory.isEmpty(static_cast<std::size_t>(invIndex));
+        bool afterInvIsTool = inventory.isTool(static_cast<std::size_t>(invIndex));
+
+        bool chestSame = (beforeChest.kind == afterChest.kind &&
+                          beforeChest.itemType == afterChest.itemType &&
+                          beforeChest.itemQty == afterChest.itemQty);
+        bool invSame = (beforeInvEmpty == afterInvEmpty &&
+                        beforeInvIsTool == afterInvIsTool &&
+                        beforeInvStack.type == afterInvStack.type &&
+                        beforeInvStack.quantity == afterInvStack.quantity);
+
+        if (chestSame && invSame) {
+            break;
+        }
+        movedAny = true;
+        if (!moveAll) break;
+    }
+
+    return movedAny;
+}
+
+// 箱子 -> 背包：支持单个与 Shift 多个搬运，并确保与 WorldState 同步。
+bool transferChestToInventory(Game::Chest& chest,
+                              int flatIndex,
+                              Game::Inventory& inventory,
+                              int invIndex,
+                              bool moveAll) {
+    if (flatIndex < 0 || invIndex < 0) return false;
+    if (chest.slots.empty()) {
+        chest.slots.resize(static_cast<std::size_t>(Game::Chest::CAPACITY));
+    }
+    if (flatIndex >= static_cast<int>(chest.slots.size())) return false;
+    if (invIndex >= static_cast<int>(inventory.size())) return false;
+    Game::Slot& slotChest = chest.slots[static_cast<std::size_t>(flatIndex)];
+
+    bool movedAny = false;
+
+    if (slotChest.kind == Game::SlotKind::Item && slotChest.itemQty > 0) {
+        Game::ItemType type = slotChest.itemType;
+        bool invEmpty = inventory.isEmpty(static_cast<std::size_t>(invIndex));
+        bool invIsItem = inventory.isItem(static_cast<std::size_t>(invIndex));
+        Game::ItemStack st = inventory.itemAt(static_cast<std::size_t>(invIndex));
+        bool sameType = invIsItem && st.type == type;
+        int currentQty = (invEmpty || !invIsItem) ? 0 : st.quantity;
+        int space = Game::ItemStack::MAX_STACK - currentQty;
+        bool canReceive = (invEmpty || sameType) && (space > 0);
+        if (!canReceive) return false;
+        int moveCount = moveAll ? std::min(space, slotChest.itemQty) : 1;
+        for (int i = 0; i < moveCount; ++i) {
+            bool okAdd = inventory.addOneItemToSlot(static_cast<std::size_t>(invIndex), type);
+            if (!okAdd) break;
+            if (slotChest.itemQty <= 0) break;
+            slotChest.itemQty -= 1;
+            movedAny = true;
+            if (slotChest.itemQty <= 0) {
+                slotChest.kind = Game::SlotKind::Empty;
+                slotChest.itemQty = 0;
+                break;
+            }
+        }
+    } else if (slotChest.kind == Game::SlotKind::Tool && slotChest.tool) {
+        bool invEmpty = inventory.isEmpty(static_cast<std::size_t>(invIndex));
+        if (!invEmpty) return false;
+        auto t = slotChest.tool.get();
+        if (!t) return false;
+        Game::ToolKind tk = t->kind();
+        int level = t->level();
+        auto tool = Game::makeTool(tk);
+        if (tool) {
+            tool->setLevel(level);
+        }
+        inventory.setTool(static_cast<std::size_t>(invIndex), tool);
+        slotChest.tool.reset();
+        slotChest.kind = Game::SlotKind::Empty;
+        slotChest.itemQty = 0;
+        movedAny = true;
+    } else {
+        return false;
+    }
+
+    if (!movedAny) return false;
+
+    auto& ws = Game::globalState();
+    for (auto& ch : ws.farmChests) {
+        if (ch.pos.equals(chest.pos)) {
+            ch = chest;
+        }
+    }
+    for (auto& ch : ws.houseChests) {
+        if (ch.pos.equals(chest.pos)) {
+            ch = chest;
+        }
+    }
+    for (auto& ch : ws.townChests) {
+        if (ch.pos.equals(chest.pos)) {
+            ch = chest;
+        }
+    }
+    for (auto& ch : ws.beachChests) {
+        if (ch.pos.equals(chest.pos)) {
+            ch = chest;
+        }
+    }
+    if (&chest == &ws.globalChest) {
+        ws.globalChest = chest;
+    }
+
+    return true;
 }
 
 }

@@ -10,6 +10,7 @@ using namespace cocos2d;
 
 namespace Controllers {
 
+// 构建箱子面板根节点：挂载到场景，并注册 ESC/Shift 键盘监听。
 void ChestPanelUI::buildChestPanel() {
     if (_panelNode) return;
     _panelNode = Node::create();
@@ -44,6 +45,7 @@ void ChestPanelUI::buildChestPanel() {
     }
 }
 
+// 使用指定 Chest 重建箱子 UI：包括背景、格子布局与初始图标。
 void ChestPanelUI::refreshChestPanel(Game::Chest* chest) {
     if (!chest) return;
     _currentChest = chest;
@@ -245,8 +247,10 @@ void ChestPanelUI::refreshChestPanel(Game::Chest* chest) {
             updateCell();
         }
     }
+    // 为所有格子注册点击监听：负责命中检测和触发背包->箱子转移。
     auto slotsListener = EventListenerTouchOneByOne::create();
     slotsListener->setSwallowTouches(false);
+    // onTouchBegan：只做命中测试，判断是否触碰到任意格子。
     slotsListener->onTouchBegan = [this, cols, rows, cellW, cellH, startX, firstRowY, rowGap](Touch* t, Event*){
         if (!_slotsRoot || !_panelNode || !_panelNode->isVisible()) return false;
         float offsetY = cellH * 2.0f;
@@ -264,6 +268,7 @@ void ChestPanelUI::refreshChestPanel(Game::Chest* chest) {
         }
         return false;
     };
+    // onTouchEnded：定位被点击的格子索引，并调用 transferInventoryToChest 执行背包->箱子转移。
     slotsListener->onTouchEnded = [this, cols, rows, cellW, cellH, startX, firstRowY, rowGap](Touch* t, Event*){
         if (!_currentChest || !_inventory || !_slotsRoot || !_panelNode || !_panelNode->isVisible()) return;
         float offsetY = cellH * 2.0f;
@@ -288,41 +293,7 @@ void ChestPanelUI::refreshChestPanel(Game::Chest* chest) {
         }
         if (hitIndex < 0) return;
         _selectedIndex = hitIndex;
-        if (_shiftDown) {
-            int invIndex = _inventory->selectedIndex();
-            if (invIndex >= 0 && invIndex < static_cast<int>(_inventory->size())) {
-                int maxMoves = Game::ItemStack::MAX_STACK;
-                for (int i = 0; i < maxMoves; ++i) {
-                    if (hitIndex < 0 || hitIndex >= static_cast<int>(_currentChest->slots.size())) {
-                        break;
-                    }
-                    Game::Slot beforeChest = _currentChest->slots[static_cast<std::size_t>(hitIndex)];
-                    Game::ItemStack beforeInvStack = _inventory->itemAt(static_cast<std::size_t>(invIndex));
-                    bool beforeInvEmpty = _inventory->isEmpty(static_cast<std::size_t>(invIndex));
-                    bool beforeInvIsTool = _inventory->isTool(static_cast<std::size_t>(invIndex));
-                    transferChestCell(*_currentChest, hitIndex, *_inventory);
-                    if (hitIndex < 0 || hitIndex >= static_cast<int>(_currentChest->slots.size())) {
-                        break;
-                    }
-                    const Game::Slot& afterChest = _currentChest->slots[static_cast<std::size_t>(hitIndex)];
-                    Game::ItemStack afterInvStack = _inventory->itemAt(static_cast<std::size_t>(invIndex));
-                    bool afterInvEmpty = _inventory->isEmpty(static_cast<std::size_t>(invIndex));
-                    bool afterInvIsTool = _inventory->isTool(static_cast<std::size_t>(invIndex));
-                    bool chestSame = (beforeChest.kind == afterChest.kind &&
-                                      beforeChest.itemType == afterChest.itemType &&
-                                      beforeChest.itemQty == afterChest.itemQty);
-                    bool invSame = (beforeInvEmpty == afterInvEmpty &&
-                                    beforeInvIsTool == afterInvIsTool &&
-                                    beforeInvStack.type == afterInvStack.type &&
-                                    beforeInvStack.quantity == afterInvStack.quantity);
-                    if (chestSame && invSame) {
-                        break;
-                    }
-                }
-            }
-        } else {
-            transferChestCell(*_currentChest, hitIndex, *_inventory);
-        }
+        transferInventoryToChest(*_currentChest, hitIndex, *_inventory, _shiftDown);
         if (hitIndex >= 0 && hitIndex < static_cast<int>(_cellIcons.size())) {
             auto icon = _cellIcons[hitIndex];
             auto countLabel = _cellCountLabels[hitIndex];
@@ -420,56 +391,26 @@ void ChestPanelUI::refreshChestPanel(Game::Chest* chest) {
     _panelNode->getEventDispatcher()->addEventListenerWithSceneGraphPriority(slotsListener, _slotsRoot);
 }
 
+// 设置背包变更回调：箱子/背包之间发生转移时由面板触发。
 void ChestPanelUI::setOnInventoryChanged(const std::function<void()>& cb) {
     _onInventoryChanged = cb;
 }
 
+// 当热键栏/背包格被点击时调用：尝试将当前选中的箱子格内容转移到指定背包格。
 void ChestPanelUI::onInventorySlotClicked(int invIndex) {
     if (!_currentChest || !_inventory) return;
     if (_selectedIndex < 0) return;
     if (invIndex < 0 || invIndex >= static_cast<int>(_inventory->size())) return;
     if (_selectedIndex < 0 || _selectedIndex >= static_cast<int>(_currentChest->slots.size())) return;
-    auto& slotChest = _currentChest->slots[static_cast<std::size_t>(_selectedIndex)];
-    if (slotChest.kind == Game::SlotKind::Item && slotChest.itemQty > 0) {
-        Game::ItemType type = slotChest.itemType;
-        bool invEmpty = _inventory->isEmpty(static_cast<std::size_t>(invIndex));
-        bool invIsItem = _inventory->isItem(static_cast<std::size_t>(invIndex));
-        Game::ItemStack st = _inventory->itemAt(static_cast<std::size_t>(invIndex));
-        bool sameType = invIsItem && st.type == type;
-        int currentQty = (invEmpty || !invIsItem) ? 0 : st.quantity;
-        int space = Game::ItemStack::MAX_STACK - currentQty;
-        bool canReceive = (invEmpty || sameType) && (space > 0);
-        if (!canReceive) return;
-        int moveCount = _shiftDown ? std::min(space, slotChest.itemQty) : 1;
-        for (int i = 0; i < moveCount; ++i) {
-            bool okAdd = _inventory->addOneItemToSlot(static_cast<std::size_t>(invIndex), type);
-            if (!okAdd) break;
-            if (slotChest.itemQty <= 0) break;
-            slotChest.itemQty -= 1;
-            if (slotChest.itemQty <= 0) {
-                slotChest.kind = Game::SlotKind::Empty;
-                slotChest.itemQty = 0;
-                break;
-            }
-        }
-    } else if (slotChest.kind == Game::SlotKind::Tool && slotChest.tool) {
-        bool invEmpty = _inventory->isEmpty(static_cast<std::size_t>(invIndex));
-        if (!invEmpty) return;
-        auto t = slotChest.tool.get();
-        if (!t) return;
-        Game::ToolKind tk = t->kind();
-        int level = t->level();
-        auto tool = Game::makeTool(tk);
-        if (tool) {
-            tool->setLevel(level);
-        }
-        _inventory->setTool(static_cast<std::size_t>(invIndex), tool);
-        slotChest.tool.reset();
-        slotChest.kind = Game::SlotKind::Empty;
-        slotChest.itemQty = 0;
-    } else {
-        return;
-    }
+
+    bool moved = transferChestToInventory(
+        *_currentChest,
+        _selectedIndex,
+        *_inventory,
+        invIndex,
+        _shiftDown);
+    if (!moved) return;
+
     if (_selectedIndex >= 0 && _selectedIndex < static_cast<int>(_cellIcons.size())) {
         auto icon = _cellIcons[_selectedIndex];
         auto countLabel = _cellCountLabels[_selectedIndex];
@@ -537,10 +478,12 @@ void ChestPanelUI::onInventorySlotClicked(int invIndex) {
     }
 }
 
+// 显示或隐藏箱子面板。
 void ChestPanelUI::toggleChestPanel(bool show) {
     if (_panelNode) _panelNode->setVisible(show);
 }
 
+// 返回箱子面板当前是否可见。
 bool ChestPanelUI::isVisible() const {
     return _panelNode && _panelNode->isVisible();
 }

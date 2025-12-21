@@ -22,13 +22,14 @@ void HotbarUI::setInventoryBackground(const std::string& path) {
             int slots = static_cast<int>(_inventory ? _inventory->size() : 0);
             float slotW = 80.0f * _hotbarScale, slotH = 32.0f * _hotbarScale, padding = 6.0f * _hotbarScale;
             float totalWidth = slots * slotW + (slots - 1) * padding;
-            float targetW = totalWidth + 20.0f;
+            float targetW = totalWidth + 35.0f;
             float targetH = slotH + 16.0f;
             auto cs = _hotbarBgSprite->getContentSize();
             if (cs.width > 0 && cs.height > 0) {
                 float sx = targetW / cs.width;
                 float sy = targetH / cs.height;
                 float s = std::min(sx, sy);
+                s *= 1.2f;
                 _hotbarBgSprite->setScale(s);
             }
         }
@@ -58,13 +59,14 @@ void HotbarUI::buildHotbar() {
         if (_hotbarBgSprite) {
             _hotbarBgSprite->setAnchorPoint(Vec2(0.5f, 0.5f));
             _hotbarNode->addChild(_hotbarBgSprite, 0);
-            float targetW = totalWidth + 20.0f;
+            float targetW = totalWidth + 35.0f;
             float targetH = slotH + 16.0f;
             auto cs = _hotbarBgSprite->getContentSize();
             if (cs.width > 0 && cs.height > 0) {
                 float sx = targetW / cs.width;
                 float sy = targetH / cs.height;
                 float s = std::min(sx, sy);
+                s *= 1.2f;
                 _hotbarBgSprite->setScale(s);
             }
             useImageBg = true;
@@ -82,6 +84,7 @@ void HotbarUI::buildHotbar() {
 
     _hotbarLabels.clear();
     _hotbarIcons.clear();
+    _hotbarQtyLabels.clear();
     for (int i = 0; i < slots; ++i) {
         float x = -totalWidth/2 + i * (slotW + padding) + slotW/2;
         if (!useImageBg) {
@@ -108,6 +111,16 @@ void HotbarUI::buildHotbar() {
         label->setPosition(Vec2(x, 0));
         _hotbarNode->addChild(label, 2);
         _hotbarLabels.push_back(label);
+
+        auto qtyLabel = Label::createWithTTF("", "fonts/arial.ttf", 18);
+        qtyLabel->setAnchorPoint(Vec2(1.0f, 0.0f));
+        qtyLabel->setColor(Color3B::BLACK);
+        float offsetX = slotW * 0.5f - 6.0f;
+        float offsetY = -slotH * 0.5f + 4.0f;
+        qtyLabel->setPosition(Vec2(x + offsetX, offsetY));
+        qtyLabel->setVisible(false);
+        _hotbarNode->addChild(qtyLabel, 3);
+        _hotbarQtyLabels.push_back(qtyLabel);
     }
 
     _hotbarHighlight = DrawNode::create();
@@ -152,23 +165,35 @@ void HotbarUI::refreshHotbar() {
     float totalWidth = slots * slotW + (slots - 1) * padding;
     bool imageBg = (_hotbarBgSprite != nullptr);
     float bgScaledW = 0.0f, bgScaledH = 0.0f;
+    float innerW = 0.0f, innerH = 0.0f;
     if (imageBg) {
         auto cs = _hotbarBgSprite->getContentSize();
         bgScaledW = cs.width * _hotbarBgSprite->getScaleX();
         bgScaledH = cs.height * _hotbarBgSprite->getScaleY();
+        innerW = bgScaledW * 0.96f;
+        innerH = bgScaledH * (64.0f / 96.0f);
     }
-    float cellW = imageBg ? (bgScaledW / std::max(1, slots)) : slotW;
-    float cellH = imageBg ? bgScaledH : slotH;
+    float cellW = imageBg ? (innerW / std::max(1, slots)) : slotW;
+    float cellH = imageBg ? innerH : slotH;
     int sel = _inventory->selectedIndex();
     float x = imageBg
-        ? (-bgScaledW/2 + (sel + 0.5f) * cellW)
+        ? (-innerW/2 + (sel + 0.5f) * cellW)
         : (-totalWidth/2 + sel * (slotW + padding) + slotW/2);
     _hotbarHighlight->clear();
-    Vec2 a(x - cellW/2, -cellH/2), b(x + cellW/2, -cellH/2), c(x + cellW/2,  cellH/2), d(x - cellW/2,  cellH/2);
-    _hotbarHighlight->drawLine(a, b, Color4F(1.f, 0.9f, 0.2f, 1.f));
-    _hotbarHighlight->drawLine(b, c, Color4F(1.f, 0.9f, 0.2f, 1.f));
-    _hotbarHighlight->drawLine(c, d, Color4F(1.f, 0.9f, 0.2f, 1.f));
-    _hotbarHighlight->drawLine(d, a, Color4F(1.f, 0.9f, 0.2f, 1.f));
+    // 选一个正方形边长（用较小的那个，避免越出槽位太多）
+    float side = std::min(cellW, cellH);
+    float half = side * 0.5f;
+
+    Vec2 a(x - half, -half);
+    Vec2 b(x + half, -half);
+    Vec2 c(x + half,  half);
+    Vec2 d(x - half,  half);
+
+    Color4F col(1.f, 0.9f, 0.2f, 1.f);
+    _hotbarHighlight->drawLine(a, b, col);
+    _hotbarHighlight->drawLine(b, c, col);
+    _hotbarHighlight->drawLine(c, d, col);
+    _hotbarHighlight->drawLine(d, a, col);
 
     std::string selectedHint;
     float hintY = cellH * 0.5f + 10.0f;
@@ -176,13 +201,15 @@ void HotbarUI::refreshHotbar() {
     for (int i = 0; i < slots && i < static_cast<int>(_hotbarLabels.size()); ++i) {
         auto label = _hotbarLabels[i];
         auto icon = (i < static_cast<int>(_hotbarIcons.size())) ? _hotbarIcons[i] : nullptr;
+        auto qtyLabel = (i < static_cast<int>(_hotbarQtyLabels.size())) ? _hotbarQtyLabels[i] : nullptr;
         float cx = imageBg
-            ? (-bgScaledW/2 + (i + 0.5f) * cellW)
+            ? (-innerW/2 + (i + 0.5f) * cellW)
             : (-totalWidth/2 + i * (slotW + padding) + slotW/2);
 
         if (auto tConst = _inventory->toolAt(i)) {
             auto t = _inventory->toolAtMutable(i);
             if (label) label->setVisible(false);
+            if (qtyLabel) qtyLabel->setVisible(false);
             if (icon) {
                 std::string path = tConst->iconPath();
                 if (!path.empty()) {
@@ -193,7 +220,7 @@ void HotbarUI::refreshHotbar() {
                         float targetW = cellW;
                         float sx = (cs.width > 0) ? (targetW / cs.width) : 1.0f;
                         float sy = (cs.height > 0) ? (targetH / cs.height) : 1.0f;
-                        float scale = std::min(sx, sy);
+                        float scale = std::min(sx, sy)* 0.8f;
                         icon->setScale(scale);
                         icon->setPosition(Vec2(cx, 0));
                         icon->setVisible(true);
@@ -217,6 +244,9 @@ void HotbarUI::refreshHotbar() {
                     }
                 }
             }
+            if (i == sel) {
+                selectedHint = tConst->displayName();
+            }
         } else if (_inventory->isItem(i)) {
             auto st = _inventory->itemAt(i);
             std::string text = StringUtils::format("%s x%d", Game::itemName(st.type), st.quantity);
@@ -233,6 +263,17 @@ void HotbarUI::refreshHotbar() {
                     } else {
                         label->setColor(Color3B::WHITE);
                     }
+                }
+            }
+            if (qtyLabel) {
+                if (st.quantity > 1) {
+                    qtyLabel->setString(StringUtils::format("%d", st.quantity));
+                    float offsetX = cellW * 0.5f - 6.0f;
+                    float offsetY = -cellH * 0.5f + 4.0f;
+                    qtyLabel->setPosition(Vec2(cx + offsetX, offsetY));
+                    qtyLabel->setVisible(true);
+                } else {
+                    qtyLabel->setVisible(false);
                 }
             }
             if (icon) {
@@ -262,7 +303,7 @@ void HotbarUI::refreshHotbar() {
                             float targetW = cellW;
                             float sx = (cs.width > 0) ? (targetW / cs.width) : 1.0f;
                             float sy = (cs.height > 0) ? (targetH / cs.height) : 1.0f;
-                            float scale = std::min(sx, sy);
+                            float scale = std::min(sx, sy) * 0.8;
                             icon->setScale(scale);
                             icon->setPosition(Vec2(cx, 0));
                             icon->setVisible(true);
@@ -288,6 +329,7 @@ void HotbarUI::refreshHotbar() {
                 label->setColor(Color3B::WHITE);
             }
             if (icon) icon->setVisible(false);
+            if (qtyLabel) qtyLabel->setVisible(false);
         }
     }
 
