@@ -17,7 +17,7 @@ public:
     void setDirection(Direction dir) override;
     void setMoving(bool moving) override;
     void updateAnimation(float dt) override;
-    void playToolAnimation(Game::ToolKind kind) override;
+    void playToolAnimation(Game::ToolKind kind, int level) override;
 
     int getShirtStyle() const { return _shirtIndex; }
     int getPantsStyle() const { return _pantsIndex; }

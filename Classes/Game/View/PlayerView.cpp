@@ -1,4 +1,5 @@
 #include "Game/View/PlayerView.h"
+#include "Game/WorldState.h"
 #include <string>
 
 namespace Game {
@@ -181,7 +182,7 @@ void PlayerView::updateSprites() {
     }
 }
 
-void PlayerView::playToolAnimation(Game::ToolKind kind) {
+void PlayerView::playToolAnimation(Game::ToolKind kind, int level) {
     _currentTool = kind;
     _isUsingTool = true;
     _toolAnimTimer = 0.0f;
@@ -198,13 +199,45 @@ void PlayerView::playToolAnimation(Game::ToolKind kind) {
     if (!_toolSprite) return;
 
     std::string path;
+    std::string prefix;
+    if (level == 1) {
+        prefix = "Copper_";
+    } else if (level == 2) {
+        prefix = "Iron_";
+    } else if (level >= 3) {
+        prefix = "Gold_";
+    }
+    std::string baseName;
     switch (kind) {
-        case Game::ToolKind::Axe: path = "Tool/AxeAction.png"; break;
-        case Game::ToolKind::Hoe: path = "Tool/HoeAction.png"; break;
-        case Game::ToolKind::Pickaxe: path = "Tool/PickaxeAction.png"; break;
-        case Game::ToolKind::WaterCan: path = "Tool/WaterCanAction.png"; break;
-        case Game::ToolKind::Scythe: path = "Tool/Scythe.png"; break;
+        case Game::ToolKind::Axe: baseName = "AxeAction.png"; break;
+        case Game::ToolKind::Hoe: baseName = "HoeAction.png"; break;
+        case Game::ToolKind::Pickaxe: baseName = "PickaxeAction.png"; break;
+        case Game::ToolKind::WaterCan: baseName = "WaterCanAction.png"; break;
+        case Game::ToolKind::Scythe:
+            path = "Tool/Scythe.png";
+            break;
+        case Game::ToolKind::Sword: {
+            auto& ws = Game::globalState();
+            int maxFloor = 0;
+            for (int f : ws.abyssElevatorFloors) {
+                if (f > maxFloor) {
+                    maxFloor = f;
+                }
+            }
+            if (maxFloor > 0 && maxFloor % 5 == 0) {
+                path = cocos2d::StringUtils::format("Weapon/sword_%d.png", maxFloor);
+            } else {
+                path = "Weapon/sword.png";
+            }
+        } break;
         default: break;
+    }
+    if (path.empty() && !baseName.empty()) {
+        if (!prefix.empty()) {
+            path = std::string("Tool/") + prefix + baseName;
+        } else {
+            path = std::string("Tool/") + baseName;
+        }
     }
     if (path.empty()) {
         _isUsingTool = false;
@@ -215,6 +248,10 @@ void PlayerView::playToolAnimation(Game::ToolKind kind) {
         return;
     }
     _toolSprite->setTexture(path);
+    if (!_toolSprite->getTexture() && !baseName.empty() && !prefix.empty()) {
+        path = std::string("Tool/") + baseName;
+        _toolSprite->setTexture(path);
+    }
     if (_toolSprite->getTexture()) {
         _toolSprite->getTexture()->setAliasTexParameters();
         _toolSprite->setVisible(true);
@@ -237,7 +274,7 @@ void PlayerView::updateToolSprite() {
         return;
     }
 
-    if (_currentTool == Game::ToolKind::Scythe) {
+    if (_currentTool == Game::ToolKind::Scythe || _currentTool == Game::ToolKind::Sword) {
         auto tex = _toolSprite->getTexture();
         auto size = tex->getContentSize();
         cocos2d::Rect r(0.0f, 0.0f, size.width, size.height);
@@ -252,7 +289,7 @@ void PlayerView::updateToolSprite() {
         _toolSprite->setTextureRect(r);
     }
 
-    if (_currentTool == Game::ToolKind::Scythe) {
+    if (_currentTool == Game::ToolKind::Scythe || _currentTool == Game::ToolKind::Sword) {
         _toolSprite->setScale(0.2f);
     } else {
         _toolSprite->setScale(1.0f);

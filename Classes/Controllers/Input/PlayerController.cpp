@@ -318,7 +318,7 @@ void PlayerController::registerCommonInputHandlers(
                                 [this]() -> Vec2 { return lastDir(); },
                                 _ui);
                             if (_player && !msg.empty()) {
-                                _player->playToolAnimation(t->kind());
+                                _player->playToolAnimation(t->kind(), t->level());
                             }
                         }
                     }
@@ -370,7 +370,7 @@ void PlayerController::registerCommonInputHandlers(
                     [this]() -> Vec2 { return lastDir(); },
                     _ui);
                 if (_player && !msg.empty()) {
-                    _player->playToolAnimation(t->kind());
+                    _player->playToolAnimation(t->kind(), t->level());
                 }
             }
         }

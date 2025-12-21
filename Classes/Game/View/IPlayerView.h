@@ -14,6 +14,6 @@ public:
     virtual void setDirection(Direction dir) = 0;
     virtual void setMoving(bool moving) = 0;
     virtual void updateAnimation(float dt) = 0;
-    virtual void playToolAnimation(Game::ToolKind kind) = 0;
+    virtual void playToolAnimation(Game::ToolKind kind, int level) = 0;
 };
 }
