@@ -843,5 +843,18 @@ void FarmMapController::addActorToMap(cocos2d::Node* node, int /*zOrder*/) {
         _worldNode->addChild(node, 20);
     }
 }
+
+void FarmMapController::addActorToOverlay(cocos2d::Node* node, int zOrder) {
+    if (!node) return;
+    if (_farmMap && _farmMap->getTMX()) {
+        _farmMap->getTMX()->addChild(node, zOrder);
+        return;
+    }
+    if (_worldNode) {
+        _worldNode->addChild(node, zOrder);
+        return;
+    }
+    addActorToMap(node, zOrder);
+}
 // namespace Controllers
 }

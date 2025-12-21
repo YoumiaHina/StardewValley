@@ -101,6 +101,7 @@ public:
 
     // 将角色/演员节点添加到地图正确的父节点与层级（Farm 使用 TMX，Room 使用 world）。
     virtual void addActorToMap(cocos2d::Node* node, int zOrder) = 0;
+    virtual void addActorToOverlay(cocos2d::Node* node, int zOrder) { addActorToMap(node, zOrder); }
 
     // Actors sorting and interactive objects
     virtual void sortActorWithEnvironment(cocos2d::Node* actor) {}

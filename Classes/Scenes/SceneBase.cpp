@@ -87,9 +87,16 @@ bool SceneBase::initBase(float worldScale, bool buildCraftPanel, bool enableTool
     pv->setHairStyle(hair);
     pv->setHairColor(Color3B(r, g, b));
     positionPlayerInitial();
+    pv->syncUpperLayerPosition();
 
     // 由 MapController 负责选择正确父节点与层级（Farm: TMX，Room: world）。
     _mapController->addActorToMap(_player, 20);
+    if (_mapController) {
+        auto* upper = pv->upperNode();
+        if (upper) {
+            _mapController->addActorToOverlay(upper, 23);
+        }
+    }
 
     // 共享背包
     if (!ws.inventory) {

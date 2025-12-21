@@ -109,6 +109,7 @@ public:
     cocos2d::Node* worldNode() const { return _worldNode; }
     // 将角色节点挂到正确父节点与层级。
     void addActorToMap(cocos2d::Node* node, int zOrder) override;
+    void addActorToOverlay(cocos2d::Node* node, int zOrder) override;
     // 获取从农场进入矿洞的出生点。
     cocos2d::Vec2 farmMineDoorSpawnPos() const override;
     // 获取从农场进入房间的出生点。
