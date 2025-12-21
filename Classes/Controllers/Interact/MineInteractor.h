@@ -17,6 +17,7 @@ public:
                     std::function<cocos2d::Vec2()> getPlayerPos)
     : _map(map), _getPlayerPos(std::move(getPlayerPos)) {}
 
+    // 处理空格键交互：根据玩家所在楼层与位置返回应执行的动作。
     SpaceAction onSpacePressed();
 
 private:

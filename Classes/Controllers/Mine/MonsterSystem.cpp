@@ -244,6 +244,7 @@ void MineMonsterController::applyDamageAt(const Vec2& worldPos, int baseDamage) 
         int dmg = std::max(0, baseDamage - def);
         _monsters[idx].hp -= dmg;
         if (_monsters[idx].hp <= 0) {
+            auto& m = _monsters[idx];
             {
                 auto& ws = Game::globalState();
                 auto& skill = Game::SkillTreeSystem::getInstance();
@@ -252,14 +253,15 @@ void MineMonsterController::applyDamageAt(const Vec2& worldPos, int baseDamage) 
                 ws.gold += reward;
                 skill.addXp(Game::SkillTreeType::Combat, skill.xpForCombatKill(baseGold));
             }
-            // 掉落：简化为添加对应主题碎片 1 个
-            auto theme = _map->currentTheme();
-            Game::ItemType drop = Game::ItemType::Fiber; // placeholder
-            if (theme == MineMapController::Theme::Ice) drop = Game::ItemType::ParsnipSeed; // placeholder swap
-            if (auto inv = Game::globalState().inventory) {
-                inv->addItems(drop, 1);
+            auto drops = m.getDrops();
+            if (_map) {
+                int c = 0;
+                int r = 0;
+                _map->worldToTileIndex(m.pos, c, r);
+                for (auto t : drops) {
+                    _map->spawnDropAt(c, r, static_cast<int>(t), 1);
+                }
             }
-            auto& m = _monsters[idx];
             if (m.sprite && m.sprite->getParent()) {
                 m.sprite->removeFromParent();
             }
@@ -294,12 +296,15 @@ void MineMonsterController::applyAreaDamage(const std::vector<std::pair<int,int>
                 ws.gold += reward;
                 skill.addXp(Game::SkillTreeType::Combat, skill.xpForCombatKill(baseGold));
             }
-            auto theme = _map->currentTheme();
-            Game::ItemType drop = Game::ItemType::Fiber;
-            if (theme == MineMapController::Theme::Ice) drop = Game::ItemType::ParsnipSeed;
-            if (auto inv = Game::globalState().inventory) {
-                inv->addItems(drop, 1);
+        auto drops = m.getDrops();
+        if (_map) {
+            int c = 0;
+            int r = 0;
+            _map->worldToTileIndex(m.pos, c, r);
+            for (auto t : drops) {
+                _map->spawnDropAt(c, r, static_cast<int>(t), 1);
             }
+        }
             if (m.sprite && m.sprite->getParent()) {
                 m.sprite->removeFromParent();
             }

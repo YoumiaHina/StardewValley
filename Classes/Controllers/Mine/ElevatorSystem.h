@@ -19,7 +19,9 @@ public:
                             cocos2d::Scene* scene)
     : _map(map), _monsters(monsters), _scene(scene) {}
 
+    // 构建电梯面板 UI（若已构建则直接返回）。
     void buildPanel();
+    // 切换电梯面板显示状态（仅 0 层有效，同时锁定/解锁移动）。
     void togglePanel();
     bool isPanelVisible() const { return _panel && _panel->isVisible(); }
     // 外部回调

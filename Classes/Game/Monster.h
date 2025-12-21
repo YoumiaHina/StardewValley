@@ -2,6 +2,8 @@
 
 #include "cocos2d.h"
 #include <string>
+#include <vector>
+#include "Game/Item.h"
 
 namespace Game {
 
@@ -22,6 +24,8 @@ struct Monster {
     float attackCooldown = 0.0f;
     cocos2d::Sprite* sprite = nullptr;
     std::string name;
+
+    std::vector<ItemType> getDrops() const;
 };
 
 int slimeVariantForFloor(int floor);

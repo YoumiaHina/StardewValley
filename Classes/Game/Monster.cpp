@@ -52,6 +52,27 @@ Monster makeMonsterForType(Monster::Type type) {
     return m;
 }
 
+std::vector<ItemType> Monster::getDrops() const {
+    std::vector<ItemType> drops;
+    ItemType base = ItemType::Stone;
+    switch (type) {
+        case Monster::Type::RockSlime:
+            base = ItemType::Coal;
+            break;
+        case Monster::Type::Bug:
+            base = ItemType::Coal;
+            break;
+        case Monster::Type::Ghost:
+            base = ItemType::Coal;
+            break;
+    }
+    int count = elite ? 2 : 1;
+    for (int i = 0; i < count; ++i) {
+        drops.push_back(base);
+    }
+    return drops;
+}
+
 std::string monsterTexturePath(const Monster& m) {
     switch (m.type) {
         case Monster::Type::RockSlime:

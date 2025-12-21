@@ -27,12 +27,16 @@ public:
 
     ~MineMonsterController();
 
+    // 生成当前楼层初始怪物波（按楼层和 MonsterArea 规则）。
     void generateInitialWave();
+    // 每帧更新怪物移动/攻击、重生与碰撞体积。
     void update(float dt);
+    // 重置当前楼层怪物和碰撞数据（切换楼层时调用）。
     void resetFloor();
+    // 根据当前怪物列表刷新可视化精灵与调试绘制。
     void refreshVisuals();
 
-    // combat interactions
+    // 战斗交互：对 worldPos 附近最近怪物造成一次伤害。
     void applyDamageAt(const cocos2d::Vec2& worldPos, int baseDamage);
     const std::vector<Monster>& monsters() const { return _monsters; }
 
