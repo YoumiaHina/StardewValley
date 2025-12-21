@@ -29,7 +29,7 @@ struct Cheat {
                  ItemType::CornSeed,
                  ItemType::Strawberry,
                  ItemType::StrawberrySeed,
-                 ItemType::Fish,
+                 ItemType::BreamFish,
                  ItemType::Coal,
                  ItemType::CopperGrain,
                  ItemType::CopperIngot,

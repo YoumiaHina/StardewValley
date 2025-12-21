@@ -70,6 +70,9 @@ void PlayerController::registerCommonInputHandlers(
         bool socialOpen = _ui && _ui->isNpcSocialVisible();
 
         if (code == EventKeyboard::KeyCode::KEY_ESCAPE) {
+            if (Game::globalState().fishingActive) {
+                return;
+            }
             if (_ui) {
                 if (_ui->isChestPanelVisible()) _ui->toggleChestPanel(false);
                 if (_ui->isCraftPanelVisible()) _ui->toggleCraftPanel(false);

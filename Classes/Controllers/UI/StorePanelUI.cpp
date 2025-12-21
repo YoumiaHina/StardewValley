@@ -278,7 +278,6 @@ void StorePanelUI::rebuildItems() {
         Game::ItemType::Wool
     };
     std::vector<Game::ItemType> fish = {
-        Game::ItemType::Fish,
         Game::ItemType::Carp,
         Game::ItemType::BreamFish,
         Game::ItemType::Sardine,
