@@ -32,6 +32,9 @@ int StoreController::getSeedPrice(Game::ItemType seedType) const {
 
 // 购买一般物品（矿物/农产品/动物产物等）：使用 Game::itemPrice 作为单价
 bool StoreController::buyItem(Game::ItemType type) {
+    if (Game::isFish(type)) {
+        return false;
+    }
     int price = getItemPrice(type);
     auto& ws = Game::globalState();
     if (ws.gold >= price) {

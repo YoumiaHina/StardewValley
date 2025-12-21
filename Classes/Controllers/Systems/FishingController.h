@@ -40,6 +40,7 @@ private:
     cocos2d::Sprite* _fishSprite = nullptr;
 
     bool _active = false;
+    int _festivalFishIndex = -1;
     float _barHeight = 220.0f;
     float _barCatchPos = 80.0f;
     float _barCatchVel = 0.0f;

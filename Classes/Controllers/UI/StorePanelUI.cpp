@@ -167,35 +167,38 @@ void StorePanelUI::refreshStorePanel() {
         nameLabel->setPosition(Vec2(-180 * STORE_UI_SCALE, y));
         _listNode->addChild(nameLabel);
         bool isSeed = Game::isSeed(type);
+        bool isFishItem = Game::isFish(type);
         int price = isSeed ? _storeController->getSeedPrice(type) : _storeController->getItemPrice(type);
         auto priceLabel = Label::createWithTTF(StringUtils::format("%d G", price), "fonts/arial.ttf", 20 * STORE_UI_SCALE);
         priceLabel->setAnchorPoint(Vec2(1, 0.5f));
         priceLabel->setPosition(Vec2(80 * STORE_UI_SCALE, y));
         priceLabel->setColor(Color3B::YELLOW);
         _listNode->addChild(priceLabel);
-        auto buyLabel = Label::createWithTTF("[Buy]", "fonts/arial.ttf", 20 * STORE_UI_SCALE);
-        buyLabel->setPosition(Vec2(120 * STORE_UI_SCALE, y));
-        buyLabel->setColor(Color3B::GREEN);
-        auto buyListener = EventListenerTouchOneByOne::create();
-        buyListener->setSwallowTouches(true);
-        buyListener->onTouchBegan = [buyLabel](Touch* t, Event* e){
-            auto target = static_cast<Label*>(e->getCurrentTarget());
-            Vec2 p = target->convertToNodeSpace(t->getLocation());
-            Size s = target->getContentSize();
-            Rect r(0, 0, s.width, s.height);
-            if (r.containsPoint(p)) { target->setScale(0.9f); return true; }
-            return false;
-        };
-        buyListener->onTouchEnded = [this, type, isSeed, buyLabel](Touch* t, Event* e){
-            buyLabel->setScale(1.0f);
-            bool ok = false;
-            if (_storeController) {
-                ok = isSeed ? _storeController->buySeed(type) : _storeController->buyItem(type);
-            }
-            if (onPurchased) onPurchased(ok);
-        };
-        _listNode->getEventDispatcher()->addEventListenerWithSceneGraphPriority(buyListener, buyLabel);
-        _listNode->addChild(buyLabel);
+        if (!isFishItem) {
+            auto buyLabel = Label::createWithTTF("[Buy]", "fonts/arial.ttf", 20 * STORE_UI_SCALE);
+            buyLabel->setPosition(Vec2(120 * STORE_UI_SCALE, y));
+            buyLabel->setColor(Color3B::GREEN);
+            auto buyListener = EventListenerTouchOneByOne::create();
+            buyListener->setSwallowTouches(true);
+            buyListener->onTouchBegan = [buyLabel](Touch* t, Event* e){
+                auto target = static_cast<Label*>(e->getCurrentTarget());
+                Vec2 p = target->convertToNodeSpace(t->getLocation());
+                Size s = target->getContentSize();
+                Rect r(0, 0, s.width, s.height);
+                if (r.containsPoint(p)) { target->setScale(0.9f); return true; }
+                return false;
+            };
+            buyListener->onTouchEnded = [this, type, isSeed, buyLabel](Touch* t, Event* e){
+                buyLabel->setScale(1.0f);
+                bool ok = false;
+                if (_storeController) {
+                    ok = isSeed ? _storeController->buySeed(type) : _storeController->buyItem(type);
+                }
+                if (onPurchased) onPurchased(ok);
+            };
+            _listNode->getEventDispatcher()->addEventListenerWithSceneGraphPriority(buyListener, buyLabel);
+            _listNode->addChild(buyLabel);
+        }
 
         bool canSell = !isSeed && Game::itemPrice(type) > 0;
         if (canSell) {
@@ -274,6 +277,27 @@ void StorePanelUI::rebuildItems() {
         Game::ItemType::Milk,
         Game::ItemType::Wool
     };
+    std::vector<Game::ItemType> fish = {
+        Game::ItemType::Fish,
+        Game::ItemType::Carp,
+        Game::ItemType::BreamFish,
+        Game::ItemType::Sardine,
+        Game::ItemType::Salmon,
+        Game::ItemType::RainbowTrout,
+        Game::ItemType::MidnightCarp,
+        Game::ItemType::LargemouthBass,
+        Game::ItemType::Sturgeon,
+        Game::ItemType::SmallmouthBass,
+        Game::ItemType::Tilapia,
+        Game::ItemType::Tuna,
+        Game::ItemType::Globefish,
+        Game::ItemType::Anchovy,
+        Game::ItemType::BlueDiscus,
+        Game::ItemType::Clam,
+        Game::ItemType::Crab,
+        Game::ItemType::Lobster,
+        Game::ItemType::Shrimp
+    };
     std::vector<Game::ItemType> minerals = {
         Game::ItemType::Coal,
         Game::ItemType::CopperGrain,
@@ -284,9 +308,10 @@ void StorePanelUI::rebuildItems() {
         Game::ItemType::GoldIngot
     };
     if (_category == StoreCategory::Produce) {
-        _items.reserve(seeds.size() + produce.size());
+        _items.reserve(seeds.size() + produce.size() + fish.size());
         _items.insert(_items.end(), seeds.begin(), seeds.end());
         _items.insert(_items.end(), produce.begin(), produce.end());
+        _items.insert(_items.end(), fish.begin(), fish.end());
     } else {
         _items = minerals;
     }

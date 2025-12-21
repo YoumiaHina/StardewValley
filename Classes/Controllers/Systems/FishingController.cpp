@@ -6,6 +6,46 @@
 
 using namespace cocos2d;
 
+namespace {
+struct FestivalFishDef {
+    const char* texturePath;
+    const char* displayName;
+    Game::ItemType itemType;
+};
+
+const FestivalFishDef kFestivalFish[] = {
+    { "fish/carp.png", "Carp", Game::ItemType::Carp },
+    { "fish/Bream.png", "Bream", Game::ItemType::BreamFish },
+    { "fish/Sardine.png", "Sardine", Game::ItemType::Sardine },
+    { "fish/Salmon.png", "Salmon", Game::ItemType::Salmon },
+    { "fish/Rainbow_Trout.png", "Rainbow Trout", Game::ItemType::RainbowTrout },
+    { "fish/Midnight_Carp.png", "Midnight Carp", Game::ItemType::MidnightCarp },
+    { "fish/Largemouth_Bass.png", "Largemouth Bass", Game::ItemType::LargemouthBass },
+    { "fish/Sturgeon.png", "Sturgeon", Game::ItemType::Sturgeon },
+    { "fish/Smallmouth_Bass.png", "Smallmouth Bass", Game::ItemType::SmallmouthBass },
+    { "fish/Tilapia.png", "Tilapia", Game::ItemType::Tilapia },
+    { "fish/Tuna.png", "Tuna", Game::ItemType::Tuna },
+    { "fish/globefish.png", "Globefish", Game::ItemType::Globefish },
+    { "fish/Anchovy.png", "Anchovy", Game::ItemType::Anchovy },
+    { "fish/Blue_Discus.png", "Blue Discus", Game::ItemType::BlueDiscus },
+    { "fish/Clam.png", "Clam", Game::ItemType::Clam },
+    { "fish/Crab.png", "Crab", Game::ItemType::Crab },
+    { "fish/Lobster.png", "Lobster", Game::ItemType::Lobster },
+    { "fish/Shrimp.png", "Shrimp", Game::ItemType::Shrimp }
+};
+
+inline bool isFishingFestivalToday() {
+    auto& ws = Game::globalState();
+    return ws.seasonIndex == 1 && ws.dayOfSeason == GameConfig::FESTIVAL_DAY;
+}
+
+inline int randomFestivalFishIndex() {
+    int count = static_cast<int>(sizeof(kFestivalFish) / sizeof(kFestivalFish[0]));
+    if (count <= 0) return -1;
+    return std::rand() % count;
+}
+} // namespace
+
 namespace Controllers {
 
 void FishingController::buildOverlayAt(const Vec2& worldPos) {
@@ -53,8 +93,16 @@ void FishingController::buildOverlayAt(const Vec2& worldPos) {
     _progressLabel->setPosition(Vec2(-static_cast<float>(GameConfig::TILE_SIZE), h/2 + 22 + 2.0f * static_cast<float>(GameConfig::TILE_SIZE)));
     _overlay->addChild(_progressLabel);
 
-    // Use Bream as fish sprite
-    _fishSprite = Sprite::create("fish/Bream.png");
+    _festivalFishIndex = -1;
+    const char* texturePath = "fish/Bream.png";
+    if (isFishingFestivalToday()) {
+        int idx = randomFestivalFishIndex();
+        if (idx >= 0) {
+            _festivalFishIndex = idx;
+            texturePath = kFestivalFish[idx].texturePath;
+        }
+    }
+    _fishSprite = Sprite::create(texturePath);
     if (_fishSprite) { _fishSprite->setScale(0.6f); _overlay->addChild(_fishSprite, 1); }
 
     _mouse = EventListenerMouse::create();
@@ -150,9 +198,9 @@ void FishingController::update(float dt) {
     if (_barCatchPos > _barHeight) { _barCatchPos = _barHeight; _barCatchVel = 0; }
 
     // fish movement (random jitter)
-    float fishAccel = ((std::rand() % 200) - 100) * 0.8f; // -80..80
+    float fishAccel = ((std::rand() % 200) - 100) * 8.0f;
     _fishVel += fishAccel * dt;
-    _fishVel = std::max(-140.0f, std::min(140.0f, _fishVel));
+    _fishVel = std::max(-360.0f, std::min(360.0f, _fishVel));
     _fishPos += _fishVel * dt;
     if (_fishPos < 20) { _fishPos = 20; _fishVel = std::abs(_fishVel); }
     if (_fishPos > _barHeight - 20) { _fishPos = _barHeight - 20; _fishVel = -std::abs(_fishVel); }
@@ -213,7 +261,14 @@ void FishingController::onSuccess(const Vec2& worldPos) {
     if (_inventory) {
         auto& skill = Game::SkillTreeSystem::getInstance();
         int qty = skill.adjustFishCatchQuantityForFishing(1);
-        _inventory->addItems(Game::ItemType::Fish, qty);
+        Game::ItemType itemType = Game::ItemType::Fish;
+        if (isFishingFestivalToday() && _festivalFishIndex >= 0) {
+            int count = static_cast<int>(sizeof(kFestivalFish) / sizeof(kFestivalFish[0]));
+            if (_festivalFishIndex < count) {
+                itemType = kFestivalFish[_festivalFishIndex].itemType;
+            }
+        }
+        _inventory->addItems(itemType, qty);
         skill.addXp(Game::SkillTreeType::Fishing, skill.xpForFishingCatch(qty));
         if (_ui && _ui->isSkillTreePanelVisible()) {
             _ui->refreshSkillTreePanel();
@@ -223,7 +278,14 @@ void FishingController::onSuccess(const Vec2& worldPos) {
     _cooldown = 2.0f;
     if (_ui) {
         _ui->refreshHotbar();
-        _ui->popTextAt(worldPos, "Caught a fish!", Color3B::GREEN);
+        std::string text = "Caught a fish!";
+        if (isFishingFestivalToday() && _festivalFishIndex >= 0) {
+            int count = static_cast<int>(sizeof(kFestivalFish) / sizeof(kFestivalFish[0]));
+            if (_festivalFishIndex < count) {
+                text = StringUtils::format("Caught %s!", kFestivalFish[_festivalFishIndex].displayName);
+            }
+        }
+        _ui->popTextAt(worldPos, text, Color3B::GREEN);
     }
 }
 

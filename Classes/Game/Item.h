@@ -22,13 +22,31 @@ enum class ItemType {
     Strawberry = 12,
     StrawberrySeed = 13,
     Fish = 100,
-    Coal = 101,
-    CopperGrain = 102,
-    CopperIngot = 103,
-    IronGrain   = 104,
-    IronIngot   = 105,
-    GoldGrain   = 106,
-    GoldIngot   = 107,
+    Carp = 101,
+    BreamFish = 102,
+    Sardine = 103,
+    Salmon = 104,
+    RainbowTrout = 105,
+    MidnightCarp = 106,
+    LargemouthBass = 107,
+    Sturgeon = 108,
+    SmallmouthBass = 109,
+    Tilapia = 110,
+    Tuna = 111,
+    Globefish = 112,
+    Anchovy = 113,
+    BlueDiscus = 114,
+    Clam = 115,
+    Crab = 116,
+    Lobster = 117,
+    Shrimp = 118,
+    Coal = 120,
+    CopperGrain = 121,
+    CopperIngot = 122,
+    IronGrain   = 123,
+    IronIngot   = 124,
+    GoldGrain   = 125,
+    GoldIngot   = 126,
     Egg         = 200,
     Milk        = 201,
     Wool        = 202,
@@ -53,6 +71,24 @@ inline const char* itemName(ItemType t) {
         case ItemType::Strawberry: return "Strawberry";
         case ItemType::StrawberrySeed: return "Strawberry Seed";
         case ItemType::Fish: return "Fish";
+        case ItemType::Carp: return "Carp";
+        case ItemType::BreamFish: return "Bream";
+        case ItemType::Sardine: return "Sardine";
+        case ItemType::Salmon: return "Salmon";
+        case ItemType::RainbowTrout: return "Rainbow Trout";
+        case ItemType::MidnightCarp: return "Midnight Carp";
+        case ItemType::LargemouthBass: return "Largemouth Bass";
+        case ItemType::Sturgeon: return "Sturgeon";
+        case ItemType::SmallmouthBass: return "Smallmouth Bass";
+        case ItemType::Tilapia: return "Tilapia";
+        case ItemType::Tuna: return "Tuna";
+        case ItemType::Globefish: return "Globefish";
+        case ItemType::Anchovy: return "Anchovy";
+        case ItemType::BlueDiscus: return "Blue Discus";
+        case ItemType::Clam: return "Clam";
+        case ItemType::Crab: return "Crab";
+        case ItemType::Lobster: return "Lobster";
+        case ItemType::Shrimp: return "Shrimp";
         case ItemType::Coal: return "Coal";
         case ItemType::CopperGrain: return "Copper Grain";
         case ItemType::CopperIngot: return "Copper Ingot";
@@ -87,6 +123,24 @@ inline cocos2d::Color4F itemColor(ItemType t) {
         case ItemType::Strawberry: return Color4F(0.95f, 0.20f, 0.25f, 1.0f);
         case ItemType::StrawberrySeed: return Color4F(0.95f, 0.20f, 0.25f, 0.8f);
         case ItemType::Fish: return Color4F(0.25f, 0.55f, 1.0f, 1.0f);
+        case ItemType::Carp: return Color4F(0.25f, 0.55f, 1.0f, 1.0f);
+        case ItemType::BreamFish: return Color4F(0.25f, 0.55f, 1.0f, 1.0f);
+        case ItemType::Sardine: return Color4F(0.25f, 0.55f, 1.0f, 1.0f);
+        case ItemType::Salmon: return Color4F(0.25f, 0.55f, 1.0f, 1.0f);
+        case ItemType::RainbowTrout: return Color4F(0.25f, 0.55f, 1.0f, 1.0f);
+        case ItemType::MidnightCarp: return Color4F(0.25f, 0.55f, 1.0f, 1.0f);
+        case ItemType::LargemouthBass: return Color4F(0.25f, 0.55f, 1.0f, 1.0f);
+        case ItemType::Sturgeon: return Color4F(0.25f, 0.55f, 1.0f, 1.0f);
+        case ItemType::SmallmouthBass: return Color4F(0.25f, 0.55f, 1.0f, 1.0f);
+        case ItemType::Tilapia: return Color4F(0.25f, 0.55f, 1.0f, 1.0f);
+        case ItemType::Tuna: return Color4F(0.25f, 0.55f, 1.0f, 1.0f);
+        case ItemType::Globefish: return Color4F(0.25f, 0.55f, 1.0f, 1.0f);
+        case ItemType::Anchovy: return Color4F(0.25f, 0.55f, 1.0f, 1.0f);
+        case ItemType::BlueDiscus: return Color4F(0.25f, 0.55f, 1.0f, 1.0f);
+        case ItemType::Clam: return Color4F(0.25f, 0.55f, 1.0f, 1.0f);
+        case ItemType::Crab: return Color4F(0.25f, 0.55f, 1.0f, 1.0f);
+        case ItemType::Lobster: return Color4F(0.25f, 0.55f, 1.0f, 1.0f);
+        case ItemType::Shrimp: return Color4F(0.25f, 0.55f, 1.0f, 1.0f);
         case ItemType::Coal: return Color4F(0.15f, 0.15f, 0.15f, 1.0f);
         case ItemType::CopperGrain: return Color4F(0.85f, 0.45f, 0.25f, 1.0f);
         case ItemType::CopperIngot: return Color4F(0.90f, 0.50f, 0.30f, 1.0f);
@@ -129,13 +183,84 @@ inline std::string itemIconPath(ItemType t) {
         case ItemType::Egg: return "DropsAndInventory/Animal_Products/Egg.png";
         case ItemType::Milk: return "DropsAndInventory/Animal_Products/Milk.png";
         case ItemType::Wool: return "DropsAndInventory/Animal_Products/Wool.png";
-        case ItemType::Fish: return "fish/globefish.png";
+        case ItemType::Fish: return "fish/Bream.png";
+        case ItemType::Carp: return "fish/carp.png";
+        case ItemType::BreamFish: return "fish/Bream.png";
+        case ItemType::Sardine: return "fish/Sardine.png";
+        case ItemType::Salmon: return "fish/Salmon.png";
+        case ItemType::RainbowTrout: return "fish/Rainbow_Trout.png";
+        case ItemType::MidnightCarp: return "fish/Midnight_Carp.png";
+        case ItemType::LargemouthBass: return "fish/Largemouth_Bass.png";
+        case ItemType::Sturgeon: return "fish/Sturgeon.png";
+        case ItemType::SmallmouthBass: return "fish/Smallmouth_Bass.png";
+        case ItemType::Tilapia: return "fish/Tilapia.png";
+        case ItemType::Tuna: return "fish/Tuna.png";
+        case ItemType::Globefish: return "fish/globefish.png";
+        case ItemType::Anchovy: return "fish/Anchovy.png";
+        case ItemType::BlueDiscus: return "fish/Blue_Discus.png";
+        case ItemType::Clam: return "fish/Clam.png";
+        case ItemType::Crab: return "fish/Crab.png";
+        case ItemType::Lobster: return "fish/Lobster.png";
+        case ItemType::Shrimp: return "fish/Shrimp.png";
         default: return std::string();
     }
 }
 
 inline bool itemEdible(ItemType t) {
-    return t == ItemType::Fiber || t == ItemType::Parsnip || t == ItemType::Blueberry || t == ItemType::Eggplant || t == ItemType::Corn || t == ItemType::Strawberry || t == ItemType::Fish || t == ItemType::Egg || t == ItemType::Milk;
+    return t == ItemType::Fiber
+        || t == ItemType::Parsnip
+        || t == ItemType::Blueberry
+        || t == ItemType::Eggplant
+        || t == ItemType::Corn
+        || t == ItemType::Strawberry
+        || t == ItemType::Fish
+        || t == ItemType::Carp
+        || t == ItemType::BreamFish
+        || t == ItemType::Sardine
+        || t == ItemType::Salmon
+        || t == ItemType::RainbowTrout
+        || t == ItemType::MidnightCarp
+        || t == ItemType::LargemouthBass
+        || t == ItemType::Sturgeon
+        || t == ItemType::SmallmouthBass
+        || t == ItemType::Tilapia
+        || t == ItemType::Tuna
+        || t == ItemType::Globefish
+        || t == ItemType::Anchovy
+        || t == ItemType::BlueDiscus
+        || t == ItemType::Clam
+        || t == ItemType::Crab
+        || t == ItemType::Lobster
+        || t == ItemType::Shrimp
+        || t == ItemType::Egg
+        || t == ItemType::Milk;
+}
+
+inline bool isFish(ItemType t) {
+    switch (t) {
+        case ItemType::Fish:
+        case ItemType::Carp:
+        case ItemType::BreamFish:
+        case ItemType::Sardine:
+        case ItemType::Salmon:
+        case ItemType::RainbowTrout:
+        case ItemType::MidnightCarp:
+        case ItemType::LargemouthBass:
+        case ItemType::Sturgeon:
+        case ItemType::SmallmouthBass:
+        case ItemType::Tilapia:
+        case ItemType::Tuna:
+        case ItemType::Globefish:
+        case ItemType::Anchovy:
+        case ItemType::BlueDiscus:
+        case ItemType::Clam:
+        case ItemType::Crab:
+        case ItemType::Lobster:
+        case ItemType::Shrimp:
+            return true;
+        default:
+            return false;
+    }
 }
 
 inline int itemEnergyRestore(ItemType t) {
@@ -147,6 +272,24 @@ inline int itemEnergyRestore(ItemType t) {
         case ItemType::Corn: return 25;
         case ItemType::Strawberry: return 50;
         case ItemType::Fish: return 15;
+        case ItemType::Carp: return 15;
+        case ItemType::BreamFish: return 15;
+        case ItemType::Sardine: return 15;
+        case ItemType::Salmon: return 20;
+        case ItemType::RainbowTrout: return 18;
+        case ItemType::MidnightCarp: return 22;
+        case ItemType::LargemouthBass: return 18;
+        case ItemType::Sturgeon: return 25;
+        case ItemType::SmallmouthBass: return 15;
+        case ItemType::Tilapia: return 16;
+        case ItemType::Tuna: return 24;
+        case ItemType::Globefish: return 15;
+        case ItemType::Anchovy: return 12;
+        case ItemType::BlueDiscus: return 22;
+        case ItemType::Clam: return 10;
+        case ItemType::Crab: return 18;
+        case ItemType::Lobster: return 20;
+        case ItemType::Shrimp: return 14;
         case ItemType::Egg: return 15;
         case ItemType::Milk: return 20;
         default: return 0;
@@ -162,6 +305,24 @@ inline int itemPrice(ItemType t) {
         case ItemType::Corn: return 50;
         case ItemType::Strawberry: return 120;
         case ItemType::Fish: return 75;
+        case ItemType::Carp: return 400;
+        case ItemType::BreamFish: return 450;
+        case ItemType::Sardine: return 300;
+        case ItemType::Salmon: return 900;
+        case ItemType::RainbowTrout: return 800;
+        case ItemType::MidnightCarp: return 1100;
+        case ItemType::LargemouthBass: return 700;
+        case ItemType::Sturgeon: return 1800;
+        case ItemType::SmallmouthBass: return 500;
+        case ItemType::Tilapia: return 550;
+        case ItemType::Tuna: return 1300;
+        case ItemType::Globefish: return 750;
+        case ItemType::Anchovy: return 350;
+        case ItemType::BlueDiscus: return 1400;
+        case ItemType::Clam: return 300;
+        case ItemType::Crab: return 1000;
+        case ItemType::Lobster: return 1200;
+        case ItemType::Shrimp: return 600;
         case ItemType::Coal: return 20;
         case ItemType::CopperGrain: return 20;
         case ItemType::CopperIngot: return 90;
@@ -185,6 +346,24 @@ inline int itemHpRestore(ItemType t) {
         case ItemType::Corn: return 2;
         case ItemType::Strawberry: return 2;
         case ItemType::Fish: return 3;
+        case ItemType::Carp: return 3;
+        case ItemType::BreamFish: return 3;
+        case ItemType::Sardine: return 2;
+        case ItemType::Salmon: return 4;
+        case ItemType::RainbowTrout: return 3;
+        case ItemType::MidnightCarp: return 4;
+        case ItemType::LargemouthBass: return 3;
+        case ItemType::Sturgeon: return 5;
+        case ItemType::SmallmouthBass: return 3;
+        case ItemType::Tilapia: return 3;
+        case ItemType::Tuna: return 4;
+        case ItemType::Globefish: return 3;
+        case ItemType::Anchovy: return 2;
+        case ItemType::BlueDiscus: return 4;
+        case ItemType::Clam: return 1;
+        case ItemType::Crab: return 3;
+        case ItemType::Lobster: return 4;
+        case ItemType::Shrimp: return 2;
         default: return 0;
     }
 }
