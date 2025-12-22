@@ -4,84 +4,18 @@
 #include "Game/Monster/MonsterBase.h"
 #include <algorithm>
 #include <string>
-#include <unordered_set>
-#
-#include "cocos2d.h"
-#
+
 using namespace cocos2d;
-#
+
 namespace Controllers {
-#
+
 namespace {
     std::mt19937& rng() {
         static std::mt19937 eng{ std::random_device{}() };
         return eng;
     }
-#
-    struct TileCoord {
-        int c = 0;
-        int r = 0;
-    };
-#
-    bool isSlime(const Game::Monster& m) {
-        using Type = Game::Monster::Type;
-        return m.type == Type::GreenSlime || m.type == Type::BlueSlime || m.type == Type::RedSlime;
-    }
-#
-    long long tileKey(int c, int r) {
-        return (static_cast<long long>(c) << 32) ^ (static_cast<unsigned long long>(r) & 0xffffffffULL);
-    }
-#
-    bool tileBlocked(const MineMapController* map, int c, int r, float radius) {
-        if (!map) return true;
-        if (!map->inBounds(c, r)) return true;
-        Vec2 center = map->tileToWorld(c, r);
-        return map->collidesWithoutMonsters(center, radius);
-    }
-#
-    bool dfsSearch(const MineMapController* map,
-                   int c, int r,
-                   int tc, int tr,
-                   float radius,
-                   int depth,
-                   int maxDepth,
-                   std::unordered_set<long long>& visited,
-                   std::vector<TileCoord>& out) {
-        if (!map) return false;
-        if (depth > maxDepth) return false;
-        if (c == tc && r == tr) {
-            out.push_back(TileCoord{ c, r });
-            return true;
-        }
-        long long key = tileKey(c, r);
-        if (!visited.insert(key).second) return false;
-        if (tileBlocked(map, c, r, radius)) return false;
-        static const int offsets[4][2] = { {1,0}, {-1,0}, {0,1}, {0,-1} };
-        for (int i = 0; i < 4; ++i) {
-            int nc = c + offsets[i][0];
-            int nr = r + offsets[i][1];
-            if (dfsSearch(map, nc, nr, tc, tr, radius, depth + 1, maxDepth, visited, out)) {
-                out.push_back(TileCoord{ c, r });
-                return true;
-            }
-        }
-        return false;
-    }
-#
-    bool findTilePath(const MineMapController* map,
-                      int sc, int sr,
-                      int tc, int tr,
-                      float radius,
-                      int maxSteps,
-                      std::vector<TileCoord>& out) {
-        out.clear();
-        if (!map) return false;
-        std::unordered_set<long long> visited;
-        if (!dfsSearch(map, sc, sr, tc, tr, radius, 0, maxSteps, visited, out)) return false;
-        std::reverse(out.begin(), out.end());
-        return true;
-    }
-#
+
+
     Game::Monster::Type randomMonsterTypeForFloor(int floor) {
         int f = floor;
         if (f < 1) f = 1;
@@ -166,6 +100,7 @@ void MineMonsterController::update(float dt) {
         }
     }
 
+    // 怪物朝玩家移动，带基础碰撞：不能穿过墙体/矿石/玩家
     for (auto& m : _monsters) {
         if (_getPlayerPos) {
             float range = m.searchRangeTiles * tileSize;
@@ -190,48 +125,7 @@ void MineMonsterController::update(float dt) {
                     m.velocity = dir * m.moveSpeed;
                     m.pos = proposed;
                 } else {
-                    bool movedByPath = false;
-                    if (_map && isSlime(m) && m.isCollisionAffected) {
-                        int sc = 0;
-                        int sr = 0;
-                        int tc = 0;
-                        int tr = 0;
-                        _map->worldToTileIndex(m.pos, sc, sr);
-                        _map->worldToTileIndex(playerPos, tc, tr);
-                        std::vector<TileCoord> path;
-                        int maxSteps = m.searchRangeTiles * 4;
-                        if (maxSteps < 8) maxSteps = 8;
-                        if (findTilePath(_map, sc, sr, tc, tr, monsterRadius, maxSteps, path) && path.size() >= 2) {
-                            TileCoord next = path[1];
-                            Vec2 nextPos = _map->tileToWorld(next.c, next.r);
-                            Vec2 dir2 = nextPos - m.pos;
-                            float len2 = dir2.length();
-                            if (len2 > 0.001f) {
-                                Vec2 ndir = dir2 / len2;
-                                Vec2 stepPos = m.pos + ndir * m.moveSpeed * dt;
-                                bool blockedStep = false;
-                                if (_map && m.isCollisionAffected) {
-                                    if (_map->collidesWithoutMonsters(stepPos, monsterRadius)) {
-                                        blockedStep = true;
-                                    }
-                                }
-                                if (!blockedStep) {
-                                    float toPlayer2 = stepPos.distance(playerPos);
-                                    if (toPlayer2 < monsterRadius + playerRadius) {
-                                        blockedStep = true;
-                                    }
-                                }
-                                if (!blockedStep) {
-                                    m.velocity = ndir * m.moveSpeed;
-                                    m.pos = stepPos;
-                                    movedByPath = true;
-                                }
-                            }
-                        }
-                    }
-                    if (!movedByPath) {
-                        m.velocity = Vec2::ZERO;
-                    }
+                    m.velocity = Vec2::ZERO;
                 }
             } else {
                 m.velocity = Vec2::ZERO;

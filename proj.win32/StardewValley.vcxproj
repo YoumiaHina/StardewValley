@@ -230,7 +230,6 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClCompile Include="..\Classes\Game\Tool\WaterCan.cpp" />
     <ClCompile Include="..\Classes\Game\View\PlayerView.cpp" />
     <ClCompile Include="..\Classes\Game\Tree.cpp" />
-    <ClCompile Include="..\Classes\Game\Monster.cpp" />
     <ClCompile Include="..\Classes\HelloWorldScene.cpp" />
     <ClCompile Include="..\Classes\Scenes\BeachScene.cpp" />
     <ClCompile Include="..\Classes\Scenes\CustomizationScene.cpp" />
@@ -367,7 +366,6 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClInclude Include="..\Classes\Game\View\IPlayerView.h" />
     <ClInclude Include="..\Classes\Game\View\PlayerView.h" />
     <ClInclude Include="..\Classes\Game\Tree.h" />
-    <ClInclude Include="..\Classes\Game\Monster.h" />
     <ClInclude Include="..\Classes\HelloWorldScene.h" />
     <ClInclude Include="..\Classes\Scenes\BeachScene.h" />
     <ClInclude Include="..\Classes\Scenes\CustomizationScene.h" />

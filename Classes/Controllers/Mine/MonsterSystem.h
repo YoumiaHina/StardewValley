@@ -11,7 +11,7 @@
 #include "Controllers/Map/MineMapController.h"
 #include "Game/Item.h"
 #include "Game/WorldState.h"
-#include "Game/Monster.h"
+#include "Game/Monster/MonsterBase.h"
 #include "cocos2d.h"
 
 namespace Controllers {

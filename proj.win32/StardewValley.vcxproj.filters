@@ -163,9 +163,6 @@
     <ClCompile Include="..\Classes\Game\Tree.cpp">
       <Filter>Classes\Game</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\Game\Monster.cpp">
-      <Filter>Classes\Game</Filter>
-    </ClCompile>
     <ClCompile Include="..\Classes\Controllers\Environment\TreeSystem.cpp">
       <Filter>Classes\Controllers\Environment</Filter>
     </ClCompile>
@@ -578,9 +575,6 @@
       <Filter>Classes\Controllers\Systems</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\Game\Tree.h">
-      <Filter>Classes\Game</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Classes\Game\Monster.h">
       <Filter>Classes\Game</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\Controllers\Environment\TreeSystem.h">
