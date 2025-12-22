@@ -300,6 +300,43 @@ bool UIController::isToolUpgradePanelVisible() const {
     return _toolUpgradePanel && _toolUpgradePanel->isVisible();
 }
 
+void UIController::buildElevatorPanel() {
+    if (!_elevatorPanel) {
+        _elevatorPanel = new ElevatorPanelUI(_scene);
+    }
+    _elevatorPanel->buildPanel();
+}
+
+void UIController::refreshElevatorPanel(const std::vector<int>& floors) {
+    if (_elevatorPanel) {
+        _elevatorPanel->refreshButtons(floors);
+    }
+}
+
+void UIController::toggleElevatorPanel(bool visible) {
+    if (visible) {
+        buildElevatorPanel();
+        if (_elevatorPanel) {
+            _elevatorPanel->togglePanel(true);
+        }
+    } else {
+        if (_elevatorPanel) {
+            _elevatorPanel->togglePanel(false);
+        }
+    }
+}
+
+bool UIController::isElevatorPanelVisible() const {
+    return _elevatorPanel && _elevatorPanel->isVisible();
+}
+
+void UIController::setElevatorFloorHandler(const std::function<void(int)>& cb) {
+    if (!_elevatorPanel) {
+        _elevatorPanel = new ElevatorPanelUI(_scene);
+    }
+    _elevatorPanel->setOnFloorSelected(cb);
+}
+
 void UIController::buildAnimalStorePanel() {
     if (!_animalStorePanel) _animalStorePanel = new AnimalStorePanelUI(_scene);
     _animalStorePanel->buildAnimalStorePanel();

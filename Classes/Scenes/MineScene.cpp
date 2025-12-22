@@ -69,10 +69,8 @@ bool MineScene::init() {
                                                     [this]() -> Vec2 { return _player ? _player->getPosition() : Vec2(); },
                                                     [this]() -> Vec2 { return _playerController ? _playerController->lastDir() : Vec2(0,-1); });
     _interactor = new Controllers::MineInteractor(_map, [this]() -> Vec2 { return _player ? _player->getPosition() : Vec2(); });
-    _elevator = new Controllers::MineElevatorController(_map, _monsters, this);
+    _elevator = new Controllers::MineElevatorController(_map, _monsters, _uiController);
     _elevator->buildPanel();
-    // 电梯面板打开时锁定移动；跳转后更新楼层标签并定位到该层出生点
-    _elevator->setMovementLocker([this](bool locked){ if (_playerController) _playerController->setMovementLocked(locked); });
     _elevator->setOnFloorChanged([this](int floor){
         if (_uiController) _uiController->setMineFloorNumber(floor);
         if (_uiController) _uiController->refreshHotbar();
@@ -178,6 +176,10 @@ void MineScene::onMouseDown(EventMouse* e) {
         }
     }
     if (_combat) _combat->onMouseDown(e);
+}
+
+bool MineScene::isMovementBlockedByScene() const {
+    return _elevator && _elevator->isPanelVisible();
 }
 
 void MineScene::onKeyPressedHook(EventKeyboard::KeyCode code) {

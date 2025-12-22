@@ -488,6 +488,9 @@
     <ClCompile Include="..\Classes\Game\EnvironmentObstacle\Weed.cpp">
       <Filter>Classes\Game\EnvironmentObstacle</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\UI\ElevatorPanelUI.cpp">
+      <Filter>Classes\Controllers\UI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <!-- Header Files -->
@@ -837,6 +840,9 @@
     </ClInclude>
     <ClInclude Include="..\Classes\Game\EnvironmentObstacle\Weed.h">
       <Filter>Classes\Game\EnvironmentObstacle</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\UI\ElevatorPanelUI.h">
+      <Filter>Classes\Controllers\UI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

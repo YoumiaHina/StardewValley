@@ -186,6 +186,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClCompile Include="..\Classes\Controllers\UI\CraftPanelUI.cpp" />
     <ClCompile Include="..\Classes\Controllers\Crafting\CraftingController.cpp" />
     <ClCompile Include="..\Classes\Controllers\UI\DialogueUI.cpp" />
+    <ClCompile Include="..\Classes\Controllers\UI\ElevatorPanelUI.cpp" />
     <ClCompile Include="..\Classes\Controllers\UI\HotbarUI.cpp" />
     <ClCompile Include="..\Classes\Controllers\UI\HUDUI.cpp" />
     <ClCompile Include="..\Classes\Controllers\UI\NpcSocialPanelUI.cpp" />
@@ -320,6 +321,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClInclude Include="..\Classes\Controllers\UI\ChestPanelUI.h" />
     <ClInclude Include="..\Classes\Controllers\UI\CraftPanelUI.h" />
     <ClInclude Include="..\Classes\Controllers\UI\DialogueUI.h" />
+    <ClInclude Include="..\Classes\Controllers\UI\ElevatorPanelUI.h" />
     <ClInclude Include="..\Classes\Controllers\UI\HotbarUI.h" />
     <ClInclude Include="..\Classes\Controllers\UI\HUDUI.h" />
     <ClInclude Include="..\Classes\Controllers\UI\NpcSocialPanelUI.h" />

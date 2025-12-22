@@ -22,6 +22,7 @@
 #include "Controllers/UI/ToolUpgradePanelUI.h"
 #include "Controllers/UI/DialogueUI.h"
 #include "Controllers/UI/NpcSocialPanelUI.h"
+#include "Controllers/UI/ElevatorPanelUI.h"
 
 namespace Controllers {
 
@@ -39,8 +40,11 @@ public:
         delete _craftPanel; _craftPanel = nullptr;
         delete _storePanel; _storePanel = nullptr;
         delete _skillTreePanel; _skillTreePanel = nullptr;
+        delete _toolUpgradePanel; _toolUpgradePanel = nullptr;
+        delete _animalStorePanel; _animalStorePanel = nullptr;
         delete _dialogueUI; _dialogueUI = nullptr;
         delete _socialPanel; _socialPanel = nullptr;
+        delete _elevatorPanel; _elevatorPanel = nullptr;
     }
 
     void buildHUD();
@@ -121,6 +125,12 @@ public:
     void toggleToolUpgradePanel(bool visible);
     bool isToolUpgradePanelVisible() const;
 
+    void buildElevatorPanel();
+    void refreshElevatorPanel(const std::vector<int>& floors);
+    void toggleElevatorPanel(bool visible);
+    bool isElevatorPanelVisible() const;
+    void setElevatorFloorHandler(const std::function<void(int)>& cb);
+
 private:
     cocos2d::Scene* _scene = nullptr;
     cocos2d::Node* _worldNode = nullptr;
@@ -136,6 +146,7 @@ private:
     AnimalStorePanelUI* _animalStorePanel = nullptr;
     DialogueUI* _dialogueUI = nullptr;
     NpcSocialPanelUI* _socialPanel = nullptr;
+    ElevatorPanelUI* _elevatorPanel = nullptr;
     std::function<bool(Game::AnimalType)> _animalStoreHandler;
 };
 

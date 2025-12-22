@@ -36,4 +36,5 @@ protected:
     // 额外事件转发：左键攻击/右键物品（此处主要处理左键）
     void onMouseDown(cocos2d::EventMouse* e) override;
     void onKeyPressedHook(cocos2d::EventKeyboard::KeyCode code) override;
+    bool isMovementBlockedByScene() const override;
 };

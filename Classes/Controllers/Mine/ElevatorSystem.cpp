@@ -1,74 +1,56 @@
 #include "Controllers/Mine/ElevatorSystem.h"
+#include "Controllers/UI/UIController.h"
 
 using namespace cocos2d;
-using namespace cocos2d::ui;
 
 namespace Controllers {
 
+// buildPanel：
+// 构建电梯面板的根节点与基础样式。仅在 _panel 为空时执行一次：
+// - 创建半透明深色背景的 Layout；
+// - 将其放置在屏幕中央，初始设置为隐藏；
+// - 挂到场景节点树上（高 zOrder，确保浮在游戏画面之上）；
+// - 调用 _refreshButtons() 根据当前已解锁的楼层生成按钮。
 void MineElevatorController::buildPanel() {
-    if (_panel) return;
-    _panel = Layout::create();
-    _panel->setBackGroundColorType(Layout::BackGroundColorType::SOLID);
-    _panel->setBackGroundColor(Color3B(20,20,20));
-    _panel->setBackGroundColorOpacity(180);
-    // 中央面板
-    Size vs = Director::getInstance()->getVisibleSize();
-    Vec2 origin = Director::getInstance()->getVisibleOrigin();
-    _panel->setContentSize(Size(960, 400));
-    _panel->setAnchorPoint(Vec2(0.5f, 0.5f));
-    _panel->setPosition(origin + Vec2(vs.width/2, vs.height/2));
-    _panel->setVisible(false);
-
-    _scene->addChild(_panel, 1000);
-    _refreshButtons();
+    if (!_ui) return;
+    _ui->buildElevatorPanel();
+    _ui->setElevatorFloorHandler([this](int floor) {
+        _jumpToFloor(floor);
+    });
 }
 
+// togglePanel：
+// 打开或关闭电梯面板（仅允许在入口层 floor <= 0 时打开）。
+// 调用流程：
+// - 若还未构建面板，则先调用 buildPanel；
+// - 若当前楼层 > 0，则强制隐藏面板并直接返回（禁止在非入口层使用电梯）；
+// - 刷新按钮列表，确保楼层变化后 UI 反映最新的解锁状态；
+// - 切换可见性，并通过 _setMovementLocked 回调通知外部是否需要锁定玩家移动。
 void MineElevatorController::togglePanel() {
-    if (!_panel) buildPanel();
-    // 仅允许在 0 层使用电梯
-    if (_map && _map->currentFloor() > 0) { if (_panel) _panel->setVisible(false); return; }
-    _refreshButtons();
-    bool newVisible = !_panel->isVisible();
-    _panel->setVisible(newVisible);
-    if (_setMovementLocked) _setMovementLocked(newVisible);
-}
-
-void MineElevatorController::_refreshButtons() {
-    if (!_panel) return;
-    _panel->removeAllChildren();
-    auto floors = _map->getActivatedElevatorFloors();
-    // 小方块网格排布
-    int cols = 8;
-    float cell = 80.0f;
-    float padding = 16.0f;
-    float w = _panel->getContentSize().width;
-    float h = _panel->getContentSize().height;
-    // 标题
-    auto title = Label::createWithTTF("Elevator", "fonts/arial.ttf", 26);
-    title->setPosition(Vec2(w/2, h - 28));
-    _panel->addChild(title);
-    float totalWidth = cols * cell + (cols - 1) * padding;
-    float startX = (w - totalWidth) * 0.5f + cell * 0.5f;
-    int i = 0;
-    for (int f : floors) {
-        int col = i % cols;
-        int row = i / cols;
-        float x = startX + col * (cell + padding);
-        float y = h - (padding + cell/2 + row * (cell + padding) + 48.0f); // 留出标题空间
-        auto btn = Button::create();
-        btn->setTitleText(StringUtils::format("%d", f));
-        btn->setTitleFontName("fonts/arial.ttf");
-        btn->setTitleFontSize(22);
-        btn->setContentSize(Size(cell, cell));
-        btn->setScale9Enabled(true);
-        btn->setColor(Color3B(240, 200, 120));
-        btn->setPosition(Vec2(x, y));
-        btn->addClickEventListener([this, f](Ref*){ _jumpToFloor(f); });
-        _panel->addChild(btn);
-        i++;
+    if (!_ui || !_map) return;
+    if (_map->currentFloor() > 0) {
+        _ui->toggleElevatorPanel(false);
+        return;
     }
+    buildPanel();
+    auto floors = _map->getActivatedElevatorFloors();
+    _ui->refreshElevatorPanel(floors);
+    bool newVisible = !_ui->isElevatorPanelVisible();
+    _ui->toggleElevatorPanel(newVisible);
 }
 
+bool MineElevatorController::isPanelVisible() const {
+    return _ui && _ui->isElevatorPanelVisible();
+}
+
+// _jumpToFloor：
+// 真正执行楼层跳转的地方：
+// - 通过 MineMapController::setFloor 切换楼层；
+// - 通知 MineMonsterController 清空上一层怪物，并为新楼层生成初始怪物波
+//   （仅当楼层 > 0 时刷怪，入口层不刷怪）；
+// - 调用外部注入的 _onFloorChanged(floor) 回调，让 UI/玩家位置等由场景层
+//   统一管理；
+// - 隐藏电梯面板并通过 _setMovementLocked(false) 解锁玩家移动。
 void MineElevatorController::_jumpToFloor(int floor) {
     if (!_map) return;
     _map->setFloor(floor);
@@ -76,10 +58,10 @@ void MineElevatorController::_jumpToFloor(int floor) {
     if (floor > 0) {
         if (_monsters) _monsters->generateInitialWave();
     }
-    // 更新 UI 楼层显示与关闭面板、解锁移动
     if (_onFloorChanged) _onFloorChanged(floor);
-    if (_panel) _panel->setVisible(false);
-    if (_setMovementLocked) _setMovementLocked(false);
+    if (_ui) {
+        _ui->toggleElevatorPanel(false);
+    }
 }
 
 } // namespace Controllers

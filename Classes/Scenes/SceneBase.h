@@ -49,6 +49,10 @@ protected:
     virtual void onSpacePressed() = 0;
     virtual const char* doorPromptText() const = 0;
 
+    // 场景级额外的移动锁定条件（默认无）。子类可覆盖，用于在自定义面板/流程
+    // 打开时禁止玩家移动，例如矿洞电梯面板。
+    virtual bool isMovementBlockedByScene() const { return false; }
+
     // 公共成员（供子类访问）：
     cocos2d::Node* _worldNode = nullptr;
     Game::IPlayerView* _player = nullptr;
