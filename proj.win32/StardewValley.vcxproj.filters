@@ -86,6 +86,9 @@
     <Filter Include="Classes\Game\Monster">
       <UniqueIdentifier>{627686b1-857b-4d05-8e0f-2f583034915d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Classes\Game\EnvironmentObstacle">
+      <UniqueIdentifier>{44901fca-00bb-42fe-b738-12ec91866e48}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <!-- Source Files -->
@@ -159,9 +162,6 @@
     </ClCompile>
     <ClCompile Include="..\Classes\Game\Crops\crop\CropBase.cpp">
       <Filter>Classes\Game\Crop</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Classes\Game\Tree.cpp">
-      <Filter>Classes\Game</Filter>
     </ClCompile>
     <ClCompile Include="..\Classes\Controllers\Environment\TreeSystem.cpp">
       <Filter>Classes\Controllers\Environment</Filter>
@@ -388,23 +388,14 @@
     <ClCompile Include="..\Classes\Controllers\Systems\ChestController.cpp">
       <Filter>Classes\Controllers\Systems</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\Game\Rock.cpp">
-      <Filter>Classes\Game</Filter>
-    </ClCompile>
     <ClCompile Include="..\Classes\Controllers\Environment\RockSystem.cpp">
       <Filter>Classes\Controllers\Environment</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Classes\Game\Mineral.cpp">
-      <Filter>Classes\Game</Filter>
     </ClCompile>
     <ClCompile Include="..\Classes\Controllers\Environment\MineralSystem.cpp">
       <Filter>Classes\Controllers\Environment</Filter>
     </ClCompile>
     <ClCompile Include="..\Classes\Controllers\Environment\StairSystem.cpp">
       <Filter>Classes\Controllers\Environment</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Classes\Game\Stair.cpp">
-      <Filter>Classes\Game</Filter>
     </ClCompile>
     <ClCompile Include="..\Classes\Game\Drop.cpp">
       <Filter>Classes\Game</Filter>
@@ -432,9 +423,6 @@
     </ClCompile>
     <ClCompile Include="..\Classes\Game\Furnace.cpp">
       <Filter>Classes\Game</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Classes\Game\Weed.cpp">
-      <Filter>Classes\Controllers\Environment</Filter>
     </ClCompile>
     <ClCompile Include="..\Classes\Controllers\Environment\WeedSystem.cpp">
       <Filter>Classes\Controllers\Environment</Filter>
@@ -484,6 +472,21 @@
     </ClCompile>
     <ClCompile Include="..\Classes\Game\Monster\RedSlime.cpp">
       <Filter>Classes\Game\Monster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\EnvironmentObstacle\Mineral.cpp">
+      <Filter>Classes\Game\EnvironmentObstacle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\EnvironmentObstacle\Rock.cpp">
+      <Filter>Classes\Game\EnvironmentObstacle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\EnvironmentObstacle\Stair.cpp">
+      <Filter>Classes\Game\EnvironmentObstacle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\EnvironmentObstacle\Tree.cpp">
+      <Filter>Classes\Game\EnvironmentObstacle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\EnvironmentObstacle\Weed.cpp">
+      <Filter>Classes\Game\EnvironmentObstacle</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -573,9 +576,6 @@
     </ClInclude>
     <ClInclude Include="..\Classes\Controllers\Systems\CropSystem.h">
       <Filter>Classes\Controllers\Systems</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Classes\Game\Tree.h">
-      <Filter>Classes\Game</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\Controllers\Environment\TreeSystem.h">
       <Filter>Classes\Controllers\Environment</Filter>
@@ -733,29 +733,17 @@
     <ClInclude Include="..\Classes\Controllers\Systems\ChestController.h">
       <Filter>Classes\Controllers\Systems</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\Game\Rock.h">
-      <Filter>Classes\Game</Filter>
-    </ClInclude>
     <ClInclude Include="..\Classes\Controllers\Environment\RockSystem.h">
       <Filter>Classes\Controllers\Environment</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\Controllers\Environment\EnvironmentObstacleSystemBase.h">
       <Filter>Classes\Controllers\Environment</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\Game\EnvironmentObstacleBase.h">
-      <Filter>Classes\Game</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Classes\Game\Mineral.h">
-      <Filter>Classes\Game</Filter>
-    </ClInclude>
     <ClInclude Include="..\Classes\Controllers\Environment\MineralSystem.h">
       <Filter>Classes\Controllers\Environment</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\Controllers\Environment\StairSystem.h">
       <Filter>Classes\Controllers\Environment</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Classes\Game\Stair.h">
-      <Filter>Classes\Game</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\Game\Save\SaveDetail.h">
       <Filter>Classes\Game\Save</Filter>
@@ -793,12 +781,6 @@
     <ClInclude Include="..\Classes\Controllers\Interact\PlacementInteractor.h">
       <Filter>Classes\Controllers\Interact</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\Game\Weed.h">
-      <Filter>Classes\Game</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Classes\Controllers\Environment\WeedSystem.h">
-      <Filter>Classes\Game\Tool</Filter>
-    </ClInclude>
     <ClInclude Include="..\Classes\Game\Tool\Scythe.h">
       <Filter>Classes\Game\Tool</Filter>
     </ClInclude>
@@ -834,6 +816,27 @@
     </ClInclude>
     <ClInclude Include="..\Classes\Game\Monster\SlimeMonsterBase.h">
       <Filter>Classes\Game\Monster</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\Environment\WeedSystem.h">
+      <Filter>Classes\Controllers\Environment</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\EnvironmentObstacle\EnvironmentObstacleBase.h">
+      <Filter>Classes\Game\EnvironmentObstacle</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\EnvironmentObstacle\Mineral.h">
+      <Filter>Classes\Game\EnvironmentObstacle</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\EnvironmentObstacle\Rock.h">
+      <Filter>Classes\Game\EnvironmentObstacle</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\EnvironmentObstacle\Stair.h">
+      <Filter>Classes\Game\EnvironmentObstacle</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\EnvironmentObstacle\Tree.h">
+      <Filter>Classes\Game\EnvironmentObstacle</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\EnvironmentObstacle\Weed.h">
+      <Filter>Classes\Game\EnvironmentObstacle</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

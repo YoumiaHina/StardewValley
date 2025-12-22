@@ -15,9 +15,9 @@
 #include "Game/Chest.h"
 #include "Game/GameConfig.h"
 #include "Game/Crops/crop/CropBase.h"
-#include "Game/Tree.h"
-#include "Game/Rock.h"
-#include "Game/Weed.h"
+#include "Game/EnvironmentObstacle/Tree.h"
+#include "Game/EnvironmentObstacle/Rock.h"
+#include "Game/EnvironmentObstacle/Weed.h"
 #include "Game/Animal.h"
 #include "Game/Furnace.h"
 

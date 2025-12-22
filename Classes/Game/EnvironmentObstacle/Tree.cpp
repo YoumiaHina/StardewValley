@@ -1,4 +1,4 @@
-#include "Game/Tree.h"
+#include "Game/EnvironmentObstacle/Tree.h"
 #include <algorithm>
 
 using namespace cocos2d;

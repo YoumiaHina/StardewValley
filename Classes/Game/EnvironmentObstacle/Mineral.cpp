@@ -1,4 +1,4 @@
-#include "Game/Mineral.h"
+#include "Game/EnvironmentObstacle/Mineral.h"
 #include "Game/GameConfig.h"
 #include <algorithm>
 

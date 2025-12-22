@@ -1,4 +1,4 @@
-#include "Game/Stair.h"
+#include "Game/EnvironmentObstacle/Stair.h"
 
 using namespace cocos2d;
 

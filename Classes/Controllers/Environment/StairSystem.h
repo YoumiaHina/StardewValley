@@ -4,8 +4,8 @@
 #include <vector>
 #include <functional>
 #include "Controllers/Environment/EnvironmentObstacleSystemBase.h"
-#include "Game/Mineral.h"
-#include "Game/Stair.h"
+#include "Game/EnvironmentObstacle/Mineral.h"
+#include "Game/EnvironmentObstacle/Stair.h"
 
 namespace Controllers {
 

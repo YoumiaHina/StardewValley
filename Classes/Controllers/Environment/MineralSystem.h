@@ -3,7 +3,7 @@
 #include "cocos2d.h"
 #include <vector>
 #include <unordered_map>
-#include "Game/Mineral.h"
+#include "Game/EnvironmentObstacle/Mineral.h"
 #include "Controllers/Environment/EnvironmentObstacleSystemBase.h"
 #include "Game/GameConfig.h"
 

@@ -2,7 +2,7 @@
 
 #include "cocos2d.h"
 #include <string>
-#include "Game/EnvironmentObstacleBase.h"
+#include "Game/EnvironmentObstacle/EnvironmentObstacleBase.h"
 
 namespace Game {
 

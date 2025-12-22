@@ -3,7 +3,7 @@
 #include "cocos2d.h"
 #include <unordered_map>
 #include <functional>
-#include "Game/Weed.h"
+#include "Game/EnvironmentObstacle/Weed.h"
 #include "Game/Map/MapBase.h"
 #include "Game/Tile.h"
 #include "Controllers/Environment/EnvironmentObstacleSystemBase.h"

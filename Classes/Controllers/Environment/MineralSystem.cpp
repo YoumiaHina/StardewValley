@@ -1,7 +1,7 @@
 #include "Controllers/Environment/MineralSystem.h"
 #include "Controllers/Map/MineMapController.h"
 #include "Game/GameConfig.h"
-#include "Game/Mineral.h"
+#include "Game/EnvironmentObstacle/Mineral.h"
 #include <random>
 #include <algorithm>
 
