@@ -54,10 +54,7 @@ void RoomMap::parseObjects() {
 }
 
 void RoomMap::parseCollision() {
-    if (_collisionDebug) { _collisionDebug->removeFromParent(); _collisionDebug = nullptr; }
-    _collisionDebug = DrawNode::create();
-    _tmx->addChild(_collisionDebug, 999);
-    MapBase::parseWalls(_tmx, _collisionRects, _collisionPolys, _collisionDebug, { "Wall","wall" });
+    MapBase::parseWalls(_tmx, _collisionRects, _collisionPolys, nullptr, { "Wall","wall" });
 }
 
 bool RoomMap::collides(const Vec2& p, float radius) const {

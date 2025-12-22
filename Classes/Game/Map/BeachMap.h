@@ -32,11 +32,9 @@ private:
 
     std::vector<cocos2d::Rect> _wallRects;
     std::vector<std::vector<cocos2d::Vec2>> _wallPolys;
-    cocos2d::DrawNode* _wallDebug = nullptr;
 
     std::vector<cocos2d::Rect> _waterRects;
     std::vector<std::vector<cocos2d::Vec2>> _waterPolys;
-    cocos2d::DrawNode* _waterDebug = nullptr;
 
     std::vector<cocos2d::Rect> _doorToFarmRects;
     std::vector<cocos2d::Vec2> _doorToFarmPoints;

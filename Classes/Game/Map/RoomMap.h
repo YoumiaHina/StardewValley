@@ -38,7 +38,6 @@ private:
     // Collision data
     std::vector<cocos2d::Rect> _collisionRects;
     std::vector<std::vector<cocos2d::Vec2>> _collisionPolys;
-    cocos2d::DrawNode* _collisionDebug = nullptr;
 
     // DoorToFarm objects
     std::vector<cocos2d::Rect> _doorToFarmRects;

@@ -35,7 +35,6 @@ private:
     std::vector<std::vector<cocos2d::Vec2>> _wallPolys;
     std::vector<cocos2d::Rect> _festivalWallRects;
     std::vector<std::vector<cocos2d::Vec2>> _festivalWallPolys;
-    cocos2d::DrawNode* _wallDebug = nullptr;
     bool _festivalActive = false;
 
     std::vector<cocos2d::Rect> _doorToFarmRects;

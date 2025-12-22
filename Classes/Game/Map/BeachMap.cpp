@@ -72,19 +72,13 @@ void BeachMap::setFestivalActive(bool active) {
 }
 
 void BeachMap::parseWalls() {
-    if (_wallDebug) { _wallDebug->removeFromParent(); _wallDebug = nullptr; }
-    _wallDebug = DrawNode::create();
-    _tmx->addChild(_wallDebug, 999);
-    MapBase::parseWalls(_tmx, _wallRects, _wallPolys, _wallDebug, { "Wall","wall" });
+    MapBase::parseWalls(_tmx, _wallRects, _wallPolys, nullptr, { "Wall","wall" });
 }
 
 void BeachMap::parseWater() {
     _waterRects.clear();
     _waterPolys.clear();
     if (!_tmx) return;
-    if (_waterDebug) { _waterDebug->removeFromParent(); _waterDebug = nullptr; }
-    _waterDebug = DrawNode::create();
-    _tmx->addChild(_waterDebug, 999);
     auto group = _tmx->getObjectGroup("Water");
     if (!group) group = _tmx->getObjectGroup("water");
     if (!group) return;
@@ -108,15 +102,11 @@ void BeachMap::parseWater() {
             }
             if (!pts.empty()) {
                 _waterPolys.push_back(pts);
-                _waterDebug->drawPoly(pts.data(), (unsigned int)pts.size(), true, Color4F(0, 0, 1, 0.5f));
-                _waterDebug->drawSolidPoly(pts.data(), (unsigned int)pts.size(), Color4F(0, 0, 1, 0.2f));
             }
         } else if (dict.find("width") != dict.end() && dict.find("height") != dict.end()) {
             float w = dict.at("width").asFloat(); float h = dict.at("height").asFloat();
             Rect r(x, y, w, h);
             _waterRects.push_back(r);
-            _waterDebug->drawRect(r.origin, r.origin + r.size, Color4F(0, 0, 1, 0.5f));
-            _waterDebug->drawSolidRect(r.origin, r.origin + r.size, Color4F(0, 0, 1, 0.2f));
         }
     }
 }

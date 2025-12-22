@@ -49,10 +49,8 @@ private:
     // Collision data
     std::vector<cocos2d::Rect> _wallRects;
     std::vector<std::vector<cocos2d::Vec2>> _wallPolygons;
-    cocos2d::DrawNode* _debugNode = nullptr;
     std::vector<cocos2d::Rect> _waterRects;
     std::vector<std::vector<cocos2d::Vec2>> _waterPolygons;
-    cocos2d::DrawNode* _waterDebugNode = nullptr;
     std::vector<cocos2d::Rect> _doorToRoomRects;
     std::vector<cocos2d::Rect> _doorToMineRects;
     std::vector<cocos2d::Rect> _doorToBeachRects;

@@ -56,14 +56,11 @@ void TownMap::setFestivalActive(bool active) {
     if (_festivalActive == active) return;
     _festivalActive = active;
     if (_festivalLayer) _festivalLayer->setVisible(_festivalActive);
-    if (_festivalActive) MapBase::parseWalls(_tmx, _festivalWallRects, _festivalWallPolys, _wallDebug, { "FestivalWall", "FestivalWall" });
+    if (_festivalActive) MapBase::parseWalls(_tmx, _festivalWallRects, _festivalWallPolys, nullptr, { "FestivalWall", "FestivalWall" });
 }
 
 void TownMap::parseWalls() {
-    if (_wallDebug) { _wallDebug->removeFromParent(); _wallDebug = nullptr; }
-    _wallDebug = DrawNode::create();
-    _tmx->addChild(_wallDebug, 999);
-    MapBase::parseWalls(_tmx, _wallRects, _wallPolys, _wallDebug, { "Wall","wall" });
+    MapBase::parseWalls(_tmx, _wallRects, _wallPolys, nullptr, { "Wall","wall" });
 }
 
 void TownMap::parseDoorToFarm() {

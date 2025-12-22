@@ -97,6 +97,7 @@ void MapBase::parseWalls(TMXTiledMap* tmx,
                          std::vector<std::vector<Vec2>>& outPolys,
                          DrawNode* debugTarget,
                          const std::vector<std::string>& groupNames) {
+    (void)debugTarget;
     outRects.clear();
     outPolys.clear();
     if (!tmx) return;
@@ -126,19 +127,11 @@ void MapBase::parseWalls(TMXTiledMap* tmx,
             }
             if (!pts.empty()) {
                 outPolys.push_back(pts);
-                if (debugTarget) {
-                    debugTarget->drawPoly(pts.data(), (unsigned int)pts.size(), true, Color4F(1, 0, 0, 0.5f));
-                    debugTarget->drawSolidPoly(pts.data(), (unsigned int)pts.size(), Color4F(1, 0, 0, 0.2f));
-                }
             }
         } else if (dict.find("width") != dict.end() && dict.find("height") != dict.end()) {
             float w = dict.at("width").asFloat(); float h = dict.at("height").asFloat();
             Rect r(x, y, w, h);
             outRects.push_back(r);
-            if (debugTarget) {
-                debugTarget->drawRect(r.origin, r.origin + r.size, Color4F(1, 0, 0, 0.5f));
-                debugTarget->drawSolidRect(r.origin, r.origin + r.size, Color4F(1, 0, 0, 0.2f));
-            }
         }
     }
 }

@@ -43,10 +43,7 @@ void FarmMap::setupLayerOrder() {
 }
 
 void FarmMap::parseWalls() {
-    if (_debugNode) { _debugNode->removeFromParent(); _debugNode = nullptr; }
-    _debugNode = cocos2d::DrawNode::create();
-    _tmx->addChild(_debugNode, 999);
-    MapBase::parseWalls(_tmx, _wallRects, _wallPolygons, _debugNode,{"Wall", "wall"});
+    MapBase::parseWalls(_tmx, _wallRects, _wallPolygons, nullptr, { "Wall", "wall" });
 }
 
 bool FarmMap::collides(const cocos2d::Vec2& p, float radius) const {
@@ -92,9 +89,6 @@ void FarmMap::parseWater() {
     _waterRects.clear();
     _waterPolygons.clear();
     if (!_tmx) return;
-    if (_waterDebugNode) { _waterDebugNode->removeFromParent(); _waterDebugNode = nullptr; }
-    _waterDebugNode = cocos2d::DrawNode::create();
-    _tmx->addChild(_waterDebugNode, 998);
     auto group = _tmx->getObjectGroup("Water");
     if (!group) group = _tmx->getObjectGroup("water");
     if (!group) return;
@@ -119,16 +113,12 @@ void FarmMap::parseWater() {
             }
             if (!pts.empty()) {
                 _waterPolygons.push_back(pts);
-                _waterDebugNode->drawPoly(pts.data(), (unsigned int)pts.size(), true, cocos2d::Color4F(0, 0, 1, 0.4f));
-                _waterDebugNode->drawSolidPoly(pts.data(), (unsigned int)pts.size(), cocos2d::Color4F(0, 0, 1, 0.2f));
             }
         } else if (dict.find("width") != dict.end() && dict.find("height") != dict.end()) {
             float w = dict.at("width").asFloat();
             float h = dict.at("height").asFloat();
             cocos2d::Rect r(x, y, w, h);
             _waterRects.push_back(r);
-            _waterDebugNode->drawRect(r.origin, r.origin + r.size, cocos2d::Color4F(0, 0, 1, 0.4f));
-            _waterDebugNode->drawSolidRect(r.origin, r.origin + r.size, cocos2d::Color4F(0, 0, 1, 0.2f));
         }
     }
 }
