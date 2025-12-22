@@ -48,6 +48,11 @@ public:
             return;
         }
         sprite->stopActionByTag(kSlimeAnimActionTag);
+        // 停止并移除眼睛覆盖动画
+        sprite->stopActionByTag(kSlimeEyesActionTag);
+        if (auto eyes = sprite->getChildByTag(kSlimeEyesSpriteTag)) {
+            eyes->removeFromParent();
+        }
         sprite->setTexture("Monster/RockSlimeDying.png");
         // RockSlimeDying.png 是单张死亡图片，这里使用整张纹理区域
         sprite->setTextureRect(cocos2d::Rect(0.0f, 0.0f, size.width, size.height));
@@ -71,6 +76,8 @@ protected:
     static constexpr int kSlimeAnimEndRow    = 4;  // 活动动画结束行号（包含）
 
     static const int kSlimeAnimActionTag = 9201;
+    static const int kSlimeEyesActionTag = 9202;
+    static const int kSlimeEyesSpriteTag = 9301;
 
     // 按给定的行号，从 RockSlimeMove.png 中切出该行的 4 帧动画
     cocos2d::Animation* slimeRowAnimation(int row) const {
@@ -124,7 +131,7 @@ protected:
         return anim;
     }
 
-    // 在第 kSlimeAnimStartRow~kSlimeAnimEndRow 行上循环播放史莱姆的活动动画
+    // 在第 kSlimeAnimStartRow~kSlimeAnimEndRow 行上循环播放史莱姆的活动动画，并叠加眼睛动画
     void slimeRunCommonLoop(cocos2d::Sprite* sprite) const {
         if (!sprite) return;
         auto running = sprite->getActionByTag(kSlimeAnimActionTag);
@@ -135,6 +142,75 @@ protected:
         auto act = cocos2d::RepeatForever::create(cocos2d::Animate::create(anim));
         act->setTag(kSlimeAnimActionTag);
         sprite->runAction(act);
+        // 在身体动画之上叠加眼睛覆盖动画
+        slimeRunEyesLoop(sprite);
+    }
+
+    // 生成史莱姆眼睛动画：从 RockSlimeEyes.png 中拆分 4 帧（每帧宽 16 高 24）
+    cocos2d::Animation* slimeEyesAnimation() const {
+        auto tex = cocos2d::Director::getInstance()->getTextureCache()->addImage("Monster/RockSlimeEyes.png");
+        if (!tex) return nullptr;
+        tex->setAliasTexParameters();
+        auto size = tex->getContentSize();
+        if (size.width <= 0.0f || size.height <= 0.0f) return nullptr;
+        // 假定 RockSlimeEyes.png 为 2 行 2 列：整体宽 32 高 48，每小格 16x24，共 4 帧
+        float frameW = size.width / 2.0f;   // 每帧宽 16
+        float frameH = size.height / 2.0f;  // 每帧高 24
+        float texH = size.height;
+        auto anim = cocos2d::Animation::create();
+        if (!anim) return nullptr;
+        for (int i = 0; i < 4; ++i) {
+            int row = i / 2;
+            int col = i % 2;
+            float x = frameW * static_cast<float>(col);
+            float y = texH - frameH * static_cast<float>(row + 1);
+            // 这里选中的是 RockSlimeEyes.png 第 row 行第 col 列的眼睛格子
+            auto frame = cocos2d::SpriteFrame::create("Monster/RockSlimeEyes.png",
+                                                      cocos2d::Rect(x, y, frameW, frameH));
+            if (!frame) continue;
+            anim->addSpriteFrame(frame);
+        }
+        anim->setDelayPerUnit(1.0f);
+        return anim;
+    }
+
+    // 在史莱姆身体精灵上创建并循环播放眼睛覆盖动画
+    void slimeRunEyesLoop(cocos2d::Sprite* body) const {
+        if (!body) return;
+        auto eyes = dynamic_cast<cocos2d::Sprite*>(body->getChildByTag(kSlimeEyesSpriteTag));
+        if (!eyes) {
+            auto tex = cocos2d::Director::getInstance()->getTextureCache()->addImage("Monster/RockSlimeEyes.png");
+            if (!tex) return;
+            tex->setAliasTexParameters();
+            auto size = tex->getContentSize();
+            if (size.width <= 0.0f || size.height <= 0.0f) return;
+            // 与 slimeEyesAnimation 相同：2 行 2 列，每帧 16x24
+            float frameW = size.width / 2.0f;
+            float frameH = size.height / 2.0f;
+            float texH = size.height;
+            eyes = cocos2d::Sprite::create();
+            if (!eyes) return;
+            eyes->setTexture(tex);
+            // 初始显示第 0 帧的眼睛（第 0 行第 0 列）
+            float x0 = 0.0f;
+            float y0 = texH - frameH * static_cast<float>(0 + 1);
+            eyes->setTextureRect(cocos2d::Rect(x0, y0, frameW, frameH));
+            // 眼睛锚点使用中心，方便与身体相对偏移对齐
+            eyes->setAnchorPoint(cocos2d::Vec2(0.5f, 0.5f));
+            // 身体小图高度约为 24，这里将眼睛中心略微向右上偏移
+            float bodyWidth = 16.0f;
+            float bodyHeight = 24.0f;
+            eyes->setPosition(cocos2d::Vec2(bodyWidth * 0.5f, bodyHeight * 0.6f));
+            eyes->setTag(kSlimeEyesSpriteTag);
+            body->addChild(eyes, 1);
+        }
+        auto running = eyes->getActionByTag(kSlimeEyesActionTag);
+        if (running) return;
+        auto anim = slimeEyesAnimation();
+        if (!anim) return;
+        auto act = cocos2d::RepeatForever::create(cocos2d::Animate::create(anim));
+        act->setTag(kSlimeEyesActionTag);
+        eyes->runAction(act);
     }
 };
 
