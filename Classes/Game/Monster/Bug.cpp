@@ -101,7 +101,7 @@ public:
         bugRunLoopRow(row, sprite);
     }
 
-    // 死亡时切换到死亡专用行（第 0 行），显示一帧后通过回调通知系统移除
+    // 死亡时切换到死亡专用行（第 0 行），显示一帧后淡出再通过回调通知系统移除
     void playDeathAnimation(const Monster& m, cocos2d::Sprite* sprite, const std::function<void()>& onComplete) const override {
         if (!sprite) {
             if (onComplete) onComplete();
@@ -127,10 +127,16 @@ public:
         sprite->stopActionByTag(kBugAnimActionTag);
         sprite->setTexture("Monster/BugMove.png");
         sprite->setTextureRect(cocos2d::Rect(x, y, frameW, frameH));
+        sprite->setOpacity(255);
         auto delay = cocos2d::DelayTime::create(0.2f);
-        auto seq = cocos2d::Sequence::create(delay, cocos2d::CallFunc::create([onComplete]() {
-            if (onComplete) onComplete();
-        }), nullptr);
+        auto fade = cocos2d::FadeOut::create(0.25f);
+        auto seq = cocos2d::Sequence::create(
+            delay,
+            fade,
+            cocos2d::CallFunc::create([onComplete]() {
+                if (onComplete) onComplete();
+            }),
+            nullptr);
         sprite->runAction(seq);
     }
 };

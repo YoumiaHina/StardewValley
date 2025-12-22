@@ -113,7 +113,7 @@ public:
         ghostRunLoopRow(row, sprite);
     }
 
-    // 死亡时循环播放第 4 行（第五排）的 4 帧动画，然后回调通知系统移除
+    // 死亡时循环播放第 0 行（第一排）的 4 帧动画，然后淡出并回调通知系统移除
     void playDeathAnimation(const Monster& m, cocos2d::Sprite* sprite, const std::function<void()>& onComplete) const override {
         if (!sprite) {
             if (onComplete) onComplete();
@@ -134,7 +134,7 @@ public:
         float frameH = size.height / 5.0f;
         float texH = size.height;
 
-        // 这里选取死亡动画所在的第 4 行（第五排）的 4 张图来做循环
+        // 这里选取死亡动画所在的第 0 行（第一排）的 4 张图来做循环
         auto anim = cocos2d::Animation::create();
         if (!anim) {
             if (onComplete) onComplete();
@@ -153,11 +153,14 @@ public:
 
         sprite->stopActionByTag(kGhostAnimActionTag);
         sprite->setTexture("Monster/GhostMove.png");
+        sprite->setOpacity(255);
         auto act = cocos2d::Animate::create(anim);
+        auto fade = cocos2d::FadeOut::create(0.25f);
         auto seq = cocos2d::Sequence::create(
             act,
+            fade,
             cocos2d::CallFunc::create([onComplete]() {
-                // 动画播完后通知系统移除幽灵
+                // 动画播完并淡出后再移除幽灵
                 if (onComplete) onComplete();
             }),
             nullptr);
