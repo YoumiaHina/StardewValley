@@ -1,4 +1,4 @@
-#include "Game/Rock.h"
+#include "Game/EnvironmentObstacle/Rock.h"
 #include <algorithm>
 
 using namespace cocos2d;

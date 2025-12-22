@@ -1,4 +1,4 @@
-#include "Game/Weed.h"
+#include "Game/EnvironmentObstacle/Weed.h"
 #include <algorithm>
 
 using namespace cocos2d;
