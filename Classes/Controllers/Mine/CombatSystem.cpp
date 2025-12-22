@@ -13,11 +13,8 @@ void MineCombatController::onMouseDown(EventMouse* e) {
     Vec2 pos = _getPlayerPos ? _getPlayerPos() : Vec2();
     auto inv = Game::globalState().inventory;
     bool swordSelected = inv && inv->selectedTool() && inv->selectedTool()->kind() == Game::ToolKind::Sword;
-    int baseDamage = 0;
-    if (swordSelected) {
-        baseDamage = Game::Sword::baseDamage();
-    }
     if (swordSelected && _monsters && _map) {
+        int baseDamage = Game::Sword::baseDamage();
         Vec2 dir = _getLastDir ? _getLastDir() : Vec2(0, -1);
         std::vector<std::pair<int,int>> tiles;
         Game::Sword::buildHitTiles(_map, pos, dir, tiles, true);
@@ -25,9 +22,6 @@ void MineCombatController::onMouseDown(EventMouse* e) {
             _monsters->applyAreaDamage(tiles, baseDamage);
         }
         return;
-    }
-    if (_monsters && baseDamage > 0) {
-        _monsters->applyDamageAt(pos, baseDamage);
     }
 }
 

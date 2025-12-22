@@ -10,13 +10,20 @@ using namespace cocos2d;
 namespace Controllers {
 
 namespace {
+    // rng：本控制器内部使用的随机数引擎，用于刷怪时进行类型抽样。
+    // 通过静态局部变量保证整个进程内只构造一次，避免频繁初始化开销。
     std::mt19937& rng() {
         static std::mt19937 eng{ std::random_device{}() };
         return eng;
     }
 
-
-    Game::Monster::Type randomMonsterTypeForFloor(int floor) {
+    // randomMonsterTypeForFloor：
+    // 根据当前楼层返回一个随机怪物类型。不同楼层通过插值调整各类怪物的出现
+    // 概率，实现：
+    // - 低层：史莱姆为主，幽灵极少；
+    // - 高层：逐渐提高幽灵比例，调整 bug 与各色史莱姆的占比，
+    // 从而在不修改 TMX 的前提下实现“随楼层递进”的难度曲线。
+    Game::MonsterType randomMonsterTypeForFloor(int floor) {
         int f = floor;
         if (f < 1) f = 1;
         if (f > 50) f = 50;
@@ -34,14 +41,19 @@ namespace {
         if (redShare < 0.0f) redShare = 0.0f;
         std::uniform_real_distribution<float> dist(0.0f, 1.0f);
         float r = dist(rng());
-        if (r < greenShare) return Game::Monster::Type::GreenSlime;
-        if (r < greenShare + blueShare) return Game::Monster::Type::BlueSlime;
-        if (r < slime) return Game::Monster::Type::RedSlime;
-        if (r < slime + bug) return Game::Monster::Type::Bug;
-        return Game::Monster::Type::Ghost;
+        if (r < greenShare) return Game::MonsterType::GreenSlime;
+        if (r < greenShare + blueShare) return Game::MonsterType::BlueSlime;
+        if (r < slime) return Game::MonsterType::RedSlime;
+        if (r < slime + bug) return Game::MonsterType::Bug;
+        return Game::MonsterType::Ghost;
     }
 }
 
+// ~MineMonsterController：
+// 控制器析构时，负责清理自己创建的所有 Cocos 节点，防止场景销毁后留下悬挂
+// 子节点或重复 remove 的问题。
+// - 对每一只怪物：如 sprite 仍在场景树上，则从父节点移除；
+// - 对调试绘制节点 _monsterDraw：如仍挂在父节点上，同样移除。
 MineMonsterController::~MineMonsterController() {
     for (auto& m : _monsters) {
         if (m.sprite && m.sprite->getParent()) {
@@ -54,6 +66,18 @@ MineMonsterController::~MineMonsterController() {
     }
 }
 
+// generateInitialWave：
+// 生成当前楼层的初始怪物波次，一般在：
+// - 场景进入矿洞楼层时；
+// - 玩家通过楼梯/电梯下楼之后，
+// 由外部先调用 resetFloor 清掉上一层状态，再调用本函数。
+//
+// 规则：
+// - 若当前层为入口层（floor <= 0）：不刷怪，只刷新一次可视，确保调试绘制正确；
+// - 若 TMX 中未配置 MonsterArea（monsterSpawnPoints 为空）：同样不刷怪；
+// - 否则：从 TMX 提供的出生点列表中遍历，为每个点随机抽取一个怪物类型，
+//   通过 Game::monsterInfoFor(type) 拿到其属性，设置初始血量与位置。
+// 最后统一调用 refreshVisuals，把逻辑状态映射到精灵/调试节点。
 void MineMonsterController::generateInitialWave() {
     _monsters.clear();
     if (_map && _map->currentFloor() <= 0) { refreshVisuals(); return; }
@@ -65,15 +89,26 @@ void MineMonsterController::generateInitialWave() {
     }
     int floor = _map ? _map->currentFloor() : 1;
     for (const auto& pt : spawns) {
-        Game::Monster::Type type = randomMonsterTypeForFloor(floor);
-        Monster m = Game::makeMonsterForType(type);
+        Game::MonsterType type = randomMonsterTypeForFloor(floor);
+        Monster m;
+        m.type = type;
+        const auto& info = Game::monsterInfoFor(type);
+        m.hp = info.def_.hp;
         m.pos = pt;
-        m.textureVariant = 0;
         _monsters.push_back(m);
     }
     refreshVisuals();
 }
 
+// update：
+// 每帧驱动怪物逻辑，包括：
+// 1) 入口层与无 MonsterArea 的早退；
+// 2) 简单的重生逻辑：每隔固定时间在数量不足时补刷一只怪；
+// 3) 追踪玩家的移动与地图/玩家碰撞；
+// 4) 怪物之间的成对分离，避免重叠在一起；
+// 5) 将怪物碰撞体同步给 MineMapController，供玩家移动/工具判定参考；
+// 6) 结算怪物对玩家的接触伤害，并在玩家死亡时清空所有怪物；
+// 7) 调用 refreshVisuals，将最新位置与移动状态同步到精灵和动画。
 void MineMonsterController::update(float dt) {
     if (_map && _map->currentFloor() <= 0) return; // 入口层：不刷新/重生
     // 没有 MonsterArea：不进行任何刷新/重生
@@ -83,9 +118,11 @@ void MineMonsterController::update(float dt) {
         _respawnAccum = 0.0f;
         if (_monsters.size() < 8) {
             int floor = _map ? _map->currentFloor() : 1;
-            Game::Monster::Type type = randomMonsterTypeForFloor(floor);
-            Monster m = Game::makeMonsterForType(type);
-            m.textureVariant = 0;
+            Game::MonsterType type = randomMonsterTypeForFloor(floor);
+            Monster m;
+            m.type = type;
+            const auto& info = Game::monsterInfoFor(type);
+            m.hp = info.def_.hp;
             _monsters.push_back(m);
         }
     }
@@ -103,14 +140,16 @@ void MineMonsterController::update(float dt) {
     // 怪物朝玩家移动，带基础碰撞：不能穿过墙体/矿石/玩家
     for (auto& m : _monsters) {
         if (_getPlayerPos) {
-            float range = m.searchRangeTiles * tileSize;
+            const auto& info = Game::monsterInfoFor(m.type);
+            const auto& def = info.def_;
+            float range = def.searchRangeTiles * tileSize;
             Vec2 delta = playerPos - m.pos;
             float dist = delta.length();
             if (dist > 0.001f && dist <= range) {
                 Vec2 dir = delta / dist;
-                Vec2 proposed = m.pos + dir * m.moveSpeed * dt;
+                Vec2 proposed = m.pos + dir * def.moveSpeed * dt;
                 bool blocked = false;
-                if (_map && m.isCollisionAffected) {
+                if (_map && def.isCollisionAffected) {
                     if (_map->collidesWithoutMonsters(proposed, monsterRadius)) {
                         blocked = true;
                     }
@@ -122,7 +161,7 @@ void MineMonsterController::update(float dt) {
                     }
                 }
                 if (!blocked) {
-                    m.velocity = dir * m.moveSpeed;
+                    m.velocity = dir * def.moveSpeed;
                     m.pos = proposed;
                 } else {
                     m.velocity = Vec2::ZERO;
@@ -164,8 +203,10 @@ void MineMonsterController::update(float dt) {
     for (auto& m : _monsters) {
         float dist = m.pos.distance(playerPos);
         float attackRange = monsterRadius + playerRadius + 2.0f;
-        if (dist < attackRange && m.attackCooldown <= 0.0f && m.dmg > 0) {
-            ws.hp = std::max(0, ws.hp - m.dmg);
+        const auto& info = Game::monsterInfoFor(m.type);
+        const auto& def = info.def_;
+        if (dist < attackRange && m.attackCooldown <= 0.0f && def.dmg > 0) {
+            ws.hp = std::max(0, ws.hp - def.dmg);
             m.attackCooldown = 0.8f;
         }
     }
@@ -190,6 +231,13 @@ void MineMonsterController::update(float dt) {
     refreshVisuals();
 }
 
+// resetFloor：
+// 切换楼层时由外部调用，用于彻底清空上一层的怪物状态。
+// - 移除所有怪物精灵节点并将指针置空；
+// - 清空内部 _monsters 容器；
+// - 将怪物碰撞体清空回写给 MineMapController；
+// - 重置重生计时器，使新楼层从“无怪物”状态开始，待 generateInitialWave
+//   重新生成。
 void MineMonsterController::resetFloor() {
     for (auto& m : _monsters) {
         if (m.sprite && m.sprite->getParent()) {
@@ -203,53 +251,15 @@ void MineMonsterController::resetFloor() {
         std::vector<Rect> colliders;
         _map->setMonsterColliders(colliders);
     }
-    refreshVisuals();
 }
 
-void MineMonsterController::applyDamageAt(const Vec2& worldPos, int baseDamage) {
-    // 简化：对距离最近的一只怪物造成伤害
-    int idx = -1; float best = 1e9f;
-    for (int i=0;i<(int)_monsters.size();++i) {
-        float d = _monsters[i].pos.distance(worldPos);
-        if (d < best) { best = d; idx = i; }
-    }
-    if (idx >= 0) {
-        Monster m = _monsters[idx];
-        int def = m.def;
-        int dmg = std::max(0, baseDamage - def);
-        m.hp -= dmg;
-        if (m.hp <= 0) {
-            auto& ws = Game::globalState();
-            auto& skill = Game::SkillTreeSystem::getInstance();
-            long long baseGold = 10;
-            long long reward = skill.adjustGoldRewardForCombat(baseGold);
-            ws.gold += reward;
-            skill.addXp(Game::SkillTreeType::Combat, skill.xpForCombatKill(baseGold));
-            auto drops = m.getDrops();
-            if (_map) {
-                int c = 0;
-                int r = 0;
-                _map->worldToTileIndex(m.pos, c, r);
-                for (auto t : drops) {
-                    _map->spawnDropAt(c, r, static_cast<int>(t), 1);
-                }
-            }
-            cocos2d::Sprite* sprite = m.sprite;
-            if (sprite) {
-                const auto& info = Game::monsterInfoFor(m.type);
-                info.playDeathAnimation(m, sprite, [sprite]() {
-                    if (sprite->getParent()) {
-                        sprite->removeFromParent();
-                    }
-                });
-            }
-            _monsters.erase(_monsters.begin() + idx);
-        } else {
-            _monsters[idx].hp = m.hp;
-        }
-    }
-}
-
+// applyAreaDamage：
+// 对一组瓦片坐标上的怪物批量结算伤害，用于范围技能/爆炸等：
+// - 利用 MapController::worldToTileIndex 将怪物当前位置映射到整数瓦片坐标；
+// - 若怪物所在瓦片在 tiles 列表内，则认为命中，按单体伤害规则扣血；
+// - hp 降为 0 时，结算金币/经验、生成掉落并播放死亡动画，与 applyDamageAt
+//   保持相同的死亡处理逻辑；
+// - 采用 while 循环 + 手动递增索引，在删除元素时避免越界。
 void MineMonsterController::applyAreaDamage(const std::vector<std::pair<int,int>>& tiles, int baseDamage) {
     if (!_map || tiles.empty()) return;
     auto matches = [this,&tiles](const Monster& m) {
@@ -263,7 +273,9 @@ void MineMonsterController::applyAreaDamage(const std::vector<std::pair<int,int>
     for (std::size_t i = 0; i < _monsters.size();) {
         Monster m = _monsters[i];
         if (!matches(m)) { ++i; continue; }
-        int dmg = std::max(0, baseDamage - m.def);
+        const auto& info = Game::monsterInfoFor(m.type);
+        int def = info.def_.def;
+        int dmg = std::max(0, baseDamage - def);
         m.hp -= dmg;
         if (m.hp <= 0) {
             auto& ws = Game::globalState();
@@ -272,7 +284,8 @@ void MineMonsterController::applyAreaDamage(const std::vector<std::pair<int,int>
             long long reward = skill.adjustGoldRewardForCombat(baseGold);
             ws.gold += reward;
             skill.addXp(Game::SkillTreeType::Combat, skill.xpForCombatKill(baseGold));
-            auto drops = m.getDrops();
+            const auto& info = Game::monsterInfoFor(m.type);
+            auto drops = info.drops_;
             if (_map) {
                 int c = 0;
                 int r = 0;
@@ -284,7 +297,7 @@ void MineMonsterController::applyAreaDamage(const std::vector<std::pair<int,int>
             cocos2d::Sprite* sprite = m.sprite;
             if (sprite) {
                 const auto& info = Game::monsterInfoFor(m.type);
-                info.playDeathAnimation(m, sprite, [sprite]() {
+                info.playDeathAnimation(sprite, [sprite]() {
                     if (sprite->getParent()) {
                         sprite->removeFromParent();
                     }
@@ -298,6 +311,19 @@ void MineMonsterController::applyAreaDamage(const std::vector<std::pair<int,int>
     }
 }
 
+// refreshVisuals：
+// 将逻辑层的 _monsters 状态同步到渲染层：
+// - 懒创建 _monsterDraw：用于未来的调试可视化（碰撞体/路径等），挂在 worldNode
+//   上，仅在首次需要时创建，后续重复复用并在每次刷新前 clear；
+// - 对每一只怪物：
+//   - 如还没有 sprite，则在 worldNode 下创建一个空 Sprite，并设置锚点与
+//     初始位置；纹理与动画由 MonsterBase 的 playXXXAnimation 决定；
+//   - 若已有 sprite，则仅更新位置；
+//   - 根据 velocity 的长度判断是播放移动动画还是静止动画：
+//     - 有速度：调用 monsterInfoFor(type).playMoveAnimation；
+//     - 无速度：调用 playStaticAnimation。
+// 控制器本身不关心具体贴图路径或帧序列，只负责把“什么时候动/停”这一信息
+// 传递给行为层。
 void MineMonsterController::refreshVisuals() {
     if (!_monsterDraw) {
         _monsterDraw = DrawNode::create();
@@ -307,8 +333,7 @@ void MineMonsterController::refreshVisuals() {
     float s = static_cast<float>(GameConfig::TILE_SIZE);
     for (auto& m : _monsters) {
         if (!m.sprite && _worldNode) {
-            std::string path = Game::monsterTexturePath(m);
-            auto spr = Sprite::create(path);
+            auto spr = Sprite::create();
             if (spr) {
                 spr->setAnchorPoint(Vec2(0.5f, 0.0f));
                 spr->setPosition(m.pos);
@@ -322,9 +347,9 @@ void MineMonsterController::refreshVisuals() {
             cocos2d::Vec2 v = m.velocity;
             float len2 = v.x * v.x + v.y * v.y;
             if (len2 > 1e-4f) {
-                info.playMoveAnimation(m, m.sprite);
+                info.playMoveAnimation(m.velocity, m.sprite);
             } else {
-                info.playStaticAnimation(m, m.sprite);
+                info.playStaticAnimation(m.sprite);
             }
         }
     }

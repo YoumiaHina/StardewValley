@@ -19,9 +19,8 @@ public:
         drops_.push_back(ItemType::Stone);
     }
 
-    // 返回怪物类型枚举，用于系统层区分怪物种类
-    Monster::Type monsterType() const override {
-        return Monster::Type::GreenSlime;
+    MonsterType monsterType() const override {
+        return MonsterType::GreenSlime;
     }
 
     // 返回绿色史莱姆的主体颜色（后续可在此调整色调）

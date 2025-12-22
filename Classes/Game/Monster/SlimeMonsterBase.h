@@ -16,7 +16,7 @@ public:
     virtual cocos2d::Color3B slimeColor() const = 0;
 
     // 静止动画：高频率循环播放 RockSlimeMove.png 中第 kSlimeAnimStartRow~kSlimeAnimEndRow 行的所有贴图
-    void playStaticAnimation(const Monster& m, cocos2d::Sprite* sprite) const override {
+    void playStaticAnimation(cocos2d::Sprite* sprite) const override {
         if (!sprite) return;
         slimeRunCommonLoop(sprite);
         sprite->setColor(slimeColor());
@@ -24,14 +24,14 @@ public:
 
     // 移动动画：与静止相同，也采用高频率循环播放 RockSlimeMove.png 中第 kSlimeAnimStartRow~kSlimeAnimEndRow 行
     // - 如需区分行走/待机，可以在此处改为调用不同的辅助函数
-    void playMoveAnimation(const Monster& m, cocos2d::Sprite* sprite) const override {
+    void playMoveAnimation(const cocos2d::Vec2& velocity, cocos2d::Sprite* sprite) const override {
         if (!sprite) return;
         slimeRunCommonLoop(sprite);
         sprite->setColor(slimeColor());
     }
 
     // 死亡动画：使用 RockSlimeDying.png 这张完整图片做淡出效果
-    void playDeathAnimation(const Monster& m, cocos2d::Sprite* sprite, const std::function<void()>& onComplete) const override {
+    void playDeathAnimation(cocos2d::Sprite* sprite, const std::function<void()>& onComplete) const override {
         if (!sprite) {
             if (onComplete) onComplete();
             return;

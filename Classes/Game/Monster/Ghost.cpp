@@ -6,12 +6,7 @@ namespace Game {
 
 namespace {
 
-// 根据幽灵当前速度向量，决定使用贴图中的哪一行：
-// - 速度接近 0 认为静止，固定选第 0 行（第一排）
-// - 横向分量更大时使用左右行（第 1/3 行）
-// - 纵向分量更大时使用上下行（第 0/2 行）
-int ghostRowForVelocity(const Monster& m) {
-    cocos2d::Vec2 v = m.velocity;
+int ghostRowForVelocity(const cocos2d::Vec2& v) {
     float len2 = v.x * v.x + v.y * v.y;
     if (len2 <= 1e-4f) return 4;
     float ax = std::fabs(v.x);
@@ -93,28 +88,21 @@ public:
         drops_.push_back(ItemType::Coal);
     }
 
-    // 返回怪物类型枚举，用于系统层区分怪物种类
-    Monster::Type monsterType() const override {
-        return Monster::Type::Ghost;
+    MonsterType monsterType() const override {
+        return MonsterType::Ghost;
     }
 
-    // 静止时循环播放第 0 行（第一排）的 4 帧动画
-    void playStaticAnimation(const Monster& m, cocos2d::Sprite* sprite) const override {
+    void playStaticAnimation(cocos2d::Sprite* sprite) const override {
         ghostRunLoopRow(4, sprite);
     }
 
     // 移动时根据速度方向选择行号，再循环播放该行的 4 帧动画
-    // - 向下：第 0 行（第一排）
-    // - 向右：第 1 行（第二排）
-    // - 向上：第 2 行（第三排）
-    // - 向左：第 3 行（第四排）
-    void playMoveAnimation(const Monster& m, cocos2d::Sprite* sprite) const override {
-        int row = ghostRowForVelocity(m);
+    void playMoveAnimation(const cocos2d::Vec2& velocity, cocos2d::Sprite* sprite) const override {
+        int row = ghostRowForVelocity(velocity);
         ghostRunLoopRow(row, sprite);
     }
 
-    // 死亡时循环播放第 0 行（第一排）的 4 帧动画，然后淡出并回调通知系统移除
-    void playDeathAnimation(const Monster& m, cocos2d::Sprite* sprite, const std::function<void()>& onComplete) const override {
+    void playDeathAnimation(cocos2d::Sprite* sprite, const std::function<void()>& onComplete) const override {
         if (!sprite) {
             if (onComplete) onComplete();
             return;

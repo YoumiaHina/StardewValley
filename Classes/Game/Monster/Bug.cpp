@@ -6,12 +6,7 @@ namespace Game {
 
 namespace {
 
-// 根据怪物当前速度向量，决定使用贴图中的哪一行：
-// - 速度接近 0 认为静止，固定选第 2 行
-// - 横向分量更大时使用左右行（第 1/3 行）
-// - 纵向分量更大时使用上下行（第 2/4 行）
-int bugRowForVelocity(const Monster& m) {
-    cocos2d::Vec2 v = m.velocity;
+int bugRowForVelocity(const cocos2d::Vec2& v) {
     float len2 = v.x * v.x + v.y * v.y;
     if (len2 <= 1e-4f) return 4;
     float ax = std::fabs(v.x);
@@ -85,24 +80,20 @@ public:
         drops_.push_back(ItemType::Fiber);
     }
 
-    // 返回怪物类型枚举，用于系统层区分怪物种类
-    Monster::Type monsterType() const override {
-        return Monster::Type::Bug;
+    MonsterType monsterType() const override {
+        return MonsterType::Bug;
     }
 
-    // 静止时固定使用第 4 行的循环动画（相当于默认朝向的待机）
-    void playStaticAnimation(const Monster& m, cocos2d::Sprite* sprite) const override {
+    void playStaticAnimation(cocos2d::Sprite* sprite) const override {
         bugRunLoopRow(4, sprite);
     }
 
-    // 移动时先用 bugRowForVelocity 根据速度方向选行，再播放该行循环动画
-    void playMoveAnimation(const Monster& m, cocos2d::Sprite* sprite) const override {
-        int row = bugRowForVelocity(m);
+    void playMoveAnimation(const cocos2d::Vec2& velocity, cocos2d::Sprite* sprite) const override {
+        int row = bugRowForVelocity(velocity);
         bugRunLoopRow(row, sprite);
     }
 
-    // 死亡时切换到死亡专用行（第 0 行），显示一帧后淡出再通过回调通知系统移除
-    void playDeathAnimation(const Monster& m, cocos2d::Sprite* sprite, const std::function<void()>& onComplete) const override {
+    void playDeathAnimation(cocos2d::Sprite* sprite, const std::function<void()>& onComplete) const override {
         if (!sprite) {
             if (onComplete) onComplete();
             return;
