@@ -109,6 +109,7 @@ void ChestPanelUI::refreshChestPanel(Game::Chest* chest) {
         firstRowY = totalH * 0.5f - cellH * 0.5f - 16.f;
         rowGap = cellH;
     }
+    // 右上角关闭按钮（简单用一个 “X” 文字代替）。
     auto closeLabel = Label::createWithTTF("X", "fonts/arial.ttf", 26);
     closeLabel->setPosition(Vec2(panelW * 0.5f - 16.f, panelH * 0.5f - 16.f));
     _panelNode->addChild(closeLabel);
@@ -132,15 +133,18 @@ void ChestPanelUI::refreshChestPanel(Game::Chest* chest) {
         }
     };
     _panelNode->getEventDispatcher()->addEventListenerWithSceneGraphPriority(closeListener, _panelNode);
+    // 用于承载所有格子节点的根节点。
     _slotsRoot = Node::create();
     _panelNode->addChild(_slotsRoot, 2);
     _highlightNode = DrawNode::create();
     _slotsRoot->addChild(_highlightNode, 11);
+    // 箱子容量：行数 * 列数。
     int capacity = rows * cols;
     _cellIcons.assign(capacity, nullptr);
     _cellCountLabels.assign(capacity, nullptr);
     _cellNameLabels.assign(capacity, nullptr);
     float offsetYVisual = cellH * 2.0f;
+    // 为每个格子创建子节点，内部再挂载图标与数量/名称文本。
     for (int r = 0; r < rows; ++r) {
         for (int c = 0; c < cols; ++c) {
             float cx = startX + c * cellW;
@@ -170,6 +174,7 @@ void ChestPanelUI::refreshChestPanel(Game::Chest* chest) {
                 _cellCountLabels[flatIndex] = countLabel;
                 _cellNameLabels[flatIndex] = nameLabel;
             }
+            // 为当前格子构造一个“小更新函数”：根据 Chest 槽位刷新图标与数量。
             Game::Chest* chestPtr = chest;
             auto updateCell = [icon, countLabel, nameLabel, chestPtr, flatIndex, cellW, cellH]() {
                 if (!chestPtr || flatIndex < 0 || flatIndex >= static_cast<int>(chestPtr->slots.size())) {

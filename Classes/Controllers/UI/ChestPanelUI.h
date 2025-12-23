@@ -33,18 +33,31 @@ public:
     bool isVisible() const;
 
 private:
+    // 所属场景：负责承载箱子 UI 面板节点。
     cocos2d::Scene* _scene = nullptr;
+    // 共享的玩家背包对象：用于读写箱子与背包之间的物品。
     std::shared_ptr<Game::Inventory> _inventory;
+    // 箱子面板根节点：作为所有格子和背景的父节点。
     cocos2d::Node* _panelNode = nullptr;
+    // ESC/Shift 键盘监听器：负责关闭面板与 shift 连续转移。
     cocos2d::EventListenerKeyboard* _escListener = nullptr;
+    // 当前正在打开的箱子指针（不拥有所有权）。
     Game::Chest* _currentChest = nullptr;
+    // 承载所有格子节点的根节点（用于命中检测和高亮绘制）。
     cocos2d::Node* _slotsRoot = nullptr;
+    // 高亮当前选中格子的 DrawNode。
     cocos2d::DrawNode* _highlightNode = nullptr;
+    // 每个格子的物品图标精灵。
     std::vector<cocos2d::Sprite*> _cellIcons;
+    // 每个格子的数量文本。
     std::vector<cocos2d::Label*> _cellCountLabels;
+    // 每个格子的物品名称文本（目前多为隐藏状态）。
     std::vector<cocos2d::Label*> _cellNameLabels;
+    // 背包内容变更时的回调（通常用于刷新 Hotbar）。
     std::function<void()> _onInventoryChanged;
+    // 当前选中的箱子格索引（-1 表示未选中）。
     int _selectedIndex = -1;
+    // 是否按着 Shift 键：用于区分“全部搬运”等操作。
     bool _shiftDown = false;
 };
 

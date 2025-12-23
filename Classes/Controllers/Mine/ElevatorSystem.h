@@ -23,21 +23,30 @@ class UIController;
 
 class MineElevatorController {
 public:
+    // 构造函数：注入地图控制器、怪物控制器与 UI 控制器。
+    // - map/monsters 为“业务模块”，负责实际楼层切换与怪物重置；
+    // - ui 负责电梯面板的创建与显示隐藏，本类只通过接口与之交互。
     MineElevatorController(MineMapController* map,
                            MineMonsterController* monsters,
                            UIController* ui)
     : _map(map), _monsters(monsters), _ui(ui) {}
 
+    // 构建电梯面板：在 UIController 中创建电梯 UI 组件并注册回调。
     void buildPanel();
+    // 开关电梯面板：仅在入口层（floor 0）允许打开。
     void togglePanel();
+    // 查询面板是否当前可见。
     bool isPanelVisible() const;
+    // 设置楼层切换回调：楼层成功跳转后会调用 cb(floor)，由场景更新 HUD、
+    // 玩家出生点等。std::function<void(int)> 可理解为“接受一个 int 参数、
+    // 无返回值的函数指针”。
     void setOnFloorChanged(std::function<void(int)> cb) { _onFloorChanged = std::move(cb); }
 
 private:
-    MineMapController* _map = nullptr;
-    MineMonsterController* _monsters = nullptr;
-    UIController* _ui = nullptr;
-    std::function<void(int)> _onFloorChanged;
+    MineMapController* _map = nullptr;              // 不拥有的指针：地图控制器
+    MineMonsterController* _monsters = nullptr;     // 不拥有的指针：怪物控制器
+    UIController* _ui = nullptr;                    // UI 控制器：真正持有电梯面板节点
+    std::function<void(int)> _onFloorChanged;       // 楼层切换回调（供场景层使用）
 
     void _jumpToFloor(int floor);
 };

@@ -11,7 +11,10 @@ namespace Controllers {
 
 namespace {
     // rng：本控制器内部使用的随机数引擎，用于刷怪时进行类型抽样。
-    // 通过静态局部变量保证整个进程内只构造一次，避免频繁初始化开销。
+    // - 使用 std::mt19937 表示一个梅森旋转算法的伪随机数引擎，比 C 标准库
+    //   的 rand() 质量更高；
+    // - 声明为 static 局部变量，保证整个进程生命周期内只构造一次，可视作
+    //   “懒汉单例”：第一次调用 rng() 时创建，之后重复复用。
     std::mt19937& rng() {
         static std::mt19937 eng{ std::random_device{}() };
         return eng;
@@ -24,10 +27,10 @@ namespace {
     // - 高层：逐渐提高幽灵比例，调整 bug 与各色史莱姆的占比，
     // 从而在不修改 TMX 的前提下实现“随楼层递进”的难度曲线。
     Game::MonsterType randomMonsterTypeForFloor(int floor) {
-        int f = floor;
+        int f = floor; // 工作变量：后续会对其进行“夹紧”处理
         if (f < 1) f = 1;
         if (f > 50) f = 50;
-        float t = 0.0f;
+        float t = 0.0f; // 归一化后的 [0,1] 比例，表示楼层深度
         if (f > 1) {
             t = static_cast<float>(f - 1) / 49.0f;
         }
@@ -39,6 +42,8 @@ namespace {
         float blueShare = slime * 0.3f;
         float redShare = slime - greenShare - blueShare;
         if (redShare < 0.0f) redShare = 0.0f;
+        // uniform_real_distribution 负责把 rng() 输出的整数转换为 [0,1] 的浮点数，
+        // 方便按“概率区间”做判断。
         std::uniform_real_distribution<float> dist(0.0f, 1.0f);
         float r = dist(rng());
         if (r < greenShare) return Game::MonsterType::GreenSlime;
@@ -54,6 +59,8 @@ namespace {
 // 子节点或重复 remove 的问题。
 // - 对每一只怪物：如 sprite 仍在场景树上，则从父节点移除；
 // - 对调试绘制节点 _monsterDraw：如仍挂在父节点上，同样移除。
+// 可以类比 C 中“谁申请，谁释放”的习惯：这里所有 sprite/_monsterDraw 均由本类
+// 创建，因此也在析构时统一释放。
 MineMonsterController::~MineMonsterController() {
     for (auto& m : _monsters) {
         if (m.sprite && m.sprite->getParent()) {
@@ -87,9 +94,12 @@ void MineMonsterController::generateInitialWave() {
         refreshVisuals();
         return;
     }
+    // 使用当前楼层决定怪物类型；若没有 map，则退化到楼层 1。
     int floor = _map ? _map->currentFloor() : 1;
     for (const auto& pt : spawns) {
         Game::MonsterType type = randomMonsterTypeForFloor(floor);
+        // 这里局部构造 Monster，再 push_back 到 std::vector 中；
+        // 等价于 C 里“先填一个结构体，再追加到动态数组尾部”。
         Monster m;
         m.type = type;
         const auto& info = Game::monsterInfoFor(type);
@@ -113,6 +123,7 @@ void MineMonsterController::update(float dt) {
     if (_map && _map->currentFloor() <= 0) return; // 入口层：不刷新/重生
     // 没有 MonsterArea：不进行任何刷新/重生
     if (_map && _map->monsterSpawnPoints().empty()) return;
+    // 使用一个累计计时器实现“每 30 秒刷一只怪”的简单重生逻辑。
     _respawnAccum += dt;
     if (_respawnAccum >= 30.0f) {
         _respawnAccum = 0.0f;
@@ -126,6 +137,7 @@ void MineMonsterController::update(float dt) {
             _monsters.push_back(m);
         }
     }
+    // TILE_SIZE 定义每一个瓦片的边长像素数，转换为 float 方便参与向量运算。
     float tileSize = static_cast<float>(GameConfig::TILE_SIZE);
     Vec2 playerPos = _getPlayerPos ? _getPlayerPos() : Vec2::ZERO;
     float monsterRadius = tileSize * 0.4f;
@@ -133,6 +145,7 @@ void MineMonsterController::update(float dt) {
 
     for (auto& m : _monsters) {
         if (m.attackCooldown > 0.0f) {
+            // std::max(a,b) 返回较大的那个，这里保证冷却时间不会减到负数。
             m.attackCooldown = std::max(0.0f, m.attackCooldown - dt);
         }
     }
@@ -144,11 +157,13 @@ void MineMonsterController::update(float dt) {
             const auto& def = info.def_;
             float range = def.searchRangeTiles * tileSize;
             Vec2 delta = playerPos - m.pos;
+            // Vec2::length() 返回向量长度，即两点之间的直线距离。
             float dist = delta.length();
             if (dist > 0.001f && dist <= range) {
+                // 单位化方向向量：除以长度，得到长度为 1 的方向，用于位移计算。
                 Vec2 dir = delta / dist;
                 Vec2 proposed = m.pos + dir * def.moveSpeed * dt;
-                bool blocked = false;
+                bool blocked = false; // 记录是否被墙体/矿石/玩家阻挡
                 if (_map && def.isCollisionAffected) {
                     if (_map->collidesWithoutMonsters(proposed, monsterRadius)) {
                         blocked = true;
@@ -178,7 +193,7 @@ void MineMonsterController::update(float dt) {
     for (size_t i = 0; i < _monsters.size(); ++i) {
         for (size_t j = i + 1; j < _monsters.size(); ++j) {
             Vec2 delta = _monsters[j].pos - _monsters[i].pos;
-            float dist = delta.length();
+            float dist = delta.length(); // 两只怪物之间的距离
             float minDist = monsterRadius * 2.0f * 0.9f;
             if (dist > 0.0001f && dist < minDist) {
                 Vec2 dir = delta / dist;
@@ -194,6 +209,7 @@ void MineMonsterController::update(float dt) {
         float ts = static_cast<float>(GameConfig::TILE_SIZE);
         for (const auto& m : _monsters) {
             float half = ts * 0.5f;
+            // Rect(x,y,w,h) 用左下角坐标和宽高构造矩形；这里使怪物居中在矩形内。
             Rect rc(m.pos.x - half, m.pos.y - half, ts, ts);
             colliders.push_back(rc);
         }
@@ -224,6 +240,7 @@ void MineMonsterController::update(float dt) {
             _map->setMonsterColliders(colliders);
         }
         if (_monsterDraw) {
+            // clear() 仅清空调试图形内容，不会从场景树中移除节点本身。
             _monsterDraw->clear();
         }
         return;
@@ -262,6 +279,9 @@ void MineMonsterController::resetFloor() {
 // - 采用 while 循环 + 手动递增索引，在删除元素时避免越界。
 void MineMonsterController::applyAreaDamage(const std::vector<std::pair<int,int>>& tiles, int baseDamage) {
     if (!_map || tiles.empty()) return;
+    // 使用 lambda 表达式封装“怪物是否位于攻击瓦片列表中”的判断逻辑：
+    // - [this,&tiles] 捕获 this 指针与 tiles 引用，便于在内部访问成员函数和参数；
+    // - 参数 m 是只读引用，避免复制 Monster 结构体。
     auto matches = [this,&tiles](const Monster& m) {
         int c = 0, r = 0;
         _map->worldToTileIndex(m.pos, c, r);
@@ -270,7 +290,12 @@ void MineMonsterController::applyAreaDamage(const std::vector<std::pair<int,int>
         }
         return false;
     };
+    // 这里使用手动管理索引的 for 循环，而不是 range-for：
+    // - 在循环过程中可能会 erase 元素，必须避免迭代器失效问题；
+    // - 每次只在需要时才递增 i，下文在 erase 后不递增即可安全访问下一个元素。
     for (std::size_t i = 0; i < _monsters.size();) {
+        // 拷贝一份 Monster 到局部变量 m，方便修改 hp 等字段；
+        // 最后只把需要同步的字段写回 _monsters[i]。
         Monster m = _monsters[i];
         if (!matches(m)) { ++i; continue; }
         const auto& info = Game::monsterInfoFor(m.type);
@@ -280,12 +305,12 @@ void MineMonsterController::applyAreaDamage(const std::vector<std::pair<int,int>
         if (m.hp <= 0) {
             auto& ws = Game::globalState();
             auto& skill = Game::SkillTreeSystem::getInstance();
-            long long baseGold = 10;
+            long long baseGold = 10; // 基础金币奖励
             long long reward = skill.adjustGoldRewardForCombat(baseGold);
             ws.gold += reward;
             skill.addXp(Game::SkillTreeType::Combat, skill.xpForCombatKill(baseGold));
             const auto& info = Game::monsterInfoFor(m.type);
-            auto drops = info.drops_;
+            auto drops = info.drops_; // 使用 auto 让编译器推导具体容器类型
             if (_map) {
                 int c = 0;
                 int r = 0;

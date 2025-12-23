@@ -301,20 +301,24 @@ bool UIController::isToolUpgradePanelVisible() const {
 }
 
 void UIController::buildElevatorPanel() {
+    // 懒加载：首次需要时再创建 ElevatorPanelUI 实例
     if (!_elevatorPanel) {
         _elevatorPanel = new ElevatorPanelUI(_scene);
     }
+    // 让面板自己完成节点构建与挂载
     _elevatorPanel->buildPanel();
 }
 
 void UIController::refreshElevatorPanel(const std::vector<int>& floors) {
     if (_elevatorPanel) {
+        // 把“可达楼层列表”交给面板，让其生成对应按钮
         _elevatorPanel->refreshButtons(floors);
     }
 }
 
 void UIController::toggleElevatorPanel(bool visible) {
     if (visible) {
+        // 打开时确保面板已经构建
         buildElevatorPanel();
         if (_elevatorPanel) {
             _elevatorPanel->togglePanel(true);
@@ -331,6 +335,7 @@ bool UIController::isElevatorPanelVisible() const {
 }
 
 void UIController::setElevatorFloorHandler(const std::function<void(int)>& cb) {
+    // 保证存在面板实例后，设置“楼层被选中”回调
     if (!_elevatorPanel) {
         _elevatorPanel = new ElevatorPanelUI(_scene);
     }

@@ -35,7 +35,8 @@ public:
     struct Monster {
         // 怪物类型（决定行为参数与动画资源）。
         Game::MonsterType type;
-        // 当前世界坐标位置（用于移动与碰撞计算）。
+        // 当前世界坐标位置（用于移动与碰撞计算），Vec2 是二维向量类型，
+        // 可理解为包含 x/y 两个 float 成员的结构体。
         cocos2d::Vec2 pos;
         // 当前生命值（不持久化，只在本层战斗中使用）。
         int hp = 0;
@@ -47,11 +48,16 @@ public:
         cocos2d::Sprite* sprite = nullptr;
     };
 
+    // 构造函数：注入矿洞地图控制器、世界根节点与“查询玩家位置”的回调。
+    // - worldNode 作为所有怪物精灵与调试绘制的父节点，相当于一个“图层根节点”；
+    // - getPlayerPos 使用 std::function 包装，可看作“类型安全的函数指针”。
     MineMonsterController(MineMapController* map,
                           cocos2d::Node* worldNode,
                           std::function<cocos2d::Vec2()> getPlayerPos)
     : _map(map), _worldNode(worldNode), _getPlayerPos(std::move(getPlayerPos)) {}
 
+    // 析构函数：场景销毁时自动调用，负责移除自己创建的所有精灵节点，
+    // 防止 Cocos 场景树中留下悬挂子节点（dangling child）。
     ~MineMonsterController();
 
     // 生成当前楼层初始怪物波（按楼层和 MonsterArea 规则）。
@@ -64,12 +70,14 @@ public:
     void refreshVisuals();
 
 private:
-    MineMapController* _map = nullptr;
-    cocos2d::Node* _worldNode = nullptr;
+    MineMapController* _map = nullptr;              // 不拥有的指针，由场景统一管理生命周期
+    cocos2d::Node* _worldNode = nullptr;            // 世界根节点，用作所有怪物精灵的父节点
+    // 使用 std::vector 作为怪物容器：可自动扩容、按索引访问，语义类似“动态数组”。
     std::vector<Monster> _monsters;
-    float _respawnAccum = 0.0f;
+    float _respawnAccum = 0.0f;                     // 怪物重生累计计时器（秒）
+    // DrawNode 是 Cocos 内置的调试绘制节点，可用来画线/矩形等辅助图形。
     cocos2d::DrawNode* _monsterDraw = nullptr;
-    std::function<cocos2d::Vec2()> _getPlayerPos;
+    std::function<cocos2d::Vec2()> _getPlayerPos;   // 回调：查询玩家世界坐标
 
 public:
     void applyAreaDamage(const std::vector<std::pair<int,int>>& tiles, int baseDamage);

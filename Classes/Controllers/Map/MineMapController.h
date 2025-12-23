@@ -21,13 +21,19 @@ namespace Controllers {
 
 class MineMapController : public Controllers::IMapController {
 public:
+    // 主题枚举：根据楼层划分不同的视觉主题（岩石/冰/岩浆）。
+    // 使用 enum class 而不是传统 C 风格 enum，可避免隐式转换带来的错误，
+    // 访问时必须写成 Theme::Rock 这样的前缀形式。
     enum class Theme { Rock, Ice, Lava };
 
     // 构造：绑定世界节点并初始化矿石/楼梯系统。
+    // worldNode 作为所有地图相关节点的父节点，等价于“地图根节点”。
     MineMapController(cocos2d::Node* worldNode);
 
     // IMapController overrides
     // 将玩家在地图局部坐标转换为世界节点坐标系位置。
+    // - playerMapLocalPos 是相对于 TMX/地图节点自身的坐标；
+    // - 返回值是相对于 worldNode 的坐标，供相机/角色控制统一使用。
     cocos2d::Vec2 getPlayerPosition(const cocos2d::Vec2& playerMapLocalPos) const override;
     // 获取当前地图内容尺寸（像素）。
     cocos2d::Size getContentSize() const override;
@@ -77,6 +83,8 @@ public:
     // 收集玩家附近掉落物到背包。
     void collectDropsNear(const cocos2d::Vec2& playerWorldPos, Game::Inventory* inv) override;
     // 设置动态碰撞矩形（如采矿节点临时碰撞）。
+    // 使用 std::vector<cocos2d::Rect> 存储一组轴对齐矩形，Rect 本质上是
+    // 一个包含 x/y/width/height 的结构体，表示一块禁止通行区域。
     void setDynamicColliders(const std::vector<cocos2d::Rect>& rects) { _dynamicColliders = rects; }
     // 设置怪物碰撞矩形。
     void setMonsterColliders(const std::vector<cocos2d::Rect>& rects) { _monsterColliders = rects; }
@@ -137,28 +145,32 @@ public:
     const std::vector<std::vector<cocos2d::Vec2>>& rockAreaPolys() const;
 
 private:
-    cocos2d::Node* _worldNode = nullptr;
-    cocos2d::DrawNode* _mapDraw = nullptr;
-    cocos2d::DrawNode* _cursor = nullptr;
-    int _cols = 80;
-    int _rows = 60;
-    std::vector<Game::TileType> _tiles; // 简化：使用 TileType 渲染主题色块
-    int _floor = 1;
-    cocos2d::Vec2 _stairsPos;
-    std::vector<cocos2d::Vec2> _extraStairs;
-    std::unordered_set<int> _elevatorFloors; // 已激活楼层（5的倍数）
-    std::vector<Game::Chest> _emptyChests; // 深渊内无箱子，返回空引用
-    Controllers::DropSystem _dropSystem;
-    Game::MineMap* _entrance = nullptr;
-    Game::MineMap* _floorMap = nullptr;
-    cocos2d::Node* _mapNode = nullptr;
+    cocos2d::Node* _worldNode = nullptr;          // 场景中的世界根节点（人物/地图都挂在下面）
+    cocos2d::DrawNode* _mapDraw = nullptr;        // 简单地图渲染或调试绘制节点
+    cocos2d::DrawNode* _cursor = nullptr;         // 交互光标（扇形）绘制节点
+    int _cols = 80;                               // 当前地图列数（瓦片数）
+    int _rows = 60;                               // 当前地图行数（瓦片数）
+    // 使用一维数组存储地图瓦片类型：索引 = r * _cols + c。
+    // TileType 只记录“是什么格子”，具体渲染颜色由 refreshMapVisuals 决定。
+    std::vector<Game::TileType> _tiles;           // 简化：使用 TileType 渲染主题色块
+    int _floor = 1;                               // 当前楼层编号（0 为入口层）
+    cocos2d::Vec2 _stairsPos;                     // 主楼梯世界坐标
+    std::vector<cocos2d::Vec2> _extraStairs;      // 额外楼梯世界坐标列表
+    std::unordered_set<int> _elevatorFloors;      // 已激活楼层集合（5 的倍数）
+    std::vector<Game::Chest> _emptyChests;        // 深渊内无箱子，返回空引用用到的占位容器
+    Controllers::DropSystem _dropSystem;          // 掉落物系统：统一管理矿洞内掉落物
+    Game::MineMap* _entrance = nullptr;           // 入口层 TMX 封装（floor 0）
+    Game::MineMap* _floorMap = nullptr;           // 普通楼层 TMX 封装（floor 1~120）
+    cocos2d::Node* _mapNode = nullptr;            // 所有地图节点挂载的根节点
+    // 矿物运行时状态容器：作为 MineralSystem 的“唯一来源”，这里持有数据，
+    // 系统负责根据该列表生成/同步可视化节点。
     std::vector<Game::MineralData> _minerals;
-    Controllers::MineralSystem _mineralSystem;
-    Controllers::StairSystem _stairSystem;
+    Controllers::MineralSystem _mineralSystem;    // 矿物系统：生成/同步矿石节点
+    Controllers::StairSystem _stairSystem;        // 楼梯系统：生成/同步楼梯节点
     std::vector<cocos2d::Rect> _dynamicColliders; // 采矿节点临时碰撞
-    std::vector<cocos2d::Rect> _monsterColliders;
-    cocos2d::Vec2 _lastClickWorldPos = cocos2d::Vec2::ZERO;
-    bool _hasLastClick = false;
+    std::vector<cocos2d::Rect> _monsterColliders; // 怪物占用的碰撞区域
+    cocos2d::Vec2 _lastClickWorldPos = cocos2d::Vec2::ZERO; // 最近一次点击的世界坐标
+    bool _hasLastClick = false;                   // 是否记录过点击，用于三格选择
 
 public:
     // 记录最近一次点击的世界坐标（用于三格选择）。

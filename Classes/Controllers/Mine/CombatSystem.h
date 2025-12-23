@@ -24,7 +24,9 @@ public:
     // - map        ：参与构建攻击瓦片范围（例如剑的扇形攻击）；
     // - monsters   ：真正执行伤害结算的怪物系统；
     // - getPlayerPos：查询玩家当前位置（世界坐标），作为攻击中心；
-    // - getLastDir ：查询玩家最近朝向，用于决定攻击扇形方向。
+    // - getLastDir ：查询玩家最近朝向，用于决定攻击扇形方向；
+    //   这里使用 std::function 包装回调，可理解为“带类型的函数指针”，
+    //   外部可以传入 lambda、成员函数绑定等多种可调用对象。
     MineCombatController(MineMapController* map,
                           MineMonsterController* monsters,
                           std::function<cocos2d::Vec2()> getPlayerPos,
@@ -38,10 +40,10 @@ public:
     void update(float dt) {}
 
 private:
-    MineMapController* _map = nullptr;
-    MineMonsterController* _monsters = nullptr;
-    std::function<cocos2d::Vec2()> _getPlayerPos;
-    std::function<cocos2d::Vec2()> _getLastDir;
+    MineMapController* _map = nullptr;                 // 原始指针：由场景负责创建与销毁
+    MineMonsterController* _monsters = nullptr;        // 指向怪物控制器，同样不负责释放
+    std::function<cocos2d::Vec2()> _getPlayerPos;      // 查询玩家当前位置的回调
+    std::function<cocos2d::Vec2()> _getLastDir;        // 查询玩家最近朝向的回调
 };
 
 } // namespace Controllers

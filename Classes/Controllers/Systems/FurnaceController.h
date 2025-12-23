@@ -23,6 +23,7 @@ class UIController;
 //   - Game::Inventory：读取/扣除熔炼所需矿石与燃料。
 class FurnaceController : public PlaceableItemSystemBase {
 public:
+    // 构造：初始化内部指针，具体容器在 bindContext/syncLoad 时绑定。
     FurnaceController();
 
     // 挂接到父节点：由基类创建 DrawNode，并作为熔炉精灵的父节点。
@@ -74,9 +75,13 @@ private:
     // 在视野内查找距离玩家最近的熔炉索引。
     int findNearestFurnace(const cocos2d::Vec2& playerWorldPos, float maxDist) const;
 
+    // 当前所在地图控制器（不拥有所有权）。
     Controllers::IMapController* _map = nullptr;
+    // UI 控制器：用于弹出文字与刷新 Hotbar。
     Controllers::UIController* _ui = nullptr;
+    // 玩家背包共享指针：用于扣除熔炼所需物品。
     std::shared_ptr<Game::Inventory> _inventory;
+    // 当前地图对应的熔炉列表指针（指向 WorldState 中的容器）。
     std::vector<Game::Furnace>* _runtime = nullptr;
 };
 

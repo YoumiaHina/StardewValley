@@ -16,6 +16,7 @@ namespace Controllers {
 namespace {
 
 // 根据地图类型返回对应的熔炉容器指针（WorldState 中的 farm/house/town/beachFurnaces）。
+// 注意：这里只是“选择容器”的工具函数，不负责创建或删除熔炉。
 std::vector<Game::Furnace>* getFurnacesForMap(Controllers::IMapController* map) {
     if (!map) return nullptr;
     auto& ws = Game::globalState();
@@ -202,10 +203,12 @@ bool FurnaceController::tryPlace(Controllers::IMapController* map,
                                  const cocos2d::Vec2& playerWorldPos,
                                  const cocos2d::Vec2& lastDir) {
     if (!map || !ui || !inventory) return false;
+    // 若 _runtime 尚未绑定，则根据 map 类型选择对应 WorldState 容器。
     if (!_runtime) {
         _runtime = getFurnacesForMap(map);
     }
     if (!_runtime) return false;
+    // 根据地图类型选择一个“放置中心点”，避免放到不可行走区域。
     Vec2 center;
     bool okCenter = false;
     if (map->isFarm()) {
@@ -220,6 +223,7 @@ bool FurnaceController::tryPlace(Controllers::IMapController* map,
     }
     if (!okCenter) return false;
 
+    // canPlaceAt：统一的占位物放置规则，检查与已有熔炉/地图特殊区域的冲突。
     auto& furnaces = *_runtime;
     float s = static_cast<float>(GameConfig::TILE_SIZE);
     float margin = s * 0.4f;
@@ -244,6 +248,7 @@ bool FurnaceController::tryPlace(Controllers::IMapController* map,
         return false;
     }
 
+    // 在运行时容器中追加一个新熔炉，并设置基础字段。
     Game::Furnace f;
     f.pos = center;
     f.dropOffset = Vec2(0, s * 0.5f);
@@ -251,10 +256,12 @@ bool FurnaceController::tryPlace(Controllers::IMapController* map,
     f.remainingSeconds = 0.0f;
     furnaces.push_back(f);
 
+    // 从背包扣除一个熔炉物品，并刷新 Hotbar 显示。
     bool removed = inventory->removeItems(Game::ItemType::Furnace, 1);
     if (removed) {
         ui->refreshHotbar();
     }
+    // 在玩家附近弹出“已放置”提示，并重绘熔炉贴图。
     Vec2 uiPos = map->getPlayerPosition(center);
     ui->popTextAt(uiPos, "Placed Furnace", Color3B::YELLOW);
     refreshVisuals();

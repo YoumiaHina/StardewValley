@@ -125,10 +125,15 @@ public:
     void toggleToolUpgradePanel(bool visible);
     bool isToolUpgradePanelVisible() const;
 
+    // 电梯面板：构建 UI 节点（只负责创建与挂载到场景）
     void buildElevatorPanel();
+    // 电梯面板：根据可达楼层列表刷新按钮
     void refreshElevatorPanel(const std::vector<int>& floors);
+    // 电梯面板：显示/隐藏
     void toggleElevatorPanel(bool visible);
+    // 电梯面板是否可见
     bool isElevatorPanelVisible() const;
+    // 设置电梯楼层回调：当玩家在面板中选择楼层时触发
     void setElevatorFloorHandler(const std::function<void(int)>& cb);
 
 private:
@@ -146,6 +151,7 @@ private:
     AnimalStorePanelUI* _animalStorePanel = nullptr;
     DialogueUI* _dialogueUI = nullptr;
     NpcSocialPanelUI* _socialPanel = nullptr;
+    // 电梯楼层选择面板
     ElevatorPanelUI* _elevatorPanel = nullptr;
     std::function<bool(Game::AnimalType)> _animalStoreHandler;
 };
