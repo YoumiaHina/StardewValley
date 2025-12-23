@@ -9,11 +9,16 @@
 
 namespace Controllers {
 
-// 初始化：从全局状态加载农场作物列表
+// 构造：从全局状态加载农场作物列表到系统私有缓存。
 CropSystem::CropSystem() { syncLoad(); }
+
+// 获取作物列表只读视图：供 UI/控制器遍历显示，不允许修改内部状态。
 const std::vector<Game::Crop>& CropSystem::crops() const { return _crops; }
+
+// 获取作物列表可写引用：仅供系统内部或受控逻辑使用，避免外部直接篡改唯一来源。
 std::vector<Game::Crop>& CropSystem::crops() { return _crops; }
 
+// 锄头收获：命中可收获作物时计算产物与数量，并执行收获状态变更。
 bool CropSystem::harvestByHoeAt(int c, int r, int toolLevel, Game::ItemType& outProduce, int& outQty, bool& outYields) {
     outProduce = Game::ItemType::Parsnip;
     outQty = 0;
@@ -21,6 +26,7 @@ bool CropSystem::harvestByHoeAt(int c, int r, int toolLevel, Game::ItemType& out
     int idx = findCropIndex(c, r);
     if (idx < 0) return false;
     if (!canHarvestAt(c, r)) return false;
+    // static_cast：显式类型转换；这里把 int 下标转为 size_t 以匹配 vector::operator[] 的索引类型。
     const auto& cp = _crops[static_cast<std::size_t>(idx)];
     outYields = yieldsOnHarvestAt(c, r);
     if (outYields) {
@@ -36,7 +42,9 @@ bool CropSystem::harvestByHoeAt(int c, int r, int toolLevel, Game::ItemType& out
         }
         int qty = minQty;
         if (maxQty > minQty) {
+            // 均匀分布随机数：在 [minQty, maxQty] 上等概率取整。
             std::uniform_int_distribution<int> dist(minQty, maxQty);
+            // static：函数内静态变量只初始化一次；这里复用随机引擎，避免每次收获都重新播种导致分布异常。
             static std::mt19937 eng{ std::random_device{}() };
             qty = dist(eng);
         }
@@ -124,6 +132,7 @@ void CropSystem::advanceCropsDaily(IMapController* map) {
         bool outOfSeason = !Game::CropDefs::isSeasonAllowed(cp.type, ws.seasonIndex);
         bool died = outOfSeason;
         if (!died && !watered) {
+            // std::rand：C 标准库随机数；这里用作低频“未浇水枯死”概率模拟。
             double roll = static_cast<double>(std::rand()) / (static_cast<double>(RAND_MAX) + 1.0);
             if (roll < 0.15) {
                 died = true;
@@ -160,6 +169,7 @@ void CropSystem::advanceCropsDaily(IMapController* map) {
         cp.wateredToday = false;
         kept.push_back(cp);
     }
+    // swap：常量时间交换容器内容；避免逐元素拷贝带来的额外开销。
     _crops.swap(kept);
     syncSave();
 
@@ -200,6 +210,7 @@ void CropSystem::harvestCropAt(int c, int r) {
             cp.stage = cp.maxStage;
             cp.progress = 0;
         } else if (cp.stage >= cp.maxStage) {
+            // erase：从 vector 中移除一个元素，后续元素会前移，索引会改变。
             _crops.erase(_crops.begin() + idx);
         }
     } else {

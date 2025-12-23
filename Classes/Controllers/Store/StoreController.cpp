@@ -8,6 +8,9 @@ namespace Controllers {
 StoreController::StoreController(std::shared_ptr<Game::Inventory> inventory)
     : _inventory(inventory) {}
 
+// 购买种子：
+// - 仅允许购买“种子类”物品（复用 Game::isSeed 判断）。
+// - 成功时扣除金币与精力，并向背包添加 1 个对应物品。
 bool StoreController::buySeed(Game::ItemType seedType) {
     // 简单校验是否为种子（虽然逻辑上允许买任何东西，但需求是种子商店）
     if (!Game::isSeed(seedType)) return false;
@@ -25,6 +28,7 @@ bool StoreController::buySeed(Game::ItemType seedType) {
     return false;
 }
 
+// 获取种子价格：当前将“回生作物种子”设为更高单价（示例规则）。
 int StoreController::getSeedPrice(Game::ItemType seedType) const {
     int base = 25;
     Game::CropType cropType = Game::cropTypeFromSeed(seedType);
@@ -56,6 +60,9 @@ bool StoreController::buyItem(Game::ItemType type) {
     return false;
 }
 
+// 获取一般物品价格：
+// - 默认委托给 Game::itemPrice。
+// - 对鱼类按折扣价处理（示例规则）。
 int StoreController::getItemPrice(Game::ItemType type) const {
     if (Game::isCookedFood(type)) {
         return 0;
@@ -67,6 +74,9 @@ int StoreController::getItemPrice(Game::ItemType type) const {
     return base;
 }
 
+// 出售物品：
+// - 禁止出售种子与熟食（示例规则）。
+// - 先从背包扣除 qty，成功后再按单价增加金币，避免“扣钱成功但物品未移除”的不一致。
 bool StoreController::sellItem(Game::ItemType type, int qty) {
     if (qty <= 0) return false;
     if (Game::isSeed(type)) return false;

@@ -35,16 +35,17 @@ public:
 private:
     // 动物实例：运行时状态 + 可视化节点引用（由系统统一管理生命周期）。
     struct Instance {
-        Game::Animal animal;
-        cocos2d::Sprite* sprite = nullptr;
-        cocos2d::Label* growthLabel = nullptr;
-        float idleTimer = 0.0f;
+        Game::Animal animal; // 动物运行时状态（唯一来源：由系统推进并写回 WorldState）
+        cocos2d::Sprite* sprite = nullptr; // 动物可视精灵节点（由系统创建/挂载/排序）
+        cocos2d::Label* growthLabel = nullptr; // 头顶状态文本（成年/剩余天数 + 喂食状态）
+        float idleTimer = 0.0f; // 停留倒计时（>0 时本帧不重新选目标）
     };
 
-    Controllers::IMapController* _map = nullptr;
-    cocos2d::Node* _worldNode = nullptr;
-    std::vector<Instance> _animals;
+    Controllers::IMapController* _map = nullptr; // 地图接口（瓦片、挂载、排序、碰撞等）
+    cocos2d::Node* _worldNode = nullptr; // 世界节点挂载点（精灵节点统一挂在其下）
+    std::vector<Instance> _animals; // 动物实例列表（系统唯一维护）
 
+    // 将运行时动物列表写回 WorldState（用于存档与跨系统读取）。
     void syncSave();
 
     // 确保实例拥有精灵与状态标签，并完成挂载与缩放。

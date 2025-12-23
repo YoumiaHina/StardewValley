@@ -12,21 +12,21 @@ enum class CropType { Parsnip, Blueberry, Eggplant, Corn, Strawberry };
 
 // 作物运行时状态：由 CropSystem 作为唯一来源持有并推进。
 struct Crop {
-    int c = 0;
-    int r = 0;
-    CropType type = CropType::Parsnip;
-    int stage = 0;
-    int progress = 0;
-    int maxStage = 0;
-    bool wateredToday = false;
+    int c = 0; // 网格列坐标（tile c）
+    int r = 0; // 网格行坐标（tile r）
+    CropType type = CropType::Parsnip; // 作物类型（决定静态定义/回生属性/物品映射）
+    int stage = 0; // 当前生长阶段（0..maxStage；回生作物可能处于 maxStage“已采摘占位”）
+    int progress = 0; // 当前阶段已推进的天数（浇水触发推进，达到 stageDays[stage] 后进入下一阶段）
+    int maxStage = 0; // 最大阶段索引（通常等于 CropDefs::maxStage(type)，缓存以避免重复查询）
+    bool wateredToday = false; // 当日是否被浇水（用于每日推进；推进后会被系统复位）
 };
 
 // 作物静态定义：用于贴图裁切与生长阶段天数等常量配置。
 struct CropDef {
-    int baseRow16 = 0;
-    int startCol = 0;
-    std::vector<int> stageDays;
-    std::array<bool, 4> seasons;
+    int baseRow16 = 0; // 贴图底部行索引（以 16px 为单位，自底向上计数）
+    int startCol = 0; // 贴图列起点（每个阶段通常占一列）
+    std::vector<int> stageDays; // 各生长阶段持续天数（索引即 stage）
+    std::array<bool, 4> seasons; // 四季可种植标记（0..3 对应 seasonIndex）
 };
 
 // 作物静态定义访问入口：
@@ -76,10 +76,10 @@ public:
     // 返回该行为对象对应的作物类型。
     virtual CropType cropType() const = 0;
 
-    CropDef def_{};
-    ItemType seedItem_ = ItemType::ParsnipSeed;
-    ItemType produceItem_ = ItemType::Parsnip;
-    bool regrow_ = false;
+    CropDef def_{}; // 静态定义数据（贴图定位/阶段天数/季节等）
+    ItemType seedItem_ = ItemType::ParsnipSeed; // 对应的“种子”物品类型
+    ItemType produceItem_ = ItemType::Parsnip; // 对应的“成熟产物”物品类型
+    bool regrow_ = false; // 是否回生（收获后可再次生长到可收获阶段）
 
     // 获取静态定义（纹理定位/阶段天数/季节）。
     const CropDef& def() const { return def_; }

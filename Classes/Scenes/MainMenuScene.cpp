@@ -29,7 +29,7 @@ bool MainMenuScene::init() {
 
     // Background image (placed at Resources/res/start_bg.png)
     // Scales to cover the entire screen while preserving aspect ratio.
-    auto bg = Sprite::create("res/start_bg.png");
+    auto bg = Sprite::create("MainMenu.png");
     if (bg) {
         bg->setAnchorPoint(Vec2(0.5f, 0.5f));
         bg->setPosition(Vec2(origin.x + visibleSize.width / 2,
@@ -37,7 +37,7 @@ bool MainMenuScene::init() {
         const auto imgSize = bg->getContentSize();
         const float scaleX = visibleSize.width  / imgSize.width;
         const float scaleY = visibleSize.height / imgSize.height;
-        bg->setScale(std::max(scaleX, scaleY)); // cover whole screen
+        bg->setScale(std::max(scaleX, scaleY));
         this->addChild(bg, 0);
     } else {
         // Fallback solid background if image is missing
@@ -45,30 +45,34 @@ bool MainMenuScene::init() {
         this->addChild(solid, 0);
     }
 
-    // Soft shade to improve text readability on bright images
     auto shade = LayerColor::create(Color4B(0, 0, 0, 60));
     this->addChild(shade, 0);
-
-    // Title
-    auto title = Label::createWithTTF("Stardew Valley", "fonts/Marker Felt.ttf", 40);
-    if (title) {
-        title->setPosition(Vec2(origin.x + visibleSize.width / 2,
-                                 origin.y + visibleSize.height * 0.75f));
-        this->addChild(title, 1);
-    }
 
     auto startLabel = Label::createWithTTF("New Game", "fonts/Marker Felt.ttf", 28);
     auto loadLabel  = Label::createWithTTF("Load Game", "fonts/Marker Felt.ttf", 28);
     auto exitLabel  = Label::createWithTTF("Quit", "fonts/Marker Felt.ttf", 28);
+    if (startLabel) startLabel->setOpacity(0);
+    if (loadLabel)  loadLabel->setOpacity(0);
+    if (exitLabel)  exitLabel->setOpacity(0);
 
     auto startItem = MenuItemLabel::create(startLabel, CC_CALLBACK_1(MainMenuScene::onStart, this));
     auto loadItem  = MenuItemLabel::create(loadLabel,  CC_CALLBACK_1(MainMenuScene::onLoad, this));
     auto exitItem  = MenuItemLabel::create(exitLabel,  CC_CALLBACK_1(MainMenuScene::onExit, this));
 
     auto menu = Menu::create(startItem, loadItem, exitItem, nullptr);
-    menu->alignItemsVerticallyWithPadding(18.0f);
-    menu->setPosition(Vec2(origin.x + visibleSize.width / 2,
-                           origin.y + visibleSize.height * 0.45f));
+    menu->setPosition(Vec2::ZERO);
+    if (startItem) {
+        startItem->setPosition(Vec2(origin.x + visibleSize.width * 0.35f,
+                                    origin.y + visibleSize.height * 0.08f));
+    }
+    if (loadItem) {
+        loadItem->setPosition(Vec2(origin.x + visibleSize.width * 0.45f,
+                                   origin.y + visibleSize.height * 0.08f));
+    }
+    if (exitItem) {
+        exitItem->setPosition(Vec2(origin.x + visibleSize.width * 0.65f,
+                                   origin.y + visibleSize.height * 0.08f));
+    }
     this->addChild(menu, 1);
 
     return true;
