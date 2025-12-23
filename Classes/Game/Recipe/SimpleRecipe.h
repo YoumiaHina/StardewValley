@@ -30,12 +30,11 @@ public:
     const std::vector<Ingredient>& ingredients() const override;
 
 private:
-    std::string _id;
-    std::string _name;
-    ItemType _outType = ItemType::Wood;
-    int _outQty = 1;
-    std::vector<Ingredient> _ingredients;
+    std::string _id; // 配方稳定标识（用于保存/排序/去重）
+    std::string _name; // 配方显示名称（用于 UI 展示）
+    ItemType _outType = ItemType::Wood; // 输出物品类型
+    int _outQty = 1; // 输出物品数量
+    std::vector<Ingredient> _ingredients; // 配方材料列表
 };
 
 } // namespace Game
-

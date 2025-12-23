@@ -50,19 +50,19 @@ private:
     // 刷新分类 Tab 的视觉状态。
     void updateTabsVisual();
 
-    cocos2d::Scene* _scene = nullptr;
-    std::shared_ptr<Game::Inventory> _inventory;
-    cocos2d::Node* _panelNode = nullptr;
-    cocos2d::Node* _listNode = nullptr;
-    cocos2d::Label* _titleLabel = nullptr;
-    cocos2d::Node* _tabsNode = nullptr;
-    cocos2d::Label* _produceTab = nullptr;
-    cocos2d::Label* _mineralTab = nullptr;
-    std::unique_ptr<StoreController> _storeController;
-    int _pageIndex = 0;
-    int _pageSize = 5;
-    StoreCategory _category = StoreCategory::Produce;
-    std::vector<Game::ItemType> _items;
+    cocos2d::Scene* _scene = nullptr; // 所属场景（用于挂载 UI 节点）
+    std::shared_ptr<Game::Inventory> _inventory; // 玩家背包（用于显示拥有数量/执行交易）
+    cocos2d::Node* _panelNode = nullptr; // 面板根节点（显示/隐藏的 owner）
+    cocos2d::Node* _listNode = nullptr; // 商品列表容器节点（每次刷新重建内容）
+    cocos2d::Label* _titleLabel = nullptr; // 标题文本（显示当前分类/页码等）
+    cocos2d::Node* _tabsNode = nullptr; // 分类 Tab 容器节点
+    cocos2d::Label* _produceTab = nullptr; // 农产品分类 Tab 文本
+    cocos2d::Label* _mineralTab = nullptr; // 矿物分类 Tab 文本
+    std::unique_ptr<StoreController> _storeController; // 交易控制器（负责买卖规则与背包/金币变更）
+    int _pageIndex = 0; // 当前页索引（从 0 开始）
+    int _pageSize = 5; // 每页显示条目数
+    StoreCategory _category = StoreCategory::Produce; // 当前分类
+    std::vector<Game::ItemType> _items; // 当前分类下的商品类型列表（用于分页展示）
 };
 
 // 动物商店面板 UI：
@@ -87,9 +87,9 @@ public:
     std::function<void(bool)> onPurchased;
 
 private:
-    cocos2d::Scene* _scene = nullptr;
-    cocos2d::Node* _panelNode = nullptr;
-    cocos2d::Node* _listNode = nullptr;
+    cocos2d::Scene* _scene = nullptr; // 所属场景（用于挂载 UI 节点）
+    cocos2d::Node* _panelNode = nullptr; // 面板根节点（显示/隐藏的 owner）
+    cocos2d::Node* _listNode = nullptr; // 动物列表容器节点
 };
 
 }

@@ -15,14 +15,19 @@ public:
     // 构造：持有背包引用用于交易时增删物品。
     StoreController(std::shared_ptr<Game::Inventory> inventory);
 
-    // 尝试购买种子
-    // 返回 true 表示购买成功（扣钱并添加物品）
+    // 尝试购买种子：
+    // - 校验种子类型与玩家金币/精力是否足够。
+    // - 成功时扣除金币与精力，并向背包添加 1 个种子。
+    // 返回 true 表示购买成功。
     bool buySeed(Game::ItemType seedType);
 
-    // 获取种子价格
+    // 获取种子价格：
+    // - 当前为简单规则：回生作物种子更贵，其它为基础价。
     int getSeedPrice(Game::ItemType seedType) const;
 
-    // 购买一般物品（矿物等），价格来自 Game::itemPrice(type)
+    // 尝试购买一般物品（矿物/农产品/动物产物等）：
+    // - 排除鱼与熟食（示例规则，避免与专门商店冲突）。
+    // - 成功时扣除金币，并向背包添加 1 个物品。
     bool buyItem(Game::ItemType type);
     // 获取一般物品价格（当前委托给 Game::itemPrice）。
     int getItemPrice(Game::ItemType type) const;
@@ -31,7 +36,7 @@ public:
     bool sellItem(Game::ItemType type, int qty);
 
 private:
-    std::shared_ptr<Game::Inventory> _inventory;
+    std::shared_ptr<Game::Inventory> _inventory; // 交易目标背包（物品增删的唯一来源）
 };
 
 }

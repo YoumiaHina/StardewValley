@@ -45,6 +45,7 @@ public:
     void advanceCropOnceAt(int c, int r);
 
 private:
+    // 作物运行时状态列表（std::vector：动态数组容器，会按需扩容）。
     std::vector<Game::Crop> _crops;
     // 从 WorldState 读取作物列表到本地缓存。
     void syncLoad();

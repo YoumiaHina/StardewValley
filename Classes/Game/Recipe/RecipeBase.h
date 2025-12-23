@@ -15,8 +15,8 @@ class RecipeBase {
 public:
     // Ingredient：配方材料条目。
     struct Ingredient {
-        ItemType type = ItemType::Wood;
-        int qty = 0;
+        ItemType type = ItemType::Wood; // 材料物品类型
+        int qty = 0; // 所需数量（必须 >0 才视为有效）
     };
 
     virtual ~RecipeBase() = default;
@@ -39,4 +39,3 @@ public:
 };
 
 } // namespace Game
-

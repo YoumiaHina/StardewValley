@@ -21,9 +21,9 @@ namespace {
     // - 用于把“动物当日产出”暂存为一条掉落信息（类型/数量/世界坐标）。
     // - 由每日推进逻辑生成，随后交由 IMapController::spawnDropAt 落地到地图掉落系统。
     struct ProducedDrop {
-        Game::ItemType type = Game::ItemType::Egg;
-        int qty = 0;
-        cocos2d::Vec2 pos;
+        Game::ItemType type = Game::ItemType::Egg; // 产物物品类型
+        int qty = 0; // 产物数量（<=0 表示本日无产出）
+        cocos2d::Vec2 pos; // 掉落世界坐标（通常取动物当前位置）
     };
 
     // 获取某类动物从幼年到成年的所需“有效喂食天数”。
@@ -332,6 +332,9 @@ void AnimalSystem::update(float dt) {
     syncSave();
 }
 
+// 每日推进：
+// - 推进 WorldState 内 farmAnimals 的成长/产出与 fedToday 跨日重置。
+// - 若 map 为 Farm：尝试将产物落地到地图掉落系统；否则写入 ws.farmDrops 等待回到农场再生成。
 void advanceAnimalsDaily(Controllers::IMapController* map) {
     auto& ws = Game::globalState();
     Controllers::IMapController* dropMap = (map && map->isFarm()) ? map : nullptr;
@@ -390,6 +393,9 @@ bool AnimalSystem::tryFeedAnimal(const cocos2d::Vec2& playerPos, Game::ItemType 
     return true;
 }
 
+// 将系统侧运行时动物列表写回 WorldState：
+// - 只同步 Game::Animal 结构体（不序列化 Sprite/Label 等运行时节点）。
+// - 用 clear + reserve 避免反复扩容，降低每帧/每次交互的写回开销。
 void AnimalSystem::syncSave() {
     auto& ws = Game::globalState();
     ws.farmAnimals.clear();

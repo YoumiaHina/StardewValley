@@ -6,6 +6,9 @@ namespace Game {
 
 namespace {
 
+// 构建配方表：
+// - 统一集中创建所有配方实例（shared_ptr），避免配方散落在多个模块维护。
+// - 返回值作为静态缓存的初始化来源，后续通过 RecipeBook::all 共享复用。
 std::vector<std::shared_ptr<RecipeBase>> buildAllRecipes() {
     std::vector<std::shared_ptr<RecipeBase>> out;
     out.reserve(32);
