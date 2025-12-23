@@ -7,7 +7,7 @@
 #include <utility>
 #include "Controllers/Store/StoreController.h"
 #include "Game/Item.h"
-#include "Game/Animal.h"
+#include "Game/Animals/Animal.h"
 
 namespace Game { class Inventory; }
 

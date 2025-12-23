@@ -3,8 +3,8 @@
 #include "cocos2d.h"
 #include <vector>
 #include <memory>
-#include "Controllers/Systems/PlaceableItemSystemBase.h"
-#include "Game/Chest.h"
+#include "Controllers/Systems\PlaceableItemSystemBase.h"
+#include "Game/PlaceableItem/Chest.h"
 #include "Game/Inventory.h"
 
 namespace Controllers {

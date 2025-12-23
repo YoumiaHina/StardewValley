@@ -7,7 +7,7 @@
 #include <utility>
 #include <vector>
 #include "Game/Tile.h"
-#include "Game/Chest.h"
+#include "Game/PlaceableItem/Chest.h"
 #include "Game/Inventory.h"
 
 namespace Controllers {

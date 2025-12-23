@@ -98,12 +98,8 @@ void MineMonsterController::generateInitialWave() {
     int floor = _map ? _map->currentFloor() : 1;
     for (const auto& pt : spawns) {
         Game::MonsterType type = randomMonsterTypeForFloor(floor);
-        // 这里局部构造 Monster，再 push_back 到 std::vector 中；
-        // 等价于 C 里“先填一个结构体，再追加到动态数组尾部”。
-        Monster m;
+        Game::Monster m = Game::monsterInfoFor(type).def_;
         m.type = type;
-        const auto& info = Game::monsterInfoFor(type);
-        m.hp = info.def_.hp;
         m.pos = pt;
         _monsters.push_back(m);
     }
@@ -125,18 +121,22 @@ void MineMonsterController::update(float dt) {
     if (_map && _map->monsterSpawnPoints().empty()) return;
     // 使用一个累计计时器实现“每 30 秒刷一只怪”的简单重生逻辑。
     _respawnAccum += dt;
-    if (_respawnAccum >= 30.0f) {
-        _respawnAccum = 0.0f;
-        if (_monsters.size() < 8) {
-            int floor = _map ? _map->currentFloor() : 1;
-            Game::MonsterType type = randomMonsterTypeForFloor(floor);
-            Monster m;
-            m.type = type;
-            const auto& info = Game::monsterInfoFor(type);
-            m.hp = info.def_.hp;
-            _monsters.push_back(m);
+        if (_respawnAccum >= 30.0f) {
+            _respawnAccum = 0.0f;
+            if (_monsters.size() < 8) {
+                int floor = _map ? _map->currentFloor() : 1;
+                Game::MonsterType type = randomMonsterTypeForFloor(floor);
+                Game::Monster m = Game::monsterInfoFor(type).def_;
+                m.type = type;
+                if (_map) {
+                    auto spawns = _map->monsterSpawnPoints();
+                    if (!spawns.empty()) {
+                        m.pos = spawns.front();
+                    }
+                }
+                _monsters.push_back(m);
+            }
         }
-    }
     // TILE_SIZE 定义每一个瓦片的边长像素数，转换为 float 方便参与向量运算。
     float tileSize = static_cast<float>(GameConfig::TILE_SIZE);
     Vec2 playerPos = _getPlayerPos ? _getPlayerPos() : Vec2::ZERO;
@@ -282,7 +282,7 @@ void MineMonsterController::applyAreaDamage(const std::vector<std::pair<int,int>
     // 使用 lambda 表达式封装“怪物是否位于攻击瓦片列表中”的判断逻辑：
     // - [this,&tiles] 捕获 this 指针与 tiles 引用，便于在内部访问成员函数和参数；
     // - 参数 m 是只读引用，避免复制 Monster 结构体。
-    auto matches = [this,&tiles](const Monster& m) {
+    auto matches = [this,&tiles](const Game::Monster& m) {
         int c = 0, r = 0;
         _map->worldToTileIndex(m.pos, c, r);
         for (const auto& t : tiles) {
@@ -296,7 +296,7 @@ void MineMonsterController::applyAreaDamage(const std::vector<std::pair<int,int>
     for (std::size_t i = 0; i < _monsters.size();) {
         // 拷贝一份 Monster 到局部变量 m，方便修改 hp 等字段；
         // 最后只把需要同步的字段写回 _monsters[i]。
-        Monster m = _monsters[i];
+        Game::Monster m = _monsters[i];
         if (!matches(m)) { ++i; continue; }
         const auto& info = Game::monsterInfoFor(m.type);
         int def = info.def_.def;

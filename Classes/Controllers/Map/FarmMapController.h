@@ -14,7 +14,7 @@
 #include "Controllers/Map/IMapController.h"
 #include "Game/GameConfig.h"
 #include "Game/Map/FarmMap.h"
-#include "Game/Chest.h"
+#include "Game/PlaceableItem/Chest.h"
 #include "Game/WorldState.h"
 #include "Controllers/Environment/TreeSystem.h"
 #include "Controllers/Environment/RockSystem.h"

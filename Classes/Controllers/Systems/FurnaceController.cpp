@@ -1,7 +1,7 @@
 #include "Controllers/Systems/FurnaceController.h"
 #include "Game/WorldState.h"
 #include "Game/GameConfig.h"
-#include "Game/PlaceableItemBase.h"
+#include "Game/PlaceableItem/PlaceableItemBase.h"
 #include "Controllers/Interact/PlacementInteractor.h"
 #include "Controllers/Map/IMapController.h"
 #include "Controllers/Map/RoomMapController.h"

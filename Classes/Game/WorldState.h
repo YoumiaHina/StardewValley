@@ -12,14 +12,14 @@
 #include "Game/Inventory.h"
 #include "Game/Tile.h"
 #include "Game/Drop.h"
-#include "Game/Chest.h"
+#include "Game/PlaceableItem/Chest.h"
 #include "Game/GameConfig.h"
 #include "Game/Crops/crop/CropBase.h"
 #include "Game/EnvironmentObstacle/Tree.h"
 #include "Game/EnvironmentObstacle/Rock.h"
 #include "Game/EnvironmentObstacle/Weed.h"
-#include "Game/Animal.h"
-#include "Game/Furnace.h"
+#include "Game/Animals/Animal.h"
+#include "Game/PlaceableItem/Furnace.h"
 
 namespace Game {
 

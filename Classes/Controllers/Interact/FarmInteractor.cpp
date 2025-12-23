@@ -4,7 +4,7 @@
 #include "Game/Crops/crop/CropBase.h"
 #include "Game/WorldState.h"
 #include "Game/GameConfig.h"
-#include "Game/Chest.h"
+#include "Game/PlaceableItem/Chest.h"
 
 using namespace cocos2d;
 

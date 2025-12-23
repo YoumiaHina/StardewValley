@@ -23,6 +23,10 @@ RoomInteractor::SpaceAction RoomInteractor::onSpacePressed() {
             _state->sleepToNextMorning();
             auto& ws = Game::globalState();
             ws.lastScene = static_cast<int>(Game::SceneKind::Room);
+            bool isFestival = (ws.seasonIndex == 1 && ws.dayOfSeason == GameConfig::FESTIVAL_DAY);
+            if (isFestival) {
+                _ui->popCenterBigText("Happy Fishing Festival", Color3B::YELLOW);
+            }
         }
         _ui->popTextAt(_map->getPlayerPosition(p), "New Day", Color3B::WHITE);
         return SpaceAction::Slept;

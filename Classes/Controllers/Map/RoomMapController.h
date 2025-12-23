@@ -9,7 +9,7 @@
 #include "cocos2d.h"
 #include <vector>
 #include "Controllers/Map/IMapController.h"
-#include "Game/Chest.h"
+#include "Game/PlaceableItem/Chest.h"
 #include "Game/Map/RoomMap.h"
 #include "Controllers/Systems/ChestController.h"
 #include "Controllers/Systems/DropSystem.h"

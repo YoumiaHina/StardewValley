@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Game/Animal.h"
+#include "Game/Animals/Animal.h"
 
 namespace Game {
 

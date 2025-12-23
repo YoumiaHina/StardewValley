@@ -24,29 +24,13 @@
 #include "Controllers/Map/MineMapController.h"
 #include "Game/Item.h"
 #include "Game/WorldState.h"
-#include "Game/Monster/MonsterBase.h"
+#include "Game/Monster/Monster.h"
 #include "cocos2d.h"
 
 namespace Controllers {
 
 class MineMonsterController {
 public:
-    // Monster：单只怪物的运行时状态（控制器内部使用，不对外暴露实现细节）。
-    struct Monster {
-        // 怪物类型（决定行为参数与动画资源）。
-        Game::MonsterType type;
-        // 当前世界坐标位置（用于移动与碰撞计算），Vec2 是二维向量类型，
-        // 可理解为包含 x/y 两个 float 成员的结构体。
-        cocos2d::Vec2 pos;
-        // 当前生命值（不持久化，只在本层战斗中使用）。
-        int hp = 0;
-        // 攻击冷却计时器（秒），为 0 时才允许再次造成伤害。
-        float attackCooldown = 0.0f;
-        // 当前移动速度向量，用于决定朝向与播放行走/静止动画。
-        cocos2d::Vec2 velocity;
-        // 绑定到 worldNode 的可视精灵指针，由控制器统一创建和销毁。
-        cocos2d::Sprite* sprite = nullptr;
-    };
 
     // 构造函数：注入矿洞地图控制器、世界根节点与“查询玩家位置”的回调。
     // - worldNode 作为所有怪物精灵与调试绘制的父节点，相当于一个“图层根节点”；
@@ -73,7 +57,7 @@ private:
     MineMapController* _map = nullptr;              // 不拥有的指针，由场景统一管理生命周期
     cocos2d::Node* _worldNode = nullptr;            // 世界根节点，用作所有怪物精灵的父节点
     // 使用 std::vector 作为怪物容器：可自动扩容、按索引访问，语义类似“动态数组”。
-    std::vector<Monster> _monsters;
+    std::vector<Game::Monster> _monsters;
     float _respawnAccum = 0.0f;                     // 怪物重生累计计时器（秒）
     // DrawNode 是 Cocos 内置的调试绘制节点，可用来画线/矩形等辅助图形。
     cocos2d::DrawNode* _monsterDraw = nullptr;

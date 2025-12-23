@@ -89,6 +89,12 @@
     <Filter Include="Classes\Game\EnvironmentObstacle">
       <UniqueIdentifier>{44901fca-00bb-42fe-b738-12ec91866e48}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Classes\Controllers\Crafting">
+      <UniqueIdentifier>{776ce908-5e56-49a3-9929-51aa9a6e706d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Classes\Game\PlaceableItem">
+      <UniqueIdentifier>{164dc438-2993-46f5-8b90-66916401e0e0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <!-- Source Files -->
@@ -379,9 +385,6 @@
     <ClCompile Include="..\Classes\Controllers\UI\NpcSocialPanelUI.cpp">
       <Filter>Classes\Controllers\UI</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\Game\Chest.cpp">
-      <Filter>Classes\Game</Filter>
-    </ClCompile>
     <ClCompile Include="..\Classes\Controllers\Interact\ChestInteractor.cpp">
       <Filter>Classes\Controllers\Interact</Filter>
     </ClCompile>
@@ -421,9 +424,6 @@
     <ClCompile Include="..\Classes\Controllers\Systems\WeatherController.cpp">
       <Filter>Classes\Controllers\Systems</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\Game\Furnace.cpp">
-      <Filter>Classes\Game</Filter>
-    </ClCompile>
     <ClCompile Include="..\Classes\Controllers\Environment\WeedSystem.cpp">
       <Filter>Classes\Controllers\Environment</Filter>
     </ClCompile>
@@ -445,7 +445,6 @@
     <ClCompile Include="..\Classes\Controllers\Systems\DropSystem.cpp">
       <Filter>Classes\Controllers\Systems</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\Controllers\Crafting\CraftingController.cpp" />
     <ClCompile Include="..\Classes\Game\Recipe\RecipeBase.cpp">
       <Filter>Classes\Game\Recipe</Filter>
     </ClCompile>
@@ -491,6 +490,15 @@
     <ClCompile Include="..\Classes\Controllers\UI\ElevatorPanelUI.cpp">
       <Filter>Classes\Controllers\UI</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\Crafting\CraftingController.cpp">
+      <Filter>Classes\Controllers\Crafting</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\PlaceableItem\Furnace.cpp">
+      <Filter>Classes\Game\PlaceableItem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Game\PlaceableItem\Chest.cpp">
+      <Filter>Classes\Game\PlaceableItem</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <!-- Header Files -->
@@ -525,9 +533,6 @@
       <Filter>Classes\Scenes</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\Game\Cheat.h">
-      <Filter>Classes\Game</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Classes\Game\Chest.h">
       <Filter>Classes\Game</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\Game\GameConfig.h">
@@ -775,12 +780,6 @@
     <ClInclude Include="..\Classes\Controllers\Systems\PlaceableItemSystemBase.h">
       <Filter>Classes\Controllers\Systems</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\Game\Furnace.h">
-      <Filter>Classes\Game</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Classes\Game\PlaceableItemBase.h">
-      <Filter>Classes\Game</Filter>
-    </ClInclude>
     <ClInclude Include="..\Classes\Controllers\Interact\PlacementInteractor.h">
       <Filter>Classes\Controllers\Interact</Filter>
     </ClInclude>
@@ -843,6 +842,21 @@
     </ClInclude>
     <ClInclude Include="..\Classes\Controllers\UI\ElevatorPanelUI.h">
       <Filter>Classes\Controllers\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\Crafting\CraftingController.h">
+      <Filter>Classes\Controllers\Crafting</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\Furnace.h">
+      <Filter>Classes\Game\PlaceableItem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\PlaceableItemBase.h">
+      <Filter>Classes\Game\PlaceableItem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\Chest.h">
+      <Filter>Classes\Game\PlaceableItem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\Animal.h">
+      <Filter>Classes\Game\Animals</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

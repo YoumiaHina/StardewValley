@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <string>
 #include "Scenes/RoomScene.h"
-#include "Game/Chest.h"
+#include "Game/PlaceableItem/Chest.h"
 #include "Game/Map/RoomMap.h"
 #include "Controllers/Systems/FishingController.h"
 #include "Controllers/Systems/WeatherController.h"

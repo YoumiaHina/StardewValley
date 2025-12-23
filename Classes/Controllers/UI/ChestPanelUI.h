@@ -5,7 +5,7 @@
 #include <vector>
 #include <functional>
 #include "Game/Inventory.h"
-#include "Game/Chest.h"
+#include "Game/PlaceableItem/Chest.h"
 
 namespace Controllers {
 

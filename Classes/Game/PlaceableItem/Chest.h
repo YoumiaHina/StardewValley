@@ -10,7 +10,7 @@
 #include <vector>
 #include "Game/GameConfig.h"
 #include "Game/Inventory.h"
-#include "Game/PlaceableItemBase.h"
+#include "Game/PlaceableItem/PlaceableItemBase.h"
 
 namespace Controllers {
 // 冗余前向声明：本头文件内部未直接使用，如无外部依赖可在重构时考虑移除。

@@ -2,7 +2,7 @@
 
 #include <vector>
 #include "cocos2d.h"
-#include "Game/Animal.h"
+#include "Game/Animals/Animal.h"
 #include "Controllers/Map/IMapController.h"
 
 namespace Controllers {

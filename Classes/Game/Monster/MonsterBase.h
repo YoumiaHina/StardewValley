@@ -14,26 +14,9 @@
 #include <functional>
 // Game/Item.h：定义了 ItemType（物品类型枚举），怪物死亡掉落会用到。
 #include "Game/Item.h"
+#include "Game/Monster/Monster.h"
 
 namespace Game {
-
-// enum class：强类型枚举，和 C 里的 enum 类似，但不会隐式转换为 int。
-// 使用方法：
-// - 声明：MonsterType t = MonsterType::GreenSlime;
-// - 对比：if (t == MonsterType::Bug) { ... }
-enum class MonsterType { GreenSlime, BlueSlime, RedSlime, Bug, Ghost };
-
-// struct：和 C 里结构体类似，这里用来保存怪物的数值配置。
-// 默认成员都是 public，可在代码里直接通过 def_.hp 等访问。
-struct MonsterDef {
-    int hp = 0;                 // HP：生命值（血量）
-    int dmg = 0;                // dmg：攻击力（一次攻击能造成多少伤害）
-    int def = 0;                // def：防御力（抵挡一部分伤害）
-    int searchRangeTiles = 0;   // searchRangeTiles：怪物“感知”玩家的范围（单位：格子数）
-    float moveSpeed = 0.0f;     // moveSpeed：移动速度（像素/秒）
-    bool isCollisionAffected = true; // 是否会被碰撞影响（true 表示会被地图/其它怪挡住）
-    const char* name = nullptr; // 怪物名称，使用 const char* 指向只读字符串常量
-};
 
 // MonsterBase：怪物行为的抽象基类（接口）。
 // - 只保存“每种怪物的配置”和“动画播放接口”，不包含具体的坐标或血量状态；
@@ -53,7 +36,7 @@ public:
     // 怪物基础数值配置：
     // - 每个 MonsterBase 子类在构造函数里给 def_ 填入具体数值；
     // - def_ 是 public 成员，MonsterSystem 可以直接读取。
-    MonsterDef def_;
+    Monster def_;
     // 怪物死亡时可能掉落的物品类型列表：
     // - std::vector 是 C++ 的动态数组容器，支持 push_back 在末尾追加元素。
     std::vector<ItemType> drops_;

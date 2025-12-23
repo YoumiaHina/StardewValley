@@ -1,4 +1,4 @@
-#include "Game/Furnace.h"
+#include "Game/PlaceableItem/Furnace.h"
 
 using namespace cocos2d;
 

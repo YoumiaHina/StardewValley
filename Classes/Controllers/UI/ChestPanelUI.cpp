@@ -2,7 +2,7 @@
 #include "Controllers/Systems/ChestController.h"
 #include "Game/WorldState.h"
 #include "Game/Item.h"
-#include "Game/Chest.h"
+#include "Game/PlaceableItem/Chest.h"
 #include "Game/Tool/ToolBase.h"
 #include "Game/Tool/ToolFactory.h"
 

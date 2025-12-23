@@ -1,7 +1,7 @@
 #include "Controllers/Map/TownMapController.h"
 #include "Controllers/Interact/TileSelector.h"
 #include "Game/GameConfig.h"
-#include "Game/Chest.h"
+#include "Game/PlaceableItem/Chest.h"
 #include "Game/WorldState.h"
 #include "Controllers/Systems/FurnaceController.h"
 

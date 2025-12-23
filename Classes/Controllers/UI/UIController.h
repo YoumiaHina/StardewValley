@@ -10,8 +10,8 @@
 #include <string>
 #include <functional>
 #include "Game/Inventory.h"
-#include "Game/Chest.h"
-#include "Game/Animal.h"
+#include "Game/PlaceableItem/Chest.h"
+#include "Game/Animals/Animal.h"
 #include "Controllers/UI/HUDUI.h"
 #include "Controllers/UI/HotbarUI.h"
 #include "Controllers/UI/PromptUI.h"

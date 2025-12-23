@@ -8,13 +8,13 @@
 #include "Game/WorldState.h"
 #include "Game/Inventory.h"
 #include "Game/Tool/ToolFactory.h"
-#include "Game/Chest.h"
+#include "Game/PlaceableItem/Chest.h"
 #include "Game/Drop.h"
 #include "Game/Crops/crop/CropBase.h"
 #include "Game/EnvironmentObstacle/Tree.h"
 #include "Game/EnvironmentObstacle/Rock.h"
-#include "Game/Animal.h"
-#include "Game/Furnace.h"
+#include "Game/Animals/Animal.h"
+#include "Game/PlaceableItem/Furnace.h"
 #include "cocos2d.h"
 
 // 本文件中都是“读写存档细节”的工具函数：

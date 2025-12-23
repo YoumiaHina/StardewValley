@@ -1,4 +1,4 @@
-#include "Game/Chest.h"
+#include "Game/PlaceableItem/Chest.h"
 
 using namespace cocos2d;
 

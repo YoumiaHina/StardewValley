@@ -2,7 +2,7 @@
 
 #include "cocos2d.h"
 #include "Game/GameConfig.h"
-#include "Game/PlaceableItemBase.h"
+#include "Game/PlaceableItem/PlaceableItemBase.h"
 #include "Game/Item.h"
 
 namespace Game {

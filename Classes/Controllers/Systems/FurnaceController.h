@@ -4,7 +4,7 @@
 #include <vector>
 #include <memory>
 #include "Controllers/Systems/PlaceableItemSystemBase.h"
-#include "Game/Furnace.h"
+#include "Game/PlaceableItem/Furnace.h"
 #include "Game/Inventory.h"
 
 namespace Controllers {
