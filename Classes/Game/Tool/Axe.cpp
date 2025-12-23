@@ -17,6 +17,8 @@ namespace Game {
 ToolKind Axe::kind() const { return ToolKind::Axe; }
 std::string Axe::displayName() const { return std::string("Axe"); }
 
+// 根据当前等级返回不同前缀的图标路径：
+// level = 0 使用基础斧头；1=铜、2=铁、>=3=金。
 std::string Axe::iconPath() const {
     int lv = level();
     std::string prefix;
@@ -30,6 +32,13 @@ std::string Axe::iconPath() const {
     return std::string("Tool/") + prefix + "Axe.png";
 }
 
+// 使用斧头的具体逻辑：
+// 1. 检查体力是否足够，不足则在玩家头顶弹出红字提示；
+// 2. 根据玩家位置和朝向，选择目标格子：
+//    - 若等级高且拥有扇形范围加成，则通过 TileSelector 选出一片前方扇形区域；
+//    - 否则只取玩家面前的一个格子；
+// 3. 调用树木系统的 damageAt，在命中时生成木头掉落并刷新相关可视；
+// 4. 扣除体力，刷新 HUD/地图显示，并返回提示文字。
 std::string Axe::use(Controllers::IMapController* map,
                      Controllers::CropSystem* /*crop*/,
                      std::function<Vec2()> getPlayerPos,

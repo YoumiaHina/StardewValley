@@ -11,6 +11,8 @@ using namespace cocos2d;
 namespace Controllers {
 
 // 构建箱子面板根节点：挂载到场景，并注册 ESC/Shift 键盘监听。
+// - 只会在第一次调用时创建 Node 和键盘监听，后续复用同一套节点。
+// - 使用 Director::getInstance()->getVisibleSize/Origin 获取当前窗口大小与原点。
 void ChestPanelUI::buildChestPanel() {
     if (_panelNode) return;
     _panelNode = Node::create();
@@ -21,8 +23,11 @@ void ChestPanelUI::buildChestPanel() {
         _panelNode->setPosition(Vec2(origin.x + visibleSize.width * 0.5f,
                                      origin.y + visibleSize.height * 0.5f));
         _panelNode->setVisible(false);
+        // 仅在第一次构建时创建键盘监听器。
         if (!_escListener) {
+            // EventListenerKeyboard：专门用于处理键盘按下/抬起事件的监听器。
             _escListener = EventListenerKeyboard::create();
+            // onKeyPressed 使用 lambda 捕获 this，方便修改成员变量 _shiftDown。
             _escListener->onKeyPressed = [this](EventKeyboard::KeyCode code, Event*) {
                 if (code == EventKeyboard::KeyCode::KEY_SHIFT ||
                     code == EventKeyboard::KeyCode::KEY_LEFT_SHIFT ||
@@ -30,6 +35,7 @@ void ChestPanelUI::buildChestPanel() {
                     _shiftDown = true;
                 }
             };
+            // onKeyReleased：当 ESC 被抬起时关闭箱子面板；Shift 抬起时复位 _shiftDown。
             _escListener->onKeyReleased = [this](EventKeyboard::KeyCode code, Event*) {
                 if (code == EventKeyboard::KeyCode::KEY_ESCAPE) {
                     toggleChestPanel(false);

@@ -9,6 +9,9 @@
 
 namespace Game {
 
+// 根据传入的 ToolKind 枚举创建不同的工具对象：
+// - 使用 std::make_shared<T>() 在堆上分配对象，并返回 shared_ptr；
+// - default 分支给一个合理的默认值（这里选择 Axe），避免出现空指针。
 std::shared_ptr<ToolBase> makeTool(ToolKind kind) {
     switch (kind) {
         case ToolKind::Axe: return std::make_shared<Axe>();

@@ -12,6 +12,9 @@ using namespace cocos2d;
 
 namespace {
 
+// 根据浇水壶等级计算最大水量：
+// - 基础值来自 GameConfig::WATERING_CAN_MAX；
+// - 每升一级容量翻倍（最高按 3 级封顶）。
 int waterCanMaxForLevel(int lv) {
     int capped = lv;
     if (capped < 0) capped = 0;
@@ -34,6 +37,7 @@ WaterCan::~WaterCan() {
 ToolKind WaterCan::kind() const { return ToolKind::WaterCan; }
 std::string WaterCan::displayName() const { return std::string("Water Can"); }
 
+// 根据当前等级返回不同前缀的图标路径（基础/铜/铁/金）。
 std::string WaterCan::iconPath() const {
     int lv = level();
     std::string prefix;
@@ -47,6 +51,11 @@ std::string WaterCan::iconPath() const {
     return std::string("Tool/") + prefix + "WaterCan.png";
 }
 
+// 使用浇水壶的逻辑：
+// 1. 根据等级调整 water/maxWater 上限（调用 waterCanMaxForLevel）；
+// 2. 若玩家靠近水面，且当前水量未满，则直接补满水，不消耗体力；
+// 3. 否则检查体力，按单格或扇形范围给前方耕地浇水，并标记 CropSystem 中的作物；
+// 4. 更新 HUD/热键栏和地图显示，同时刷新热键栏上的水量条。
 std::string WaterCan::use(Controllers::IMapController* map,
                           Controllers::CropSystem* crop,
                           std::function<Vec2()> getPlayerPos,
@@ -142,6 +151,9 @@ std::string WaterCan::use(Controllers::IMapController* map,
     return msg;
 }
 
+// 在热键栏图标上方创建一个水量条：
+// - 使用 Node 作为容器，内部用 DrawNode 分别画背景和填充部分；
+// - 位置根据图标尺寸和格子高度计算，使其略高于图标顶部。
 void WaterCan::attachHotbarOverlay(cocos2d::Sprite* iconSprite, float cellW, float cellH) {
     if (!iconSprite) return;
     _iconSprite = iconSprite;
@@ -171,6 +183,9 @@ void WaterCan::attachHotbarOverlay(cocos2d::Sprite* iconSprite, float cellW, flo
     refreshHotbarOverlay();
 }
 
+// 根据当前 water/maxWater 重绘水量条填充部分：
+// - ratio = water / maxWater，限制在 [0,1] 范围；
+// - 通过 drawSolidPoly 画一个矩形填充表示剩余水量。
 void WaterCan::refreshHotbarOverlay() {
     if (!_iconSprite || !_waterBarNode || !_waterBarFill) return;
     auto cs = _iconSprite->getContentSize();
@@ -198,6 +213,7 @@ void WaterCan::refreshHotbarOverlay() {
     _waterBarFill->drawSolidPoly(fillRect, 4, cocos2d::Color4F(0.2f, 0.5f, 1.0f, 0.85f));
 }
 
+// 从父节点移除水量条相关节点，并清空本地指针。
 void WaterCan::detachHotbarOverlay() {
     if (_waterBarNode) {
         _waterBarNode->removeFromParent();

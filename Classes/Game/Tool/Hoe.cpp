@@ -19,6 +19,7 @@ namespace Game {
 ToolKind Hoe::kind() const { return ToolKind::Hoe; }
 std::string Hoe::displayName() const { return std::string("Hoe"); }
 
+// 根据等级返回不同前缀的图标路径（基础/铜/铁/金）。
 std::string Hoe::iconPath() const {
     int lv = level();
     std::string prefix;
@@ -32,6 +33,13 @@ std::string Hoe::iconPath() const {
     return std::string("Tool/") + prefix + "Hoe.png";
 }
 
+// 使用锄头的逻辑：
+// 1. 检查体力；若不足，则在玩家位置弹出 "Not enough energy"；
+// 2. 根据等级和技能，决定使用单格还是前方扇形区域的格子；
+// 3. 对每个格子：
+//    - 若存在成熟作物，则尝试收获并将产物放入背包或生成掉落；
+//    - 若是普通土壤 Soil 且没有树/石头/杂草阻挡，则把土壤翻耕成 Tilled/Watered；
+// 4. 更新作物和地图可视，并刷新 HUD/热键栏。
 std::string Hoe::use(Controllers::IMapController* map,
                      Controllers::CropSystem* crop,
                      std::function<Vec2()> getPlayerPos,

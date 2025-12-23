@@ -22,16 +22,21 @@ class RoomMapController;
 namespace Game {
 
 // Chest：单个箱子实例的数据结构。
-// - slots：内部 3x12 固定容量的槽位数组（托管物品/工具）。
+// - slots       ：内部 3x12 固定容量的槽位数组（托管物品/工具）。
 // - MAX_PER_AREA：用于限制同一地图区域内可放置的箱子数量。
 struct Chest : public PlaceableItemBase {
+    // constexpr 静态成员：在编译期就确定的常量，用于约束 UI 布局与容量。
     static constexpr int ROWS = 3;                 // UI 行数
     static constexpr int COLS = 12;                // UI 列数
     static constexpr int CAPACITY = ROWS * COLS;   // 槽位总数
     static constexpr int MAX_PER_AREA = 200;       // 单张地图最多箱子数量
 
-    std::vector<Slot> slots;                       // 箱子内部所有槽位
+    // 箱子内部所有槽位；每个 Slot 存储一个物品栈或一个工具。
+    std::vector<Slot> slots;
 
+    // 构造函数：
+    // - 调用 PlaceableItemBase 默认构造，把 pos 设为 Vec2::ZERO。
+    // - 初始化 slots，分配 CAPACITY 个槽位。
     Chest()
       : PlaceableItemBase(),
         slots(static_cast<std::size_t>(CAPACITY)) {}

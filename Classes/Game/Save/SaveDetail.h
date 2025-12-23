@@ -17,8 +17,16 @@
 #include "Game/Furnace.h"
 #include "cocos2d.h"
 
+// 本文件中都是“读写存档细节”的工具函数：
+// - 负责把 WorldState/Chest/Inventory 等结构体序列化成纯文本（写入输出流）
+// - 或者从文本中解析回结构体（从输入流读取）
+// 这里放在头文件中，供 SaveSystem.cpp 直接包含使用。
+// 注意：下方使用匿名命名空间（namespace { ... }），等价于 C 语言里的 static 函数，
+// 这些函数只在包含它的 .cpp 文件内部可见，不会污染全局命名空间。
 namespace {
 
+// 把地图格子的枚举类型 Game::TileType 转成 int，方便写入文本存档。
+// 存档只保存数字，加载时再反向转换回枚举。
 int toInt(Game::TileType t) {
     switch (t) {
         case Game::TileType::Soil: return 1;
@@ -29,6 +37,8 @@ int toInt(Game::TileType t) {
     }
 }
 
+// 与上面的 toInt 相反：把文件中读到的整数还原成 Game::TileType 枚举值。
+// 非法数值统一当成 NotSoil 处理，保证程序健壮性。
 Game::TileType tileFromInt(int v) {
     switch (v) {
         case 1: return Game::TileType::Soil;
@@ -39,6 +49,13 @@ Game::TileType tileFromInt(int v) {
     }
 }
 
+// 把玩家背包 Inventory 写入输出流 out。
+// - 使用引用 std::ostream& 作为“输出管道”，就像 C 语言里的 FILE*；
+// - 使用 std::shared_ptr<Game::Inventory> 共享拥有背包对象，可能有多个模块同时持有它。
+// 写入格式：
+//   hasInv size
+//   kind tk tl itemType qty  (一行一个格子)
+// 其中 kind 表示该格子是“空 / 工具 / 物品”三种情况。
 void writeInventory(std::ostream& out, const std::shared_ptr<Game::Inventory>& inv) {
     if (!inv) {
         out << 0 << ' ' << 0 << '\n';
@@ -68,6 +85,10 @@ void writeInventory(std::ostream& out, const std::shared_ptr<Game::Inventory>& i
     }
 }
 
+// 从输入流 in 中读回一个 Inventory 对象。
+// - 使用 std::istream& 作为“输入管道”；
+// - 返回值是 std::shared_ptr<Game::Inventory>，读取失败时返回 nullptr。
+// 读取时按照 writeInventory 写入时约定的顺序依次解析。
 std::shared_ptr<Game::Inventory> readInventory(std::istream& in) {
     int hasInv = 0;
     int sz = 0;
@@ -100,6 +121,10 @@ std::shared_ptr<Game::Inventory> readInventory(std::istream& in) {
     return inv;
 }
 
+// 把一个 Game::Chest（包含位置 + 槽位数组）写入存档。
+// 这里直接访问 chest.pos 和 chest.slots：
+// - pos 是 cocos2d::Vec2，用于记住箱子的世界坐标；
+// - slots 是一个 std::vector<ChestSlot>，记录每个格子的工具/物品。
 void writeChest(std::ostream& out, const Game::Chest& chest) {
     out << chest.pos.x << ' ' << chest.pos.y << ' ' << chest.slots.size() << '\n';
     for (const auto& s : chest.slots) {
@@ -116,6 +141,10 @@ void writeChest(std::ostream& out, const Game::Chest& chest) {
     }
 }
 
+// 从输入流中读回一个 Chest：
+// - 先读位置坐标和格子数量；
+// - 再按顺序恢复每个槽位的 kind / tool / itemType / itemQty 等字段。
+// 返回值按值传递（按值返回一个 Chest 对象）。
 Game::Chest readChest(std::istream& in) {
     Game::Chest chest;
     float x = 0.0f;
@@ -151,6 +180,10 @@ Game::Chest readChest(std::istream& in) {
     return chest;
 }
 
+// 把地面掉落物列表写入存档：
+// - 先写掉落数量；
+// - 再逐个写出 type（物品类型枚举）、位置坐标、数量。
+// 使用 std::vector<Game::Drop> 存储一组掉落记录。
 void writeDrops(std::ostream& out, const std::vector<Game::Drop>& drops) {
     out << drops.size() << '\n';
     for (const auto& d : drops) {
@@ -158,6 +191,9 @@ void writeDrops(std::ostream& out, const std::vector<Game::Drop>& drops) {
     }
 }
 
+// 从存档中读取掉落物列表：
+// - 先读取总数，再循环读取每一条记录；
+// - 通过 static_cast<Game::ItemType>(type) 把 int 转回枚举类型。
 void readDrops(std::istream& in, std::vector<Game::Drop>& drops) {
     std::size_t count = 0;
     in >> count;
@@ -180,6 +216,8 @@ void readDrops(std::istream& in, std::vector<Game::Drop>& drops) {
     }
 }
 
+// 把熔炉列表写入存档：
+// - 每个熔炉记录位置 pos、正在熔的矿石类型 oreType、剩余时间 remainingSeconds。
 void writeFurnaces(std::ostream& out, const std::vector<Game::Furnace>& furnaces) {
     out << furnaces.size() << '\n';
     for (const auto& f : furnaces) {
@@ -189,6 +227,9 @@ void writeFurnaces(std::ostream& out, const std::vector<Game::Furnace>& furnaces
     }
 }
 
+// 从存档中读取熔炉列表：
+// - 使用 std::vector::reserve 预分配容量，避免多次扩容；
+// - 对于枚举字段 oreType 同样使用 static_cast 转回枚举值。
 void readFurnaces(std::istream& in, std::vector<Game::Furnace>& furnaces) {
     std::size_t count = 0;
     in >> count;
@@ -212,6 +253,9 @@ void readFurnaces(std::istream& in, std::vector<Game::Furnace>& furnaces) {
     }
 }
 
+// 批量写入多个箱子：
+// - 先写箱子数量；
+// - 再循环调用 writeChest(out, ch) 写每一个箱子的详细内容。
 void writeChests(std::ostream& out, const std::vector<Game::Chest>& chests) {
     out << chests.size() << '\n';
     for (const auto& ch : chests) {
@@ -219,6 +263,9 @@ void writeChests(std::ostream& out, const std::vector<Game::Chest>& chests) {
     }
 }
 
+// 批量读取多个箱子：
+// - 先读数量，再多次调用 readChest(in) 还原每一个箱子；
+// - 读失败时提前退出循环。
 void readChests(std::istream& in, std::vector<Game::Chest>& chests) {
     std::size_t count = 0;
     in >> count;
@@ -232,6 +279,8 @@ void readChests(std::istream& in, std::vector<Game::Chest>& chests) {
     }
 }
 
+// 写入农作物列表：
+// - 每个 Game::Crop 保存坐标(c, r)、作物类型 type、生长阶段 stage、进度 progress 等。
 void writeCrops(std::ostream& out, const std::vector<Game::Crop>& crops) {
     out << crops.size() << '\n';
     for (const auto& cp : crops) {
@@ -241,6 +290,9 @@ void writeCrops(std::ostream& out, const std::vector<Game::Crop>& crops) {
     }
 }
 
+// 读取农作物列表：
+// - 注意使用 static_cast<Game::CropType>(type) 把 int 转回枚举；
+// - wateredToday 字段使用 0/1 存储，再转换成 bool。
 void readCrops(std::istream& in, std::vector<Game::Crop>& crops) {
     std::size_t count = 0;
     in >> count;
@@ -270,6 +322,8 @@ void readCrops(std::istream& in, std::vector<Game::Crop>& crops) {
     }
 }
 
+// 写入树木位置列表：
+// - 这里只保存位置和树种枚举 kind，不涉及运行时的节点指针。
 void writeTreePositions(std::ostream& out, const std::vector<Game::TreePos>& trees) {
     out << trees.size() << '\n';
     for (const auto& t : trees) {
@@ -277,6 +331,8 @@ void writeTreePositions(std::ostream& out, const std::vector<Game::TreePos>& tre
     }
 }
 
+// 读取树木位置列表：
+// - 为了兼容旧存档，若读到非法 kind，就强制改为默认的 Tree1。
 void readTreePositions(std::istream& in, std::vector<Game::TreePos>& trees) {
     std::size_t count = 0;
     in >> count;
@@ -303,6 +359,7 @@ void readTreePositions(std::istream& in, std::vector<Game::TreePos>& trees) {
     }
 }
 
+// 写入石头位置列表：同样只保存格子坐标和 RockKind 枚举。
 void writeRockPositions(std::ostream& out, const std::vector<Game::RockPos>& rocks) {
     out << rocks.size() << '\n';
     for (const auto& r : rocks) {
@@ -310,6 +367,7 @@ void writeRockPositions(std::ostream& out, const std::vector<Game::RockPos>& roc
     }
 }
 
+// 读取石头位置列表，并对非法 kind 做兜底处理，默认成 Rock1。
 void readRockPositions(std::istream& in, std::vector<Game::RockPos>& rocks) {
     std::size_t count = 0;
     in >> count;
@@ -336,6 +394,7 @@ void readRockPositions(std::istream& in, std::vector<Game::RockPos>& rocks) {
     }
 }
 
+// 写入杂草位置列表：结构简单，只有格子坐标(c, r)。
 void writeWeedPositions(std::ostream& out, const std::vector<Game::WeedPos>& weeds) {
     out << weeds.size() << '\n';
     for (const auto& w : weeds) {
@@ -343,6 +402,7 @@ void writeWeedPositions(std::ostream& out, const std::vector<Game::WeedPos>& wee
     }
 }
 
+// 读取杂草位置列表：依次读入每个格子的行列号，压入 std::vector 中。
 void readWeedPositions(std::istream& in, std::vector<Game::WeedPos>& weeds) {
     std::size_t count = 0;
     in >> count;
@@ -362,6 +422,9 @@ void readWeedPositions(std::istream& in, std::vector<Game::WeedPos>& weeds) {
     }
 }
 
+// 写入农场动物列表：
+// - Game::Animal 包含类型(type)、当前位置/目标位置(pos/target)、移动速度、游走半径、
+//   年龄天数、是否成年、今天是否喂食等字段。
 void writeAnimals(std::ostream& out, const std::vector<Game::Animal>& animals) {
     out << animals.size() << '\n';
     for (const auto& a : animals) {
@@ -375,6 +438,7 @@ void writeAnimals(std::ostream& out, const std::vector<Game::Animal>& animals) {
     }
 }
 
+// 读取农场动物列表，按与 writeAnimals 相同的顺序依次解析字段。
 void readAnimals(std::istream& in, std::vector<Game::Animal>& animals) {
     std::size_t count = 0;
     in >> count;

@@ -17,21 +17,29 @@ using namespace cocos2d;
 
 namespace Game {
 
+// g_customSaveRoot：可选的“自定义存档根目录”，由 setSaveRootDirectory 设置。
+// g_currentSavePath：最近一次读/写存档实际使用的完整路径，供 UI 显示或调试查看。
 static std::string g_customSaveRoot;
 static std::string g_currentSavePath;
 
+// 设置自定义存档根目录，不做路径拼接与合法性检查；
+// 真正使用时会在 makeAbsoluteSaveRoot 中结合 FileUtils 做处理。
 void setSaveRootDirectory(const std::string& rootDir) {
     g_customSaveRoot = rootDir;
 }
 
+// 记录当前存档的完整路径，通常在保存或加载成功时调用。
 void setCurrentSavePath(const std::string& fullPath) {
     g_currentSavePath = fullPath;
 }
 
+// 返回当前记录的存档路径字符串。
 std::string currentSavePath() {
     return g_currentSavePath;
 }
 
+// 辅助函数：规范化目录字符串，保证末尾一定带有斜杠 '/' 或 '\\'。
+// 方便后续直接用“目录 + 文件名”拼接路径。
 static std::string normalizeSaveDir(std::string dir) {
     if (!dir.empty()) {
         char last = dir[dir.size() - 1];
@@ -43,6 +51,8 @@ static std::string normalizeSaveDir(std::string dir) {
 }
 
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
+// Windows 专用：把宽字符 std::wstring 转成 UTF-8 编码的 std::string。
+// 便于统一使用 UTF-8 字符串与 cocos2d::FileUtils 等接口交互。
 static std::string utf8FromWide(const std::wstring& w) {
     if (w.empty()) return std::string();
     int size = WideCharToMultiByte(CP_UTF8, 0, w.c_str(), static_cast<int>(w.size()), nullptr, 0, nullptr, nullptr);
@@ -52,6 +62,7 @@ static std::string utf8FromWide(const std::wstring& w) {
     return result;
 }
 
+// Windows 专用：获得当前可执行文件所在的目录，作为相对路径的“基准目录”。
 static std::string getExeDirectory() {
     WCHAR buffer[MAX_PATH + 1] = { 0 };
     DWORD len = GetModuleFileNameW(nullptr, buffer, MAX_PATH);
@@ -67,6 +78,9 @@ static std::string getExeDirectory() {
 }
 #endif
 
+// 把用户给出的 root 目录转成“绝对路径形式”的存档根目录：
+// - 若 root 本身是绝对路径，直接规范化并返回；
+// - 否则在 Windows 上优先拼接 exe 目录，其他平台使用 FileUtils::getWritablePath。
 static std::string makeAbsoluteSaveRoot(const std::string& root) {
     auto* fu = FileUtils::getInstance();
     if (root.empty()) {
@@ -87,6 +101,10 @@ static std::string makeAbsoluteSaveRoot(const std::string& root) {
     return base + root;
 }
 
+// 过滤玩家输入的存档名称，生成一个“合法的文件名”：
+// - 只允许数字/字母/空格/下划线/连字符/点号；
+// - 其余字符统一替换成 '_'；
+// - 去掉开头结尾的空格和点，避免在部分系统下出现隐藏文件等问题。
 static std::string sanitizeFileName(const std::string& name) {
     std::string result;
     result.reserve(name.size());
@@ -118,6 +136,7 @@ static std::string sanitizeFileName(const std::string& name) {
     return result;
 }
 
+// 判断字符串是否已经以 .txt（大小写不敏感）结尾。
 static bool hasTxtExtension(const std::string& name) {
     if (name.size() < 4) return false;
     std::size_t n = name.size();
@@ -127,6 +146,9 @@ static bool hasTxtExtension(const std::string& name) {
             (name[n - 1] == 't' || name[n - 1] == 'T'));
 }
 
+// 根据玩家输入的存档名称生成完整路径：
+// - 前缀使用 saveDirectory()；
+// - 文件名部分先 sanitizeFileName，再补全 .txt 后缀。
 std::string makeSavePathWithName(const std::string& name) {
     std::string dir = normalizeSaveDir(saveDirectory());
     std::string base = sanitizeFileName(name);
@@ -136,6 +158,10 @@ std::string makeSavePathWithName(const std::string& name) {
     return dir + base;
 }
 
+// 计算并创建存档目录：
+// - 若设置了 g_customSaveRoot，则转换成绝对路径后使用；
+// - 否则在可写路径(writablePath)下创建 "save" 子目录。
+// 返回值总是以斜杠结尾的目录路径。
 std::string saveDirectory() {
     auto* fu = FileUtils::getInstance();
     std::string dir;
@@ -150,6 +176,8 @@ std::string saveDirectory() {
     return normalizeSaveDir(dir);
 }
 
+// 根据存档槽位编号生成路径，比如 slot=1 -> ".../save1.txt"。
+// 槽位在 [1, 50] 范围之外会被截断到合法范围。
 std::string savePathForSlot(int slot) {
     if (slot < 1) slot = 1;
     if (slot > 50) slot = 50;
@@ -157,10 +185,16 @@ std::string savePathForSlot(int slot) {
     return dir + "save" + std::to_string(slot) + ".txt";
 }
 
+// 默认存档路径：约定为第 1 号槽位。
 std::string defaultSavePath() {
     return savePathForSlot(1);
 }
 
+// 核心函数：把当前全局 WorldState 序列化到指定文件。
+// 主要流程：
+// 1. 处理 fullPath（为空则使用 defaultSavePath），并确保目录存在；
+// 2. 打开 std::ofstream，写入存档版本号与基础数值字段；
+// 3. 利用 SaveDetail.h 中的辅助函数写入 Inventory / Chest / Furnace / Crop 等列表。
 bool saveToFile(const std::string& fullPath) {
     std::string path = fullPath;
     if (path.empty()) {
@@ -238,6 +272,11 @@ bool saveToFile(const std::string& fullPath) {
     return true;
 }
 
+// 从文件中加载存档到全局 WorldState：
+// 1. 处理 fullPath（为空则使用默认路径），尝试打开输入文件；
+// 2. 读取并校验“魔数 + 版本号”，不符合期望则立即返回 false；
+// 3. 依次读取基础字段、农田格子、矿井电梯层数、背包、箱子、熔炉等；
+// 4. 根据 version 做向后兼容处理，例如老版本没有某些字段时给默认值。
 bool loadFromFile(const std::string& fullPath) {
     std::string path = fullPath;
     if (path.empty()) {

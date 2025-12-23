@@ -70,6 +70,8 @@ void FurnaceController::bindContext(Controllers::IMapController* map,
 }
 
 // 从 WorldState 拿到当前地图对应的熔炉列表，并补齐 dropOffset。
+// - _runtime 指向 WorldState 中的某个 vector（农场/房屋/城镇/海滩）。
+// - dropOffset 表示“锭掉落”相对熔炉中心的偏移量，这里统一设为向上半格。
 void FurnaceController::syncLoad() {
     if (!_runtime && _map) {
         _runtime = getFurnacesForMap(_map);
@@ -85,6 +87,8 @@ void FurnaceController::syncLoad() {
 }
 
 // 每帧更新熔炉状态：推进 remainingSeconds，完成时生成掉落并提示。
+// - dt：上一帧到这一帧经过的时间（秒），由场景 update 传入。
+// - 当某个熔炉计时从 >0 降到 <=0 时，视为一次熔炼完成，生成对应锭。
 void FurnaceController::update(float dt) {
     if (!_runtime || !_map) return;
     bool changedState = false;
@@ -119,6 +123,8 @@ void FurnaceController::update(float dt) {
 }
 
 // 重新绘制所有熔炉精灵：根据 remainingSeconds 选择冷/热贴图。
+// - 使用 Sprite::create 动态加载贴图，并根据占用矩形缩放到合适大小。
+// - 若贴图加载失败，则退化为灰色实心矩形。
 void FurnaceController::refreshVisuals() {
     if (!_drawNode || !_runtime) return;
     _drawNode->clear();

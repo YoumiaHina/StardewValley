@@ -61,7 +61,13 @@ private:
                              const cocos2d::Vec2& playerWorldPos,
                              const cocos2d::Vec2& lastDir) override;
 
+    // 标记当前控制器对应的地图类型：
+    // - true  时表示控制农场上的箱子（使用 WorldState::farmChests）。
+    // - false 时表示控制室内箱子（使用 WorldState::houseChests）。
     bool _isFarm = true;
+    // 当前场景的箱子列表副本：
+    // - 进入场景时从 WorldState 同步到此处；
+    // - 发生增删改时，再通过辅助函数写回 WorldState。
     std::vector<Game::Chest> _chests;
 };
 

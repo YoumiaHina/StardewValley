@@ -15,10 +15,16 @@ namespace Game {
 ToolKind Scythe::kind() const { return ToolKind::Scythe; }
 std::string Scythe::displayName() const { return std::string("Scythe"); }
 
+// 镰刀图标路径固定，不随等级变化。
 std::string Scythe::iconPath() const {
     return std::string("Tool/Scythe.png");
 }
 
+// 使用镰刀的逻辑：
+// 1. 检查体力；不足时弹出提示并返回；
+// 2. 只对玩家面前的一个格子进行判定；
+// 3. 若该格子存在 Weed 障碍，则通过 damageAt 破坏并生成一个掉落；
+// 4. 扣除体力，刷新 HUD 与地图显示。
 std::string Scythe::use(Controllers::IMapController* map,
                         Controllers::CropSystem* /*crop*/,
                         std::function<Vec2()> getPlayerPos,

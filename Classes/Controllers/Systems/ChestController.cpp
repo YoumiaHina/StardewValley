@@ -17,11 +17,13 @@ using namespace cocos2d;
 namespace Controllers {
 
 // 挂接到父节点并初始化调试绘制节点（由基类完成）。
+// - 这里直接复用 PlaceableItemSystemBase::attachTo 的实现。
 void ChestController::attachTo(Node* parentNode, int zOrder) {
     PlaceableItemSystemBase::attachTo(parentNode, zOrder);
 }
 
 // 从 WorldState 加载当前场景对应的箱子列表。
+// - _isFarm=true  时使用 farmChests；否则使用 houseChests。
 void ChestController::syncLoad() {
     auto& ws = Game::globalState();
     if (_isFarm) {
@@ -42,11 +44,13 @@ std::vector<Game::Chest>& ChestController::chests() {
 }
 
 // 判断给定世界坐标附近是否存在箱子（用于提示/种地避让）。
+// - 实现上直接调用 Game::isNearAnyChest，里面使用 PlaceableItemBase::isNearAny。
 bool ChestController::isNearChest(const Vec2& worldPos) const {
     return Game::isNearAnyChest(worldPos, _chests);
 }
 
 // 判断给定世界坐标是否与任意箱子发生碰撞（用于玩家移动/放置阻挡）。
+// - 使用 PlaceableItemBase::collidesAny 统一做“点在矩形内”的判断。
 bool ChestController::collides(const Vec2& worldPos) const {
     return Game::PlaceableItemBase::collidesAny<Game::Chest>(
         worldPos,
@@ -92,6 +96,8 @@ bool ChestController::shouldPlace(const Game::Inventory& inventory) const {
 }
 
 // 放置箱子入口：根据地图类型分发到农场/室内/室外的具体实现。
+// - 对 IMapController* 使用 dynamic_cast 判断其真实类型：
+//   农场（isFarm=true）、RoomMapController（室内）、其它室外地图。
 bool ChestController::tryPlace(Controllers::IMapController* map,
                                Controllers::UIController* ui,
                                const std::shared_ptr<Game::Inventory>& inventory,
@@ -109,6 +115,7 @@ bool ChestController::tryPlace(Controllers::IMapController* map,
 }
 
 // 与已有箱子交互：透传给 openChestNearPlayer 打开最近的箱子面板。
+// - inventory 在此函数中暂未使用，因此通过 (void)inventory 明确标记。
 bool ChestController::tryInteractExisting(Controllers::IMapController* map,
                                           Controllers::UIController* ui,
                                           const std::shared_ptr<Game::Inventory>& inventory,
@@ -121,9 +128,11 @@ bool ChestController::tryInteractExisting(Controllers::IMapController* map,
 namespace {
 
 // 将系统内部箱子列表同步回 WorldState 的回调类型。
+// - std::function 接口可以绑定任意可调用对象（lambda/函数/仿函数）。
 using ChestSyncFunc = std::function<void(const std::vector<Game::Chest>&)>;
 
 // 计算离玩家最近的箱子下标（非农场场景使用距离最近策略）。
+// - 通过遍历所有箱子，使用 Vec2::distance 计算真实距离，取最小值。
 int nearestChestIndex(const Vec2& playerWorldPos, const std::vector<Game::Chest>& chests) {
     int idx = -1;
     float best = 1e9f;
@@ -138,6 +147,10 @@ int nearestChestIndex(const Vec2& playerWorldPos, const std::vector<Game::Chest>
 }
 
 // 通用放置流程：检查可放置、数量上限、同步 WorldState 并扣除背包中的箱子物品。
+// - center ：放置位置（世界坐标）。
+// - blocked：用于额外阻挡判断的函数对象（例如房间门/床区域）。
+// - map/room：用于计算 UI 坐标；两者必有其一非空。
+// - syncWorld：把 chs 写回 WorldState 的回调。
 bool placeChestCommon(const Vec2& center,
                       Controllers::UIController* ui,
                       const std::shared_ptr<Game::Inventory>& inventory,
@@ -151,6 +164,7 @@ bool placeChestCommon(const Vec2& center,
     const auto& slot = inventory->selectedSlot();
     if (slot.itemType != Game::ItemType::Chest || slot.itemQty <= 0) return false;
 
+    // 使用 PlaceableItemBase::canPlaceAt 做“接近/阻挡”检查。
     float s = static_cast<float>(GameConfig::TILE_SIZE);
     float margin = s * 0.4f;
     bool okPlace = Game::PlaceableItemBase::canPlaceAt<Game::Chest>(
@@ -169,6 +183,7 @@ bool placeChestCommon(const Vec2& center,
         return false;
     }
 
+    // 在容器中追加一个新 Chest，并设置其位置。
     Game::Chest chest;
     chest.pos = center;
     chs.push_back(chest);
@@ -190,6 +205,8 @@ bool placeChestCommon(const Vec2& center,
 } // anonymous namespace
 
 // 打开玩家附近的箱子：农场按朝向格子查找，其它场景按距离最近箱子处理。
+// - 农场：使用 targetTile(playerWorldPos, lastDir) 得到玩家前方格子。
+// - 其它：先要求玩家“接近任意箱子”，再选择距离最近的那个。
 bool openChestNearPlayer(Controllers::IMapController* map,
                          Controllers::UIController* ui,
                          const Vec2& playerWorldPos,
@@ -224,6 +241,7 @@ bool openChestNearPlayer(Controllers::IMapController* map,
 }
 
 // 打开全局箱子（类似扩展背包）。
+// - 使用 WorldState::globalChest 作为持久化存储。
 bool openGlobalChest(Controllers::UIController* ui) {
     if (!ui) return false;
     auto& ws = Game::globalState();
@@ -244,6 +262,7 @@ bool placeChestOnFarm(Controllers::IMapController* map,
     bool okCenter = Controllers::PlaceablePlacementBase::selectFarmCenter(map, playerPos, lastDir, center);
     if (!okCenter) return false;
     auto& chs = map->chests();
+    // 农场目前不需要额外阻挡区域，因此 blocked 总是返回 false。
     auto blocked = [](const Rect&) { return false; };
     auto& ws = Game::globalState();
     ChestSyncFunc syncWorld = [&ws, map](const std::vector<Game::Chest>& out) {
@@ -265,6 +284,7 @@ bool placeChestInRoom(Controllers::RoomMapController* room,
     bool okCenter = Controllers::PlaceablePlacementBase::selectRoomCenter(room, playerPos, center);
     if (!okCenter) return false;
     auto& chs = room->chests();
+    // blocked lambda：若候选矩形与门/床有交集，则视为不允许放置。
     auto blocked = [room](const Rect& r) {
         return r.intersectsRect(room->doorRect()) || r.intersectsRect(room->bedRect());
     };
@@ -309,6 +329,7 @@ void transferChestCell(Game::Chest& chest,
     bool chestHasItem = (cs.kind == Game::SlotKind::Item && cs.itemQty > 0);
     bool chestHasTool = (cs.kind == Game::SlotKind::Tool && cs.tool != nullptr);
 
+    // 分支一：选中的是“物品栈”（可叠加）。
     if (invIsItem && invStack.quantity > 0) {
         if (chestHasTool) return;
         if (chestHasItem && cs.itemType != invStack.type) return;
@@ -322,6 +343,7 @@ void transferChestCell(Game::Chest& chest,
         bool ok = inventory.consumeSelectedItem(1);
         if (!ok) return;
         cs.itemQty += 1;
+    // 分支二：选中的是工具（不可叠加）。
     } else if (invIsTool) {
         if (chestHasItem || chestHasTool) return;
         const Game::ToolBase* tConst = inventory.toolAt(static_cast<std::size_t>(invIndex));
@@ -345,6 +367,7 @@ void transferChestCell(Game::Chest& chest,
         return;
     }
 
+    // 把修改后的 chest 写回 WorldState 中所有箱子列表：
     auto& ws = Game::globalState();
     for (auto& ch : ws.farmChests) {
         if (ch.pos.equals(chest.pos)) {
@@ -372,6 +395,7 @@ void transferChestCell(Game::Chest& chest,
 }
 
 // 背包 -> 箱子：支持 Shift 连续搬运，多次调用 transferChestCell 直到无法再变化。
+// - moveAll=true 时，会以 MAX_STACK 为上限循环多次，直到格子或背包状态不再变化。
 bool transferInventoryToChest(Game::Chest& chest,
                               int flatIndex,
                               Game::Inventory& inventory,
@@ -385,10 +409,12 @@ bool transferInventoryToChest(Game::Chest& chest,
     int invIndex = inventory.selectedIndex();
     if (invIndex < 0 || invIndex >= static_cast<int>(inventory.size())) return false;
 
+    // 最多尝试搬运次数：一次或最多 MAX_STACK 次。
     int maxMoves = moveAll ? Game::ItemStack::MAX_STACK : 1;
     bool movedAny = false;
 
     for (int i = 0; i < maxMoves; ++i) {
+        // 调用前先记录 Chest 槽位与背包格的旧状态，调用后再对比是否有变化。
         Game::Slot beforeChest = chest.slots[static_cast<std::size_t>(flatIndex)];
         Game::ItemStack beforeInvStack = inventory.itemAt(static_cast<std::size_t>(invIndex));
         bool beforeInvEmpty = inventory.isEmpty(static_cast<std::size_t>(invIndex));
@@ -409,6 +435,7 @@ bool transferInventoryToChest(Game::Chest& chest,
                         beforeInvStack.type == afterInvStack.type &&
                         beforeInvStack.quantity == afterInvStack.quantity);
 
+        // 若调用前后状态完全相同，则说明已经无法再搬运，提前结束循环。
         if (chestSame && invSame) {
             break;
         }
@@ -420,6 +447,7 @@ bool transferInventoryToChest(Game::Chest& chest,
 }
 
 // 箱子 -> 背包：支持单个与 Shift 多个搬运，并确保与 WorldState 同步。
+// - moveAll=true 时尽量把该箱子格的物品搬满到目标背包格（受栈上限限制）。
 bool transferChestToInventory(Game::Chest& chest,
                               int flatIndex,
                               Game::Inventory& inventory,

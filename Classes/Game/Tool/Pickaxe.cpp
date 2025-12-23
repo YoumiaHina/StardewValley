@@ -18,6 +18,7 @@ namespace Game {
 ToolKind Pickaxe::kind() const { return ToolKind::Pickaxe; }
 std::string Pickaxe::displayName() const { return std::string("Pickaxe"); }
 
+// 根据等级返回不同前缀的图标路径（基础/铜/铁/金）。
 std::string Pickaxe::iconPath() const {
     int lv = level();
     std::string prefix;
@@ -31,6 +32,12 @@ std::string Pickaxe::iconPath() const {
     return std::string("Tool/") + prefix + "Pickaxe.png";
 }
 
+// 使用镐子的逻辑：
+// 1. 检查体力；若不足，则在玩家位置弹出提示并立即返回；
+// 2. 根据等级决定单格或扇形范围，通过 TileSelector 计算目标格子；
+// 3. 若命中矿石系统，则对每个格子调用 damageAt，产生矿物掉落并增加挖矿经验；
+// 4. 在农场上，还可以把没种作物的耕地/浇水耕地拍平成普通土壤；
+// 5. 扣除体力，刷新 HUD 与地图可视，返回描述动作的文本。
 std::string Pickaxe::use(Controllers::IMapController* map,
                          Controllers::CropSystem* crop,
                          std::function<Vec2()> getPlayerPos,

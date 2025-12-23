@@ -15,6 +15,9 @@ namespace Game {
 ToolKind Sword::kind() const { return ToolKind::Sword; }
 std::string Sword::displayName() const { return std::string("Sword"); }
 
+// 根据玩家解锁的矿井电梯层数选择不同的剑图标：
+// - 没有解锁电梯时使用基础剑；
+// - 每到 5 的倍数层数时，尝试显示对应的“进阶剑”贴图。
 std::string Sword::iconPath() const {
     auto& ws = Game::globalState();
     if (ws.abyssElevatorFloors.empty()) {
@@ -32,6 +35,11 @@ std::string Sword::iconPath() const {
     return std::string("Weapon/sword.png");
 }
 
+// 使用剑的逻辑较为简单：
+// - 检查体力并扣除；
+// - 刷新 HUD/热键栏；
+// - 在玩家位置弹出 "Slash!" 提示；
+// - 由于战斗系统可能在别处处理，这里只负责表现层。
 std::string Sword::use(Controllers::IMapController* map,
                        Controllers::CropSystem* /*crop*/,
                        std::function<Vec2()> getPlayerPos,
@@ -60,6 +68,9 @@ std::string Sword::use(Controllers::IMapController* map,
     return msg;
 }
 
+// 计算剑的基础伤害：
+// - 以常数 8 为基础；
+// - 按解锁的电梯层数数量叠加额外伤害，每层 +2。
 int Sword::baseDamage() {
     auto& ws = Game::globalState();
     std::size_t upgrades = ws.abyssElevatorFloors.size();
@@ -67,6 +78,9 @@ int Sword::baseDamage() {
     return 8 + bonus;
 }
 
+// 根据玩家位置和朝向构建挥剑时覆盖的格子列表：
+// - 内部复用 TileSelector::collectForwardFanTiles 的扇形选区算法；
+// - includeSelf 控制是否包含玩家所在格子。
 void Sword::buildHitTiles(Controllers::IMapController* map,
                           const Vec2& playerPos,
                           const Vec2& lastDir,

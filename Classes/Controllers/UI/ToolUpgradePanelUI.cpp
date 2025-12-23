@@ -8,8 +8,11 @@ namespace Controllers {
 
 namespace {
 
+// 整个升级面板在默认分辨率上的缩放系数，方便统一调整 UI 大小。
 const float UPGRADE_UI_SCALE = 1.2f;
 
+// 把数值等级转换成在面板上显示的文本。
+// 这里直接用英文字符串，实际项目中也可以接入本地化系统。
 std::string levelText(int level) {
     if (level <= 0) return "Lv 0 (Basic)";
     if (level == 1) return "Lv 1 (Copper)";
@@ -19,6 +22,8 @@ std::string levelText(int level) {
 
 }
 
+// 构建升级面板的所有节点（只构建一次）。
+// 包括：半透明背景、标题文字、每行图标/等级/材料/按钮等。
 void ToolUpgradePanelUI::buildPanel() {
     if (_panelNode) return;
     _panelNode = Node::create();
@@ -31,6 +36,7 @@ void ToolUpgradePanelUI::buildPanel() {
     }
     _panelNode->setVisible(false);
 
+    // 背景矩形：使用 DrawNode 画一个半透明黑色矩形。
     auto bg = DrawNode::create();
     float w = 420.f * UPGRADE_UI_SCALE * 2.0f;
     float h = 220.f * UPGRADE_UI_SCALE * 2.0f;
@@ -38,12 +44,14 @@ void ToolUpgradePanelUI::buildPanel() {
     bg->drawSolidPoly(v, 4, Color4F(0.f, 0.f, 0.f, 0.85f));
     _panelNode->addChild(bg);
 
+    // 面板标题文字。
     auto title = Label::createWithTTF("Tool Upgrade", "fonts/arial.ttf", 22 * UPGRADE_UI_SCALE);
     if (title) {
         title->setPosition(Vec2(0, h/2 - 26 * UPGRADE_UI_SCALE));
         _panelNode->addChild(title);
     }
 
+    // 预先约定本面板只展示 4 种工具：锄头、镐子、斧头、浇水壶。
     _rows.clear();
     Game::ToolKind kinds[4] = {
         Game::ToolKind::Hoe,
@@ -58,6 +66,7 @@ void ToolUpgradePanelUI::buildPanel() {
         RowWidgets row;
         row.kind = kinds[i];
 
+        // 工具图标，占位用的空 Sprite，刷新时会设置具体贴图。
         auto toolIcon = Sprite::create();
         if (toolIcon) {
             toolIcon->setAnchorPoint(Vec2(0.f, 0.5f));
@@ -67,6 +76,7 @@ void ToolUpgradePanelUI::buildPanel() {
         }
         row.toolIcon = toolIcon;
 
+        // 显示当前工具等级的文字标签。
         auto levelLabel = Label::createWithTTF("", "fonts/arial.ttf", 18 * UPGRADE_UI_SCALE);
         if (levelLabel) {
             levelLabel->setAnchorPoint(Vec2(0.f, 0.5f));
@@ -75,6 +85,7 @@ void ToolUpgradePanelUI::buildPanel() {
         }
         row.levelLabel = levelLabel;
 
+        // 材料图标：最多显示 5 个小图标，用来描述升级所需材料数量。
         float iconStartX = -w/2 + 380.f * UPGRADE_UI_SCALE;
         float iconGapX = 30.f * UPGRADE_UI_SCALE;
         for (int j = 0; j < 5; ++j) {
@@ -88,6 +99,7 @@ void ToolUpgradePanelUI::buildPanel() {
             }
         }
 
+        // “升级”按钮：实际上用 Label 充当按钮，并注册触摸监听。
         auto buttonLabel = Label::createWithTTF("[Upgrade]", "fonts/arial.ttf", 18 * UPGRADE_UI_SCALE);
         if (buttonLabel) {
             buttonLabel->setAnchorPoint(Vec2(0.5f, 0.5f));
@@ -95,8 +107,12 @@ void ToolUpgradePanelUI::buildPanel() {
             buttonLabel->setColor(Color3B::YELLOW);
             _panelNode->addChild(buttonLabel);
 
+            // 事件监听器：使用 EventListenerTouchOneByOne 监听点击事件。
             auto listener = EventListenerTouchOneByOne::create();
             listener->setSwallowTouches(true);
+            // lambda 写法：
+            // - 捕获列表 [buttonLabel]：把外部的指针按值拷贝到闭包中；
+            // - 参数 (Touch* t, Event* e)：与 C 回调类似，只是这里用的是 C++ 对象指针。
             listener->onTouchBegan = [buttonLabel](Touch* t, Event* e) {
                 auto target = static_cast<Label*>(e->getCurrentTarget());
                 Vec2 p = target->convertToNodeSpace(t->getLocation());
@@ -108,6 +124,11 @@ void ToolUpgradePanelUI::buildPanel() {
                 }
                 return false;
             };
+            // onTouchEnded 中捕获 this、kinds、i 和 buttonLabel：
+            // - this：允许在回调里访问成员函数 refreshPanel() 和成员变量 _rows；
+            // - kinds：值捕获数组，保证回调里看到的仍是当时的 4 种 ToolKind；
+            // - i：当前行索引，注意用 int 参与边界检查；
+            // - buttonLabel：用于恢复按钮缩放。
             listener->onTouchEnded = [this, kinds, i, buttonLabel](Touch* t, Event* e) {
                 buttonLabel->setScale(1.0f);
                 if (i < 0 || i >= static_cast<int>(_rows.size())) {
@@ -116,6 +137,7 @@ void ToolUpgradePanelUI::buildPanel() {
                 if (!_rows[static_cast<std::size_t>(i)].canUpgrade) {
                     return;
                 }
+                // 调用系统层的 ToolUpgradeSystem 执行实际的升级逻辑。
                 bool ok = ToolUpgradeSystem::getInstance().upgradeToolOnce(_inventory, kinds[i]);
                 if (ok) {
                     refreshPanel();
@@ -132,6 +154,12 @@ void ToolUpgradePanelUI::buildPanel() {
     }
 }
 
+// 根据当前背包/全局箱子里的工具和金钱情况刷新 UI。
+// 主要步骤：
+// 1. 找到每种工具的当前等级（先查玩家背包，再查全局箱子）；
+// 2. 通过 ToolUpgradeSystem::nextUpgradeCost 计算下一次升级所需费用与材料；
+// 3. 根据是否可升级更新按钮文本与颜色；
+// 4. 更新工具图标与材料图标的贴图和可见状态。
 void ToolUpgradePanelUI::refreshPanel() {
     if (!_panelNode) return;
     for (auto& row : _rows) {
@@ -230,6 +258,7 @@ void ToolUpgradePanelUI::refreshPanel() {
                 row.toolIcon->setVisible(false);
             }
         }
+        // 根据材料种类选择对应的小图标路径。
         std::string iconPath;
         if (hasNext) {
             switch (materialType) {
@@ -262,6 +291,9 @@ void ToolUpgradePanelUI::refreshPanel() {
     }
 }
 
+// 控制面板的显示与隐藏：
+// - 第一次显示前会确保已经完成 buildPanel；
+// - 显示前先刷新内容，避免用旧数据。
 void ToolUpgradePanelUI::togglePanel(bool show) {
     if (!_panelNode) buildPanel();
     if (!_panelNode) return;
@@ -273,10 +305,12 @@ void ToolUpgradePanelUI::togglePanel(bool show) {
     }
 }
 
+// 简单查询根节点是否存在且处于可见状态。
 bool ToolUpgradePanelUI::isVisible() const {
     return _panelNode && _panelNode->isVisible();
 }
 
+// 注册一个“升级成功后回调”，由外部（例如 UIController）传入。
 void ToolUpgradePanelUI::setOnUpgraded(const std::function<void()>& cb) {
     _onUpgraded = cb;
 }
