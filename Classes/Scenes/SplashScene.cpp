@@ -19,16 +19,7 @@ bool SplashScene::init() {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     auto origin = Director::getInstance()->getVisibleOrigin();
 
-    // Title
-    auto title = Label::createWithTTF("Stardew Valley", "fonts/Marker Felt.ttf", 36);
-    if (title) {
-        title->setPosition(Vec2(origin.x + visibleSize.width / 2,
-                                 origin.y + visibleSize.height * 0.65f));
-        this->addChild(title, 1);
-    }
-
-    // Center image (reuse existing resource)
-    auto sprite = Sprite::create("HelloWorld.png");
+    auto sprite = Sprite::create("HelloWorld1.jpg");
     if (sprite) {
         sprite->setPosition(Vec2(origin.x + visibleSize.width / 2,
                                  origin.y + visibleSize.height / 2));
