@@ -76,6 +76,7 @@ public:
     // 弹出短文本
     void popTextAt(const cocos2d::Vec2& worldPos, const std::string& text, const cocos2d::Color3B& color);
     void popFriendshipTextAt(const cocos2d::Vec2& worldPos, const std::string& text, const cocos2d::Color3B& color);
+    void popCenterBigText(const std::string& text, const cocos2d::Color3B& color);
 
     void showDialogue(const std::string& npcName,
                       const std::string& text,

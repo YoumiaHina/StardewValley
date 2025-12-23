@@ -7,8 +7,15 @@
 #include "Game/GameConfig.h"
 #include "cocos2d.h"
 #include <cmath>
+#include <chrono>
 
 using namespace cocos2d;
+
+namespace {
+    using Clock = std::chrono::steady_clock;
+    Clock::time_point g_swordLastUseTime;
+    bool g_swordCooldownInitialized = false;
+}
 
 namespace Game {
 
@@ -45,6 +52,19 @@ std::string Sword::use(Controllers::IMapController* map,
                        std::function<Vec2()> getPlayerPos,
                        std::function<Vec2()> /*getLastDir*/,
                        Controllers::UIController* ui) {
+    float cd = attackCooldownSeconds();
+    if (cd > 0.0f) {
+        Clock::time_point now = Clock::now();
+        if (!g_swordCooldownInitialized) {
+            g_swordCooldownInitialized = true;
+            g_swordLastUseTime = now - std::chrono::duration_cast<Clock::duration>(std::chrono::duration<float>(cd * 2.0f));
+        }
+        std::chrono::duration<float> diff = now - g_swordLastUseTime;
+        if (diff.count() < cd) {
+            return std::string("");
+        }
+        g_swordLastUseTime = now;
+    }
     auto& ws = Game::globalState();
     int need = GameConfig::ENERGY_COST_SWORD;
     if (ws.energy < need) {
@@ -68,14 +88,15 @@ std::string Sword::use(Controllers::IMapController* map,
     return msg;
 }
 
-// 计算剑的基础伤害：
-// - 以常数 8 为基础；
-// - 按解锁的电梯层数数量叠加额外伤害，每层 +2。
-int Sword::baseDamage() {
+int Sword::baseDamage() const {
     auto& ws = Game::globalState();
     std::size_t upgrades = ws.abyssElevatorFloors.size();
     int bonus = static_cast<int>(upgrades) * 2;
     return 8 + bonus;
+}
+
+float Sword::attackCooldownSeconds() const {
+    return 0.2f;
 }
 
 // 根据玩家位置和朝向构建挥剑时覆盖的格子列表：

@@ -30,7 +30,9 @@ public:
     std::string iconPath() const override;
 
     // 基础伤害：根据玩家解锁的电梯层数增加额外加成。
-    static int baseDamage();
+    int baseDamage() const override;
+    // 攻击冷却时间：两次挥剑之间的最小间隔（秒），限制最高攻击频率。
+    float attackCooldownSeconds() const override;
     // 计算挥剑时可能命中的地图格子集合：
     // - 使用 TileSelector 的“前方扇形区域”算法；
     // - includeSelf 为 true 时，会包含玩家所在格子。

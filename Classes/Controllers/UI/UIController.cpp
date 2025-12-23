@@ -124,6 +124,11 @@ void UIController::popFriendshipTextAt(const Vec2& worldPos, const std::string& 
     _prompts->popFriendshipTextAt(worldPos, text, color);
 }
 
+void UIController::popCenterBigText(const std::string& text, const Color3B& color) {
+    if (!_prompts) _prompts = new PromptUI(_scene, _worldNode);
+    _prompts->popCenterBigText(text, color);
+}
+
 void UIController::showNpcSocial(int npcKey, const std::string& npcName) {
     if (!_socialPanel) _socialPanel = new NpcSocialPanelUI(_scene);
     auto& ws = Game::globalState();

@@ -36,14 +36,15 @@ public:
 
     // 处理鼠标左键按下：若当前选择剑则按扇形范围对怪物造成伤害。
     void onMouseDown(cocos2d::EventMouse* e);
-    // 每帧更新占位：当前战斗逻辑全部在 onMouseDown 中完成，保留扩展点。
-    void update(float dt) {}
+    // 每帧更新：推进内部攻击冷却计时器等与时间相关的战斗状态。
+    void update(float dt);
 
 private:
     MineMapController* _map = nullptr;                 // 原始指针：由场景负责创建与销毁
     MineMonsterController* _monsters = nullptr;        // 指向怪物控制器，同样不负责释放
     std::function<cocos2d::Vec2()> _getPlayerPos;      // 查询玩家当前位置的回调
     std::function<cocos2d::Vec2()> _getLastDir;        // 查询玩家最近朝向的回调
+    float _attackCooldownRemaining = 0.0f;             // 当前剩余攻击冷却时间（秒）
 };
 
 } // namespace Controllers

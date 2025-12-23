@@ -16,6 +16,7 @@ public:
     void showNpcPrompt(bool visible, const cocos2d::Vec2& worldPos, const std::string& text);
     void popTextAt(const cocos2d::Vec2& worldPos, const std::string& text, const cocos2d::Color3B& color);
     void popFriendshipTextAt(const cocos2d::Vec2& worldPos, const std::string& text, const cocos2d::Color3B& color);
+    void popCenterBigText(const std::string& text, const cocos2d::Color3B& color);
 
 private:
     cocos2d::Scene* _scene = nullptr;

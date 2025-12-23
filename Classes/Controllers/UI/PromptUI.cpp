@@ -101,4 +101,16 @@ void PromptUI::popFriendshipTextAt(const Vec2& worldPos, const std::string& text
     label->runAction(Sequence::create(Spawn::create(up, fade, nullptr), rm, nullptr));
 }
 
+void PromptUI::popCenterBigText(const std::string& text, const Color3B& color) {
+    auto label = Label::createWithTTF(text, "fonts/Marker Felt.ttf", 48);
+    label->setColor(color);
+    auto vs = Director::getInstance()->getVisibleSize();
+    auto origin = Director::getInstance()->getVisibleOrigin();
+    label->setPosition(origin + Vec2(vs.width * 0.5f, vs.height * 0.5f));
+    if (_scene) _scene->addChild(label, 1000);
+    auto fade = FadeOut::create(1.2f);
+    auto rm = RemoveSelf::create();
+    label->runAction(Sequence::create(fade, rm, nullptr));
+}
+
 }

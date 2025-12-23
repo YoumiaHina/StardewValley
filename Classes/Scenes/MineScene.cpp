@@ -116,8 +116,11 @@ void MineScene::positionPlayerInitial() {
 void MineScene::onSpacePressed() {
     if (_inTransition) return;
     _inTransition = true;
+    auto& ws = Game::globalState();
+    std::size_t prevElevatorCount = ws.abyssElevatorFloors.size();
     auto act = _interactor ? _interactor->onSpacePressed() : Controllers::MineInteractor::SpaceAction::None;
     if (act == Controllers::MineInteractor::SpaceAction::Descend) {
+        bool unlockedNewElevatorFloor = ws.abyssElevatorFloors.size() > prevElevatorCount;
         // 重置当层状态并根据 TMX 对象层生成
         if (_monsters) { _monsters->resetFloor(); _monsters->generateInitialWave(); }
         // 新楼层出生点：优先 Appear，否则楼梯中心
@@ -127,6 +130,9 @@ void MineScene::onSpacePressed() {
         // UI 提示：显示当前楼层
         if (_uiController && _player) {
             if (_mapController) _uiController->popTextAt(_mapController->getPlayerPosition(_player->getPosition()), StringUtils::format("Floor %d", _map->currentFloor()), Color3B::YELLOW);
+        }
+        if (_uiController && unlockedNewElevatorFloor) {
+            _uiController->popCenterBigText("You get a new sword!!!", Color3B::GREEN);
         }
     } else if (act == Controllers::MineInteractor::SpaceAction::UseElevator) {
         if (_elevator) _elevator->togglePanel();
@@ -184,14 +190,19 @@ bool MineScene::isMovementBlockedByScene() const {
 
 void MineScene::onKeyPressedHook(EventKeyboard::KeyCode code) {
     if (code == EventKeyboard::KeyCode::KEY_N) {
-        // 调试：直接去下一层
+        auto& ws = Game::globalState();
+        std::size_t prevElevatorCount = ws.abyssElevatorFloors.size();
         _map->descend(1);
+        bool unlockedNewElevatorFloor = ws.abyssElevatorFloors.size() > prevElevatorCount;
         if (_monsters) { _monsters->resetFloor(); _monsters->generateInitialWave(); }
         if (_player) _player->setPosition(_map->floorSpawnPos());
         if (_uiController) _uiController->setMineFloorNumber(_map->currentFloor());
         if (_uiController) _uiController->refreshHotbar();
         if (_uiController && _player) {
             if (_mapController) _uiController->popTextAt(_mapController->getPlayerPosition(_player->getPosition()), StringUtils::format("Floor %d", _map->currentFloor()), Color3B::YELLOW);
+            if (unlockedNewElevatorFloor) {
+                _uiController->popCenterBigText("You get a new sword!!!", Color3B::GREEN);
+            }
         }
     }
 }
