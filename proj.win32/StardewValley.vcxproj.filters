@@ -367,9 +367,6 @@
     <ClCompile Include="..\Classes\Game\NPC\AbigailNpc.cpp">
       <Filter>Classes\Game\NPC</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\Game\NPC\NpcBase.cpp">
-      <Filter>Classes\Game\NPC</Filter>
-    </ClCompile>
     <ClCompile Include="..\Classes\Game\NPC\PierreNpc.cpp">
       <Filter>Classes\Game\NPC</Filter>
     </ClCompile>
