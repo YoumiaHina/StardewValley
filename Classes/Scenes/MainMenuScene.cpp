@@ -1,6 +1,3 @@
-/**
- * MainMenuScene: Minimal main menu with Start/Quit.
- */
 #include "Scenes/MainMenuScene.h"
 #include "Scenes/RoomScene.h"
 #include "Scenes/FarmScene.h"
@@ -27,8 +24,6 @@ bool MainMenuScene::init() {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     auto origin = Director::getInstance()->getVisibleOrigin();
 
-    // Background image (placed at Resources/res/start_bg.png)
-    // Scales to cover the entire screen while preserving aspect ratio.
     auto bg = Sprite::create("MainMenu.png");
     if (bg) {
         bg->setAnchorPoint(Vec2(0.5f, 0.5f));
@@ -40,7 +35,6 @@ bool MainMenuScene::init() {
         bg->setScale(std::max(scaleX, scaleY));
         this->addChild(bg, 0);
     } else {
-        // Fallback solid background if image is missing
         auto solid = LayerColor::create(Color4B(26, 39, 63, 255));
         this->addChild(solid, 0);
     }

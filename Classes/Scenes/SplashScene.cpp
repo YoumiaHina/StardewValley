@@ -1,6 +1,3 @@
-/**
- * SplashScene: Simple boot scene showing a title and switching to menu.
- */
 #include "Scenes/SplashScene.h"
 #include "Scenes/MainMenuScene.h"
 #include "cocos2d.h"
@@ -26,7 +23,6 @@ bool SplashScene::init() {
         this->addChild(sprite, 0);
     }
 
-    // Delay then go to main menu
     this->scheduleOnce(CC_SCHEDULE_SELECTOR(SplashScene::goToMainMenu), 1.5f);
     return true;
 }

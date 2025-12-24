@@ -22,7 +22,7 @@ USING_NS_CC;
 Scene* RoomScene::createScene() { return RoomScene::create(); }
 
 bool RoomScene::init() {
-    if (!initBase(/*worldScale*/3.0f, /*buildCraftPanel*/false, /*enableToolOnSpace*/false, /*enableToolOnLeftClick*/false)) return false;
+    if (!initBase(3.0f, false, false, false)) return false;
     auto& ws = Game::globalState();
     ws.lastScene = static_cast<int>(Game::SceneKind::Room);
     Managers::AudioManager::getInstance().playBackgroundFor(Managers::SceneZone::Room);
@@ -50,7 +50,6 @@ void RoomScene::setSpawnInsideDoor() {
     _player->setMoving(false);
 }
 
-// SceneBase overrides
 Controllers::IMapController* RoomScene::createMapController(Node* worldNode) {
     _roomMap = new Controllers::RoomMapController(worldNode);
     _roomMap->init();
