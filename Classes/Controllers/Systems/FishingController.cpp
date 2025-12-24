@@ -13,6 +13,7 @@ struct FestivalFishDef {
     Game::ItemType itemType;
 };
 
+// 钓鱼节可获得的特殊鱼定义表。
 const FestivalFishDef kFestivalFish[] = {
     { "fish/carp.png", "Carp", Game::ItemType::Carp },
     { "fish/Bream.png", "Bream", Game::ItemType::BreamFish },
@@ -34,11 +35,13 @@ const FestivalFishDef kFestivalFish[] = {
     { "fish/Shrimp.png", "Shrimp", Game::ItemType::Shrimp }
 };
 
+// 判断今天是否为钓鱼节，用于切换奖励鱼种。
 inline bool isFishingFestivalToday() {
     auto& ws = Game::globalState();
     return ws.seasonIndex == 1 && ws.dayOfSeason == GameConfig::FESTIVAL_DAY;
 }
 
+// 在钓鱼节当天，随机选出一条节日鱼。
 inline int randomFestivalFishIndex() {
     int count = static_cast<int>(sizeof(kFestivalFish) / sizeof(kFestivalFish[0]));
     if (count <= 0) return -1;
@@ -51,6 +54,7 @@ namespace Controllers {
 void FishingController::buildOverlayAt(const Vec2& worldPos) {
     if (_overlay) destroyOverlay();
     if (!_scene) return;
+    // 创建 UI 覆盖层并放到世界坐标附近。
     _overlay = Node::create();
     Vec2 pos = worldPos;
     if (_worldNode) pos = _worldNode->convertToWorldSpace(worldPos);
@@ -77,6 +81,7 @@ void FishingController::buildOverlayAt(const Vec2& worldPos) {
         _overlay->addChild(_bgSprite, 0);
     }
 
+    // 绿色捕获条所在的竖直轨道背景。
     _barBg = DrawNode::create();
     _overlay->addChild(_barBg);
     _barBg->setPosition(Vec2(-static_cast<float>(GameConfig::TILE_SIZE), 0));
@@ -93,6 +98,7 @@ void FishingController::buildOverlayAt(const Vec2& worldPos) {
     _progressLabel->setPosition(Vec2(-static_cast<float>(GameConfig::TILE_SIZE), h/2 + 22 + 2.0f * static_cast<float>(GameConfig::TILE_SIZE)));
     _overlay->addChild(_progressLabel);
 
+    // 选择本次小游戏中要捕获的鱼纹理：节日当天从表中随机选择。
     _festivalFishIndex = -1;
     const char* texturePath = "fish/Bream.png";
     if (isFishingFestivalToday()) {
@@ -105,6 +111,7 @@ void FishingController::buildOverlayAt(const Vec2& worldPos) {
     _fishSprite = Sprite::create(texturePath);
     if (_fishSprite) { _fishSprite->setScale(0.6f); _overlay->addChild(_fishSprite, 1); }
 
+    // 注册鼠标事件：按住左键提升绿色条，松开则下落。
     _mouse = EventListenerMouse::create();
     _mouse->onMouseDown = [this](EventMouse* e){ if (!_active) return; if (e->getMouseButton() == EventMouse::MouseButton::BUTTON_LEFT) _hold = true; };
     _mouse->onMouseUp =   [this](EventMouse* e){ if (!_active) return; if (e->getMouseButton() == EventMouse::MouseButton::BUTTON_LEFT) _hold = false; };
@@ -120,6 +127,7 @@ void FishingController::destroyOverlay() {
     _barHeight = 220.0f;
 }
 
+// 在湖泊附近开始一次标准钓鱼（需要靠近水面）。
 void FishingController::startAt(const Vec2& worldPos) {
     if (_active) return;
     if (_cooldown > 0.0f) {
@@ -154,6 +162,7 @@ void FishingController::startAt(const Vec2& worldPos) {
     Game::globalState().fishingActive = true;
 }
 
+// 任意位置开始钓鱼小游戏，主要用于节日等不受限制的场景。
 void FishingController::startAnywhere(const Vec2& worldPos) {
     if (_active) return;
     if (_cooldown > 0.0f) {
@@ -184,12 +193,13 @@ void FishingController::startAnywhere(const Vec2& worldPos) {
 }
 
 void FishingController::update(float dt) {
+    // 先更新冷却计时；冷却中直接返回不处理逻辑。
     if (_cooldown > 0.0f) {
         _cooldown -= dt;
         if (_cooldown < 0.0f) _cooldown = 0.0f;
     }
     if (!_active) return;
-    // physics for catch bar
+    // 绿色捕获条的“受力”模拟：按住时上升，松开时下落，并带阻尼。
     float accelUp = 240.0f; float gravity = 280.0f; float damping = 0.98f;
     _barCatchVel += (_hold ? accelUp : -gravity) * dt;
     _barCatchVel *= damping;
@@ -197,7 +207,7 @@ void FishingController::update(float dt) {
     if (_barCatchPos < 0) { _barCatchPos = 0; _barCatchVel = 0; }
     if (_barCatchPos > _barHeight) { _barCatchPos = _barHeight; _barCatchVel = 0; }
 
-    // fish movement (random jitter)
+    // 鱼在轨道上的随机游动，带有边界弹回。
     float fishAccel = ((std::rand() % 200) - 100) * 4.0f;
     _fishVel += fishAccel * dt;
     _fishVel = std::max(-200.0f, std::min(200.0f, _fishVel));
@@ -205,7 +215,7 @@ void FishingController::update(float dt) {
     if (_fishPos < 20) { _fishPos = 20; _fishVel = std::abs(_fishVel); }
     if (_fishPos > _barHeight - 20) { _fishPos = _barHeight - 20; _fishVel = -std::abs(_fishVel); }
 
-    // overlap -> progress
+    // 统计绿色条与鱼的重叠程度，决定“捕获进度”的增减。
     float catchSize = 54.0f; // green bar height
     float diff = std::abs((_barCatchPos) - (_fishPos));
     bool overlap = diff <= catchSize * 0.5f;
@@ -213,7 +223,7 @@ void FishingController::update(float dt) {
     _progress = std::max(0.0f, std::min(100.0f, _progress + gain * dt));
     _timeLeft -= dt;
 
-    // draw
+    // 绘制捕获条、进度条以及鱼的当前位置。
     if (_barCatch) {
         _barCatch->clear();
         float w = 28.0f; float h = catchSize;
@@ -245,7 +255,7 @@ void FishingController::update(float dt) {
         _fishSprite->setPosition(Vec2(-static_cast<float>(GameConfig::TILE_SIZE), _fishPos - _barHeight*0.5f));
     }
 
-    if (_progress >= 100.0f) {
+    // 达到 100% 视为成功；时间耗尽视为失败。
         Vec2 posWorld = _worldNode ? _worldNode->convertToNodeSpace(_overlay->getPosition()) : _overlay->getPosition();
         onSuccess(posWorld);
     } else if (_timeLeft <= 0.0f) {
@@ -254,6 +264,7 @@ void FishingController::update(float dt) {
     }
 }
 
+// 钓鱼成功：奖励鱼类、增加经验并播放提示。
 void FishingController::onSuccess(const Vec2& worldPos) {
     _active = false;
     destroyOverlay();
@@ -262,6 +273,7 @@ void FishingController::onSuccess(const Vec2& worldPos) {
         auto& skill = Game::SkillTreeSystem::getInstance();
         int qty = skill.adjustFishCatchQuantityForFishing(1);
         Game::ItemType itemType = Game::ItemType::BreamFish;
+        // 钓鱼节当天改为节日鱼，并在提示文字中显示鱼名。
         if (isFishingFestivalToday() && _festivalFishIndex >= 0) {
             int count = static_cast<int>(sizeof(kFestivalFish) / sizeof(kFestivalFish[0]));
             if (_festivalFishIndex < count) {
@@ -289,6 +301,7 @@ void FishingController::onSuccess(const Vec2& worldPos) {
     }
 }
 
+// 钓鱼失败：只重置状态并给出“逃跑”提示。
 void FishingController::onFail(const Vec2& worldPos) {
     _active = false;
     destroyOverlay();
@@ -300,6 +313,7 @@ void FishingController::onFail(const Vec2& worldPos) {
     }
 }
 
+// 主动取消当前钓鱼过程（例如玩家切换场景时调用）。
 void FishingController::cancel() {
     if (!_active) return;
     _active = false;

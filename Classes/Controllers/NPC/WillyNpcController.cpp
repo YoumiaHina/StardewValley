@@ -12,14 +12,17 @@ namespace Controllers {
 
 namespace {
 
+// 方向枚举：用于决定动画序列与静态贴图。
 constexpr int kDirDown = 0;
 constexpr int kDirRight = 1;
 constexpr int kDirUp = 2;
 constexpr int kDirLeft = 3;
 
+// 行为标签：区分“行走动画”和“巡逻路径”两个 Action。
 constexpr int kWalkActionTag = 21001;
 constexpr int kPatrolActionTag = 21002;
 
+// 根据方向返回用于拼接贴图路径的 token。
 std::string dirToken(int dir) {
   switch (dir) {
     case kDirUp: return "up";
@@ -30,6 +33,7 @@ std::string dirToken(int dir) {
   }
 }
 
+// 根据位移向量估算 NPC 面朝的方向。
 int dirFromDelta(const cocos2d::Vec2& d) {
   float ax = std::abs(d.x);
   float ay = std::abs(d.y);
@@ -37,6 +41,7 @@ int dirFromDelta(const cocos2d::Vec2& d) {
   return d.y >= 0 ? kDirUp : kDirDown;
 }
 
+// 构建指定 NPC 在某个方向上的行走动画帧序列。
 cocos2d::Animation* buildWalkAnim(const std::string& namePrefix, int dir) {
   auto anim = cocos2d::Animation::create();
   if (!anim) return nullptr;
@@ -49,6 +54,7 @@ cocos2d::Animation* buildWalkAnim(const std::string& namePrefix, int dir) {
   return anim;
 }
 
+// 根据 NPC 名称、方向与帧号生成立绘贴图路径。
 std::string framePath(const std::string& namePrefix, int dir, int frameIndex1Based) {
   std::string token = dirToken(dir);
   return "NPC/" + namePrefix + "/" + namePrefix + "-" + token + "-" + std::to_string(frameIndex1Based) + ".png";
@@ -67,6 +73,7 @@ WillyNpcController::WillyNpcController(
       ui_(ui),
       inventory_(std::move(inventory)),
       dialogue_(dialogue) {
+  // 基于地图中心和偏移量，计算 Willy 的出生位置，并尝试微调避免与障碍重叠。
   if (!map_ || !world_node_) return;
   cocos2d::Size size = map_->getContentSize();
   tile_ = map_->tileSize();
@@ -107,6 +114,7 @@ WillyNpcController::WillyNpcController(
       }
     }
   }
+  // 把 Willy 精灵添加到地图图层，并记录为后续巡逻的基准点。
   sprite->setPosition(pos);
   map_->addActorToMap(sprite, 22);
   sprite_ = sprite;
@@ -132,6 +140,7 @@ WillyNpcController::~WillyNpcController() {
   CC_SAFE_RELEASE(walk_right_);
 }
 
+// 计算玩家是否在指定距离内，并返回一个适合显示 UI 提示的世界坐标。
 bool WillyNpcController::isNear(const cocos2d::Vec2& player_pos,
                                 float max_dist,
                                 cocos2d::Vec2& out_pos) const {
@@ -147,6 +156,7 @@ bool WillyNpcController::isNear(const cocos2d::Vec2& player_pos,
   return true;
 }
 
+// 从当前背包选中物品中计算赠礼带来的好感增量，并在成功时消耗 1 个物品。
 int WillyNpcController::friendshipGainForGift() const {
   if (!inventory_ || !npc_) return 0;
   if (inventory_->size() <= 0) return 0;
@@ -162,7 +172,9 @@ int WillyNpcController::friendshipGainForGift() const {
 
 void WillyNpcController::update(const cocos2d::Vec2& player_pos) {
   if (!ui_ || !map_) return;
+  // 依据地图环境层高度调整绘制顺序，让 NPC 正确被环境遮挡。
   if (sprite_) map_->sortActorWithEnvironment(sprite_);
+  // 当任意 UI 面板打开时，暂停巡逻并隐藏交互提示。
   bool interacting = ui_->isDialogueVisible()
                      || ui_->isNpcSocialVisible()
                      || ui_->isStorePanelVisible()
@@ -181,10 +193,12 @@ void WillyNpcController::update(const cocos2d::Vec2& player_pos) {
     }
     return;
   }
+  // UI 关闭后恢复巡逻。
   if (paused_by_interaction_) {
     startPatrol();
     paused_by_interaction_ = false;
   }
+  // 玩家靠近指定半径时显示“对话/赠礼”提示。
   float max_dist = map_->tileSize() * 1.5f;
   cocos2d::Vec2 pos;
   bool is_near = isNear(player_pos, max_dist, pos);
@@ -197,6 +211,7 @@ void WillyNpcController::update(const cocos2d::Vec2& player_pos) {
   }
 }
 
+// 为 Willy 构建一个循环巡逻路线，遇到碰撞会由地图帮助调整目的地。
 void WillyNpcController::startPatrol() {
   if (!sprite_ || !map_) return;
   sprite_->stopActionByTag(kPatrolActionTag);
@@ -205,6 +220,7 @@ void WillyNpcController::startPatrol() {
   const float pause = 5.0f;
   const float radius = 8.0f;
 
+  // 辅助函数：根据一组相对偏移构建一串“走到目标+站立+停顿”的动作序列。
   auto buildPatrolActions = [&](const std::vector<cocos2d::Vec2>& offsets) {
     cocos2d::Vec2 current = sprite_->getPosition();
     cocos2d::Vector<cocos2d::FiniteTimeAction*> actions;
@@ -225,6 +241,7 @@ void WillyNpcController::startPatrol() {
     return actions;
   };
 
+  // 优先尝试一条较长的路径，不可行时再退化为短路线。
   cocos2d::Vector<cocos2d::FiniteTimeAction*> actions = buildPatrolActions({
       cocos2d::Vec2(2.0f, 0.0f),
       cocos2d::Vec2(2.0f, 2.0f),
@@ -247,6 +264,7 @@ void WillyNpcController::startPatrol() {
   sprite_->runAction(rep);
 }
 
+// 根据方向播放对应的循环行走动画，并记录当前朝向。
 void WillyNpcController::playWalk(int dir) {
   if (!sprite_) return;
   sprite_->stopActionByTag(kWalkActionTag);
@@ -266,6 +284,7 @@ void WillyNpcController::playWalk(int dir) {
   sprite_->runAction(rep);
 }
 
+// 切换到静止站立帧，同时记录 NPC 面朝方向。
 void WillyNpcController::setStanding(int dir) {
   if (!sprite_) return;
   sprite_->stopActionByTag(kWalkActionTag);
@@ -275,6 +294,7 @@ void WillyNpcController::setStanding(int dir) {
   if (sprite_->getTexture()) sprite_->getTexture()->setAliasTexParameters();
 }
 
+// 空间键交互：若手上无礼物则开启对话，有礼物则尝试赠礼并更新好感。
 void WillyNpcController::handleTalkAt(const cocos2d::Vec2& player_pos) {
   if (!ui_ || !map_) return;
   float max_dist = map_->tileSize() * 1.5f;
@@ -286,10 +306,12 @@ void WillyNpcController::handleTalkAt(const cocos2d::Vec2& player_pos) {
   bool hasItem = inventory_ && inventory_->size() > 0 &&
                  inventory_->selectedKind() == Game::SlotKind::Item &&
                  inventory_->selectedSlot().itemQty > 0;
+  // 没有可赠送的物品时，仅触发对话树。
   if (!hasItem) {
     if (dialogue_) dialogue_->startDialogue(key, npc_name);
     return;
   }
+  // 有礼物时，根据当日是否已赠礼决定是否允许再次送礼并结算好感。
   auto& ws = Game::globalState();
   int current = 0;
   auto it = ws.npcFriendship.find(key);
@@ -310,6 +332,7 @@ void WillyNpcController::handleTalkAt(const cocos2d::Vec2& player_pos) {
   if (gained <= 0) return;
   ws.npcLastGiftDay[key] = today;
   if (ui_) ui_->refreshHotbar();
+  // 好感值上限 250，更新后在头顶弹出当前好感数字。
   int next = current + gained;
   if (next > 250) next = 250;
   ws.npcFriendship[key] = next;
@@ -321,6 +344,7 @@ void WillyNpcController::handleTalkAt(const cocos2d::Vec2& player_pos) {
                            cocos2d::Color3B::WHITE);
 }
 
+// 右键点击 Willy 精灵时，打开对应的社交面板。
 bool WillyNpcController::handleRightClick(cocos2d::EventMouse* e) {
   if (!ui_ || !sprite_) return false;
   if (e->getMouseButton() != cocos2d::EventMouse::MouseButton::BUTTON_RIGHT)

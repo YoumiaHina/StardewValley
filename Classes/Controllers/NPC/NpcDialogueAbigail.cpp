@@ -13,12 +13,14 @@ int firstNodeForWilly();
 DialogueNode nodeForWilly(int id);
 
 int NpcDialogueManager::firstNodeFor(int npcKey) const {
+  // 不同 npcKey 对应不同 NPC：当前 1=Abigail，2=Willy。
   if (npcKey == 1) return firstNodeForAbigail();
   if (npcKey == 2) return firstNodeForWilly();
   return 0;
 }
 
 DialogueNode NpcDialogueManager::nodeFor(int npcKey, int id) const {
+  // 将“具体节点构造”分发给各自的助手函数，便于按 NPC 拆分脚本。
   if (npcKey == 1) return nodeForAbigail(id);
   if (npcKey == 2) return nodeForWilly(id);
   DialogueNode n;
@@ -32,6 +34,7 @@ void NpcDialogueManager::presentCurrent() {
     close();
     return;
   }
+  // 将当前节点的所有选项文本提取出来交给 UI 显示。
   std::vector<std::string> optionTexts;
   for (auto& o : node.options) optionTexts.push_back(o.text);
   ui_->showDialogue(
@@ -54,6 +57,7 @@ void NpcDialogueManager::startDialogue(int npcKey, const std::string& npcName) {
 void NpcDialogueManager::advance() {
   if (!active_) return;
   DialogueNode node = nodeFor(npcKey_, currentId_);
+  // 有选项时，由 selectOption 决定下一节点，不在此自动前进。
   if (!node.options.empty()) return;
   if (node.terminal) {
     close();
@@ -78,6 +82,7 @@ void NpcDialogueManager::selectOption(int index) {
     close();
     return;
   }
+  // 若是“终结节点但仍有文本”，先展示最后一句，再由 advance 关闭。
   if (nextNode.terminal && nextNode.options.empty()) {
     presentCurrent();
     return;
@@ -91,6 +96,7 @@ void NpcDialogueManager::close() {
   if (ui_) ui_->hideDialogue();
 }
 
+// Abigail 对话脚本：根据 id 返回对应的对话节点与选项。
 int firstNodeForAbigail() {
   static int variants[] = {1, 10, 20, 30, 40, 50, 60, 70, 80, 90};
   int idx = std::rand() % 10;

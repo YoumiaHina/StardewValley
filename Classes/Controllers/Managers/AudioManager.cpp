@@ -22,6 +22,7 @@ void AudioManager::playBackgroundFor(SceneZone zone) {
     const std::string path = pathForZone(zone);
     if (path.empty()) return;
 
+    // 若请求播放的曲目与当前一致且仍在播放，则不重复切歌。
     if (!_currentPath.empty() && _currentPath == path) {
         if (_currentAudioId != -1) {
             auto state = AudioEngine::getState(_currentAudioId);
@@ -29,6 +30,7 @@ void AudioManager::playBackgroundFor(SceneZone zone) {
         }
     }
 
+    // 停止旧曲目，避免多首 BGM 叠加。
     if (_currentAudioId != -1) {
         AudioEngine::stop(_currentAudioId);
         _currentAudioId = -1;

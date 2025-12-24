@@ -11,8 +11,12 @@ namespace Controllers {
 
 class UIController;
 
+// Willy NPC 控制器（渔夫）：
+// - 控制 Willy 在海滩地图中的出生位置、巡逻与朝向。
+// - 处理与玩家的对话、赠礼与社交面板，使用 NpcDialogueManager 管理多段对话。
 class WillyNpcController : public NpcControllerBase {
  public:
+  // 构造：在地图上放置 Willy 精灵，并开始巡逻。
   WillyNpcController(IMapController* map,
                      cocos2d::Node* world_node,
                      UIController* ui,
@@ -20,9 +24,12 @@ class WillyNpcController : public NpcControllerBase {
                      NpcDialogueManager* dialogue);
   ~WillyNpcController() override;
 
+  // 每帧更新：根据玩家距离显示提示，并在交互中暂停巡逻。
   void update(const cocos2d::Vec2& player_pos) override;
 
+  // 处理空间键交互：触发对话或尝试赠礼并更新好感度。
   void handleTalkAt(const cocos2d::Vec2& player_pos) override;
+  // 处理右键点击：打开 Willy 社交面板。
   bool handleRightClick(cocos2d::EventMouse* e) override;
 
  private:

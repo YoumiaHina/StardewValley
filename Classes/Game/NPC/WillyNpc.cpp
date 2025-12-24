@@ -6,6 +6,10 @@ const char* Willy::name() const { return "Willy"; }
 
 const char* Willy::texturePath() const { return "NPC/Willy/Willy-standing.png"; }
 
+// Willy 赠礼好感规则：
+// - 对各种鱼与海产有较高好感；
+// - 其次是玉米等少量农作物；
+// - 其它物品给予中等基础好感。
 int Willy::friendshipGainForGift(ItemType itemType) const {
   switch (itemType) {
     case ItemType::Carp:

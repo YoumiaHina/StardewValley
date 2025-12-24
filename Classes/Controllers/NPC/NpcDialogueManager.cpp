@@ -6,6 +6,7 @@ using namespace cocos2d;
 
 namespace Controllers {
 
+// 根据 NPC 键随机选择一组起始对话节点，使首句台词具备一定多样性。
 int NpcDialogueManager::firstNodeFor(int npcKey) const {
   if (npcKey == 1) {
     static int variants[] = {1, 10, 20, 30, 40, 50, 60, 70, 80, 90};
@@ -20,6 +21,7 @@ int NpcDialogueManager::firstNodeFor(int npcKey) const {
   return 0;
 }
 
+// 按 npcKey 与节点 id 查找对应的对话节点；未匹配时返回 id 为 0 的空节点。
 DialogueNode NpcDialogueManager::nodeFor(int npcKey, int id) const {
   DialogueNode n;
   if (npcKey == 1) {
@@ -270,6 +272,7 @@ DialogueNode NpcDialogueManager::nodeFor(int npcKey, int id) const {
   return n;
 }
 
+// 把当前对话节点映射为 UI 文本与选项，并弹出对话框，将确认/选项回调绑定到内部处理函数。
 void NpcDialogueManager::presentCurrent() {
   if (!ui_ || !active_) return;
   DialogueNode node = nodeFor(npcKey_, currentId_);
@@ -287,6 +290,7 @@ void NpcDialogueManager::presentCurrent() {
       [this]() { advance(); });
 }
 
+// 外部入口：为指定 NPC 开启一轮对话，会随机挑选起始节点并立即展示。
 void NpcDialogueManager::startDialogue(int npcKey, const std::string& npcName) {
   npcKey_ = npcKey;
   npcName_ = npcName;
@@ -296,6 +300,7 @@ void NpcDialogueManager::startDialogue(int npcKey, const std::string& npcName) {
   presentCurrent();
 }
 
+// 在当前节点没有选项时推进对话；若节点标记为终端则直接关闭，否则当前实现选择结束对话。
 void NpcDialogueManager::advance() {
   if (!active_) return;
   DialogueNode node = nodeFor(npcKey_, currentId_);
@@ -308,6 +313,7 @@ void NpcDialogueManager::advance() {
   close();
 }
 
+// 处理玩家在 UI 中选择的分支，根据选项跳转到下一节点，并视是否为终端节点决定是否继续展示。
 void NpcDialogueManager::selectOption(int index) {
   if (!active_) return;
   DialogueNode node = nodeFor(npcKey_, currentId_);
@@ -330,6 +336,7 @@ void NpcDialogueManager::selectOption(int index) {
   presentCurrent();
 }
 
+// 关闭对话并重置内部状态，同时隐藏 UI 中的对话框。
 void NpcDialogueManager::close() {
   active_ = false;
   currentId_ = 0;
