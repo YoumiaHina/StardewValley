@@ -55,9 +55,9 @@ private:
     float _barCatchVel = 0.0f;
     float _fishPos = 140.0f;
     float _fishVel = 0.0f;
-    float _progress = 0.0f; // 0..100
-    float _timeLeft = 12.0f; // seconds
-    bool _hold = false; // input hold
+    float _progress = 0.0f; 
+    float _timeLeft = 12.0f; 
+    bool _hold = false; 
 
     float _cooldown = 0.0f;
 

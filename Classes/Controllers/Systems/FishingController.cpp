@@ -61,16 +61,13 @@ void FishingController::buildOverlayAt(const Vec2& worldPos) {
     _overlay->setPosition(pos + Vec2(220.0f, 20.0f));
     _scene->addChild(_overlay, 5);
 
-    // Expand catch bar vertical range by 3 tiles up and down (total +6 tiles)
     _barHeight = 220.0f + 6.0f * static_cast<float>(GameConfig::TILE_SIZE);
 
-    // Background image (Fishing game map)
     _bgSprite = Sprite::create("fish/Fishing game map.png");
     if (_bgSprite) {
         _bgSprite->setAnchorPoint(Vec2(0.5f, 0.5f));
         _bgSprite->setPosition(Vec2(0, 0));
         auto vs = Director::getInstance()->getVisibleSize();
-        // Scale to occupy ~60% of screen width/height while preserving aspect
         auto texSize = _bgSprite->getContentSize();
         float targetW = vs.width * 0.6f;
         float targetH = vs.height * 0.6f;
@@ -92,7 +89,6 @@ void FishingController::buildOverlayAt(const Vec2& worldPos) {
     _overlay->addChild(_barCatch);
     _progressFill = DrawNode::create();
     _overlay->addChild(_progressFill);
-    // Shift vertical progress meter right by 1 tile (net left offset becomes -1.5 tiles)
     _progressFill->setPosition(Vec2(-static_cast<float>(GameConfig::TILE_SIZE) * 1.5f, 0));
     _progressLabel = Label::createWithTTF("Catch 0%", "fonts/Marker Felt.ttf", 18);
     _progressLabel->setPosition(Vec2(-static_cast<float>(GameConfig::TILE_SIZE), h/2 + 22 + 2.0f * static_cast<float>(GameConfig::TILE_SIZE)));
@@ -123,7 +119,6 @@ void FishingController::destroyOverlay() {
     _mouse = nullptr;
     if (_overlay) { _overlay->removeFromParent(); _overlay = nullptr; }
     _barBg = nullptr; _barCatch = nullptr; _progressFill = nullptr; _progressLabel = nullptr; _fishSprite = nullptr;
-    // Restore default height after overlay destroyed
     _barHeight = 220.0f;
 }
 
@@ -233,14 +228,13 @@ void FishingController::update(float dt) {
     }
     if (_progressFill) {
         _progressFill->clear();
-        // Extend meter by 2 tiles up and 2 tiles down (total +4 tiles)
         float extra = static_cast<float>(GameConfig::TILE_SIZE) * 2.0f;
-        float pv = _barHeight + extra * 2.0f;   // extended total height
-        float pw = 12.0f;                // meter width
+        float pv = _barHeight + extra * 2.0f;   
+        float pw = 12.0f;                
         float ratio = _progress / 100.0f;
-        float fillH = pv * ratio;        // fill respects extended range
-        float x = 40.0f;                 // place to the right of track center
-        float yBottom = -_barHeight * 0.5f - extra; // push bottom down by 2 tiles
+        float fillH = pv * ratio;        
+        float x = 40.0f;               
+        float yBottom = -_barHeight * 0.5f - extra; 
         Vec2 bl(x, yBottom);
         Vec2 br(x + pw, yBottom);
         Vec2 tr(x + pw, yBottom + fillH);
@@ -323,5 +317,4 @@ void FishingController::cancel() {
     _cooldown = 1.0f;
     Game::globalState().fishingActive = false;
 }
-// namespace Controllers
 }
