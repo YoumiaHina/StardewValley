@@ -255,6 +255,7 @@ void FishingController::update(float dt) {
         _fishSprite->setPosition(Vec2(-static_cast<float>(GameConfig::TILE_SIZE), _fishPos - _barHeight*0.5f));
     }
 
+    if (_progress >= 100.0f) {
     // 达到 100% 视为成功；时间耗尽视为失败。
         Vec2 posWorld = _worldNode ? _worldNode->convertToNodeSpace(_overlay->getPosition()) : _overlay->getPosition();
         onSuccess(posWorld);
