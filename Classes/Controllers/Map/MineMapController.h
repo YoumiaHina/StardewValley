@@ -162,9 +162,6 @@ private:
     Game::MineMap* _entrance = nullptr;           // 入口层 TMX 封装（floor 0）
     Game::MineMap* _floorMap = nullptr;           // 普通楼层 TMX 封装（floor 1~120）
     cocos2d::Node* _mapNode = nullptr;            // 所有地图节点挂载的根节点
-    // 矿物运行时状态容器：作为 MineralSystem 的“唯一来源”，这里持有数据，
-    // 系统负责根据该列表生成/同步可视化节点。
-    std::vector<Game::MineralData> _minerals;
     Controllers::MineralSystem _mineralSystem;    // 矿物系统：生成/同步矿石节点
     Controllers::StairSystem _stairSystem;        // 楼梯系统：生成/同步楼梯节点
     std::vector<cocos2d::Rect> _dynamicColliders; // 采矿节点临时碰撞

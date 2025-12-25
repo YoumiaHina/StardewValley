@@ -23,9 +23,9 @@ void MineralSystem::clearVisuals() {
 }
 
 void MineralSystem::syncVisuals() {
-    if (!_root || !_runtime) return;
+    if (!_root) return;
     clearVisuals();
-    for (const auto& data : *_runtime) {
+    for (const auto& data : _minerals) {
         auto mineral = Game::Mineral::create(data.texture);
         if (!mineral) continue;
         mineral->setType(data.type);
@@ -42,10 +42,9 @@ void MineralSystem::syncVisuals() {
     }
 }
 
-void MineralSystem::generateNodesForFloor(std::vector<Game::MineralData>& outNodes,
-                                          const std::vector<Vec2>& candidates,
-                                          const std::vector<Vec2>& stairWorldPos) const {
-    outNodes.clear();
+void MineralSystem::generateNodesForFloor(const std::vector<Vec2>& candidates,
+                                          const std::vector<Vec2>& stairWorldPos) {
+    _minerals.clear();
     if (!_map || _map->currentFloor() <= 0) return;
 
     std::mt19937 rng{ std::random_device{}() };
@@ -105,7 +104,7 @@ void MineralSystem::generateNodesForFloor(std::vector<Game::MineralData>& outNod
             m.sizeTiles = 1;
             m.pos = p;
             m.texture = "Mineral/goldOre.png";
-            outNodes.push_back(m);
+            _minerals.push_back(m);
             placed = true;
         } else if (allowIron && oreRoll < 0.03f) {
             Game::MineralData m;
@@ -114,7 +113,7 @@ void MineralSystem::generateNodesForFloor(std::vector<Game::MineralData>& outNod
             m.sizeTiles = 1;
             m.pos = p;
             m.texture = "Mineral/ironOre.png";
-            outNodes.push_back(m);
+            _minerals.push_back(m);
             placed = true;
         } else if (allowCopper && oreRoll < 0.05f) {
             Game::MineralData m;
@@ -123,7 +122,7 @@ void MineralSystem::generateNodesForFloor(std::vector<Game::MineralData>& outNod
             m.sizeTiles = 1;
             m.pos = p;
             m.texture = "Mineral/copperOre.png";
-            outNodes.push_back(m);
+            _minerals.push_back(m);
             placed = true;
         }
         if (placed) {
@@ -137,7 +136,7 @@ void MineralSystem::generateNodesForFloor(std::vector<Game::MineralData>& outNod
             m.sizeTiles = 2;
             m.pos = p;
             m.texture = "Rock/hugeRock.png";
-            outNodes.push_back(m);
+            _minerals.push_back(m);
         } else if (r < 0.25f) {
             int hi = hardIdx(rng);
             Game::MineralData m;
@@ -148,7 +147,7 @@ void MineralSystem::generateNodesForFloor(std::vector<Game::MineralData>& outNod
             if (hi == 1) m.texture = "Rock/hardRock1.png";
             else if (hi == 2) m.texture = "Rock/hardRock2.png";
             else m.texture = "Rock/hardRock3.png";
-            outNodes.push_back(m);
+            _minerals.push_back(m);
         } else {
             int ni = normalIdx(rng);
             Game::MineralData m;
@@ -163,7 +162,7 @@ void MineralSystem::generateNodesForFloor(std::vector<Game::MineralData>& outNod
                 case 4: m.texture = "Rock/Rock4.png"; break;
                 default: m.texture = "Rock/Rock5.png"; break;
             }
-            outNodes.push_back(m);
+            _minerals.push_back(m);
         }
     }
 
@@ -180,7 +179,7 @@ void MineralSystem::generateNodesForFloor(std::vector<Game::MineralData>& outNod
             m.sizeTiles = 2;
             m.pos = p;
             m.texture = "Rock/hugeRock.png";
-            outNodes.push_back(m);
+            _minerals.push_back(m);
         } else if (r < 0.25f) {
             int hi = hardIdx(rng);
             Game::MineralData m;
@@ -191,7 +190,7 @@ void MineralSystem::generateNodesForFloor(std::vector<Game::MineralData>& outNod
             if (hi == 1) m.texture = "Rock/hardRock1.png";
             else if (hi == 2) m.texture = "Rock/hardRock2.png";
             else m.texture = "Rock/hardRock3.png";
-            outNodes.push_back(m);
+            _minerals.push_back(m);
         } else {
             int ni = normalIdx(rng);
             Game::MineralData m;
@@ -206,33 +205,9 @@ void MineralSystem::generateNodesForFloor(std::vector<Game::MineralData>& outNod
                 case 4: m.texture = "Rock/Rock4.png"; break;
                 default: m.texture = "Rock/Rock5.png"; break;
             }
-            outNodes.push_back(m);
+            _minerals.push_back(m);
         }
     }
-}
-
-bool MineralSystem::hitNearestNode(std::vector<Game::MineralData>& nodes,
-                                   const Vec2& worldPos,
-                                   int power) const {
-    int idx = -1;
-    float best = 1e9f;
-    for (int i = 0; i < static_cast<int>(nodes.size()); ++i) {
-        float d = nodes[i].pos.distance(worldPos);
-        if (d < best) {
-            best = d;
-            idx = i;
-        }
-    }
-    float ts = static_cast<float>(GameConfig::TILE_SIZE);
-    if (idx >= 0 && best <= ts * 0.6f) {
-        nodes[idx].hp -= power;
-        if (nodes[idx].hp <= 0) {
-            nodes.erase(nodes.begin() + idx);
-            return true;
-        }
-        return true;
-    }
-    return false;
 }
 
 bool MineralSystem::spawnFromTile(int, int, const Vec2&,
@@ -264,12 +239,12 @@ bool MineralSystem::collides(const Vec2& p, float radius, int) const {
 bool MineralSystem::damageAt(int c, int r, int amount,
                              const std::function<void(int,int,int)>& spawnDrop,
                              const std::function<void(int,int, Game::TileType)>& setTile) {
-    if (!_map || !_runtime || _runtime->empty()) return false;
+    if (!_map || _minerals.empty()) return false;
     Vec2 center = _map->tileToWorld(c, r);
     int idx = -1;
     float best = 1e9f;
-    for (int i = 0; i < static_cast<int>(_runtime->size()); ++i) {
-        float d = (*_runtime)[i].pos.distance(center);
+    for (int i = 0; i < static_cast<int>(_minerals.size()); ++i) {
+        float d = _minerals[i].pos.distance(center);
         if (d < best) {
             best = d;
             idx = i;
@@ -279,7 +254,7 @@ bool MineralSystem::damageAt(int c, int r, int amount,
     if (idx < 0 || best > ts * 0.6f) {
         return false;
     }
-    auto data = (*_runtime)[idx];
+    auto data = _minerals[idx];
     long long key = 0;
     if (_map) {
         int mc = 0;
@@ -320,16 +295,15 @@ bool MineralSystem::damageAt(int c, int r, int amount,
                 spawnDrop(c, r, static_cast<int>(drop));
             }
         }
-        _runtime->erase(_runtime->begin() + idx);
+        _minerals.erase(_minerals.begin() + idx);
         return true;
     }
-    (*_runtime)[idx] = data;
+    _minerals[idx] = data;
     return true;
 }
 
 bool MineralSystem::isEmpty() const {
-    if (!_runtime) return true;
-    return _runtime->empty();
+    return _minerals.empty();
 }
 
 }

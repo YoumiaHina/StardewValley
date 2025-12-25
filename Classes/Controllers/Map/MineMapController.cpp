@@ -213,9 +213,7 @@ void MineMapController::refreshMapVisuals() {
         }
         if (_mapDraw) _mapDraw->clear();
         _stairsPos = _floorMap->stairsCenter();
-        // 把 StairSystem 生成的额外楼梯位置写回到 MineMap（TMX 封装），
-        // 然后让楼梯系统刷新可视化节点。
-        _stairSystem.syncExtraStairsToMap(_minerals);
+        _stairSystem.syncExtraStairsToMap(_mineralSystem.minerals());
         _stairSystem.refreshVisuals();
         return;
     }
@@ -291,7 +289,6 @@ void MineMapController::generateFloor(int floorIndex) {
     _dropSystem.clear();
     _extraStairs.clear();
     _stairSystem.reset();
-    _minerals.clear();
     _mineralSystem.clearVisuals();
     _stairSystem.attachTo(nullptr);
     if (_entrance) { _entrance->removeFromParent(); _entrance = nullptr; }
@@ -336,11 +333,12 @@ bool MineMapController::isNearStairs(const Vec2& p) const {
     }
     if (_floorMap) {
         bool mainCovered = false;
-        if (_stairsPos != Vec2::ZERO && !_minerals.empty()) {
+        const auto& minerals = _mineralSystem.minerals();
+        if (_stairsPos != Vec2::ZERO && !minerals.empty()) {
             int sc = 0;
             int sr = 0;
             worldToTileIndex(_stairsPos, sc, sr);
-            for (const auto& m : _minerals) {
+            for (const auto& m : minerals) {
                 int mc = 0;
                 int mr = 0;
                 worldToTileIndex(m.pos, mc, mr);
@@ -416,7 +414,6 @@ void MineMapController::loadEntrance() {
     _dropSystem.clear();
     _extraStairs.clear();
     _stairSystem.reset();
-    _minerals.clear();
     _mineralSystem.clearVisuals();
     _stairSystem.attachTo(nullptr);
     if (_floorMap) { _floorMap->removeFromParent(); _floorMap = nullptr; }
@@ -444,9 +441,7 @@ void MineMapController::loadEntrance() {
         // 用 NotSoil 填满 _tiles，矿洞地图本身不依赖该数组做逻辑，仅用于调试绘制。
         _tiles.assign(static_cast<std::size_t>(_cols) * static_cast<std::size_t>(_rows), Game::TileType::NotSoil);
         _stairsPos = _entrance->stairsCenter();
-        // MineralSystem / StairSystem 挂到入口 TMX 节点下，负责创建并管理相应精灵。
         _mineralSystem.attachTo(_entrance->getTMX());
-        _mineralSystem.bindRuntimeStorage(&_minerals);
         _stairSystem.attachTo(_entrance->getTMX());
         // DropSystem 通过一个回调函数获取“应该把掉落物挂到哪里”，这里优先挂
         // 在 TMX 节点，其次是 worldNode。
@@ -510,8 +505,7 @@ void MineMapController::loadFloorTMX(int floorIndex) {
         _tiles.assign(static_cast<std::size_t>(_cols) * static_cast<std::size_t>(_rows), Game::TileType::NotSoil);
         _extraStairs.clear();
         _stairsPos = _floorMap->stairsCenter();
-        _minerals.clear();
-        _mineralSystem.bindRuntimeStorage(&_minerals);
+        _mineralSystem.clearVisuals();
         if (_floorMap->getTMX()) {
             _mineralSystem.attachTo(_floorMap->getTMX());
         } else {
@@ -552,10 +546,9 @@ void MineMapController::loadFloorTMX(int floorIndex) {
         for (const auto& sp : _extraStairs) {
             stairWorldPos.push_back(sp);
         }
-        // 根据候选区域和楼梯位置生成矿石节点，避免矿石直接挡住楼梯。
-        _mineralSystem.generateNodesForFloor(_minerals, candidates, stairWorldPos);
+        _mineralSystem.generateNodesForFloor(candidates, stairWorldPos);
         _mineralSystem.syncVisuals();
-        _stairSystem.syncExtraStairsToMap(_minerals);
+        _stairSystem.syncExtraStairsToMap(_mineralSystem.minerals());
         _stairSystem.refreshVisuals();
         refreshMapVisuals();
     }
