@@ -332,7 +332,7 @@ bool placeChestOnFarm(Controllers::IMapController* map,
                       const Vec2& lastDir) {
     if (!map || !ui || !inventory) return false;
     Vec2 center;
-    bool okCenter = Controllers::PlaceablePlacementBase::selectFarmCenter(map, playerPos, lastDir, center);
+    bool okCenter = Controllers::PlacementInteractor::selectFarmCenter(map, playerPos, lastDir, center);
     if (!okCenter) return false;
     auto& chs = map->chests();
     // 农场目前不需要额外阻挡区域，因此 blocked 总是返回 false。
@@ -354,7 +354,7 @@ bool placeChestInRoom(Controllers::RoomMapController* room,
                       const Vec2& playerPos) {
     if (!room || !ui || !inventory) return false;
     Vec2 center;
-    bool okCenter = Controllers::PlaceablePlacementBase::selectRoomCenter(room, playerPos, center);
+    bool okCenter = Controllers::PlacementInteractor::selectRoomCenter(room, playerPos, center);
     if (!okCenter) return false;
     auto& chs = room->chests();
     // blocked lambda：若候选矩形与门/床有交集，则视为不允许放置。

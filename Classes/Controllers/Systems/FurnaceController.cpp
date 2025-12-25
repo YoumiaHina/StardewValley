@@ -255,13 +255,13 @@ bool FurnaceController::tryPlace(Controllers::IMapController* map,
     Vec2 center;
     bool okCenter = false;
     if (map->isFarm()) {
-        okCenter = Controllers::PlaceablePlacementBase::selectFarmCenter(map, playerWorldPos, lastDir, center);
+        okCenter = Controllers::PlacementInteractor::selectFarmCenter(map, playerWorldPos, lastDir, center);
     } else {
         auto* room = dynamic_cast<Controllers::RoomMapController*>(map);
         if (room) {
-            okCenter = Controllers::PlaceablePlacementBase::selectRoomCenter(room, playerWorldPos, center);
+            okCenter = Controllers::PlacementInteractor::selectRoomCenter(room, playerWorldPos, center);
         } else {
-            okCenter = Controllers::PlaceablePlacementBase::selectOutdoorCenter(map, playerWorldPos, center);
+            okCenter = Controllers::PlacementInteractor::selectOutdoorCenter(map, playerWorldPos, center);
         }
     }
     if (!okCenter) return false;

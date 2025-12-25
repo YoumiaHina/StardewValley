@@ -843,17 +843,17 @@
     <ClInclude Include="..\Classes\Controllers\Crafting\CraftingController.h">
       <Filter>Classes\Controllers\Crafting</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\Game\Furnace.h">
-      <Filter>Classes\Game\PlaceableItem</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Classes\Game\PlaceableItemBase.h">
-      <Filter>Classes\Game\PlaceableItem</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Classes\Game\Chest.h">
-      <Filter>Classes\Game\PlaceableItem</Filter>
-    </ClInclude>
     <ClInclude Include="..\Classes\Game\Animal.h">
       <Filter>Classes\Game\Animals</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\PlaceableItem\PlaceableItemBase.h">
+      <Filter>Classes\Game\PlaceableItem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\PlaceableItem\Chest.h">
+      <Filter>Classes\Game\PlaceableItem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\PlaceableItem\Furnace.h">
+      <Filter>Classes\Game\PlaceableItem</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

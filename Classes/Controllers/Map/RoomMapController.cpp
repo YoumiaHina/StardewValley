@@ -125,6 +125,7 @@ void RoomMapController::init() {
         _chestController->attachTo(chestParent, 19);
         _chestController->syncLoad();
     }
+    refreshChestsVisuals();
 
     if (!_furnaceController) {
         _furnaceController = new Controllers::FurnaceController();
