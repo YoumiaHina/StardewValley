@@ -9,6 +9,7 @@
 #include "Controllers/Map/IMapController.h"
 #include "Game/Map/BeachMap.h"
 #include "Controllers/Systems/DropSystem.h"
+#include "Controllers/Systems/ChestController.h"
 
 namespace Controllers {
 
@@ -59,7 +60,9 @@ public:
     // 是否靠近矿洞门（沙滩不支持）。
     bool isNearMineDoor(const cocos2d::Vec2&) const override { return false; }
     // 是否靠近任意箱子。
-    bool isNearChest(const cocos2d::Vec2& p) const override { return Game::isNearAnyChest(p, _chests); }
+    bool isNearChest(const cocos2d::Vec2& p) const override {
+        return _chestController ? _chestController->isNearChest(p) : false;
+    }
     // 是否靠近水域（用于浇水壶补水）。
     bool isNearLake(const cocos2d::Vec2& p, float radius) const override { return _map ? _map->nearWater(p, radius) : false; }
 
@@ -90,10 +93,16 @@ public:
     // 从农场进入矿洞的出生点（沙滩无此门，返回零向量）。
     cocos2d::Vec2 farmMineDoorSpawnPos() const override { return cocos2d::Vec2::ZERO; }
 
-    // 获取箱子列表（沙滩使用全局存档容器）。
-    std::vector<Game::Chest>& chests() override { return _chests; }
+    // 获取箱子列表（沙滩使用全局存档容器，通过 ChestController 访问）。
+    std::vector<Game::Chest>& chests() override {
+        static std::vector<Game::Chest> empty;
+        return _chestController ? _chestController->chests() : empty;
+    }
     // 获取箱子列表（只读）。
-    const std::vector<Game::Chest>& chests() const override { return _chests; }
+    const std::vector<Game::Chest>& chests() const override {
+        static const std::vector<Game::Chest> empty;
+        return _chestController ? _chestController->chests() : empty;
+    }
 
     // 记录最近一次点击的世界坐标（用于三格选择）。
     void setLastClickWorldPos(const cocos2d::Vec2& p) override;
@@ -113,12 +122,11 @@ private:
     int _cols = 0;
     int _rows = 0;
     std::vector<Game::TileType> _tiles;
-    std::vector<Game::Chest> _chests;
     cocos2d::DrawNode* _cursor = nullptr;
-    cocos2d::DrawNode* _chestDraw = nullptr;
     Controllers::DropSystem _dropSystem;
     cocos2d::Vec2 _lastClickWorldPos = cocos2d::Vec2::ZERO;
     bool _hasLastClick = false;
+    Controllers::ChestController* _chestController = nullptr;
     Controllers::FurnaceController* _furnaceController = nullptr;
 };
 
