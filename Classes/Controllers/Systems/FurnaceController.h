@@ -53,6 +53,7 @@ public:
     bool isNearFurnace(const cocos2d::Vec2& worldPos) const;
     // 判定给定世界坐标是否与任一熔炉发生碰撞。
     bool collides(const cocos2d::Vec2& worldPos) const;
+    bool breakEmptyFurnaceAtTile(int c, int r, int amount);
 
 private:
     // 判断当前背包选中格是否为“熔炉物品”，用于驱动放置逻辑。

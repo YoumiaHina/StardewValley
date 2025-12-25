@@ -33,6 +33,8 @@ struct Chest : public PlaceableItemBase {
 
     // 箱子内部所有槽位；每个 Slot 存储一个物品栈或一个工具。
     std::vector<Slot> slots;
+    bool empty = true;
+    int hp = 1;
 
     // 构造函数：
     // - 调用 PlaceableItemBase 默认构造，把 pos 设为 Vec2::ZERO。
@@ -55,5 +57,6 @@ cocos2d::Rect chestRect(const Chest& chest);
 cocos2d::Rect chestCollisionRect(const Chest& chest);
 // 判断玩家在 worldPos 附近是否“接近任意箱子”，由 ChestController/IMapController 等调用。
 bool isNearAnyChest(const cocos2d::Vec2& playerWorldPos, const std::vector<Chest>& chests);
+void refreshChestEmpty(Chest& chest);
 
 } // namespace Game

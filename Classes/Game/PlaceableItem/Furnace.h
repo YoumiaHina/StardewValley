@@ -15,6 +15,7 @@ struct Furnace : public PlaceableItemBase {
     cocos2d::Vec2 dropOffset;         // 熔炼完成后掉落物品的偏移位置
     ItemType oreType = ItemType::CopperGrain; // 当前正在熔炼的矿石类型
     float remainingSeconds = 0.0f;    // 剩余熔炼时间，<=0 表示空闲
+    int hp = 1;
 
     // 返回熔炉的占用矩形（1x2 格，用于放置/渲染）。
     cocos2d::Rect placeRect() const override;

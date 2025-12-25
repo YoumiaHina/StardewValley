@@ -19,6 +19,7 @@ enum class ObstacleKind {
     Rock,
     Tree,
     Weed,
+    Placeable,
 };
 
 class IMapController {

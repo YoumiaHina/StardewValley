@@ -4,6 +4,21 @@ using namespace cocos2d;
 
 namespace Game {
 
+void refreshChestEmpty(Chest& chest) {
+    bool e = true;
+    for (const auto& s : chest.slots) {
+        if (s.kind == SlotKind::Item && s.itemQty > 0) {
+            e = false;
+            break;
+        }
+        if (s.kind == SlotKind::Tool && s.tool) {
+            e = false;
+            break;
+        }
+    }
+    chest.empty = e;
+}
+
 // 返回箱子在世界坐标中的占用矩形（宽度 1 格，高度 2 格）。
 // - 这里直接复用 PlaceableItemBase 提供的“标准 1x2”矩形算法。
 Rect Chest::placeRect() const {

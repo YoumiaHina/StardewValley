@@ -195,6 +195,43 @@ bool FurnaceController::collides(const cocos2d::Vec2& worldPos) const {
         [](const Game::Furnace& f) { return f.collisionRect(); });
 }
 
+bool FurnaceController::breakEmptyFurnaceAtTile(int c, int r, int amount) {
+    if (!_map) return false;
+    if (!_runtime) {
+        _runtime = getFurnacesForMap(_map);
+    }
+    if (!_runtime) return false;
+    cocos2d::Vec2 center = _map->tileToWorld(c, r);
+    for (auto it = _runtime->begin(); it != _runtime->end(); ++it) {
+        auto& f = *it;
+        if (!f.collisionRect().containsPoint(center)) {
+            continue;
+        }
+        if (f.remainingSeconds > 0.0f) {
+            return false;
+        }
+        if (amount <= 0) {
+            return false;
+        }
+        f.hp -= amount;
+        if (f.hp > 0) {
+            refreshVisuals();
+            return true;
+        }
+        int itemType = static_cast<int>(Game::ItemType::Furnace);
+        _runtime->erase(it);
+        int dc = c;
+        int dr = r;
+        if (_map) {
+            _map->spawnDropAt(dc, dr, itemType, 1);
+            _map->refreshDropsVisuals();
+        }
+        refreshVisuals();
+        return true;
+    }
+    return false;
+}
+
 // 背包中选中“熔炉物品”且数量>0 时，允许触发放置逻辑。
 bool FurnaceController::shouldPlace(const Game::Inventory& inventory) const {
     if (inventory.selectedKind() != Game::SlotKind::Item) return false;

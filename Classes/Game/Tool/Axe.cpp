@@ -4,6 +4,7 @@
 #include "Controllers/Systems/CropSystem.h"
 #include "Controllers/Environment/EnvironmentObstacleSystemBase.h"
 #include "Controllers/Interact/TileSelector.h"
+#include "Controllers/Systems/ChestController.h"
 #include "Game/WorldState.h"
 #include "Game/GameConfig.h"
 #include "Game/SkillTree/SkillTreeSystem.h"
@@ -76,8 +77,8 @@ std::string Axe::use(Controllers::IMapController* map,
     if (tiles.empty()) return std::string("");
 
     bool acted = false;
+    int dmg = 1 + std::max(0, level());
     if (auto* sys = map->obstacleSystem(Controllers::ObstacleKind::Tree)) {
-        int dmg = 1 + std::max(0, level());
         for (const auto& tile : tiles) {
             int tc = tile.first;
             int tr = tile.second;
@@ -105,6 +106,15 @@ std::string Axe::use(Controllers::IMapController* map,
                 }
             );
             if (one) {
+                acted = true;
+            }
+        }
+    }
+    if (map) {
+        for (const auto& tile : tiles) {
+            int tc = tile.first;
+            int tr = tile.second;
+            if (Controllers::breakEmptyChestAtTile(map, tc, tr, dmg)) {
                 acted = true;
             }
         }
