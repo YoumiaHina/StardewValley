@@ -136,6 +136,28 @@ std::string Hoe::use(Controllers::IMapController* map,
                         if (rs && rs->findWeedAt(tc, tr)) blocked = true;
                     }
                 }
+                if (!blocked) {
+                    for (const auto& ch : ws.farmChests) {
+                        int cc = 0;
+                        int rr = 0;
+                        map->worldToTileIndex(ch.pos, cc, rr);
+                        if (cc == tc && rr == tr) {
+                            blocked = true;
+                            break;
+                        }
+                    }
+                }
+                if (!blocked) {
+                    for (const auto& f : ws.farmFurnaces) {
+                        int cc = 0;
+                        int rr = 0;
+                        map->worldToTileIndex(f.pos, cc, rr);
+                        if (cc == tc && rr == tr) {
+                            blocked = true;
+                            break;
+                        }
+                    }
+                }
                 if (blocked) {
                     if (msg.empty()) {
                         msg = std::string("Nothing");

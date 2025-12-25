@@ -855,6 +855,9 @@
     <ClInclude Include="..\Classes\Game\PlaceableItem\Furnace.h">
       <Filter>Classes\Game\PlaceableItem</Filter>
     </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\Map\IMapController.h">
+      <Filter>Classes\Controllers\Map</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="game.rc">

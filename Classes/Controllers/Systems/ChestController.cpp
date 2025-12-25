@@ -4,6 +4,7 @@
 #include "Game/GameConfig.h"
 #include "Game/PlaceableItem/PlaceableItemBase.h"
 #include "Game/Tool/ToolFactory.h"
+#include "Game/Tile.h"
 #include "Controllers/Interact/PlacementInteractor.h"
 #include "Controllers/Map/IMapController.h"
 #include "Controllers/Map/RoomMapController.h"
@@ -335,8 +336,27 @@ bool placeChestOnFarm(Controllers::IMapController* map,
     bool okCenter = Controllers::PlacementInteractor::selectFarmCenter(map, playerPos, lastDir, center);
     if (!okCenter) return false;
     auto& chs = map->chests();
-    // 农场目前不需要额外阻挡区域，因此 blocked 总是返回 false。
-    auto blocked = [](const Rect&) { return false; };
+    auto blocked = [map](const Rect& r) {
+        if (!map || !map->isFarm()) return false;
+        float s = map->tileSize();
+        Vec2 rectCenter(r.getMidX(), r.getMidY());
+        Vec2 bottomCenter = rectCenter + Vec2(0.0f, -s * 0.5f);
+        Vec2 topCenter = rectCenter + Vec2(0.0f, s * 0.5f);
+        auto tileBlocked = [map](const Vec2& p) {
+            int c = 0;
+            int rIndex = 0;
+            map->worldToTileIndex(p, c, rIndex);
+            if (!map->inBounds(c, rIndex)) return true;
+            Game::TileType t = map->getTile(c, rIndex);
+            if (t == Game::TileType::Tilled || t == Game::TileType::Watered) return true;
+            return false;
+        };
+        if (tileBlocked(bottomCenter) || tileBlocked(topCenter)) return true;
+        float radius = s * 0.4f;
+        if (map->collides(bottomCenter, radius)) return true;
+        if (map->collides(topCenter, radius)) return true;
+        return false;
+    };
     auto& ws = Game::globalState();
     ChestSyncFunc syncWorld = [&ws, map](const std::vector<Game::Chest>& out) {
         ws.farmChests = out;

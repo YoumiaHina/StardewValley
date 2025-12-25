@@ -301,6 +301,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClInclude Include="..\Classes\Controllers\Interact\TileSelector.h" />
     <ClInclude Include="..\Classes\Controllers\Interact\TownInteractor.h" />
     <ClInclude Include="..\Classes\Controllers\Map\BeachMapController.h" />
+    <ClInclude Include="..\Classes\Controllers\Map\IMapController.h" />
     <ClInclude Include="..\Classes\Controllers\Map\TownMapController.h" />
     <ClInclude Include="..\Classes\Controllers\Mine\CombatSystem.h" />
     <ClInclude Include="..\Classes\Controllers\Mine\ElevatorSystem.h" />

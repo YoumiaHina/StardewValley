@@ -2,6 +2,7 @@
 #include "Game/WorldState.h"
 #include "Game/GameConfig.h"
 #include "Game/PlaceableItem/PlaceableItemBase.h"
+#include "Game/Tile.h"
 #include "Controllers/Interact/PlacementInteractor.h"
 #include "Controllers/Map/IMapController.h"
 #include "Controllers/Map/RoomMapController.h"
@@ -271,6 +272,26 @@ bool FurnaceController::tryPlace(Controllers::IMapController* map,
     float s = static_cast<float>(GameConfig::TILE_SIZE);
     float margin = s * 0.4f;
     auto blocked = [map](const Rect& r) {
+        if (map && map->isFarm()) {
+            float sLocal = map->tileSize();
+            Vec2 rectCenter(r.getMidX(), r.getMidY());
+            Vec2 bottomCenter = rectCenter + Vec2(0.0f, -sLocal * 0.5f);
+            Vec2 topCenter = rectCenter + Vec2(0.0f, sLocal * 0.5f);
+            auto tileBlocked = [map](const Vec2& p) {
+                int c = 0;
+                int rIndex = 0;
+                map->worldToTileIndex(p, c, rIndex);
+                if (!map->inBounds(c, rIndex)) return true;
+                Game::TileType t = map->getTile(c, rIndex);
+                if (t == Game::TileType::Tilled || t == Game::TileType::Watered) return true;
+                return false;
+            };
+            if (tileBlocked(bottomCenter) || tileBlocked(topCenter)) return true;
+            float radius = sLocal * 0.4f;
+            if (map->collides(bottomCenter, radius)) return true;
+            if (map->collides(topCenter, radius)) return true;
+            return false;
+        }
         auto* room = dynamic_cast<Controllers::RoomMapController*>(map);
         if (room) {
             return r.intersectsRect(room->doorRect()) || r.intersectsRect(room->bedRect());
