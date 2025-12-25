@@ -1,6 +1,6 @@
 # StardewValley（Cocos2d-x / C++）
 
-本仓库是一个基于 **Cocos2d-x 3.17.2** 的 2D 模拟经营/冒险类小游戏项目（类《星露谷物语》玩法拆解），核心代码位于 `Classes/`，资源位于 `Resources/`，当前主要面向 **Windows（Win32）** 构建与运行。
+本仓库是一个基于 **Cocos2d-x 3.17.2** 的 2D 模拟经营/冒险类小游戏项目（类《星露谷物语》玩法），核心代码位于 `Classes/`，资源位于 `Resources/`，当前主要面向 **Windows（Win32）** 构建与运行。
 
 ## 运行与构建（Windows）
 
@@ -34,81 +34,76 @@
 - 天气：`Classes/Controllers/Systems/WeatherController.*`
 - 节日：`Classes/Controllers/Systems/FestivalController.*`
 - 钓鱼：`Classes/Controllers/Systems/FishingController.*`
+- 捏脸/角色外观：`Classes/Scenes/CustomizationScene.*` + `Classes/Game/View/PlayerView.*`
 - 商店：`Classes/Controllers/Store/StoreController.*` + `Classes/Controllers/UI/StorePanelUI.*`
 - NPC / 社交 / 对话：`Classes/Controllers/NPC/*` + `Classes/Controllers/UI/NpcSocialPanelUI.*` + `Classes/Controllers/UI/DialogueUI.*`
 - 合成/配方：`Classes/Controllers/Crafting/CraftingController.*` + `Classes/Game/Recipe/*`
-- 熔炉：`Classes/Controllers/Systems/FurnaceController.*`
 - 工具升级：`Classes/Controllers/Systems/ToolUpgradeSystem.*`
+- 可放置物（箱子等）：`Classes/Controllers/Systems/PlaceableItemSystemBase.h` + `Classes/Controllers/Systems/ChestController.*` + `Classes/Game/PlaceableItem/*`
 - 掉落：`Classes/Controllers/Systems/DropSystem.*`
 - 音乐/音频：`Classes/Controllers/Managers/AudioManager.*`
-- 采矿/战斗/怪物（矿洞）：`Classes/Controllers/Mine/*` + `Classes/Game/Monster/*`
+- 战斗/怪物（矿洞）：`Classes/Controllers/Mine/*` + `Classes/Game/Monster/*`
 - 环境障碍物（树/石头/矿石/杂草/楼梯等）：`Classes/Controllers/Environment/*`
 - UI 聚合入口：`Classes/Controllers/UI/UIController.*`（统一管理 HUD/背包/面板等）
 
-## 玩法系统简述
-
-### 社交系统（NPC / 对话 / 好感度）
-
-- NPC 分布（按场景组装）：城镇 `Abigail` / `Pierre`，农场 `Robin`，海滩 `Willy`。
-- 对话系统：`NpcDialogueManager` 将 NPC 对话树映射为 UI 文本/选项，并通过 `UIController::showDialogue` 弹出 `DialogueUI`。
-- 对话操作：有选项时点击按钮选择；无选项时点击对话框区域推进。
-- 好感度：保存在 `Game::WorldState::npcFriendship`，部分 NPC 支持“赠礼提升好感（每日一次）”，超出会提示 `Already gifted today`。
-- 社交面板：鼠标右键点击 NPC 精灵可打开社交面板，展示名称、好感、关系状态与任务列表。
-- 任务/恋爱：`WorldState` 预留 `npcQuests` / `npcRomanceUnlocked` 存档字段并支持在社交面板展示；任务生成/恋爱解锁逻辑目前未在代码中实现入口（仅存档与 UI 读取）。
-- 节日（Festival）：`SceneBase::initBase` 统一创建 `FestivalController` 并挂到 update 回调；当“夏季第 `GameConfig::FESTIVAL_DAY` 天（当前为 6）”到来时，控制器会通过 `IMapController::setFestivalActive(bool)` 同步节日开关到当前地图。
-- 节日地图表现：小镇/海滩会显示/隐藏 TMX 的 `Festival` 图层；小镇在节日启用时额外解析 `FestivalWall` 作为碰撞来源。
-
-### 钓鱼系统（Fishing）
-
-- 创建与更新：`SceneBase::initBase` 统一创建 `FishingController` 并每帧调用 `update`。
-- 工具入口：背包默认包含 `FishingRod`，并在初始化时把钓鱼竿的启动回调绑定到 `FishingController::startAt`。
-- 交互提示：当玩家“靠近湖边 + 当前选中钓鱼竿 + 未处于钓鱼中”时，UI 会提示 `Left-click to Fish`。
-- 小游戏规则：`startAt` 会校验冷却与“湖边可钓区域”，开始后锁定移动并置 `WorldState::fishingActive=true`；按住/松开鼠标左键控制绿色捕获条上下，重叠越多进度越快，进度满则成功发放鱼类与钓鱼经验，时间耗尽则失败。
-- 节日钓鱼联动：在节日当天（同 `GameConfig::FESTIVAL_DAY`）会从 `kFestivalFish` 表随机一条“节日鱼”作为外观与最终奖励。
+## 玩法系统简述（后续补充对应的贴图……）
 
 ### 商店系统
 
-- 杂货店：城镇的 `Pierre` 通过对话选项或右键直接打开商店面板。
-- 动物商店：农场的 `Robin` 打开动物商店面板，购买行为由场景侧回调驱动，并最终由 `AnimalSystem` 生成动物。
+- 城镇杂货店可购买种子/基础物资，也可出售农产品、矿物等换取金币。
+- 农场动物商店可购买鸡/牛/羊等动物，购买后需要在农场选择位置放置。
+- 买卖会影响金币与背包物品数量；部分购买行为也会消耗精力。
+- 商店面板支持分类与分页，便于快速浏览与交易。
 
 ### 农场管理（作物 / Crop）
 
-- 状态唯一来源：`Controllers::CropSystem` 维护运行时作物列表，并与 `Game::WorldState::farmCrops` 同步持久化。
-- 播种（种子 -> 作物类型）：交互发生在 `FarmInteractor`（空格/左键）里，满足“目标格可耕 + 无作物占用 + 手持种子 + 季节允许”后调用 `CropSystem::plantCrop` 并消耗背包物品。
-- 浇水：`WaterCan` 在瓦片为 `Tilled` 时将其置为 `Watered`，并调用 `CropSystem::markWateredAt` 写入“当日已浇水”标记
-- 收获（锄头）：`Hoe` 命中作物格子时走 `CropSystem::harvestByHoeAt`，由系统计算产物/数量并在成功后执行移除或回生状态转换；若产物溢出背包则落地为掉落物。
-- 生长与日结：睡觉到第二天会触发 `CropSystem::advanceCropsDaily`，按“浇水推进/缺水概率枯死/季节不符枯死”更新作物，并把 `Watered` 瓦片回退为 `Tilled`。
-- 可视化刷新：农场地图用 `FarmMapController::refreshCropsVisuals` 读取 `WorldState::farmCrops` 并生成/更新作物精灵；交互（播种/收获）后会主动调用该刷新。
+- 用锄头开垦土地后播种，随后使用水壶浇水推进生长。
+- 作物在每天结算时成长；缺水会停滞或有概率枯死，换季不适合作物也会枯死。
+- 成熟后可收获获得农产品；背包满时会以掉落物形式留在地面。
+- 睡觉进入下一天会触发作物推进，并重置当天“已浇水”的状态。
 
 ### 农场管理（动物 / Animal）
 
-- 状态唯一来源：`Controllers::AnimalSystem` 维护运行时动物实例列表（含精灵/标签节点），并持续写回 `Game::WorldState::farmAnimals`；每日推进逻辑读取 `farmAnimals` 并产出掉落。
-- 购买入口：`RobinNpcController` 通过空格对话选项或右键直接打开动物商店面板，面板渲染与“Buy”点击回调在 `AnimalStorePanelUI`。
-- 购买落地：`FarmScene` 将动物商店的购买回调绑定为“在玩家前方一格生成动物”，并调用 `AnimalSystem::buyAnimal`；价格来自 `Game::animalPrice`。
-- 喂食：`FarmInteractor` 在空格交互时优先尝试喂食（距离阈值/可接受饲料/当日未喂食），成功后由上层扣除背包物品并刷新 UI。
-- 每日产物与掉落：睡觉到第二天会调用 `advanceAnimalsDaily` 推进成长与产物；若当前在农场则直接生成地图掉落，否则写入 `WorldState::farmDrops` 等待回到农场再落地。
+- 购买动物后会在农场游走，玩家可以靠近进行喂食。
+- 喂食影响动物当日状态，并与每日产物（鸡蛋/牛奶/羊毛等）结算相关。
+- 每天睡觉后结算成长与产物；不在农场时产物会延迟到回到农场后出现为掉落物。
 
 ### 资源采集与环境障碍物
 
-- 树/石头/矿石/杂草/楼梯等统一由对应 `*System` 维护状态与可视化挂载。
-- 场景与交互器只负责输入转发与调用顺序，不应在 Controller/Scene 内维护重复的环境实体容器。
+- 地图中分布树木、石头、矿石、杂草等可破坏/可采集的环境物。
+- 使用对应工具进行采集，获得木材/石头/矿物/纤维等资源掉落。
+- 掉落物可在地面拾取进入背包，用于后续合成、升级与交易。
 
-### 矿洞（战斗 / 楼层 / 电梯）
+### 矿洞冒险（战斗 / 楼层 / 电梯）
 
-- 矿洞场景入口与楼层切换：`Classes/Scenes/MineScene.cpp`
-- 怪物与战斗：`Classes/Controllers/Mine/*`
-- 电梯：在特定楼层解锁，并通过电梯面板选择回到已解锁楼层。
+- 从入口进入矿洞，逐层深入探索，每层都有怪物与资源点。
+- 使用武器与怪物战斗，击败怪物可获得金币与掉落。
+- 电梯会随着探索逐步解锁，允许快速前往已解锁楼层，减少重复跑图。
+- 在矿洞中需要关注生命值与精力，适时返回农场补给与存档。
 
 ### 时间 / 天气 / 日结
 
-- 时间推进与每日结算（作物生长等）：`Classes/Controllers/Systems/GameStateController.*`
-- 天气表现：`Classes/Controllers/Systems/WeatherController.*`，并通过 `WorldState` 持久化当天是否下雨等标记。
+- 游戏时间持续流逝，驱动一天的行动节奏；睡觉进入下一天并触发各类每日结算。
+- 天气以晴天/雨天为主：雨天会改变氛围与移动手感，并自动视为“已浇水”。
+- 特定节日当天保证晴天，避免活动受到天气影响。
+
+### 社交系统（NPC / 对话 / 好感度）
+
+- 城镇/农场/海滩分布不同 NPC，可通过对话了解剧情与触发交互选项。
+- 好感度会随对话与赠礼提升；赠礼存在“每日一次”的限制，避免无限刷好感。
+- 社交面板可查看 NPC 的基础信息、好感与关系状态。
+- 节日会在特定日期开启，城镇/海滩出现活动布置与特殊交互内容。
+
+### 钓鱼系统（Fishing）
+
+- 在水边使用钓鱼竿开始钓鱼小游戏，通过按住/松开控制捕获条位置。
+- 捕获条与鱼影重叠越多，进度增长越快；进度满则钓鱼成功并获得鱼与经验。
+- 特定节日提供“节日钓鱼”玩法与限定鱼种奖励。
 
 ### 音乐系统（BGM）
 
-- 管理器：`AudioManager` 作为单例封装 `AudioEngine`，保证同一时刻只播放一首 BGM，并避免重复切歌。
-- 场景切换：各场景在 `init()` 时选择 `SceneZone` 并调用 `playBackgroundFor`（房间 `Classes/Scenes/RoomScene.cpp:24-29`，农场 `Classes/Scenes/FarmScene.cpp:29-34`，矿洞 `Classes/Scenes/MineScene.cpp:13-19`）。
-- 资源映射：`SceneZone -> 音乐路径` 由 `AudioManager::pathForZone` 决定，对应资源位于 `Resources/music/`。
+- 不同场景会播放不同的背景音乐，切换场景时自动切歌以增强氛围。
+- 音频播放避免重复触发与突兀切换，保证整体体验稳定流畅。
 
 ## 操作说明（默认按键）
 
@@ -165,7 +160,7 @@
 
 ### （3）开发特性
 
-- C++11/14 特性：大量使用 lambda 回调做模块解耦与事件绑定（例如钓鱼竿启动回调绑定）；单例采用函数内 `static`（线程安全）初始化。
+- C++11/14 特性：合理使用 lambda 回调做模块解耦与事件绑定（例如钓鱼竿启动回调绑定）；单例采用函数内 `static`（线程安全）初始化。
 - 架构清晰：SceneBase 只承担“骨架 + 调度 + 转发”，业务逻辑下沉到 `Controllers/*` 与 `Game/*`，以接口对接减少跨模块耦合。
 - 目录结构明确：`Classes/Scenes` 放场景骨架；`Classes/Controllers` 放控制器/系统；`Classes/Game` 放数据结构、道具与规则定义；`Resources` 放地图/贴图/音乐。
 
