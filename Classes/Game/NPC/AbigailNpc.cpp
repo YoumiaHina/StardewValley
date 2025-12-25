@@ -6,6 +6,10 @@ const char* Abigail::name() const { return "Abigail"; }
 
 const char* Abigail::texturePath() const { return "NPC/Abigail/Abigail-standing.png"; }
 
+// Abigail 赠礼好感规则：
+// - 草莓给予最高加成；
+// - 其次是各类鱼与海产；
+// - 其它物品统一给予较低的基础好感。
 int Abigail::friendshipGainForGift(ItemType itemType) const {
   switch (itemType) {
     case ItemType::Strawberry: return 55;

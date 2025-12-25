@@ -1,9 +1,9 @@
-// 萝卜种子：物品栏静态信息（名称/价格/映射作物类型）
+//防风草种子：物品栏静态信息（名称/价格/映射作物类型）
 #include "Game/Crops/seed/SeedBase.h"
 
 namespace Game {
 
-// 萝卜种子物品：仅提供背包内静态元数据。
+//防风草种子物品：仅提供背包内静态元数据。
 class ParsnipSeed : public SeedBase {
 public:
     // 返回该物品对应的枚举类型。

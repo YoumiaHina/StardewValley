@@ -8,6 +8,12 @@
 
 namespace Game {
 
+// Drop：地面掉落物的一条记录。
+// - type：物品类型（ItemType），决定渲染贴图与拾取结果；
+// - pos ：世界坐标位置，通常位于地图上的某个点；
+// - qty ：堆叠数量。
+// renderDrops      ：根据掉落列表在场景中渲染对应精灵/调试形状；
+// collectDropsNear ：检测玩家附近掉落并尝试吸入背包。
 class Drop {
 public:
     ItemType type;

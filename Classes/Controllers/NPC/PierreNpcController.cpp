@@ -12,14 +12,17 @@ namespace Controllers {
 
 namespace {
 
+// 方向枚举：用于决定 Pierre 的面朝方向与贴图选择。
 constexpr int kDirDown = 0;
 constexpr int kDirRight = 1;
 constexpr int kDirUp = 2;
 constexpr int kDirLeft = 3;
 
+// 行为标签：区分“行走动画”和“巡逻路径”两个动作。
 constexpr int kWalkActionTag = 21001;
 constexpr int kPatrolActionTag = 21002;
 
+// 根据方向返回用于拼接贴图路径的方向 token。
 std::string dirToken(int dir) {
   switch (dir) {
     case kDirUp: return "up";
@@ -30,6 +33,7 @@ std::string dirToken(int dir) {
   }
 }
 
+// 根据位移向量估算当前行走方向。
 int dirFromDelta(const cocos2d::Vec2& d) {
   float ax = std::abs(d.x);
   float ay = std::abs(d.y);
@@ -37,6 +41,7 @@ int dirFromDelta(const cocos2d::Vec2& d) {
   return d.y >= 0 ? kDirUp : kDirDown;
 }
 
+// 构建 Pierre 在某个方向上的循环行走动画。
 cocos2d::Animation* buildWalkAnim(const std::string& namePrefix, int dir) {
   auto anim = cocos2d::Animation::create();
   if (!anim) return nullptr;
@@ -49,6 +54,7 @@ cocos2d::Animation* buildWalkAnim(const std::string& namePrefix, int dir) {
   return anim;
 }
 
+// 根据 NPC 名称、方向与帧号生成静止帧贴图路径。
 std::string framePath(const std::string& namePrefix, int dir, int frameIndex1Based) {
   std::string token = dirToken(dir);
   return "NPC/" + namePrefix + "/" + namePrefix + "-" + token + "-" + std::to_string(frameIndex1Based) + ".png";
@@ -56,6 +62,7 @@ std::string framePath(const std::string& namePrefix, int dir, int frameIndex1Bas
 
 }  // namespace
 
+// 初始化 Pierre：在地图上放置精灵，修正出生点避免碰撞，并构建行走动画与巡逻基准位置。
 PierreNpcController::PierreNpcController(
     IMapController* map,
     cocos2d::Node* world_node,
@@ -123,6 +130,7 @@ PierreNpcController::PierreNpcController(
   startPatrol();
 }
 
+// 释放 Pierre 行走动画的引用计数。
 PierreNpcController::~PierreNpcController() {
   CC_SAFE_RELEASE(walk_down_);
   CC_SAFE_RELEASE(walk_up_);
@@ -130,6 +138,7 @@ PierreNpcController::~PierreNpcController() {
   CC_SAFE_RELEASE(walk_right_);
 }
 
+// 计算玩家是否在指定交互距离内，并返回一个适合显示 UI 提示的世界坐标。
 bool PierreNpcController::isNear(const cocos2d::Vec2& player_pos,
                                  float max_dist,
                                  cocos2d::Vec2& out_pos) const {
@@ -145,6 +154,7 @@ bool PierreNpcController::isNear(const cocos2d::Vec2& player_pos,
   return true;
 }
 
+// 每帧更新：在有交互 UI 打开时暂停巡逻，否则根据玩家距离显示“对话/开店”提示。
 void PierreNpcController::update(const cocos2d::Vec2& player_pos) {
   if (!ui_ || !map_) return;
   if (sprite_) map_->sortActorWithEnvironment(sprite_);
@@ -182,6 +192,7 @@ void PierreNpcController::update(const cocos2d::Vec2& player_pos) {
   }
 }
 
+// 为 Pierre 构建一条循环巡逻路线，并借助地图碰撞信息修正每个路点的位置。
 void PierreNpcController::startPatrol() {
   if (!sprite_ || !map_) return;
   sprite_->stopActionByTag(kPatrolActionTag);
@@ -232,6 +243,7 @@ void PierreNpcController::startPatrol() {
   sprite_->runAction(rep);
 }
 
+// 根据方向播放对应的循环行走动画，并记录当前朝向。
 void PierreNpcController::playWalk(int dir) {
   if (!sprite_) return;
   sprite_->stopActionByTag(kWalkActionTag);
@@ -251,6 +263,7 @@ void PierreNpcController::playWalk(int dir) {
   sprite_->runAction(rep);
 }
 
+// 切换到静止帧，让 Pierre 面向给定方向站立。
 void PierreNpcController::setStanding(int dir) {
   if (!sprite_) return;
   sprite_->stopActionByTag(kWalkActionTag);
@@ -260,6 +273,7 @@ void PierreNpcController::setStanding(int dir) {
   if (sprite_->getTexture()) sprite_->getTexture()->setAliasTexParameters();
 }
 
+// 空间键交互：弹出对话框，让玩家选择是否打开杂货店。
 void PierreNpcController::handleTalkAt(const cocos2d::Vec2& player_pos) {
   if (!ui_ || !map_) return;
   float max_dist = map_->tileSize() * 1.5f;
@@ -286,6 +300,7 @@ void PierreNpcController::handleTalkAt(const cocos2d::Vec2& player_pos) {
       nullptr);
 }
 
+// 右键直接点击 Pierre 精灵时，立即打开杂货店面板。
 bool PierreNpcController::handleRightClick(cocos2d::EventMouse* e) {
   if (!ui_ || !sprite_) return false;
   if (e->getMouseButton() != cocos2d::EventMouse::MouseButton::BUTTON_RIGHT)

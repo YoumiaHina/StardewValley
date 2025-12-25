@@ -11,8 +11,13 @@ namespace Controllers {
 
 class UIController;
 
+// Abigail NPC 控制器：
+// - 负责 Abigail 的出生位置、巡逻行为与朝向切换。
+// - 处理与玩家的对话、赠礼与社交面板打开逻辑。
+// - 协作对象：地图控制器（寻路/碰撞）、UI 控制器、Inventory 与 NpcDialogueManager。
 class AbigailNpcController : public NpcControllerBase {
  public:
+  // 构造：在指定地图/world 节点上创建 Abigail 精灵并开始巡逻。
   AbigailNpcController(IMapController* map,
                        cocos2d::Node* world_node,
                        UIController* ui,
@@ -20,10 +25,13 @@ class AbigailNpcController : public NpcControllerBase {
                        NpcDialogueManager* dialogue);
   ~AbigailNpcController() override;
 
+  // 每帧更新：根据玩家距离显示交互提示，并在交互时暂停巡逻。
   void update(const cocos2d::Vec2& player_pos) override;
 
+  // 处理空间键交互：触发对话或尝试赠礼并增长好感度。
   void handleTalkAt(const cocos2d::Vec2& player_pos) override;
- bool handleRightClick(cocos2d::EventMouse* e) override;
+  // 处理右键点击：在点击精灵时打开 Abigail 社交面板。
+  bool handleRightClick(cocos2d::EventMouse* e) override;
 
  private:
   IMapController* map_ = nullptr;

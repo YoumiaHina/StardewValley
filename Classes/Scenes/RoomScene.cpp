@@ -50,7 +50,6 @@ void RoomScene::setSpawnInsideDoor() {
     _player->setMoving(false);
 }
 
-// SceneBase overrides
 Controllers::IMapController* RoomScene::createMapController(Node* worldNode) {
     _roomMap = new Controllers::RoomMapController(worldNode);
     _roomMap->init();

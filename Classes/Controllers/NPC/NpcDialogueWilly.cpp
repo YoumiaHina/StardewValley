@@ -3,12 +3,14 @@
 
 namespace Controllers {
 
+// Willy 对话脚本的起始节点：从一组候选中随机挑选一个。
 int firstNodeForWilly() {
   static int variants[] = {101, 110, 120, 130, 140, 150, 160, 170, 180, 190};
   int idx = std::rand() % 10;
   return variants[idx];
 }
 
+// Willy 单个对话节点：按 id 返回对应的台词与选项。
 DialogueNode nodeForWilly(int id) {
   DialogueNode n;
   if (id == 101) {

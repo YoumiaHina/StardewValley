@@ -217,7 +217,6 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClCompile Include="..\Classes\Game\Map\RoomMap.cpp" />
     <ClCompile Include="..\Classes\Game\Map\TownMap.cpp" />
     <ClCompile Include="..\Classes\Game\NPC\AbigailNpc.cpp" />
-    <ClCompile Include="..\Classes\Game\NPC\NpcBase.cpp" />
     <ClCompile Include="..\Classes\Game\NPC\PierreNpc.cpp" />
     <ClCompile Include="..\Classes\Game\NPC\RobinNpc.cpp" />
     <ClCompile Include="..\Classes\Game\NPC\WillyNpc.cpp" />
