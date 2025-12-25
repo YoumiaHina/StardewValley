@@ -126,6 +126,7 @@ int Inventory::addItems(ItemType type, int qty) {
     qty = addToEmptySlots(_slots, type, qty);
     if (useChest && qty > 0 && chestSlots) {
         qty = addToEmptySlots(*chestSlots, type, qty);
+        refreshChestEmpty(ws.globalChest);
     }
     return qty;
 }
@@ -153,6 +154,7 @@ bool Inventory::removeItems(ItemType type, int qty) {
     removeFromSlots(_slots, type, qty);
     if (useChest && qty > 0) {
         removeFromSlots(ws.globalChest.slots, type, qty);
+        refreshChestEmpty(ws.globalChest);
     }
     return qty <= 0;
 }

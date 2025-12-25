@@ -11,6 +11,7 @@
 #include "Controllers/Map/BeachMapController.h"
 #include "Controllers/UI/UIController.h"
 #include <functional>
+#include <algorithm>
 
 using namespace cocos2d;
 
@@ -240,6 +241,78 @@ bool openChestNearPlayer(Controllers::IMapController* map,
     return true;
 }
 
+bool breakEmptyChestAtTile(Controllers::IMapController* map,
+                           int c,
+                           int r,
+                           int amount) {
+    if (!map || amount <= 0) return false;
+    auto& chs = map->chests();
+    if (chs.empty()) return false;
+    Vec2 center = map->tileToWorld(c, r);
+    for (auto it = chs.begin(); it != chs.end(); ++it) {
+        Game::Chest& chest = *it;
+        if (!Game::chestCollisionRect(chest).containsPoint(center)) {
+            continue;
+        }
+        if (!chest.empty) {
+            return false;
+        }
+        chest.hp -= amount;
+        if (chest.hp > 0) {
+            auto& ws = Game::globalState();
+            for (auto& ch : ws.farmChests) {
+                if (ch.pos.equals(chest.pos)) {
+                    ch = chest;
+                }
+            }
+            for (auto& ch : ws.houseChests) {
+                if (ch.pos.equals(chest.pos)) {
+                    ch = chest;
+                }
+            }
+            for (auto& ch : ws.townChests) {
+                if (ch.pos.equals(chest.pos)) {
+                    ch = chest;
+                }
+            }
+            for (auto& ch : ws.beachChests) {
+                if (ch.pos.equals(chest.pos)) {
+                    ch = chest;
+                }
+            }
+            if (&chest == &ws.globalChest) {
+                ws.globalChest = chest;
+            }
+            return true;
+        }
+        Game::Chest removed = chest;
+        chs.erase(it);
+        auto& ws = Game::globalState();
+        ws.farmChests.erase(
+            std::remove_if(ws.farmChests.begin(), ws.farmChests.end(),
+                           [&removed](const Game::Chest& ch) { return ch.pos.equals(removed.pos); }),
+            ws.farmChests.end());
+        ws.houseChests.erase(
+            std::remove_if(ws.houseChests.begin(), ws.houseChests.end(),
+                           [&removed](const Game::Chest& ch) { return ch.pos.equals(removed.pos); }),
+            ws.houseChests.end());
+        ws.townChests.erase(
+            std::remove_if(ws.townChests.begin(), ws.townChests.end(),
+                           [&removed](const Game::Chest& ch) { return ch.pos.equals(removed.pos); }),
+            ws.townChests.end());
+        ws.beachChests.erase(
+            std::remove_if(ws.beachChests.begin(), ws.beachChests.end(),
+                           [&removed](const Game::Chest& ch) { return ch.pos.equals(removed.pos); }),
+            ws.beachChests.end());
+        int itemType = static_cast<int>(Game::ItemType::Chest);
+        map->spawnDropAt(c, r, itemType, 1);
+        map->refreshDropsVisuals();
+        map->refreshMapVisuals();
+        return true;
+    }
+    return false;
+}
+
 // 打开全局箱子（类似扩展背包）。
 // - 使用 WorldState::globalChest 作为持久化存储。
 bool openGlobalChest(Controllers::UIController* ui) {
@@ -367,6 +440,7 @@ void transferChestCell(Game::Chest& chest,
         return;
     }
 
+    Game::refreshChestEmpty(chest);
     // 把修改后的 chest 写回 WorldState 中所有箱子列表：
     auto& ws = Game::globalState();
     for (auto& ch : ws.farmChests) {
@@ -508,6 +582,7 @@ bool transferChestToInventory(Game::Chest& chest,
 
     if (!movedAny) return false;
 
+    Game::refreshChestEmpty(chest);
     auto& ws = Game::globalState();
     for (auto& ch : ws.farmChests) {
         if (ch.pos.equals(chest.pos)) {

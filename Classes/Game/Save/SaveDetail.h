@@ -177,6 +177,7 @@ Game::Chest readChest(std::istream& in) {
             }
         }
     }
+    Game::refreshChestEmpty(chest);
     return chest;
 }
 

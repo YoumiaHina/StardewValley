@@ -1,7 +1,12 @@
 #include "Game/Tool/Pickaxe.h"
 #include "Controllers/Map/IMapController.h"
+#include "Controllers/Map/FarmMapController.h"
+#include "Controllers/Map/RoomMapController.h"
+#include "Controllers/Map/TownMapController.h"
+#include "Controllers/Map/BeachMapController.h"
 #include "Controllers/UI/UIController.h"
 #include "Controllers/Systems/CropSystem.h"
+#include "Controllers/Systems/FurnaceController.h"
 #include "Controllers/Environment/EnvironmentObstacleSystemBase.h"
 #include "Controllers/Interact/TileSelector.h"
 #include "Game/WorldState.h"
@@ -14,6 +19,17 @@
 using namespace cocos2d;
 
 namespace Game {
+
+namespace {
+Controllers::FurnaceController* furnaceControllerForMap(Controllers::IMapController* map) {
+    if (!map) return nullptr;
+    if (auto* farm = dynamic_cast<Controllers::FarmMapController*>(map)) return farm->furnaceController();
+    if (auto* room = dynamic_cast<Controllers::RoomMapController*>(map)) return room->furnaceController();
+    if (auto* town = dynamic_cast<Controllers::TownMapController*>(map)) return town->furnaceController();
+    if (auto* beach = dynamic_cast<Controllers::BeachMapController*>(map)) return beach->furnaceController();
+    return nullptr;
+}
+}
 
 ToolKind Pickaxe::kind() const { return ToolKind::Pickaxe; }
 std::string Pickaxe::displayName() const { return std::string("Pickaxe"); }
@@ -76,8 +92,8 @@ std::string Pickaxe::use(Controllers::IMapController* map,
     if (tiles.empty()) return std::string("");
 
     bool hit = false;
+    int dmg = 1 + std::max(0, level());
     if (auto* sys = map->obstacleSystem(Controllers::ObstacleKind::Rock)) {
-        int dmg = 1 + std::max(0, level());
         for (const auto& tile : tiles) {
             int tc = tile.first;
             int tr = tile.second;
@@ -100,6 +116,16 @@ std::string Pickaxe::use(Controllers::IMapController* map,
                 }
             );
             if (one) {
+                hit = true;
+            }
+        }
+    }
+
+    if (auto* furnace = furnaceControllerForMap(map)) {
+        for (const auto& tile : tiles) {
+            int tc = tile.first;
+            int tr = tile.second;
+            if (furnace->breakEmptyFurnaceAtTile(tc, tr, dmg)) {
                 hit = true;
             }
         }

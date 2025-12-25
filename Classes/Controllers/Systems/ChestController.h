@@ -77,6 +77,12 @@ bool openChestNearPlayer(Controllers::IMapController* map,
                          const cocos2d::Vec2& playerWorldPos,
                          const cocos2d::Vec2& lastDir);
 
+// 使用工具在指定瓦片尝试破坏空箱子（3 点 HP，掉落箱子物品）。
+bool breakEmptyChestAtTile(Controllers::IMapController* map,
+                           int c,
+                           int r,
+                           int amount);
+
 // 打开全局箱子（扩展背包）：直接使用 WorldState::globalChest。
 bool openGlobalChest(Controllers::UIController* ui);
 
