@@ -2,11 +2,11 @@
 
 namespace Game {
 
-// TileType£ºÅ©³¡/µØÍ¼¸ñ×ÓÀàÐÍÃ¶¾Ù¡£
-// - Soil    £º¿É¸û×÷µÄÆÕÍ¨ÍÁµØ£¨Î´·­µØ¡¢Î´½½Ë®£©£»
-// - Tilled  £ºÒÑ¾­±»³úÍ··­¹ýµÄ¸ûµØ£¬¿ÉÓÃÓÚ²¥ÖÖ£»
-// - Watered £ºÒÑ½½Ë®µÄ¸ûµØ£¬µ±ÈÕ¿ÉÍÆ½ø×÷ÎïÉú³¤£»
-// - NotSoil£º²»¿É¸û×÷ÇøÓò£¨µÀÂ·¡¢½¨Öþ¡¢ÕÏ°­µÈ£©£¬½öÓÃÓÚÅö×²/ÕÚÕÖ¡£
+// TileTypeï¼šå†œåœº/åœ°å›¾æ ¼å­ç±»åž‹æžšä¸¾ã€‚
+// - Soil    ï¼šå¯è€•ä½œçš„æ™®é€šåœŸåœ°ï¼ˆæœªç¿»åœ°ã€æœªæµ‡æ°´ï¼‰ï¼›
+// - Tilled  ï¼šå·²ç»è¢«é”„å¤´ç¿»è¿‡çš„è€•åœ°ï¼Œå¯ç”¨äºŽæ’­ç§ï¼›
+// - Watered ï¼šå·²æµ‡æ°´çš„è€•åœ°ï¼Œå½“æ—¥å¯æŽ¨è¿›ä½œç‰©ç”Ÿé•¿ï¼›
+// - NotSoilï¼šä¸å¯è€•ä½œåŒºåŸŸï¼ˆé“è·¯ã€å»ºç­‘ã€éšœç¢ç­‰ï¼‰ï¼Œä»…ç”¨äºŽç¢°æ’ž/é®ç½©ã€‚
 enum class TileType {
     Soil,
     Tilled,
