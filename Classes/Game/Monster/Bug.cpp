@@ -85,7 +85,7 @@ public:
         def_.moveSpeed = 100.0f;
         def_.isCollisionAffected = false; // 不受碰撞影响，可以直接穿过障碍。
         def_.name = "Bug";
-        drops_.push_back(ItemType::Fiber);
+        drops_.push_back(ItemType::Coal);
     }
 
     MonsterType monsterType() const override {

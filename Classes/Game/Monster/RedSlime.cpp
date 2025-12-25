@@ -16,7 +16,7 @@ public:
         def_.moveSpeed = 40.0f;
         def_.isCollisionAffected = true;
         def_.name = "Red Slime";
-        drops_.push_back(ItemType::Stone);
+        drops_.push_back(ItemType::Coal);
     }
 
     MonsterType monsterType() const override {

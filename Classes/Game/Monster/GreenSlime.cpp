@@ -20,7 +20,7 @@ public:
         def_.isCollisionAffected = true; // 会被地图碰撞阻挡
         def_.name = "Green Slime";       // 显示名称
         // drops_ 是 std::vector<ItemType>，使用 push_back 追加一个掉落物类型。
-        drops_.push_back(ItemType::Stone);
+        drops_.push_back(ItemType::Coal);
     }
 
     // 返回怪物类型：用于 MonsterSystem / 其它系统区分不同怪物。
