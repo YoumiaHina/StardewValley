@@ -1,5 +1,5 @@
-#include "Controllers/Systems/WeatherController.h"
-#include "Controllers/Systems/RainLayer.h"
+#include "Controllers/Weather/WeatherController.h"
+#include "Controllers/Weather/RainLayer.h"
 #include "Controllers/Map/IMapController.h"
 #include "Controllers/Input/PlayerController.h"
 #include "Game/WorldState.h"

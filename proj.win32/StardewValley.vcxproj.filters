@@ -95,6 +95,9 @@
     <Filter Include="Classes\Game\PlaceableItem">
       <UniqueIdentifier>{164dc438-2993-46f5-8b90-66916401e0e0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Classes\Controllers\Weather">
+      <UniqueIdentifier>{5f711170-ae99-46b5-8b69-bcd331703087}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <!-- Source Files -->
@@ -418,17 +421,11 @@
     <ClCompile Include="..\Classes\Controllers\Systems\FurnaceController.cpp">
       <Filter>Classes\Controllers\Systems</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\Controllers\Systems\WeatherController.cpp">
-      <Filter>Classes\Controllers\Systems</Filter>
-    </ClCompile>
     <ClCompile Include="..\Classes\Controllers\Environment\WeedSystem.cpp">
       <Filter>Classes\Controllers\Environment</Filter>
     </ClCompile>
     <ClCompile Include="..\Classes\Game\Tool\Scythe.cpp">
       <Filter>Classes\Game\Tool</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Classes\Controllers\Systems\RainLayer.cpp">
-      <Filter>Classes\Controllers\Systems</Filter>
     </ClCompile>
     <ClCompile Include="..\Classes\Controllers\UI\ToolUpgradePanelUI.cpp">
       <Filter>Classes\Controllers\UI</Filter>
@@ -495,6 +492,12 @@
     </ClCompile>
     <ClCompile Include="..\Classes\Game\PlaceableItem\Chest.cpp">
       <Filter>Classes\Game\PlaceableItem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\Weather\RainLayer.cpp">
+      <Filter>Classes\Controllers\Weather</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Controllers\Weather\WeatherController.cpp">
+      <Filter>Classes\Controllers\Weather</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -771,9 +774,6 @@
     <ClInclude Include="..\Classes\Controllers\Systems\FurnaceController.h">
       <Filter>Classes\Controllers\Systems</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\Controllers\Systems\WeatherController.h">
-      <Filter>Classes\Controllers\Systems</Filter>
-    </ClInclude>
     <ClInclude Include="..\Classes\Controllers\Systems\PlaceableItemSystemBase.h">
       <Filter>Classes\Controllers\Systems</Filter>
     </ClInclude>
@@ -784,9 +784,6 @@
       <Filter>Classes\Game\Tool</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\Controllers\Systems\DropSystem.h">
-      <Filter>Classes\Controllers\Systems</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Classes\Controllers\Systems\RainLayer.h">
       <Filter>Classes\Controllers\Systems</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\Controllers\UI\ToolUpgradePanelUI.h">
@@ -857,6 +854,12 @@
     </ClInclude>
     <ClInclude Include="..\Classes\Controllers\Map\IMapController.h">
       <Filter>Classes\Controllers\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\Weather\RainLayer.h">
+      <Filter>Classes\Controllers\Weather</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Controllers\Weather\WeatherController.h">
+      <Filter>Classes\Controllers\Weather</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

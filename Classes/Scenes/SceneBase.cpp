@@ -7,7 +7,7 @@
 #include "Game/PlaceableItem/Chest.h"
 #include "Game/Map/RoomMap.h"
 #include "Controllers/Systems/FishingController.h"
-#include "Controllers/Systems/WeatherController.h"
+#include "Controllers/Weather/WeatherController.h"
 #include "Controllers/Systems/FestivalController.h"
 #include "Game/Tool/FishingRod.h"
 
