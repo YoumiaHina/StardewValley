@@ -330,7 +330,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClInclude Include="..\Classes\Controllers\UI\ToolUpgradePanelUI.h" />
     <ClInclude Include="..\Classes\Controllers\Weather\RainLayer.h" />
     <ClInclude Include="..\Classes\Controllers\Weather\WeatherController.h" />
-    <ClInclude Include="..\Classes\Game\Animal.h" />
+    <ClInclude Include="..\Classes\Game\Animals\Animal.h" />
     <ClInclude Include="..\Classes\Game\Cheat.h" />
     <ClInclude Include="..\Classes\Game\EnvironmentObstacle\EnvironmentObstacleBase.h" />
     <ClInclude Include="..\Classes\Game\EnvironmentObstacle\Mineral.h" />

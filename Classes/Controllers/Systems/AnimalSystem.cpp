@@ -101,8 +101,8 @@ namespace {
     }
 
     // 饲料可接受性判定：
-    // - 小鸡：接受任意种子（复用 Game::isSeed）。
-    // - 牛/羊：仅接受萝卜（示例规则，可后续替换为更完整的饲料系统）。
+    // - 小鸡：接受任意种子。
+    // - 牛/羊：仅接受防风草。
     bool acceptsFeed(Game::AnimalType type, Game::ItemType feed) {
         if (type == Game::AnimalType::Chicken) {
             return Game::isSeed(feed);

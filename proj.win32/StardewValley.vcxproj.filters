@@ -840,9 +840,6 @@
     <ClInclude Include="..\Classes\Controllers\Crafting\CraftingController.h">
       <Filter>Classes\Controllers\Crafting</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\Game\Animal.h">
-      <Filter>Classes\Game\Animals</Filter>
-    </ClInclude>
     <ClInclude Include="..\Classes\Game\PlaceableItem\PlaceableItemBase.h">
       <Filter>Classes\Game\PlaceableItem</Filter>
     </ClInclude>
@@ -860,6 +857,9 @@
     </ClInclude>
     <ClInclude Include="..\Classes\Controllers\Weather\WeatherController.h">
       <Filter>Classes\Controllers\Weather</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Game\Animals\Animal.h">
+      <Filter>Classes\Game\Animals</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
