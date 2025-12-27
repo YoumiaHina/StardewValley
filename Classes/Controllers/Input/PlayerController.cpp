@@ -123,6 +123,8 @@ void PlayerController::registerCommonInputHandlers(
             case EventKeyboard::KeyCode::KEY_8: if (_ui) _ui->selectHotbarIndex(7); break;
             case EventKeyboard::KeyCode::KEY_9: if (_ui) _ui->selectHotbarIndex(8); break;
             case EventKeyboard::KeyCode::KEY_0: if (_ui) _ui->selectHotbarIndex(9); break;
+            case EventKeyboard::KeyCode::KEY_MINUS: if (_ui) _ui->selectHotbarIndex(10); break;
+            case EventKeyboard::KeyCode::KEY_EQUAL: if (_ui) _ui->selectHotbarIndex(11); break;
             case EventKeyboard::KeyCode::KEY_Z: {
                 if (chestOpen || craftOpen || storeOpen) break;
                 Game::Cheat::grantBasic(_inventory);
