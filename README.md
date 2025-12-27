@@ -292,6 +292,82 @@ UI 层以 `UIController` 为核心入口，将各个独立 UI 面板组织成一
 - `DialogueUI`：对话框 UI，负责台词显示与选项交互。
 - 其他如技能面板、合成面板、箱子面板等，各自对应独立 UI 类，由 `UIController` 或相关 Controller 负责打开/关闭与数据刷新。
 
+### 作物（Crop）
+
+- 状态唯一来源：`CropSystem`（`Classes/Controllers/Systems/CropSystem.*`）持有作物运行时列表并同步写回 `WorldState`，对外仅暴露“种植/浇水/推进/收获”等接口。
+- 静态定义与映射：`Game::CropBase` / `Game::CropDefs`（`Classes/Game/Crops/crop/CropBase.*`）提供阶段天数、季节适配、回生属性，以及“种子/产物”物品映射。
+- 交互入口：
+  - 播种：`FarmInteractor`（`Classes/Controllers/Interact/FarmInteractor.*`）在玩家选中种子时调用 `CropSystem::plantCrop`，并触发地图作物可视刷新。
+  - 收获：`Hoe`（`Classes/Game/Tool/Hoe.*`）与 `CropSystem::harvestByHoeAt` 协作计算产物与数量（含技能树加成），再由上层将结果落入背包或掉落系统。
+- 日结推进：`CropSystem::advanceCropsDaily` 在“睡觉进入下一天”时被调用，统一处理浇水复位、阶段推进、枯死与回生等分支。
+
+**关键类示例（Crop）**
+
+- `CropSystem`：作物规则与状态唯一来源，统一承载种植/推进/收获。
+- `Game::Crop` / `Game::CropType`：作物运行时状态与类型枚举。
+- `Game::CropDefs` / `Game::CropBase`：作物静态定义与类型→规则查询入口。
+- `FarmInteractor`：把“种子选中 + 交互输入”翻译为作物系统调用。
+
+### 动物（Animal）
+
+- 状态唯一来源：`AnimalSystem`（`Classes/Controllers/Systems/AnimalSystem.*`）维护动物运行时列表（位置/目标/成长/喂食）并同步写回 `WorldState::farmAnimals`，同时作为精灵节点与状态标签的唯一 owner。
+- 静态定义：
+  - 数据结构：`Game::AnimalType` / `Game::Animal` 与 `Game::animalPrice` 位于 `Classes/Game/Animals/Animal.h`。
+  - 行为常量：`Game::AnimalBase`（`Classes/Game/Animals/AnimalBase.h`）的派生类（`ChickenAnimal`/`CowAnimal`/`SheepAnimal`）提供速度、游走半径与贴图路径，系统侧按 `AnimalType` 索引获取。
+- 交互入口：
+  - 喂食：`FarmInteractor` 调用 `AnimalSystem::tryFeedAnimal` 只返回“建议消耗数量”，背包扣除仍由上层完成以避免系统耦合背包细节。
+  - 购买：动物商店面板 `AnimalStorePanelUI`（`Classes/Controllers/UI/StorePanelUI.*`）通过回调驱动 `AnimalSystem::buyAnimal`（价格通常来自 `Game::animalPrice`）扣费并生成；面板的打开入口由 NPC 交互接口 `NpcControllerBase`（`Classes/Controllers/NPC/NpcControllerBase.*`）触发。
+- 日结推进：`advanceAnimalsDaily`（`Classes/Controllers/Systems/AnimalSystem.*`）统一处理成长结算与当日产物生成（落地到掉落系统或写入离线掉落）。
+
+**关键类示例（Animal）**
+
+- `AnimalSystem`：动物状态唯一来源，统一管理游走/喂食/产物与可视节点生命周期。
+- `Game::Animal` / `Game::AnimalType` / `Game::animalPrice`：动物数据结构与定价（`Classes/Game/Animals/Animal.h`）。
+- `Game::AnimalBase` 与 `ChickenAnimal`/`CowAnimal`/`SheepAnimal`：动物静态行为定义（贴图/速度/游走半径）。
+- `advanceAnimalsDaily`：动物每日结算入口（成长 + 产物生成）。
+- `AnimalStorePanelUI`：动物购买 UI，使用回调解耦扣费与生成逻辑。
+
+### 配方与合成（Recipe / Craft）
+
+- 数据抽象：`RecipeBase`（`Classes/Game/Recipe/RecipeBase.*`）定义“材料列表 → 产物”的统一接口，提供可合成判定与执行逻辑。
+- 配方集中管理：`RecipeBook`（`Classes/Game/Recipe/RecipeBook.*`）集中创建并持有所有配方实例，避免配方散落在多个模块维护；UI 通过 `RecipeFilter` 做分类筛选。
+- 合成控制器：`CraftingController`（`Classes/Controllers/Crafting/CraftingController.*`）只负责扣材料与加产物，不负责 UI 与输入。
+- UI 入口：`CraftPanelUI`（`Classes/Controllers/UI/CraftPanelUI.*`）负责列表、分页与筛选展示，并把点击事件转发给 `CraftingController` 执行合成。
+
+**关键类示例（Recipe / Craft）**
+
+- `RecipeBase` / `SimpleRecipe`：配方接口与数据驱动实现。
+- `RecipeBook` / `CategoryRecipeFilter`：配方表与筛选器。
+- `CraftingController`：合成执行入口（背包增删的唯一落点）。
+- `CraftPanelUI`：合成面板 UI（列表展示 + 触发合成）。
+
+### 商店（Store）
+
+- 交易规则：`StoreController`（`Classes/Controllers/Store/StoreController.*`）负责买入/卖出时的金币、精力与背包物品变更，UI 只通过接口触发交易。
+- 商品展示：`StorePanelUI`（`Classes/Controllers/UI/StorePanelUI.*`）提供分类、分页与买卖入口；内部持有 `StoreController` 完成交易闭环。
+- 触发入口：NPC 交互接口 `NpcControllerBase`（`Classes/Controllers/NPC/NpcControllerBase.*`）在交互回调中调用 `UIController` 打开/关闭商店面板，避免把“开店逻辑”写进场景类。
+- 动物商店：`AnimalStorePanelUI` 只负责购买界面展示，真实扣费/生成由上层回调委托给 `AnimalSystem`。
+
+**关键类示例（Store）**
+
+- `StoreController`：交易规则与金币/背包变更入口。
+- `StorePanelUI`：杂货商店 UI（分类/分页/买卖）。
+- `NpcControllerBase`：商店触发接口位置（对话/右键等交互回调）。
+- `AnimalStorePanelUI`：动物商店 UI（回调驱动购买）。
+
+### 技能树（SkillTree）
+
+- 静态定义：`SkillTreeBase`（`Classes/Game/SkillTree/SkillTreeBase.*`）描述技能树类型、节点列表与经验曲线；各 `*SkillTree.cpp` 只提供常量节点定义。
+- 进度与加成入口：`SkillTreeSystem`（`Classes/Game/SkillTree/SkillTreeSystem.*`）负责读写 `WorldState` 中的技能进度，提供“加经验/查等级/查加成描述”等统一接口。
+- 经验来源：作物收获与动物喂食等系统在规则落点处调用 `SkillTreeSystem::addXp`，保证经验累积与业务规则同源。
+- UI 展示：`SkillTreePanelUI`（`Classes/Controllers/UI/SkillTreePanelUI.*`）只负责展示与刷新，数据查询统一走 `SkillTreeSystem`。
+
+**关键类示例（SkillTree）**
+
+- `SkillTreeBase` / `SkillNode` / `SkillProgress`：静态定义与进度数据结构。
+- `SkillTreeSystem`：技能经验、等级、点数与加成的统一入口。
+- `SkillTreePanelUI`：技能面板 UI（展示等级/经验/加成）。
+
 ### 工具与环境交互链路
 
 围绕“玩家工具使用”这一高频操作，项目中形成了一条相对统一的交互链路：
