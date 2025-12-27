@@ -8,7 +8,7 @@
 
 USING_NS_CC;
 
-cocos2d::Scene* MineScene::createScene() { return MineScene::create(); }
+Scene* MineScene::createScene() { return MineScene::create(); }
 
 bool MineScene::init() {
     // 深渊矿洞：不启用空格工具，启用左键工具；不显示 Craft 面板
@@ -94,6 +94,19 @@ bool MineScene::init() {
     });
 
     return true;
+}
+
+MineScene::~MineScene() {
+    delete _chestInteractor;
+    _chestInteractor = nullptr;
+    delete _elevator;
+    _elevator = nullptr;
+    delete _interactor;
+    _interactor = nullptr;
+    delete _combat;
+    _combat = nullptr;
+    delete _monsters;
+    _monsters = nullptr;
 }
 
 Controllers::IMapController* MineScene::createMapController(Node* worldNode) {

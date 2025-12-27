@@ -46,6 +46,25 @@ cocos2d::Vec2 computeRoomBedCenter() {
 
 } // namespace
 
+SceneBase::~SceneBase() {
+    delete _fishingController;
+    _fishingController = nullptr;
+    delete _festivalController;
+    _festivalController = nullptr;
+    delete _weatherController;
+    _weatherController = nullptr;
+    delete _stateController;
+    _stateController = nullptr;
+    delete _cropSystem;
+    _cropSystem = nullptr;
+    delete _playerController;
+    _playerController = nullptr;
+    delete _uiController;
+    _uiController = nullptr;
+    delete _mapController;
+    _mapController = nullptr;
+}
+
 bool SceneBase::initBase(float worldScale, bool buildCraftPanel, bool enableToolOnSpace, bool enableToolOnLeftClick) {
     if (!Scene::init()) return false;
 

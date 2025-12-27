@@ -29,6 +29,7 @@ public:
     virtual bool init() override;
 
     CREATE_FUNC(RoomScene);
+    ~RoomScene() override;
 
     // 设置出生点为门内侧（从农场返回室内时使用）。
     void setSpawnInsideDoor();

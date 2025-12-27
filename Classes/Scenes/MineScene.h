@@ -21,6 +21,7 @@ public:
     // 初始化矿洞场景。
     virtual bool init() override;
     CREATE_FUNC(MineScene);
+    ~MineScene() override;
 
 private:
     Controllers::MineMapController* _map = nullptr;

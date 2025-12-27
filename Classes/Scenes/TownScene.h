@@ -19,6 +19,7 @@ public:
     static cocos2d::Scene* createScene();
     // Cocos 工厂：创建并初始化对象。
     CREATE_FUNC(TownScene);
+    ~TownScene() override;
 
 protected:
     // 初始化：构建 SceneBase 骨架并接入城镇特有模块。

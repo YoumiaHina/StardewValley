@@ -31,6 +31,7 @@ public:
     virtual bool init() override;
 
     CREATE_FUNC(FarmScene);
+    ~FarmScene() override;
     
     // 设置出生点为农场入口外侧（供其它场景返回时使用）。
     void setSpawnAtFarmEntrance();

@@ -28,7 +28,7 @@ namespace Controllers { class FestivalController; }
 class SceneBase : public cocos2d::Scene {
 public:
     // 析构：释放场景持有的控制器与资源。
-    virtual ~SceneBase() = default;
+    virtual ~SceneBase();
 
 protected:
     // 由子类在 init() 中调用：初始化共享骨架。

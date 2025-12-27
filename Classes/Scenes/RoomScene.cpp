@@ -42,6 +42,11 @@ bool RoomScene::init() {
     return true;
 }
 
+RoomScene::~RoomScene() {
+    delete _interactor;
+    _interactor = nullptr;
+}
+
 void RoomScene::setSpawnInsideDoor() {
     if (!_player || !_roomMap) return;
     Vec2 spawn = _roomMap->roomFarmDoorSpawnPos();

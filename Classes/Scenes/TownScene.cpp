@@ -62,6 +62,13 @@ bool TownScene::init() {
     return true;
 }
 
+TownScene::~TownScene() {
+    delete _chestInteractor;
+    _chestInteractor = nullptr;
+    delete _npcController;
+    _npcController = nullptr;
+}
+
 IMapController* TownScene::createMapController(Node* worldNode) {
     const auto& ws = Game::globalState();
     std::string key;

@@ -71,6 +71,15 @@ bool FarmScene::init() {
     return true;
 }
 
+FarmScene::~FarmScene() {
+    delete _interactor;
+    _interactor = nullptr;
+    delete _animalSystem;
+    _animalSystem = nullptr;
+    delete _robinNpc;
+    _robinNpc = nullptr;
+}
+
 void FarmScene::setSpawnAtFarmEntrance() {
     if (!_player || !_mapController) return;
     float s = static_cast<float>(GameConfig::TILE_SIZE);

@@ -16,6 +16,7 @@ public:
     // 创建沙滩场景实例。
     static cocos2d::Scene* createScene();
     CREATE_FUNC(BeachScene);
+    ~BeachScene() override;
 
 protected:
     // 初始化沙滩场景。

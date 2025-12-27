@@ -53,6 +53,13 @@ bool BeachScene::init() {
     return true;
 }
 
+BeachScene::~BeachScene() {
+    delete _chestInteractor;
+    _chestInteractor = nullptr;
+    delete _npcController;
+    _npcController = nullptr;
+}
+
 IMapController* BeachScene::createMapController(Node* worldNode) {
     const auto& ws = Game::globalState();
     std::string key;
