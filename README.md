@@ -169,6 +169,140 @@
 - UI 聚合：`UIController` 作为统一入口管理 HUD/热键栏/背包与各类面板，避免 UI 分散在多个系统中互相直接引用。
 - 交互一致：社交/对话/钓鱼/箱子/商店等面板打开时统一阻止移动，减少输入冲突。
 
+## 类的架构
+
+本项目在代码层面整体遵循“场景骨架 + 控制器/系统 + 游戏数据 + UI”的分层设计，尽量做到高内聚、低耦合。下面从几个主要维度简要说明类的架构与协作关系。
+
+### 场景层（Scenes）
+
+- 场景基类：`Classes/Scenes/SceneBase.*` 是所有具体场景的唯一基类，负责：
+  - 创建并持有通用控制器（地图、玩家、作物、天气、节日、钓鱼、UI 等）。
+  - 搭建 worldNode / UI 根节点等挂载点。
+  - 在 `update` 中统一驱动各控制器与系统的帧更新。
+- 具体场景：`FarmScene`、`RoomScene`、`TownScene`、`BeachScene`、`MineScene` 等（位于 `Classes/Scenes/*`）仅负责：
+  - 指定使用的地图控制器实现（农场/城镇/矿洞 TMX 等）。
+  - 根据场景需求按需创建额外的控制器或系统（如矿洞战斗、电梯、怪物控制器等）。
+  - 覆盖少量与该场景强相关的钩子（例如场景进入/离开时的初始化或清理）。
+- 设计原则：所有业务规则（掉落计算、战斗数值、作物成长等）不直接写在场景类中，而是下沉到 Controllers/System/Game 层，场景只承担“骨架 + 调度 + 事件转发”的职责。
+
+**关键类示例（`Classes/Scenes`）**
+
+- `SceneBase`：场景骨架与调度中心，持有通用控制器与 world/UI 根节点。
+- `FarmScene`：农场室外场景，组合 `FarmMapController`、作物/动物系统并挂接农场专用 UI。
+- `RoomScene`：室内/房间场景，负责与房间地图控制器、室内交互器协作。
+- `TownScene`：城镇场景，聚合 NPC/商店/节日等与 `TownMapController` 的交互。
+- `BeachScene`：海滩场景，承载钓鱼、节日活动等，与海滩地图控制器协作。
+- `MineScene`：矿洞场景，组合 `MineMapController`、矿洞战斗/怪物/电梯等控制器。
+
+### 控制器层（Controllers / Interactors / Managers）
+
+控制器层负责“流程编排与输入转发”，是场景与底层系统之间的中介。
+
+- 地图控制器：
+  - 抽象接口：`Controllers::IMapController` 位于 `Classes/Controllers/Map/*`，统一封装 TMX 地图加载、坐标转换、碰撞检测、地块属性查询、楼层切换等能力。
+  - 具体实现：`FarmMapController`、`TownMapController`、`MineMapController` 等分别服务于不同场景，但都通过 `IMapController` 暴露统一接口，场景与系统只依赖抽象。
+- 玩家与输入控制器：
+  - `PlayerController`（`Classes/Controllers/Input/PlayerController.*`）集中处理键盘/鼠标输入、移动、工具使用触发等，将“玩家按键”转换为对 Tool / System 的调用。
+  - 与背包、UI 交互：通过接口与背包系统、UI 面板协作，而不直接操作底层容器。
+- 玩法控制器与交互器：
+  - 例如 `Classes/Controllers/Mine/*` 下的一组控制器/交互器负责矿洞战斗、电梯、宝箱、楼层事件等，它们更多做“命中结果 → 调用 System/Drop/UI”的调用顺序编排。
+  - 合成、商店、社交等模块也有各自的 Controller/Interactor（如 `CraftingController`、`StoreController`、各类 *Interactor），负责把 UI 操作或输入事件翻译成对系统层的调用。
+- 管理类（Manager）：
+  - 典型如 `AudioManager`（`Classes/Controllers/Managers/AudioManager.*`），集中管理 BGM/音效的播放、切换与资源复用，对外提供简单接口（播放/停止/切换），内部自行维护状态。
+  - 其他 Manager 类也遵循类似模式：提供清晰接口，内部隐藏具体实现与资源管理。
+
+**关键类示例（`Classes/Controllers`）**
+
+- `PlayerController`（Input）：负责采集玩家输入、移动与工具使用触发，是“输入入口”。
+- `UIController`（UI）：统一创建和管理 HUD/背包栏/各类面板，是 UI 的聚合入口。
+- `StoreController`（Store）：处理商店买卖逻辑，与 `StorePanelUI`、`WorldState` 协作修改金币与物品。
+- `CraftingController`（Crafting）：处理合成配方查询与合成结果生成，驱动背包与合成 UI。
+- `WeatherController` / `FestivalController`（Systems）：围绕 `WorldState` 驱动天气变化与节日开关。
+- `FishingController`（Systems）：管理钓鱼小游戏流程，与 `PlayerController` 输入与鱼行为/掉落系统协作。
+- `MineMapController` / `FarmMapController` / `TownMapController`（Map）：封装各自场景的 TMX 地图与碰撞/坐标转换。
+- 矿洞相关控制器（`Classes/Controllers/Mine/*`）：
+  - 典型如战斗控制器、怪物控制器、电梯控制器、矿洞交互器等，负责把命中结果分发给 `DropSystem`、经验系统与 UI。
+
+### 系统层（Systems）
+
+系统层主要负责“状态唯一来源”和“规则实现”，对同一类业务实体提供集中管理。
+
+- 作物与动物：
+  - `CropSystem`（`Classes/Controllers/Systems/CropSystem.*`）管理所有地块作物生长状态，是作物相关数据的唯一来源，负责每日推进、浇水状态、成熟与枯死等规则。
+  - `AnimalSystem`（`Classes/Controllers/Systems/AnimalSystem.*`）集中管理农场动物的状态、产物结算等。
+- 时间、天气与节日：
+  - `WeatherController` 与 `FestivalController`（位于 `Classes/Controllers/Systems/`）共同围绕 `WorldState` 驱动每日天气变化、节日开启与关闭等。
+  - 这些控制器更多承担“系统级规则”，与具体场景解耦。
+- 工具与升级：
+  - `ToolUpgradeSystem`（`Classes/Controllers/Systems/ToolUpgradeSystem.*`）负责工具升级消耗、条件校验与升级结果写回，避免把升级规则散落在 UI 或场景中。
+- 掉落与可放置物：
+  - `DropSystem`（`Classes/Controllers/Systems/DropSystem.*`）负责统一生成、管理与回收地图上的掉落实体，避免各业务模块各自维护掉落列表。
+  - `PlaceableItemSystemBase` / `ChestController` 等处理可放置物体（如箱子）的状态与与挂载节点。
+- 环境障碍物系统：
+  - 所有树木、石头、矿石、杂草、楼梯等环境实体由 `EnvironmentObstacleSystemBase` 的子类统一管理（目录 `Classes/Controllers/Environment/*`），例如矿石相关的 `MineralSystem`。
+  - 这些 System 既是状态唯一来源，也是对应 Cocos 节点（sprite/DrawNode）的唯一 owner，负责生成、更新与销毁节点，并通过接口向控制器暴露命中/破坏/掉落等结果。
+
+**关键类示例（`Classes/Controllers/Systems` 与 `Environment`）**
+
+- `CropSystem`：唯一管理作物状态与可视节点，负责每日推进、浇水/枯死/成熟等规则。
+- `AnimalSystem`：集中管理动物状态、喂食与产物结算，并驱动对应节点更新。
+- `ToolUpgradeSystem`：处理工具升级条件、消耗与结果写回（更新工具等级与属性）。
+- `DropSystem`：统一管理掉落物生成/更新/销毁和地图挂载，是掉落状态唯一来源。
+- `PlaceableItemSystemBase`：可放置物体（如箱子）的通用系统基类。
+- `ChestController`：基于 `PlaceableItemSystemBase` 管理箱子放置、打开/关闭与存取物。
+- `EnvironmentObstacleSystemBase`：环境障碍物系统抽象基类，统一定义生成/更新/销毁接口。
+- `MineralSystem` 等环境子系统：分别管理矿石、树木、石头、杂草等具体环境实体。
+
+### 游戏数据与规则层（Game）
+
+`Classes/Game/*` 目录下主要是与具体引擎无关的游戏数据结构与规则定义，尽量保持“无场景、无 UI、弱引擎依赖”：
+
+- 全局状态：`Game::WorldState` 作为全局游戏状态的唯一来源，包含背包、地图瓦片、作物/动物、NPC 好感度、时间/天气等核心数据，通过 `globalState()` 访问。
+- 道具与配方：`Classes/Game/Item/*`、`Classes/Game/Recipe/*` 定义了物品基础属性、堆叠规则、合成配方等。
+- 生物与战斗：`Classes/Game/Monster/*`、玩家与怪物的数值结构等，描述生命值、攻击力、经验、掉落表等战斗相关规则。
+- 存档：`Classes/Game/Save/SaveSystem.*` 负责将 `WorldState` 读写到磁盘，并处理版本演进与兼容。
+
+**关键类示例（`Classes/Game`）**
+
+- `Game::WorldState`：全局状态唯一来源，持有背包、时间、季节、天气、地图瓦片、作物/动物、NPC 状态等。
+- 物品相关：
+  - 基础物品/堆叠结构（如物品 ID、数量、品质等）用于背包与掉落。
+  - 合成配方/配方表（`Recipe` 等）描述输入→输出的规则。
+- 怪物与战斗相关数据结构：定义怪物基础属性、掉落表、经验与战斗行为参数。
+- `SaveSystem`：负责把 `WorldState` 序列化/反序列化到文本存档，并处理版本兼容。
+
+### UI 层（UI）
+
+UI 层以 `UIController` 为核心入口，将各个独立 UI 面板组织成一个整体：
+
+- UI 聚合入口：
+  - `UIController`（`Classes/Controllers/UI/UIController.*`）在场景创建时由 `SceneBase` 创建并持有，负责初始化 HUD/背包栏/提示气泡/各类面板，并与 `PlayerController`、各 System 协作刷新显示。
+- 具体 UI 面板：
+  - 商店 UI：`StorePanelUI`（`Classes/Controllers/UI/StorePanelUI.*`）。
+  - 社交 UI：`NpcSocialPanelUI`、`DialogueUI` 等。
+  - 其他如技能、合成、箱子等面板也各自有独立类，遵循“单一面板单一类”的原则，通过 `UIController` 或对应 Controller 进行打开/关闭与数据刷新。
+- 与系统协作方式：
+  - UI 层不直接修改底层数据结构，而是通过 Controller/System 提供的接口完成购买、制作、赠礼、取物等操作；UI 只负责展示与输入采集。
+
+**关键类示例（`Classes/Controllers/UI`）**
+
+- `UIController`：全局 UI 管理入口，持有 HUD、背包栏及各类面板的实例。
+- `StorePanelUI`：商店 UI，展示可购买/可出售物品，并与 `StoreController` 协作完成交易。
+- `NpcSocialPanelUI`：社交面板 UI，展示 NPC 基本信息与好感度。
+- `DialogueUI`：对话框 UI，负责台词显示与选项交互。
+- 其他如技能面板、合成面板、箱子面板等，各自对应独立 UI 类，由 `UIController` 或相关 Controller 负责打开/关闭与数据刷新。
+
+### 工具与环境交互链路
+
+围绕“玩家工具使用”这一高频操作，项目中形成了一条相对统一的交互链路：
+
+- 输入采集：`PlayerController` 根据键盘/鼠标输入与当前背包选中物品，判断是否触发某个 Tool 的使用。
+- 工具逻辑：Tool 本身只做“调用对应 System 接口”，例如锄头作用于 `CropSystem`、武器/镐子作用于矿洞/环境系统（如 `MineralSystem`）、斧子作用于 `TreeSystem` 等。
+- 系统判定：各环境 System 内部完成命中判定、耐久/HP 计算、破坏与否、掉落内容等业务逻辑，并返回结构化结果（如是否命中、是否摧毁、掉落列表）。
+- 结果分发：Controller 根据系统返回的结果，调用 `DropSystem` 生成掉落、更新 `WorldState`，并通知 `UIController` 刷新背包/提示，同时可能驱动 `AudioManager` 播放音效、摄像机震动等效果。
+
+通过上述分层，项目中同一类职责尽量集中在同一类/同一模块中，避免出现“同一实体状态在多处维护”或“场景直接堆业务逻辑”的情况，也便于后续对单个模块进行替换与扩展。
+
 ## 开发流程（基于提交记录归纳）
 
 ### （1）初期阶段
@@ -190,7 +324,7 @@
 
 - 钓鱼节与天气逻辑冲突：天气使用固定 seed 计算导致“夏季第 6 天”可能必然下雨，影响节日体验；解决方式是在节日当天强制 `ws.isRaining = false`。
 - 钓鱼小游戏难度不合理：鱼速度/加速度导致难以捕获；通过限制速度上限并调整阻尼与进度增减速率改善手感。
-- NPC 赠礼重复结算：需要“每日一次赠礼”约束；通过 `npcLastGiftDay` 记录当天赠礼时间并在重复赠礼时提示。
+- cocos2dx使用的OpenGL坐标与瓦片坐标的冲突：OpenGL坐标y轴朝上，而游戏内使用的瓦片坐标为y轴朝下。这个问题导致使用工具前，获取鼠标点击坐标时，出现了上下相反的问题。一开始并未意识到是由坐标系冲突导致，而是简单地将点击的坐标上下镜像尝试解决，而导致了人物在接近地图边界，离开屏幕中心时的定位问题。后续通过仔细排查问题发生的链路，找到根源问题，并将鼠标点击的OpenGL坐标值正确换算为瓦片坐标值，解决了问题。
 - 箱子/房间切换显示异常：迭代中出现“切回 Room 场景箱子贴图消失”等问题，通过重命名与交互器职责调整修复。
 
 ## 开发项目过程学习到的知识
