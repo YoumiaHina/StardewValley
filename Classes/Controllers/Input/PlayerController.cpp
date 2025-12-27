@@ -21,6 +21,8 @@ using namespace cocos2d;
 
 namespace Controllers {
 
+// registerCommonInputHandlers：在指定节点上注册键盘/鼠标/触摸监听，作为统一输入入口。
+// - 同步更新内部 UI/背包/作物系统指针，并根据当前面板状态决定哪些输入可用。
 void PlayerController::registerCommonInputHandlers(
     Node* ownerNode,
     UIController* ui,
@@ -466,7 +468,7 @@ void PlayerController::update(float dt) {
         _player->setMoving(false);
         _moveHeldDuration = 0.0f;
         _isSprinting = false;
-        // Keep cursor and camera follow without moving the player
+        // 移动被锁定时：保持光标与相机跟随玩家，但不更新玩家位置。
         _map->updateCursor(_player->getPosition(), _lastDir);
         if (_worldNode) {
             auto visibleSize = Director::getInstance()->getVisibleSize();
@@ -499,7 +501,7 @@ void PlayerController::update(float dt) {
         return;
     }
 
-    // sprint timing: holding ANY movement key
+    // 冲刺判定：任意方向键持续按住超过阈值则进入冲刺状态。
     bool movementHeld = (_up || _down || _left || _right);
     if (movementHeld) {
         _moveHeldDuration += dt;
@@ -544,7 +546,7 @@ void PlayerController::update(float dt) {
         pv->syncUpperLayerPosition();
     }
 
-    // Cursor (Farm) and camera follow
+    // 更新农场光标与相机跟随，使玩家始终保持在视野中心附近。
     _map->updateCursor(_player->getPosition(), _lastDir);
 
     if (_worldNode) {

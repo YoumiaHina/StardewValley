@@ -74,12 +74,34 @@
 - 使用对应工具进行采集，获得木材/石头/矿物/纤维等资源掉落。
 - 掉落物可在地面拾取进入背包，用于后续合成、升级与交易。
 
-### 矿洞冒险（战斗 / 楼层 / 电梯）
+### 矿洞冒险（采矿）
 
-- 从入口进入矿洞，逐层深入探索，每层都有怪物与资源点。
-- 使用武器与怪物战斗，击败怪物可获得金币与掉落。
-- 电梯会随着探索逐步解锁，允许快速前往已解锁楼层，减少重复跑图。
-- 在矿洞中需要关注生命值与精力，适时返回农场补给与存档。
+- 进入矿洞后，每层都会生成矿石/石头/硬石等资源点，分布在可探索区域，各资源点的出现概率和所需敲击次数不同。
+- 使用镐子等工具敲击矿点，可获得矿石、宝石与石头等掉落，部分矿点可能刷新隐藏楼梯。
+- 楼层越深，矿物种类与稀有度越高，产出的矿石可以送往熔炉冶炼为金属锭，用于合成与工具升级，也可以售卖换钱。
+- 采矿会持续消耗精力，需要在矿洞中合理安排路线，或返回农场休息补给。
+
+### 矿洞冒险（战斗）
+
+- 每层都会刷新对应强度的怪物，每种怪物伤害、血量、速度、动画等属性都不同，玩家可使用武器进行攻击。
+- 击败怪物可获得金币、经验与战利品掉落，部分怪物也可能掉落楼梯或特殊钥匙类道具。
+- 通过楼梯向下推进楼层，每过5层会解锁一级电梯并获赠新的剑，电梯允许快速前往已解锁楼层，减少重复跑图。
+- 战斗过程中需要同时关注生命值与精力，合理使用食物/药品，并在必要时撤退返回农场存档。
+
+### 可放置物系统（箱子 / 熔炉）
+
+- 玩家可以在农场、房屋室内等场景放置箱子，作为额外的储物空间。
+- 靠近箱子并交互可打开箱子面板，在背包与箱子之间自由搬运物品；箱子内容会随存档长期保留。
+- 熔炉同样属于可放置物，放置后可以向其中投入矿石与燃料，启动熔炼计时。
+- 熔炼完成后会在熔炉附近生成金属锭等掉落物，玩家拾取后进入背包，用于后续合成与工具升级。
+- 箱子与熔炉的放置都遵循统一的占位与碰撞规则，避免阻挡玩家必经路径或重叠放置。
+
+### 工具升级系统
+
+- 工具（锄头、镐子、斧头、浇水壶）拥有多级品质，等级越高，效率和作用范围越好。
+- 通过工具升级面板，玩家可以查看当前每种工具的等级以及下一次升级所需的金币与金属锭材料。
+- 若背包和全局箱子中的材料与金币满足要求，点击升级按钮将消耗对应资源，并立刻提升工具等级（最高 3 级）。
+- 升级成功后会刷新背包与热键栏显示，使高等级工具在采矿、伐木、耕地与浇水等操作中体现明显差异。
 
 ### 时间 / 天气 / 日结
 
@@ -128,7 +150,8 @@
 - 其它：
   - `F`：食用当前选中可食用物品
   - `Q`：丢弃/放置当前选中物品（与地图/选中物品类型有关）
-  - `Ctrl`：切换工具（工具需升至满级）距离修饰（用于扩大交互范围的按住状态）
+  - `Ctrl`：工具距离修饰键（仅对满级工具生效，按住时把单格锄地/浇水/采集改为扇形多格范围）
+  - `Shift`：在箱子界面按住再点击物品格，可连续搬运整叠物品
 
 说明：项目内还包含少量开发用快捷键（例如 `Z` 发放基础物资、`T/X` 时间/作物推进等），以 `Classes/Controllers/Input/PlayerController.cpp` 为准。
 
@@ -326,6 +349,79 @@ UI 层以 `UIController` 为核心入口，将各个独立 UI 面板组织成一
 - `Game::AnimalBase` 与 `ChickenAnimal`/`CowAnimal`/`SheepAnimal`：动物静态行为定义（贴图/速度/游走半径）。
 - `advanceAnimalsDaily`：动物每日结算入口（成长 + 产物生成）。
 - `AnimalStorePanelUI`：动物购买 UI，使用回调解耦扣费与生成逻辑。
+
+### 怪物（Monster）
+
+- 状态唯一来源：`MineMonsterController`（`Classes/Controllers/Mine/MonsterSystem.*`）维护矿洞内所有怪物的运行时列表（位置/速度/当前 HP/攻击冷却），并负责与 `MineMapController` 同步碰撞体和与世界节点同步精灵。
+- 静态行为定义：`Game::MonsterBase` 及其派生类（`GreenSlime` / `BlueSlime` / `RedSlime` / `Bug` / `Ghost` 等，位于 `Classes/Game/Monster/*`）提供每种怪物的基础属性（血量/攻击/移动速度/搜敌范围）和动画接口，通过 `monsterInfoFor(MonsterType)` 统一查询。
+- 交互入口：
+  - 近战攻击：`MineCombatController`（`Classes/Controllers/Mine/CombatSystem.*`）在鼠标左键按下时读取当前选中的 `Game::Sword`，通过 `Game::Sword::buildHitTiles` 构建前方扇形瓦片列表，并调用 `MineMonsterController::applyAreaDamage` 结算怪物伤害与死亡（经验/掉落由怪物系统内部通过 `SkillTreeSystem`、`DropSystem` 等模块完成）。
+  - 怪物反击：`MineMonsterController::update` 每帧根据玩家位置驱动怪物移动与接触伤害，更新玩家生命值写回 `WorldState`，并在玩家死亡时清空怪物。
+
+**关键类示例（Monster）**
+
+- `MineMonsterController`：怪物运行时状态唯一来源，负责刷怪/移动/攻击/死亡。
+- `Game::MonsterBase` / `monsterInfoFor`：怪物静态配置与动画接口。
+- `GreenSlime` / `BlueSlime` / `RedSlime` / `Bug` / `Ghost`：具体怪物行为实现。
+- `MineCombatController`：把玩家攻击输入翻译为对怪物系统的范围伤害调用。
+
+### 矿物与矿脉（Mineral）
+
+- 状态唯一来源：`MineralSystem`（`Classes/Controllers/Environment/MineralSystem.*`）作为矿洞内“矿石/石块”环境障碍的唯一来源，持有 `std::vector<Game::MineralData>` 作为运行时列表，并维护 `_obstacles` 映射以同步到 Cocos 节点。
+- 运行时数据与静态定义：
+  - 运行时：`Game::MineralData`（`Classes/Game/EnvironmentObstacle/Mineral.h`）记录每一块矿石的类型、位置、HP、尺寸与贴图路径。
+  - 静态：`Game::MineralType` 枚举区分普通石头/硬石/巨岩/铜矿/铁矿/金矿，`Game::mineralDropItem` 负责把矿石类型映射为掉落物品（石头或各类矿粒）。
+- 生成与刷新：
+  - 生成：`MineralSystem::generateNodesForFloor` 根据 `MineMapController` 提供的候选点与楼层信息，使用随机数决定矿石种类与分布，并填充 `_minerals`。
+  - 可视化：`MineralSystem::attachTo` 绑定世界节点后，通过 `syncVisuals` 懒创建 `Game::Mineral` 节点并挂到场景中，保持“系统持有状态 + 节点由系统统一创建/销毁”的约束。
+- 交互入口：
+  - 采矿：镐子等工具通过地图控制器 `MineMapController::obstacleSystem(ObstacleKind::Mineral)` 获取矿物系统接口，在命中矿石时调用系统的受击接口降低 HP；当 HP 降为 0 时，由系统调用 `mineralDropItem` 生成掉落并通过回调交给 `DropSystem`。
+  - 楼梯遮挡：`StairSystem` 在生成楼梯时会参考 `MineralSystem` 的矿石分布，避免楼梯被巨岩等矿石完全覆盖。
+
+**关键类示例（Mineral）**
+
+- `MineralSystem`：矿石/石块状态与节点唯一来源，负责生成/刷新/受击与销毁。
+- `Game::Mineral` / `Game::MineralData` / `Game::MineralType`：矿物实体节点与运行时数据结构。
+- `Game::mineralDropItem`：矿石类型到掉落物品的映射函数。
+- `MineMapController`：为矿物系统提供楼层信息、坐标换算与障碍查询。
+
+### 可放置物（Placeable Item）
+
+- 几何与通用规则：`PlaceableItemBase`（`Classes/Game/PlaceableItem/PlaceableItemBase.*`）抽象出所有可放置物体（箱子/熔炉等）的公共几何接口：`pos`、`placeRect()`、`collisionRect()`、`maxPerArea()`，并提供 `isNearAny`、`canPlaceAt` 等模板工具，用于统一实现“接近判定”和“可放置判定”。
+- 系统基类：`PlaceableItemSystemBase`（`Classes/Controllers/Systems/PlaceableItemSystemBase.*`）负责管理可放置物系统的 `DrawNode`，并提供统一的 `InteractWithItem` 入口：先判断是否应进入“放置流程”，否则尝试与已有物体交互；具体规则由子类实现。
+- 状态唯一来源：
+  - 箱子：`ChestController`（`Classes/Controllers/Systems/ChestController.*`）作为箱子状态的唯一来源，持有当前地图所有箱子的列表，并与 `WorldState::farmChests` / `houseChests` 等容器同步。
+  - 熔炉：`FurnaceController`（`Classes/Controllers/Systems/FurnaceController.*`）统一管理熔炉列表与计时逻辑，底层数据存放在 `WorldState` 的各个 `*Furnaces` 容器。
+- 交互入口：
+  - 放置：`PlacementInteractor`（`Classes/Controllers/Interact/PlacementInteractor.*`）根据地图类型与玩家位置，选择合适的放置中心点，再调用对应系统的 `tryPlace` 完成放置与背包扣除。
+  - 箱子交互：右键或交互键触发 `ChestController::tryInteractExisting`，打开 `ChestPanelUI`（`Classes/Controllers/UI/ChestPanelUI.*`）进行物品转移；业务规则（容量/堆叠/移动）集中在 `ChestController` 与背包系统内部。
+  - 熔炉交互：熔炉系统在交互时根据 `Game::furnaceRecipeFor` 查找配方，将矿石与燃料转化为锭，完成后通过掉落或直接写回背包。
+
+**关键类示例（Placeable Item）**
+
+- `PlaceableItemBase`：可放置物基础几何接口与放置判定工具。
+- `PlaceableItemSystemBase`：所有可放置物系统的统一调度基类。
+- `ChestController` / `FurnaceController`：箱子/熔炉系统的具体实现与状态唯一来源。
+- `Game::Chest` / `Game::Furnace`：可放置物体的运行时数据结构。
+
+### 工具升级（Tool Upgrade）
+
+- 规则唯一来源：`ToolUpgradeSystem`（`Classes/Controllers/Systems/ToolUpgradeSystem.*`）以单例形式存在，通过 `getInstance()` 获取；集中负责工具等级查询、下一次升级消耗计算与实际升级操作，是“工具升级规则”的唯一来源。
+- 与工具数据的关系：工具基类 `Game::ToolBase`（`Classes/Game/Tool/ToolBase.*`）持有 `level` 字段，具体工具（锄头/镐子/斧头/浇水壶等）在自身逻辑中根据等级调整伤害、效率或范围；`ToolUpgradeSystem` 通过背包与全局箱子中的 `ToolBase` 实例读写该等级。
+- 升级规则：
+  - 等级上限：当前约定等级 0~3 共四档，`nextUpgradeCost` 在等级已达上限或未找到工具时返回 `false`。
+  - 消耗结构：从 0 升 1 需要 2000G + 5 个铜锭，从 1 升 2 需要 5000G + 5 个铁锭，从 2 升 3 需要 10000G + 5 个金锭；材料类型分别为 `ItemType::CopperIngot` / `IronIngot` / `GoldIngot`。
+  - 统一扣费：`upgradeToolOnce` 在确认可升级后从 `WorldState` 扣除金币，并从玩家背包（必要时扩展到全局箱子）中扣除对应材料，再将工具等级 +1。
+- UI 与入口：
+  - 面板：`ToolUpgradePanelUI`（`Classes/Controllers/UI/ToolUpgradePanelUI.*`）负责构建“工具升级” UI（图标/等级文本/材料图标/按钮），在 `refreshPanel` 中调用 `ToolUpgradeSystem::nextUpgradeCost` 获取升级信息并更新按钮状态。
+  - 触发：`UIController` 提供 `buildToolUpgradePanel` / `toggleToolUpgradePanel` 等方法，由场景或输入逻辑在合适时机打开/关闭升级面板；面板内部按钮点击通过 `ToolUpgradeSystem::upgradeToolOnce` 执行实际升级，并在成功后回调 `UIController::refreshHotbar` 刷新热键栏显示。
+
+**关键类示例（Tool Upgrade）**
+
+- `ToolUpgradeSystem`：工具升级规则与执行入口的唯一来源。
+- `Game::ToolBase` 及其派生工具：持有等级并在 `use` 逻辑中根据等级调整效果。
+- `ToolUpgradePanelUI`：工具升级 UI 面板，展示等级/材料并驱动系统调用。
+- `UIController`：作为升级面板的聚合入口与升级后 UI 刷新触发点。
 
 ### 配方与合成（Recipe / Craft）
 
