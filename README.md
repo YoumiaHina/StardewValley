@@ -628,6 +628,27 @@ UI 层以 `UIController` 为核心入口，将各个独立 UI 面板组织成一
 - `ChestController` / `FurnaceController`：箱子/熔炉系统的具体实现与状态唯一来源。
 - `Game::Chest` / `Game::Furnace`：可放置物体的运行时数据结构。
 
+### 捏脸与玩家外观（Customization / Player View）
+
+- 状态唯一来源：
+  - 玩家外观参数（上衣/裤子/发型/发色）由 `Game::WorldState` 中的 `playerShirt` / `playerPants` / `playerHair` / `playerHairR/G/B` 字段统一维护（`Classes/Game/WorldState.h`），存档与读档都只读写这一处。
+- 静态定义与映射：
+  - `Game::PlayerView`（`Classes/Game/View/PlayerView.*`）使用多层 Sprite（身体/衣服/裤子/头发/手臂/工具）组合角色形象，通过 `getMaxShirtStyles` / `getMaxPantsStyles` / `getMaxHairStyles` 定义可用的样式数量，并在 `updateSprites` 中根据“样式索引 + 朝向 + 动画帧”从贴图中切分出对应区域。
+- 交互入口：
+  - 外观定制：`CustomizationScene`（`Classes/Scenes/CustomizationScene.*`）作为独立捏脸场景，创建一个放大的 `PlayerView` 作为预览角色，通过左右箭头切换上衣/裤子/发型索引（`changeShirt` / `changePants` / `changeHair`），并通过一排颜色按钮调用 `changeHairColor` 更改发色，同时使用 `updateLabels` 更新当前索引显示。
+  - 进入捏脸：主菜单场景 `MainMenuScene`（`Classes/Scenes/MainMenuScene.cpp`）在“新建存档”流程中，先根据输入名称创建存档路径并重置全局 `WorldState`，然后将 `lastScene` 预置为房间场景枚举值，最后通过 `CustomizationScene::createScene` 切换到捏脸界面。
+  - 应用外观：`CustomizationScene::onStartGame` 在玩家点击“开始游戏”按钮时，从 `_character`（`PlayerView` 实例）读取当前样式索引与发色，写回 `WorldState` 的外观字段后，通过场景切换进入 `RoomScene`。
+  - 场景还原：任意游戏主场景在 `SceneBase::init`（`Classes/Scenes/SceneBase.cpp`）中创建 `PlayerView`，从 `WorldState` 读取 `playerShirt` / `playerPants` / `playerHair` / `playerHairR/G/B`，做范围校验后调用 `setShirtStyle` / `setPantsStyle` / `setHairStyle` / `setHairColor`，从而在进入农场/房间/矿洞等场景时统一还原玩家外观。
+- 存档与加载：
+  - `SaveSystem::saveToFile` 与 `SaveSystem::loadFromFile`（`Classes/Game/Save/SaveSystem.cpp`）在基础字段部分把外观参数按顺序序列化/反序列化，版本号大于等于 7 的存档都包含外观信息，保证捏脸结果在多次游戏中保持一致。
+
+**关键类示例（Customization）**
+
+- `Game::WorldState`：持久化玩家上衣/裤子/发型/发色参数。
+- `Game::PlayerView`：多层 Sprite 组合的玩家视图，负责外观渲染。
+- `CustomizationScene`：捏脸场景，提供外观选择和预览，并写回 WorldState。
+- `SceneBase`：所有主场景的公共基类，根据 WorldState 初始化玩家外观。
+
 ### 工具升级（Tool Upgrade）
 
 - 规则唯一来源：`ToolUpgradeSystem`（`Classes/Controllers/Systems/ToolUpgradeSystem.*`）以单例形式存在，通过 `getInstance()` 获取；集中负责工具等级查询、下一次升级消耗计算与实际升级操作，是“工具升级规则”的唯一来源。
