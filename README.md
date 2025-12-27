@@ -57,7 +57,7 @@
 
 | 姓名       | 学号      | 分工                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 |:--------:|:-------:|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
-| 薛飞扬 (组长) | 2351510 | **各场景类、各Map类、各MapController类（除矿洞）、环境障碍物系统、TileSelector类、天气系统、时间/昼夜系统、季节系统、捏脸系统、掉落物系统、部分UI系统的初步构建**<br /> `SceneBase`基类及各派生类：游戏内各个场景的管理与逐帧更新<br /> `Game`下的`MapBase`基类及各派生类：.tmx地图的读取<br /> `Controller`下的`IMapController`基类及各派生类：地图控制器，用于控制地图状态与交互<br /> `Game/EnvironmentObstacle`下的`EnvironmentObstacleBase`基类及各派生类：实现单个环境障碍物的定义，例如单棵树、单个石头等<br /> `Controller/Environment`下的`EnvironmentObstacleSystemBase`基类及各派生类：组合单个环境障碍物，实现环境障碍物系统，作为地图中环境障碍物的唯一来源<br /> `TileSelector`：用于实现对人物前方9*9格子的选取<br /> `Controller/Weather`下的`WeatherController`类：实现天气系统（晴/雨）；`RainLayer`类：用于实现雨水的粒子效果<br /> `GameStateControlle`r类：用于实现时间的推进<br /> `WorldState`结构体：用于全局记录游戏数据<br /> `Classes/Scenes/CustomizationScene`类与`Classes/Game/View/PlayerView`类：用于实现捏脸功能，前者为捏脸选择界面，后者为捏脸完成后的人物外观表现                                                                                                                                                                                                        |
+| 薛飞扬 (组长) | 2351510 | **各场景类、各Map类、各MapController类（除矿洞）、环境障碍物系统、各Interactor类与TileSelector类、天气系统、时间/昼夜系统、季节系统、捏脸系统、掉落物系统、部分UI系统的初步构建**<br /> `SceneBase`基类及各派生类：游戏内各个场景的管理与逐帧更新<br /> `Game`下的`MapBase`基类及各派生类：.tmx地图的读取<br /> `Controller`下的`IMapController`基类及各派生类：地图控制器，用于控制地图状态与交互<br /> `Game/EnvironmentObstacle`下的`EnvironmentObstacleBase`基类及各派生类：实现单个环境障碍物的定义，例如单棵树、单个石头等<br /> `Controller/Environment`下的`EnvironmentObstacleSystemBase`基类及各派生类：组合单个环境障碍物，实现环境障碍物系统，作为地图中环境障碍物的唯一来源<br /> `Controller/Interact`下的各`Interactor`类：用于实现地图中的交互功能<br /> `TileSelector`：用于实现对人物前方9*9格子的选取<br /> `Controller/Weather`下的`WeatherController`类：实现天气系统（晴/雨）；`RainLayer`类：用于实现雨水的粒子效果<br /> `GameStateControlle`r类：用于实现时间的推进<br /> `WorldState`结构体：用于全局记录游戏数据<br /> `Classes/Scenes/CustomizationScene`类与`Classes/Game/View/PlayerView`类：用于实现捏脸功能，前者为捏脸选择界面，后者为捏脸完成后的人物外观表现 |
 | 冯泉睿      | 2353365 | **矿洞地图与场景、采矿与战斗系统、可放置物系统、物品栏与背包、工具与工具升级系统、存档系统及相关部分UI**<br /> `MineScene` / `MineMapController/MineMap`：在SceneBase基础上实现矿洞场景与多楼层地图结构、矿洞 .tmx 地图资源与对象层解析、楼梯与电梯切换以及矿洞 HUD 显示<br /> `MineralSystem`：实现每层矿洞中矿石/石块的生成、生命值管理与掉落生成功能<br /> `MineMonsterController`：实现矿洞怪物的刷怪、移动、追踪玩家与生命值、动画管理功能<br /> `MineCombatController`：实现玩家在矿洞中使用武器的攻击判定、范围伤害与经验结算功能<br /> `StairSystem`：实现矿洞楼梯的生成与上下楼层切换功能<br /> `MineElevatorController`：实现矿洞电梯面板、楼层列表与已解锁楼层快速传送功能<br /> `PlaceableItemBase` / `PlaceableItemSystemBase`：实现可放置物体的几何定义、放置区域判定与统一放置规则<br /> `ChestController`：实现箱子的放置、打开箱子面板和物品存取功能<br /> `FurnaceController`：实现熔炉的放置、投放矿石与燃料以及熔炼产物生成功能<br /> `Inventory`：实现物品栏/背包数据结构、热键栏切换与选中高亮功能，并与全局箱子联动完成物品堆叠、统计与扣除<br /> `Game::ToolBase` 及各具体工具：实现锄头、镐子、斧头、镰刀等工具的使用效果与体力消耗功能<br /> `ToolUpgradeSystem`：实现工具升级的消耗规则、等级提升和属性变化功能<br /> `ToolUpgradePanelUI`：实现工具升级面板 UI 的展示、材料与金币需求显示以及升级按钮交互功能<br /> `SaveSystem`：实现存档文件的写入与读取功能<br /> `WorldState` 其他相关字段：实现全局存档中矿洞、工具、可放置物、时间与玩家状态等数据的持久化存储功能 |
 | 阮文涛      | 2350757 |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | 张国雄      | 2352875 | **社交系统、节日系统、钓鱼系统、音乐系统及一些 UI、场景显示的优化工作等**<br />  `FestivalController`：节日开启/关闭的状态驱动与节日流程控制<br /> `FishingController`：钓鱼小游戏流程与节日钓鱼等玩法接入<br /> `AudioManager`：BGM/音效播放、切歌与防重复触发等音频管理 <br />`NpcControllerBase` / 各 NPC 控制器：对话、赠礼与社交入口的交互逻辑<br /> `NpcSocialPanelUI` / `DialogueUI`：社交面板与对话 UI 的展示与交互<br /> `UIController`：HUD/背包/面板聚合管理画面的优化<br /> `TownScene` / `MainMenuScene` / `SplashScene`：场景显示与切换流程的体验优化                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
@@ -464,7 +464,7 @@ UI 层以 `UIController` 为核心入口，将各个独立 UI 面板组织成一
 - `DialogueUI`：对话框 UI，负责台词显示与选项交互。
 - 其他如技能面板、合成面板、箱子面板等，各自对应独立 UI 类，由 `UIController` 或相关 Controller 负责打开/关闭与数据刷新
 
-## 各功能类的具体实现
+## 各功能的具体实现
 
 ### 作物（Crop）
 
@@ -481,6 +481,28 @@ UI 层以 `UIController` 为核心入口，将各个独立 UI 面板组织成一
 - `Game::Crop` / `Game::CropType`：作物运行时状态与类型枚举。
 - `Game::CropDefs` / `Game::CropBase`：作物静态定义与类型→规则查询入口。
 - `FarmInteractor`：把“种子选中 + 交互输入”翻译为作物系统调用。
+
+### 农场耕地（Farm Tilling）
+
+- 状态唯一来源：
+  - 农场地表的耕作状态由 `WorldState::farmTiles` 维护（`Classes/Game/WorldState.h`），元素类型为 `Game::TileType`，在农场加载时由 `FarmMapController` 读入到 `_tiles` 并在修改后写回。
+- 静态定义与映射：
+  - `Game::TileType`（`Classes/Game/Tile.h`）枚举 `Soil` / `Tilled` / `Watered` / `NotSoil`，分别代表可耕未翻地、已翻地、已浇水耕地与不可耕作区域。（农场以外的其他地图的所有瓦片均为NotSoil，即不可耕种。
+  - `FarmMapController::applyStaticNotSoilMask`（`Classes/Controllers/Map/FarmMapController.cpp`）在初始化时遍历 `_tiles`，结合 TMX 的建筑/道路区域将对应格子标记为 `NotSoil`，保证不可耕区域在数据层固定。
+- 交互入口：
+  - 锄地：`Game::Hoe::use`（`Classes/Game/Tool/Hoe.cpp`）在农场地图上，被选中格子的 `TileType` 为 `Soil` 且不存在树/石头/杂草/箱子/熔炉时，将其设置为 `Tilled`，若当日下雨则直接设置为 `Watered`，并刷新地图与 HUD。
+  - 铲平：`Game::Pickaxe::use`（`Classes/Game/Tool/Pickaxe.cpp`）在命中格子无作物时，可将 `Tilled` / `Watered` 还原为 `Soil`，用于整理农田。
+  - 浇水：`Game::WaterCan::use`（`Classes/Game/Tool/WaterCan.cpp`）在农场地图上，被选中格子的 `TileType` 为 `Tilled` 时，将其设置为 `Watered`，并刷新地图与 HUD。
+  - 日结回退：`CropSystem::advanceCropsDaily`（`Classes/Controllers/Systems/CropSystem.h`）在每日推进时会把所有 `Watered` 瓦片回退为 `Tilled`，形成“浇水仅当日有效”的规则闭环。
+- 可视化：
+  - `FarmMapController` 在初始化时创建 `_tileRoot` 以及 `_tileSprites` / `_waterSprites`（`Classes/Controllers/Map/FarmMapController.*`），根据 `_tiles` 中的 `Tilled` / `Watered` 状态绘制覆盖贴图，使锄过地与浇水效果在地图上可见。
+
+**关键类示例（Farm Tilling）**
+
+- `Game::TileType`：地块可耕/耕地/浇水/不可耕枚举。
+- `WorldState::farmTiles`：农场地块状态的持久化容器。
+- `FarmMapController`：维护 `_tiles`、负责 `getTile` / `setTile` 与耕地可视化。
+- `Game::Hoe` / `Game::WaterCan` / `Game::Pickaxe`：通过 `use` 逻辑驱动锄地、浇水与铲平。
 
 ### 动物（Animal）
 
@@ -516,6 +538,30 @@ UI 层以 `UIController` 为核心入口，将各个独立 UI 面板组织成一
 - `GreenSlime` / `BlueSlime` / `RedSlime` / `Bug` / `Ghost`：具体怪物行为实现。
 - `MineCombatController`：把玩家攻击输入翻译为对怪物系统的范围伤害调用。
 
+### 农场的环境障碍物（Environment Obstacles）
+
+- 状态唯一来源：
+  - `EnvironmentObstacleSystemBase`（`Classes/Controllers/Environment/EnvironmentObstacleSystemBase.h`）定义 `attachTo` / `spawnFromTile` / `spawnRandom` / `collides` / `damageAt` / `isEmpty` 等抽象接口，所有环境障碍系统以该接口作为“唯一来源”的约束。
+  - 农场树/石头/杂草分别由 `TreeSystem` / `RockSystem` / `WeedSystem`（`Classes/Controllers/Environment/*.h`）维护运行时容器和 `WorldState::farmTrees` / `farmRocks` / `farmWeeds` 的读写，只通过系统接口生成/移除节点。
+- 静态定义与映射：
+  - 树：`Game::Tree` / `Game::TreeKind` / `Game::TreePos`（`Classes/Game/EnvironmentObstacle/Tree.h`）描述单棵树的节点行为与存档数据，`TreeKind` 控制季节贴图与 HP。
+  - 石头：`Game::Rock` / `Game::RockKind` / `Game::RockPos`（`Classes/Game/EnvironmentObstacle/Rock.h`）提供石头种类、贴图、HP 与位置持久化。
+  - 杂草：`Game::Weed` / `Game::WeedPos`（`Classes/Game/EnvironmentObstacle/Weed.h`）描述杂草节点与其在地图上的位置。
+- 生成与恢复：
+  - 初始生成：`TreeSystem::generateInitial` / `RockSystem::generateInitial` / `WeedSystem::generateInitial` 在农场加载时，根据可种植区域、建筑遮罩与占位回调在地图上随机生成初始障碍，并通过 `markOccupiedTile` 避免互相重叠。
+  - 存档恢复：`FarmMapController::init`（`Classes/Controllers/Map/FarmMapController.cpp`）在系统为空且 `WorldState` 中已有 `farmTrees` / `farmRocks` / `farmWeeds` 时，遍历存档数据调用 `spawnFromTileWithKind` / `spawnFromTile` 重建节点。
+  - 夜间补充：`TreeSystem::regrowNightlyWorldOnly` / `RockSystem::regrowNightlyWorldOnly` / `WeedSystem::regrowNightlyWorldOnly` 根据当前占用情况向 `WorldState` 追加新障碍，模拟“树木/石块/杂草再生”。
+- 碰撞与受击：
+  - 碰撞：各 System 实现 `collides`，通过内部索引与脚底矩形实现玩家/实体与障碍的阻挡判定；`FarmMapController::collides` 将其整合进地图碰撞逻辑。
+  - 受击与掉落：`damageAt` 接口由工具系统调用（如 `Axe`、`Pickaxe`、`Scythe`），内部根据 HP 计算是否被摧毁，并通过 `spawnDrop` 回调把掉落物交给地图（转发到 `DropSystem`），同时可通过 `setTile` 把格子改回 `Soil` 或其他类型。
+
+**关键类示例（Environment Obstacles）**
+
+- `EnvironmentObstacleSystemBase`：环境障碍系统的统一接口约束。
+- `TreeSystem` / `RockSystem` / `WeedSystem`：农场树/石头/杂草的唯一来源。
+- `Game::Tree` / `Game::Rock` / `Game::Weed`：单体障碍节点与静态定义。
+- `FarmMapController::obstacleSystem`：向工具/交互层暴露树/石/草系统。
+
 ### 矿物与矿脉（Mineral）
 
 - 状态唯一来源：`MineralSystem`（`Classes/Controllers/Environment/MineralSystem.*`）作为矿洞内“矿石/石块”环境障碍的唯一来源，持有 `std::vector<Game::MineralData>` 作为运行时列表，并维护 `_obstacles` 映射以同步到 Cocos 节点。
@@ -535,6 +581,33 @@ UI 层以 `UIController` 为核心入口，将各个独立 UI 面板组织成一
 - `Game::Mineral` / `Game::MineralData` / `Game::MineralType`：矿物实体节点与运行时数据结构。
 - `Game::mineralDropItem`：矿石类型到掉落物品的映射函数。
 - `MineMapController`：为矿物系统提供楼层信息、坐标换算与障碍查询。
+
+### 掉落物（Drop）
+
+- 状态唯一来源：
+  - `DropSystem`（`Classes/Controllers/Systems/DropSystem.*`）持有当前场景的掉落列表 `_drops`，负责所有掉落的生成、拾取与渲染；各地图控制器内部各自维护一份实例。
+  - 持久化：`WorldState::farmDrops`（`Classes/Game/WorldState.h`）存储农场场景的掉落列表，`FarmMapController::init` 通过 `_dropSystem.setDrops(ws.farmDrops)` 读入，并在 `setOnDropsChanged` 回调中把任何变化写回 `WorldState`。
+- 静态定义：
+  - `Game::Drop`（`Classes/Game/Drop.h`）为单条掉落记录，包含 `ItemType type`、世界坐标 `pos` 与堆叠数量 `qty`，并提供 `renderDrops` 与 `collectDropsNear` 两个静态工具函数。
+  - 掉落内容本身使用通用的 `ItemType` / `Item` 系统；部分特殊掉落（如工具）通过 `toolDropRaw` 等辅助函数编码为整数。
+- 交互入口：
+  - 生成掉落：
+    - 环境破坏：`TreeSystem::damageAt` / `RockSystem::damageAt` / `WeedSystem::damageAt` 通过 `spawnDrop` 回调把掉落物类型传回调用方，调用方通常是工具（`Axe` / `Pickaxe` / `Scythe`），再由地图控制器 `spawnDropAt` 转发给 `DropSystem::spawnDropAt`。
+    - 作物收获：`Hoe::use` 在收获溢出时会将无法放入背包的多余产物通过 `map->spawnDropAt` 落到地面。
+    - 怪物死亡与动物日结：怪物系统与 `advanceAnimalsDaily` 在结算产物时，同样通过地图控制器的 `spawnDropAt` 生成掉落。
+  - 拾取掉落：
+    - 地图控制器统一实现 `collectDropsNear`（例如 `FarmMapController::collectDropsNear`），内部委托给 `_dropSystem.collectDropsNear(playerWorldPos, inventory)`，将玩家附近的掉落尝试吸入背包。
+    - 玩家移动时由 `PlayerController` 在合适的时机调用地图的 `collectDropsNear`，实现自动拾取。
+- 渲染与挂载：
+  - 各 MapController 在初始化时调用 `_dropSystem.configureTargetProvider` 将挂载父节点与 zOrder 交给 DropSystem（优先挂在 TMX 节点，否则挂在 `worldNode`），DropSystem 在 `ensureAttached` 中根据该配置创建 `_dropsRoot` 与 `_dropsDraw`。
+  - `DropSystem::refreshVisuals` 调用 `Game::Drop::renderDrops`，为每条掉落创建/更新精灵并绘制调试图形。
+
+**关键类示例（Drop）**
+
+- `Controllers::DropSystem`：掉落状态与渲染的唯一来源。
+- `Game::Drop`：掉落记录的数据结构与渲染/拾取工具函数。
+- `FarmMapController::spawnDropAt` / `collectDropsNear`：地图侧掉落生成与拾取入口。
+- `Game::Hoe` / `Game::Axe` / `Game::Pickaxe` / `Game::Scythe`：根据工具使用结果触发掉落生成。
 
 ### 可放置物（Placeable Item）
 
