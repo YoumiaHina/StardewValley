@@ -339,7 +339,7 @@
 
 ## 存档位置
 
-存档通过 `Classes/Game/Save/SaveSystem.*` 写入文本文件，默认目录为 Cocos 的可写目录下的 `save/` 子目录（通过 `FileUtils::getInstance()->getWritablePath()` 计算），并支持 `save1.txt` ~ `save50.txt` 槽位命名。
+存档通过 `Classes/Game/Save/SaveSystem.*` 写入文本文件，默认目录为 可执行文件（.exe） 同级目录下的 `save/` 文件夹（通过 `FileUtils::getInstance()->getWritablePath()` 计算），支持英文命名。
 
 ## 技术架构
 
