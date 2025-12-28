@@ -115,7 +115,7 @@
   
   ![1766832527941](READMEImage/1766832527941.png)
   
-  ![](READMEImage\16a63dfffbd839083ad0fa233839cc1e.png)
+  ![16a63dfffbd839083ad0fa233839cc1e](READMEImage\16a63dfffbd839083ad0fa233839cc1e.png)
 
 ### 农场管理（动物 / Animal）
 
@@ -127,7 +127,7 @@
   
   ![1766833387189](READMEImage/1766833387189.png)
   
-  ![](READMEImage\be96979adbd5935ecfbdbd34347860d2.png)
+  ![be96979adbd5935ecfbdbd34347860d2](READMEImage\be96979adbd5935ecfbdbd34347860d2.png)
 
 ### 资源采集与环境障碍物
 
@@ -151,9 +151,9 @@
 
 - 采矿会持续消耗精力，需要在矿洞中合理安排路线，或返回农场休息补给。
   
-  ![](READMEImage\41f4c32b-1473-46f0-b936-b7ff6e56d77d.png)
+  ![41f4c32b-1473-46f0-b936-b7ff6e56d77d](READMEImage\41f4c32b-1473-46f0-b936-b7ff6e56d77d.png)
   
-  ![](READMEImage\1766832682176.png)
+  ![1766832682176](READMEImage\1766832682176.png)
 
 ### 矿洞冒险（战斗）
 
@@ -165,11 +165,11 @@
 
 - 战斗过程中需要同时关注生命值与精力，合理使用食物/药品，并在必要时撤退返回农场存档。
   
-  ![](READMEImage\3bde9686-166d-4ab1-a28d-c48c96d9e30a.png)
+  ![3bde9686-166d-4ab1-a28d-c48c96d9e30a](READMEImage\3bde9686-166d-4ab1-a28d-c48c96d9e30a.png)
   
-  ![](READMEImage\95e96077-44e9-4ff3-99c1-cdd738d77478.png)
+  ![95e96077-44e9-4ff3-99c1-cdd738d77478](READMEImage\95e96077-44e9-4ff3-99c1-cdd738d77478.png)
   
-  ![](READMEImage\7acb8d6f-f07e-44c3-a2bd-b3c1e425ea70.png)
+  ![7acb8d6f-f07e-44c3-a2bd-b3c1e425ea70](READMEImage\7acb8d6f-f07e-44c3-a2bd-b3c1e425ea70.png)
 
 ### 可放置物系统（箱子 / 熔炉）
 
@@ -185,7 +185,7 @@
 
 - 在农场中，玩家使用斧头可移除空箱子（若箱子内有物品则无法移除），使用镐子可以移除空闲状态的熔炉。
   
-  ![](READMEImage\1b2e06e1-dcfd-42b3-a24d-2ca82d4a6e65.png)
+  ![1b2e06e1-dcfd-42b3-a24d-2ca82d4a6e65](READMEImage\1b2e06e1-dcfd-42b3-a24d-2ca82d4a6e65.png)
   
   ![1766832735323](READMEImage/1766832735323.png)
 
@@ -213,9 +213,9 @@
 
 - 满级工具可以一次性对面前的 3*3 范围进行操作（使用Ctrl+左键），也可与低级工具一样对单个格子进行操作（左键）。
   
-  ![](READMEImage\57e4399e-11f4-48e2-a231-7fe150b62d73.png)
+  ![57e4399e-11f4-48e2-a231-7fe150b62d73](READMEImage\57e4399e-11f4-48e2-a231-7fe150b62d73.png)
   
-  ![](READMEImage\17ccc5e8-cb9f-4a10-aa38-e07412bfd16a.png)
+  ![17ccc5e8-cb9f-4a10-aa38-e07412bfd16a](READMEImage\17ccc5e8-cb9f-4a10-aa38-e07412bfd16a.png)
 
 ### 技能树系统（SkillTree）
 
