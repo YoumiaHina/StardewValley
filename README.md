@@ -341,14 +341,6 @@
 
 存档通过 `Classes/Game/Save/SaveSystem.*` 写入文本文件，默认目录为 可执行文件（.exe） 同级目录下的 `save/` 文件夹（通过 `FileUtils::getInstance()->getWritablePath()` 计算），支持英文命名。
 
-## 技术架构
-
-- 场景骨架：所有场景继承 `SceneBase`，集中完成 worldNode/玩家视图/背包/UI/通用控制器的创建与 update 调度。
-- 数据唯一来源：全局状态集中在 `Game::WorldState`（背包、地图瓦片、作物/动物、NPC 好感度等）并通过 `globalState()` 统一读写。
-- 地图抽象：场景通过 `Controllers::IMapController` 屏蔽不同 TMX 地图差异，提供坐标转换、碰撞、掉落拾取、节日图层开关等接口。
-- 输入与玩法链路：输入采集集中在 `PlayerController`，由“背包选中工具 -> Tool 执行 -> 对应 System/Controller 处理”完成业务闭环；场景只做事件转发与调用顺序编排。
-- 存档与版本兼容：`SaveSystem` 以版本号增量读取字段，解析失败时通过 `istream` 状态与边界检查尽量保证存档可恢复。
-
 ## 类的架构
 
 本项目在代码层面整体遵循“场景骨架 + 控制器/系统 + 游戏数据 + UI”的分层设计，尽量做到高内聚、低耦合。下面从几个主要维度简要说明类的架构与协作关系。
