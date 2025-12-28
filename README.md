@@ -31,7 +31,7 @@
 
 - 作物：`Classes/Controllers/Systems/CropSystem.*`
 - 动物：`Classes/Controllers/Systems/AnimalSystem.*`
-- 天气：`Classes/Controllers/Systems/WeatherController.*`
+- 天气：`Classes/Controllers/Weather/WeatherController.*`
 - 节日：`Classes/Controllers/Systems/FestivalController.*`
 - 钓鱼：`Classes/Controllers/Systems/FishingController.*`
 - 捏脸/角色外观：`Classes/Scenes/CustomizationScene.*` + `Classes/Game/View/PlayerView.*`
@@ -55,12 +55,12 @@
 - 可追溯性：Commit 记录清晰，提交信息覆盖玩法迭代与问题修复（例如钓鱼节与天气冲突、鱼速度异常等），便于按问题回溯定位相关改动。
 - 合理的分工：
 
-| 姓名       | 学号      | 分工                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-|:--------:|:-------:|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
-| 薛飞扬 (组长) | 2351510 | **各场景类、各Map类、各MapController类（除矿洞）、环境障碍物系统、各Interactor类与TileSelector类、天气系统、时间/昼夜系统、季节系统、捏脸系统、掉落物系统、部分UI系统的初步构建**<br /> `SceneBase`基类及各派生类：游戏内各个场景的管理与逐帧更新<br /> `Game`下的`MapBase`基类及各派生类：.tmx地图的读取<br /> `Controller`下的`IMapController`基类及各派生类：地图控制器，用于控制地图状态与交互<br /> `Game/EnvironmentObstacle`下的`EnvironmentObstacleBase`基类及各派生类：实现单个环境障碍物的定义，例如单棵树、单个石头等<br /> `Controller/Environment`下的`EnvironmentObstacleSystemBase`基类及各派生类：组合单个环境障碍物，实现环境障碍物系统，作为地图中环境障碍物的唯一来源<br /> `Controller/Interact`下的各`Interactor`类：用于实现地图中的交互功能<br /> `TileSelector`：用于实现对人物前方9*9格子的选取<br /> `Controller/Weather`下的`WeatherController`类：实现天气系统（晴/雨）；`RainLayer`类：用于实现雨水的粒子效果<br /> `GameStateControlle`r类：用于实现时间的推进<br /> `WorldState`结构体：用于全局记录游戏数据<br /> `Classes/Scenes/CustomizationScene`类与`Classes/Game/View/PlayerView`类：用于实现捏脸功能，前者为捏脸选择界面，后者为捏脸完成后的人物外观表现 |
-| 冯泉睿      | 2353365 | **矿洞地图与场景、采矿与战斗系统、可放置物系统、物品栏与背包、工具与工具升级系统、存档系统及相关部分UI**<br /> `MineScene` / `MineMapController/MineMap`：在SceneBase基础上实现矿洞场景与多楼层地图结构、矿洞 .tmx 地图资源与对象层解析、楼梯与电梯切换以及矿洞 HUD 显示<br /> `MineralSystem`：实现每层矿洞中矿石/石块的生成、生命值管理与掉落生成功能<br /> `MineMonsterController`：实现矿洞怪物的刷怪、移动、追踪玩家与生命值、动画管理功能<br /> `MineCombatController`：实现玩家在矿洞中使用武器的攻击判定、范围伤害与经验结算功能<br /> `StairSystem`：实现矿洞楼梯的生成与上下楼层切换功能<br /> `MineElevatorController`：实现矿洞电梯面板、楼层列表与已解锁楼层快速传送功能<br /> `PlaceableItemBase` / `PlaceableItemSystemBase`：实现可放置物体的几何定义、放置区域判定与统一放置规则<br /> `ChestController`：实现箱子的放置、打开箱子面板和物品存取功能<br /> `FurnaceController`：实现熔炉的放置、投放矿石与燃料以及熔炼产物生成功能<br /> `Inventory`：实现物品栏/背包数据结构、热键栏切换与选中高亮功能，并与全局箱子联动完成物品堆叠、统计与扣除<br /> `Game::ToolBase` 及各具体工具：实现锄头、镐子、斧头、镰刀等工具的使用效果与体力消耗功能<br /> `ToolUpgradeSystem`：实现工具升级的消耗规则、等级提升和属性变化功能<br /> `ToolUpgradePanelUI`：实现工具升级面板 UI 的展示、材料与金币需求显示以及升级按钮交互功能<br /> `SaveSystem`：实现存档文件的写入与读取功能<br /> `WorldState` 其他相关字段：实现全局存档中矿洞、工具、可放置物、时间与玩家状态等数据的持久化存储功能 |
-| 阮文涛      | 2350757 | **农场核心玩法：作物系统、动物系统、技能树系统、合成/配方系统、商店系统及相关 UI 与数据结构**<br /> `CropSystem`：实现农场作物列表的唯一来源管理、浇水/每日推进/收获与季节判定<br /> `Game::CropBase` / `Game::CropDefs`：定义作物静态数据（阶段天数/季节/回生）与种子/产物映射规则<br /> `AnimalSystem` / `advanceAnimalsDaily`：实现农场动物游走、喂食/成长与产物结算掉落<br /> `Game::Animal` / `Game::AnimalType` / `Game::animalPrice`：定义动物数据结构、类型与购买定价规则<br /> `StoreController` / `StorePanelUI` / `AnimalStorePanelUI`：实现杂货/动物商店的买卖与购买 UI，支持分类分页与交易反馈<br /> `SkillTreeBase` / `SkillTreeSystem` / `SkillTreePanelUI`：实现技能树静态定义、经验/等级/点数与加成查询，以及技能面板展示<br /> `RecipeBase` / `SimpleRecipe` / `RecipeBook` / `RecipeFilter`：实现配方抽象、配方表集中管理与分类筛选<br /> `CraftingController` / `CraftPanelUI`：实现合成时材料扣除与产物生成，并接入合成面板交互 |
-| 张国雄      | 2352875 | **社交系统、节日系统、钓鱼系统、音乐系统及一些 UI、场景显示的优化工作等**<br />  `FestivalController`：节日开启/关闭的状态驱动与节日流程控制<br /> `FishingController`：钓鱼小游戏流程与节日钓鱼等玩法接入<br /> `AudioManager`：BGM/音效播放、切歌与防重复触发等音频管理 <br />`NpcControllerBase` / 各 NPC 控制器：对话、赠礼与社交入口的交互逻辑<br /> `NpcSocialPanelUI` / `DialogueUI`：社交面板与对话 UI 的展示与交互<br /> `UIController`：HUD/背包/面板聚合管理画面的优化<br /> `TownScene` / `MainMenuScene` / `SplashScene`：场景显示与切换流程的体验优化                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+|     姓名     |  学号  | 分工比例 |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     分工                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| :-----------: | :-----: | -------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
+| 薛飞扬 (组长) | 2351510 | 25%      |                                                                                                                                              **各场景类、各Map类、各MapController类（除矿洞）、环境障碍物系统、各Interactor类与TileSelector类、天气系统、时间/昼夜系统、季节系统、捏脸系统、掉落物系统、部分UI系统的初步构建**<br /> `SceneBase`基类及各派生类：游戏内各个场景的管理与逐帧更新<br /> `Game`下的 `MapBase`基类及各派生类：.tmx地图的读取<br /> `Controller`下的 `IMapController`基类及各派生类：地图控制器，用于控制地图状态与交互<br /> `Game/EnvironmentObstacle`下的 `EnvironmentObstacleBase`基类及各派生类：实现单个环境障碍物的定义，例如单棵树、单个石头等<br /> `Controller/Environment`下的 `EnvironmentObstacleSystemBase`基类及各派生类：组合单个环境障碍物，实现环境障碍物系统，作为地图中环境障碍物的唯一来源<br /> `Controller/Interact`下的各 `Interactor`类：用于实现地图中的交互功能<br /> `TileSelector`：用于实现对人物前方9*9格子的选取<br /> `Controller/Weather`下的 `WeatherController`类：实现天气系统（晴/雨）；`RainLayer`类：用于实现雨水的粒子效果<br /> `GameStateController` 类：用于实现时间的推进<br /> `WorldState`结构体：用于全局记录游戏数据<br /> `Classes/Scenes/CustomizationScene`类与 `Classes/Game/View/PlayerView`类：用于实现捏脸功能，前者为捏脸选择界面，后者为捏脸完成后的人物外观表现                                                                                                                                              |
+|    冯泉睿    | 2353365 | 25%      | **矿洞地图与场景、采矿与战斗系统、可放置物系统、物品栏与背包、工具与工具升级系统、存档系统及相关部分UI**<br /> `MineScene` / `MineMapController/MineMap`：在SceneBase基础上实现矿洞场景与多楼层地图结构、矿洞 .tmx 地图资源与对象层解析、楼梯与电梯切换以及矿洞 HUD 显示<br /> `MineralSystem`：实现每层矿洞中矿石/石块的生成、生命值管理与掉落生成功能<br /> `MineMonsterController`：实现矿洞怪物的刷怪、移动、追踪玩家与生命值、动画管理功能<br /> `MineCombatController`：实现玩家在矿洞中使用武器的攻击判定、范围伤害与经验结算功能<br /> `StairSystem`：实现矿洞楼梯的生成与上下楼层切换功能<br /> `MineElevatorController`：实现矿洞电梯面板、楼层列表与已解锁楼层快速传送功能<br /> `PlaceableItemBase` / `PlaceableItemSystemBase`：实现可放置物体的几何定义、放置区域判定与统一放置规则<br /> `ChestController`：实现箱子的放置、打开箱子面板和物品存取功能<br /> `FurnaceController`：实现熔炉的放置、投放矿石与燃料以及熔炼产物生成功能<br /> `Inventory`：实现物品栏/背包数据结构、热键栏切换与选中高亮功能，并与全局箱子联动完成物品堆叠、统计与扣除<br /> `Game::ToolBase` 及各具体工具：实现锄头、镐子、斧头、镰刀等工具的使用效果与体力消耗功能<br /> `ToolUpgradeSystem`：实现工具升级的消耗规则、等级提升和属性变化功能<br /> `ToolUpgradePanelUI`：实现工具升级面板 UI 的展示、材料与金币需求显示以及升级按钮交互功能<br /> `SaveSystem`：实现存档文件的写入与读取功能<br /> `WorldState` 其他相关字段：实现全局存档中矿洞、工具、可放置物、时间与玩家状态等数据的持久化存储功能 |
+|    阮文涛    | 2350757 | 25%      |                                                                                                                                                                                                                                                                      **农场核心玩法：作物系统、动物系统、技能树系统、合成/配方系统、商店系统及相关 UI 与数据结构**<br /> `CropSystem`：实现农场作物列表的唯一来源管理、浇水/每日推进/收获与季节判定<br /> `Game::CropBase` / `Game::CropDefs`：定义作物静态数据（阶段天数/季节/回生）与种子/产物映射规则<br /> `AnimalSystem` / `advanceAnimalsDaily`：实现农场动物游走、喂食/成长与产物结算掉落<br /> `Game::Animal` / `Game::AnimalType` / `Game::animalPrice`：定义动物数据结构、类型与购买定价规则<br /> `StoreController` / `StorePanelUI` / `AnimalStorePanelUI`：实现杂货/动物商店的买卖与购买 UI，支持分类分页与交易反馈<br /> `SkillTreeBase` / `SkillTreeSystem` / `SkillTreePanelUI`：实现技能树静态定义、经验/等级/点数与加成查询，以及技能面板展示<br /> `RecipeBase` / `SimpleRecipe` / `RecipeBook` / `RecipeFilter`：实现配方抽象、配方表集中管理与分类筛选<br /> `CraftingController` / `CraftPanelUI`：实现合成时材料扣除与产物生成，并接入合成面板交互                                                                                                                                                                                                                                                                      |
+|    张国雄    | 2352875 | 25%      |                                                                                                                                                                                                                                                                                                  **社交系统、节日系统、钓鱼系统、音乐系统及一些 UI、场景显示的优化工作等**<br /> `FestivalController`：节日开启/关闭的状态驱动与节日流程控制<br /> `FishingController`：钓鱼小游戏流程与节日钓鱼等玩法接入（节日限定鱼种、UI 布局/手感参数调优）<br /> `AudioManager`：BGM/音效播放、切歌与防重复触发等音频管理<br /> `NpcControllerBase` / 各 NPC 控制器：对话、赠礼与社交入口的交互逻辑<br /> `NpcSocialPanelUI` / `DialogueUI`：社交面板与对话 UI 的展示与交互（选项、推进与状态提示）<br /> `UIController`：HUD/背包/面板聚合管理与输入冲突收敛，优化面板打开/关闭体验<br /> `HUDUI` / `HotbarUI` / `PromptUI`：HUD 信息展示、热键栏与提示气泡的显示与交互细节优化<br /> `BeachScene` / `TownScene`：与钓鱼、节日相关的场景显示与流程打磨<br /> `MainMenuScene` / `SplashScene`：主菜单与启动过场显示、切换流程与体验优化<br /> 资源与表现：补充/整理 BGM、鱼类与 UI 素材资源，并修复部分显示细节问题                                                                                                                                                                                                                                                                                                  |
 
 ### （2）代码质量
 
@@ -87,11 +87,9 @@
 ### 捏脸系统
 
 - 玩家可在创建新存档时，选择自己心仪的角色外观。
-
 - 当前提供多种衣服款式、头发类型、头发颜色可供选择。
-
 - 玩家确定外观并进入游戏后，对应的外观将被记录在存档中，后续加载存档可读取外观并正确显示。
-  
+
   ![1766832164924](READMEImage/1766832164924.png)
 
 ### 商店系统
@@ -105,163 +103,121 @@
 ### 农场管理（作物 / Crop）
 
 - 用锄头开垦土地后播种，随后使用水壶浇水推进生长。
-
 - 作物在每天结算时成长；缺水会停滞或有概率枯死，换季不适合作物也会枯死。
-
 - 成熟后可收获获得农产品；背包满时会以掉落物形式留在地面。
-
 - 睡觉进入下一天会触发作物推进，并重置当天“已浇水”的状态。
-  
+
   ![1766832527941](READMEImage/1766832527941.png)
 
 ### 农场管理（动物 / Animal）
 
 - 购买动物后会在农场游走，玩家可以靠近进行喂食。
-
 - 喂食影响动物当日状态，并与每日产物（鸡蛋/牛奶/羊毛等）结算相关。
-
 - 每天睡觉后结算成长与产物；不在农场时产物会延迟到回到农场后出现为掉落物。
-  
+
   ![1766833387189](READMEImage/1766833387189.png)
 
 ### 资源采集与环境障碍物
 
 - 地图中分布树木、石头、矿石、杂草等可破坏/可采集的环境物。
-
 - 使用对应工具进行采集，获得木材/石头/矿物/纤维等资源掉落，掉落物会显示在地图上，等待拾取。
-
 - 掉落物可在地面拾取进入背包，用于后续合成、升级与交易。
-
 - 当农场中的环境障碍物少于一定数量时，每天结束时会进行生长，增加一定量的环境障碍物（但不会破坏耕地、墙体、与其他环境障碍物）
-  
+
   ![1766833671044](READMEImage/1766833671044.png)
 
 ### 矿洞冒险（采矿）
 
 - 进入矿洞后，每层都会生成矿石/石头/硬石等资源点，分布在可探索区域，各资源点的出现概率和所需敲击次数不同。
-
 - 使用镐子等工具敲击矿点，可获得矿石、宝石与石头等掉落，部分矿点可能刷新隐藏楼梯。
-
 - 楼层越深，矿物种类与稀有度越高，产出的矿石可以送往熔炉冶炼为金属锭，用于合成与工具升级，也可以售卖换钱。
-
 - 采矿会持续消耗精力，需要在矿洞中合理安排路线，或返回农场休息补给。
-  
+
   ![1766833816708](READMEImage/1766833816708.png)
 
 ### 矿洞冒险（战斗）
 
 - 每层都会刷新对应强度的怪物，每种怪物伤害、血量、速度、动画等属性都不同，玩家可使用武器进行攻击。
-
 - 击败怪物可获得金币、经验与战利品掉落，部分怪物也可能掉落楼梯或特殊钥匙类道具。
-
 - 通过楼梯向下推进楼层，每过5层会解锁一级电梯并获赠新的剑，电梯允许快速前往已解锁楼层，减少重复跑图。
-
 - 战斗过程中需要同时关注生命值与精力，合理使用食物/药品，并在必要时撤退返回农场存档。
-  
+
   ![1766832682176](READMEImage/1766832682176.png)
 
 ### 可放置物系统（箱子 / 熔炉）
 
 - 玩家可以在农场等场景放置箱子，作为额外的储物空间。
-
 - 靠近箱子并交互可打开箱子面板，在背包与箱子之间自由搬运物品；箱子内容会随存档长期保留。
-
 - 熔炉同样属于可放置物，放置后可以向其中投入矿石与燃料，启动熔炼计时。
-
 - 熔炼完成后会在熔炉附近生成金属锭等掉落物，玩家拾取后进入背包，用于后续合成与工具升级。
-
 - 箱子与熔炉的放置都遵循统一的占位与碰撞规则，避免阻挡玩家必经路径或重叠放置。
-
 - 在农场中，玩家使用斧头可移除空箱子（若箱子内有物品则无法移除），使用镐子可以移除空闲状态的熔炉。
-  
+
   ![1766832735323](READMEImage/1766832735323.png)
 
 ### 合成系统（Crafting）
 
 - 按 `C` 打开合成面板，支持配方分类与分页浏览，便于快速找到目标配方。
-
 - 配方以“材料列表 → 产物”的形式展示，并会显示当前背包内对应材料的拥有数量。
-
 - 点击合成会消耗材料并生成成品（如箱子/熔炉/食物等），用于扩展储物、冶炼与战斗补给等玩法闭环。
-
 - 合成结果会即时反馈到背包与 UI 显示，便于连续制作与资源规划。
-  
+
   ![1766832773873](READMEImage/1766832773873.png)
 
 ### 工具升级系统
 
 - 工具（锄头、镐子、斧头、浇水壶）拥有多级品质，等级越高，效率和作用范围越好。
-
 - 通过工具升级面板，玩家可以查看当前每种工具的等级以及下一次升级所需的金币与金属锭材料。
-
 - 若背包和全局箱子中的材料与金币满足要求，点击升级按钮将消耗对应资源，并立刻提升工具等级（最高 3 级）。
-
 - 升级成功后会刷新背包与热键栏显示，使高等级工具在采矿、伐木、耕地与浇水等操作中体现明显差异。
-
 - 满级工具可以一次性对面前的 3*3 范围进行操作（使用Ctrl+左键），也可与低级工具一样对单个格子进行操作（左键）。
-  
+
   ![1766833543550](READMEImage/1766833543550.png)
 
 ### 技能树系统（SkillTree）
 
 - 按 `L` 打开技能面板，展示种地/养殖/砍树/钓鱼/采矿/战斗等技能树的等级、经验与当前加成描述。
-
 - 不同行为会累积对应技能经验（如收获作物、喂食动物、挖矿与战斗等），升级后获得可分配的技能点。
-
 - 技能点可用于解锁技能节点，节点解锁后会对对应玩法产生持续加成（如产量、掉落或效率提升等）。
-
 - 技能加成在系统结算时生效，并通过 UI 面板可随时查看当前收益与升级进度。
-  
+
   ![1766832792564](READMEImage/1766832792564.png)
 
 ### 时间 / 天气 / 日结
 
 - 游戏时间持续流逝，驱动一天的行动节奏；睡觉进入下一天并触发各类每日结算。
-
 - 天气以晴天/雨天为主：雨天有对应的显示效果，会改变户外地图的氛围与移动手感，并自动将耕地视为“已浇水”。
-
 - 特定节日当天保证晴天，避免活动受到天气影响。
-
 - 每天的17:30会开始天黑，此时户外地图的亮度会逐渐变暗，直到19:00时达到最暗
-
 - 若玩家晚于0点睡觉，会触发晕倒，扣除金币并自动进入第二天，在房间的床上醒来
-  
+
   ![1766832835766](READMEImage/1766832835766.png)
 
 ### 季节系统
 
 - 游戏共 4 个季节：春/夏/秋/冬
-
 - 每个季节都有对应的户外地图（农场、城镇、海滩），与原游戏相同。
-
 - 季节会对环境障碍物（树）的外观产生影响，与原游戏相同。
-
 - 农作物有对应的可种植季节，玩家只能在对应季节种植，否则无法种植。如果是正在生长的作物，换季时会枯死。
-
 - 季节会自动循环，每个季节结束后会触发下一个季节的开启。
-  
+
   ![1766832882727](READMEImage/1766832882727.png)
 
 ### 社交系统（NPC / 对话 / 好感度）
 
 - 城镇/农场/海滩分布不同 NPC，可通过对话了解剧情与触发交互选项。
-
 - 好感度会随对话与赠礼提升；赠礼存在“每日一次”的限制，避免无限刷好感。
-
 - 社交面板可查看 NPC 的基础信息、好感与关系状态。
-
 - 节日会在特定日期开启，城镇/海滩出现活动布置与特殊交互内容。
-  
+
   ![1766832946583](READMEImage/1766832946583.png)
 
 ### 钓鱼系统（Fishing）
 
 - 在水边使用钓鱼竿开始钓鱼小游戏，通过按住/松开控制捕获条位置。
-
 - 捕获条与鱼影重叠越多，进度增长越快；进度满则钓鱼成功并获得鱼与经验。
-
 - 特定节日提供“节日钓鱼”玩法与限定鱼种奖励。
-  
+
   ![1766833003103](READMEImage/1766833003103.png)
   ![1766833830625](READMEImage/1766833830625.png)
 
@@ -295,7 +251,7 @@
   - 鼠标点击对话框区域：推进下一句（无选项时）
   - 鼠标点击选项按钮：选择分支（有选项时）
 - 物品栏：
-  - 切换选中：鼠标滚轮 / 键码`1`~`=` / 鼠标左键对应物品
+  - 切换选中：鼠标滚轮 / 键码 `1`~`=` / 鼠标左键对应物品
   - 按 `E` 可打开背包界面，物品栏放不下的物品会自动存放到背包中，背包的操作与箱子相同；按 `Esc` 关闭背包
 - 面板：
   - `C`：合成面板，合成面板上方可选择合成 可放置物 或 食物，左键进行二者切换，可合成可放置物或食物
@@ -611,8 +567,8 @@ UI 层以 `UIController` 为核心入口，将各个独立 UI 面板组织成一
 
 ### 可放置物（Placeable Item）
 
-- 几何与通用规则：`PlaceableItemBase`（`Classes/Game/PlaceableItem/PlaceableItemBase.*`）抽象出所有可放置物体（箱子/熔炉等）的公共几何接口：`pos`、`placeRect()`、`collisionRect()`、`maxPerArea()`，并提供 `isNearAny`、`canPlaceAt` 等模板工具，用于统一实现“接近判定”和“可放置判定”。
-- 系统基类：`PlaceableItemSystemBase`（`Classes/Controllers/Systems/PlaceableItemSystemBase.*`）负责管理可放置物系统的 `DrawNode`，并提供统一的 `InteractWithItem` 入口：先判断是否应进入“放置流程”，否则尝试与已有物体交互；具体规则由子类实现。
+- 几何与通用规则：`PlaceableItemBase`（`Classes/Game/PlaceableItem/PlaceableItemBase.h`）抽象出所有可放置物体（箱子/熔炉等）的公共几何接口：`pos`、`placeRect()`、`collisionRect()`、`maxPerArea()`，并提供 `isNearAny`、`canPlaceAt` 等模板工具，用于统一实现“接近判定”和“可放置判定”。
+- 系统基类：`PlaceableItemSystemBase`（`Classes/Controllers/Systems/PlaceableItemSystemBase.h`）负责管理可放置物系统的 `DrawNode`，并提供统一的 `InteractWithItem` 入口：先判断是否应进入“放置流程”，否则尝试与已有物体交互；具体规则由子类实现。
 - 状态唯一来源：
   - 箱子：`ChestController`（`Classes/Controllers/Systems/ChestController.*`）作为箱子状态的唯一来源，持有当前地图所有箱子的列表，并与 `WorldState::farmChests` / `houseChests` 等容器同步。
   - 熔炉：`FurnaceController`（`Classes/Controllers/Systems/FurnaceController.*`）统一管理熔炉列表与计时逻辑，底层数据存放在 `WorldState` 的各个 `*Furnaces` 容器。
@@ -708,6 +664,68 @@ UI 层以 `UIController` 为核心入口，将各个独立 UI 面板组织成一
 - `SkillTreeBase` / `SkillNode` / `SkillProgress`：静态定义与进度数据结构。
 - `SkillTreeSystem`：技能经验、等级、点数与加成的统一入口。
 - `SkillTreePanelUI`：技能面板 UI（展示等级/经验/加成）。
+
+### NPC 与社交（NPC / Dialogue / Friendship）
+
+- 状态唯一来源：
+  - 社交状态：`WorldState` 统一维护 NPC 好感度、恋爱解锁、每日赠礼与委托等信息（`Classes/Game/WorldState.h`）。
+  - 行为聚合：`NpcController`（`Classes/Controllers/NPC/NpcControllerBase.*`）聚合多个具体 NPC 控制器并统一转发 update/交互输入，内部通过 `NpcDialogueManager` 维护当前对话进度。
+- 静态定义与映射：
+  - 对话树定义：`NpcDialogueManager` 通过 `npcKey + 节点 id` 查询节点；不同 NPC 的节点数据由 `Classes/Controllers/NPC/NpcDialogue*.cpp` 提供。
+  - 展示与交互：`NpcSocialPanelUI` 与 `DialogueUI` 只负责 UI 展示，所需的好感度/关系/任务等数据由上层从 `WorldState` 读取后注入。
+- 交互入口：
+  - 对话/赠礼：`NpcControllerBase::handleTalkAt` 在玩家对话键触发时调用，具体 NPC 控制器内部完成距离判定、赠礼判定与社交状态写回。
+  - 鼠标右键入口：`NpcControllerBase::handleRightClick` 可用于打开社交面板或触发商店等功能。
+  - 对话推进：`NpcControllerBase::advanceDialogueIfActive` 推进当前对话节点，选项选择最终回到 `NpcDialogueManager::selectOption` 更新分支。
+
+**关键类示例（NPC / Social）**
+
+- `NpcControllerBase` / `NpcController`：NPC 行为与交互入口，以及子控制器的聚合与转发。
+- `NpcDialogueManager`：对话状态机（起始、推进、选项分支、关闭）。
+- `AbigailNpcController` / `WillyNpcController` / `PierreNpcController` / `RobinNpcController`：具体 NPC 的交互与对话/赠礼逻辑实现。
+- `NpcSocialPanelUI`：社交面板（好感、关系、委托）展示。
+- `DialogueUI`：对话框与选项 UI。
+
+### 钓鱼（Fishing）
+
+- 规则与流程入口：`FishingController`（`Classes/Controllers/Systems/FishingController.*`）负责钓鱼小游戏的启动、UI 覆盖层构建与“绿色条/鱼影”物理解算，并在成功/失败时统一收尾。
+- 地图约束：
+  - 常规钓鱼：`startAt` 调用地图接口 `IMapController::isNearLake`（`Classes/Controllers/Map/IMapController.h`）检查是否靠近可钓水域。
+  - 节日钓鱼：`startAnywhere` 忽略湖泊判定，用于节日活动等特殊场景。
+- 奖励与经验：成功后通过 `Inventory::addItems` 发放鱼类物品，并调用 `SkillTreeSystem::addXp` 增加钓鱼经验；钓鱼状态通过 `WorldState::fishingActive` 标记（`Classes/Game/WorldState.h`）。
+- 节日鱼种：`FishingController.cpp` 内置 `kFestivalFish` 表，在钓鱼节当天随机从表中选择纹理与物品类型并展示提示文本（`Resources/fish/*`）。
+
+**关键类示例（Fishing）**
+
+- `FishingController`：钓鱼小游戏控制器（start/update/success/fail/cancel）。
+- `IMapController`：提供 `isNearLake` 等钓鱼相关地图约束接口。
+- `Game::Inventory`：鱼类奖励写入背包的统一入口。
+- `Game::SkillTreeSystem`：钓鱼经验与数量加成的统一入口。
+
+### 节日（Festival）
+
+- 节日判定：`FestivalController`（`Classes/Controllers/Systems/FestivalController.*`）根据 `WorldState` 的日期判断当天是否为节日（当前为夏季第 6 天），并在跨天时触发重新同步。
+- 地图切换：节日控制器通过 `IMapController::setFestivalActive` 将“节日开关”写入地图；`TownMapController` / `BeachMapController` 将其转发给 `TownMap` / `BeachMap` 完成具体图层显示与碰撞切换。
+- 图层与碰撞：`TownMap::setFestivalActive` / `BeachMap::setFestivalActive` 控制 Festival 图层显示，并在节日开启时按对象层解析 `FestivalWall` 碰撞，保证节日布置与通行规则一致（`Classes/Game/Map/*`）。
+
+**关键类示例（Festival）**
+
+- `FestivalController`：节日开关判定与同步入口。
+- `IMapController::setFestivalActive`：节日状态写入地图的抽象接口。
+- `TownMapController` / `BeachMapController`：把节日开关转发到具体地图实现。
+- `TownMap` / `BeachMap`：节日图层显示与 `FestivalWall` 碰撞解析。
+
+### 音乐与音频（BGM）
+
+- 音频管理：`AudioManager`（`Classes/Controllers/Managers/AudioManager.*`）封装 `AudioEngine`，保证同一时刻只播放一首 BGM，并避免重复切歌导致的突兀切换。
+- 场景分区：通过 `SceneZone`（Farm/Room/Abyss）选择背景音乐资源路径（`Resources/music/*`），并在对应场景进入时触发播放。
+- 播放入口：当前由 `FarmScene` / `RoomScene` / `MineScene` 调用 `AudioManager::playBackgroundFor` 切换 BGM（`Classes/Scenes/*`）。
+
+**关键类示例（Audio）**
+
+- `AudioManager`：BGM 播放/停止与曲目切换去重。
+- `SceneZone`：场景区域枚举与曲目映射。
+- `FarmScene` / `RoomScene` / `MineScene`：场景进入时触发 BGM 切换的调用点。
 
 ### 工具与环境交互链路
 
