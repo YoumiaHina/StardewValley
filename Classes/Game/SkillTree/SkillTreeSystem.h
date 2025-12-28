@@ -26,9 +26,6 @@ public:
     // 返回升到下一等级还差多少经验（满级返回 0）。
     int xpToNextLevel(SkillTreeType type) const;
 
-    // 判断节点是否已解锁。
-    bool isNodeUnlocked(SkillTreeType type, int nodeId) const;
-
     // 增加指定技能树经验；会自动处理升级与点数变化。
     void addXp(SkillTreeType type, int deltaXp, int* outLevelsGained = nullptr);
 
@@ -69,6 +66,7 @@ private:
     SkillTreeSystem() = default;
     std::size_t indexFromType(SkillTreeType type) const;
     void normalizeProgress(SkillTreeType type) const;
+    bool isNodeUnlocked(SkillTreeType type, int nodeId) const;
     float farmingExtraProduceChance() const;
     float forestryExtraWoodChance() const;
     float fishingExtraFishChance() const;

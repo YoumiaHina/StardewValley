@@ -64,10 +64,7 @@ int SkillTreeSystem::xpToNextLevel(SkillTreeType type) const {
     normalizeProgress(type);
     auto& ws = globalState();
     const auto& p = ws.skillTrees[indexFromType(type)];
-    SkillProgress tmp;
-    tmp.totalXp = p.totalXp;
-    tmp.level = definition(type).levelFromTotalXp(p.totalXp);
-    return definition(type).xpToNextLevel(tmp);
+    return definition(type).xpToNextLevelFromTotalXp(p.totalXp);
 }
 
 bool SkillTreeSystem::isNodeUnlocked(SkillTreeType type, int nodeId) const {
